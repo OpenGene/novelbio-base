@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.swing.ComboBoxModel;
@@ -21,11 +22,11 @@ public class JComboBoxData<T> extends JComboBox{
 	/**
 	 * 保存key和value的map
 	 */
-	HashMap<String, T> mapString2Value = null;
+	Map<String, T> mapString2Value = null;
 	/**
 	 * 保存key和value的map
 	 */
-	HashMap<T, String> mapValue2String = null;
+	Map<T, String> mapValue2String = null;
 	/** 安顺序排列的key值 */
 	ArrayList<String> lsInfo = new ArrayList<String>();
 	/**
@@ -47,7 +48,7 @@ public class JComboBoxData<T> extends JComboBox{
 	 * 装载hash表
 	 * @param hashInfo
 	 */
-	public void setMapItem(HashMap<String, T> mapString2Value) {
+	public void setMapItem(Map<String, T> mapString2Value) {
 		this.mapString2Value = mapString2Value;
 		mapValue2String = new HashMap<T, String>();
 		for (Entry<String, T> entry : mapString2Value.entrySet()) {
