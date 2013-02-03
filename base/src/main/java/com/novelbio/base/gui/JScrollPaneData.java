@@ -3,10 +3,13 @@ package com.novelbio.base.gui;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.DefaultCellEditor;
+import javax.swing.JComboBox;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
@@ -56,8 +59,15 @@ public class JScrollPaneData extends JScrollPane{
 		jTabFInputGo = new JTable();
 		setViewportView(jTabFInputGo);
 		jTabFInputGo.setModel(defaultTableModel);
-
 	}
+	/**
+	 * 设定本表的选项
+	 */
+	public void setItem(int column, JComboBox jComboBox) {
+		TableColumn tableCol =jTabFInputGo.getColumnModel().getColumn(column);
+		tableCol.setCellEditor(new DefaultCellEditor(jComboBox));
+	}
+	
 	/**
 	 * 往jScrollPane中添加表格，如果没有title，则第一行为title
 	 */
@@ -101,6 +111,7 @@ public class JScrollPaneData extends JScrollPane{
 		
 		defaultTableModel.addRow(info);
 	}
+
 	/**
 	 * 没有就返回空的list
 	 * @return
