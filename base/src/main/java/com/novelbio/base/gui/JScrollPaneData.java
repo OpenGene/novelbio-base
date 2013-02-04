@@ -24,8 +24,13 @@ public class JScrollPaneData extends JScrollPane{
 	private static final long serialVersionUID = -4238706503361283499L;
 	
 	DefaultTableModel defaultTableModel = null;
-	JTable jTabFInputGo = null;
+	JTable jTabFInput = null;
 	String[] title;
+	
+	public JTable getjTabFInput() {
+		return jTabFInput;
+	}
+	
 	/**
 	 * 往jScrollPane中添加表格，第一行为title
 	 */
@@ -33,9 +38,9 @@ public class JScrollPaneData extends JScrollPane{
 		String[][] tableValue = null;
 		title = lsInfo.get(0);
 		defaultTableModel = new DefaultTableModel(tableValue, title);
-		jTabFInputGo = new JTable();
-		setViewportView(jTabFInputGo);
-		jTabFInputGo.setModel(defaultTableModel);
+		jTabFInput = new JTable();
+		setViewportView(jTabFInput);
+		jTabFInput.setModel(defaultTableModel);
 		for (int i = 1; i < lsInfo.size(); i++) {
 			defaultTableModel.addRow(lsInfo.get(i));
 		}
@@ -56,15 +61,15 @@ public class JScrollPaneData extends JScrollPane{
 		String[][] tableValue = null;
 		this.title = title;
 		defaultTableModel = new DefaultTableModel(tableValue, title);
-		jTabFInputGo = new JTable();
-		setViewportView(jTabFInputGo);
-		jTabFInputGo.setModel(defaultTableModel);
+		jTabFInput = new JTable();
+		setViewportView(jTabFInput);
+		jTabFInput.setModel(defaultTableModel);
 	}
 	/**
 	 * 设定本表的选项
 	 */
 	public void setItem(int column, JComboBox jComboBox) {
-		TableColumn tableCol =jTabFInputGo.getColumnModel().getColumn(column);
+		TableColumn tableCol =jTabFInput.getColumnModel().getColumn(column);
 		tableCol.setCellEditor(new DefaultCellEditor(jComboBox));
 	}
 	
@@ -103,9 +108,9 @@ public class JScrollPaneData extends JScrollPane{
 		if (defaultTableModel == null) {
 			String[][] tableValue = null;
 			defaultTableModel = new DefaultTableModel(tableValue, info);
-			jTabFInputGo = new JTable();
-			setViewportView(jTabFInputGo);
-			jTabFInputGo.setModel(defaultTableModel);
+			jTabFInput = new JTable();
+			setViewportView(jTabFInput);
+			jTabFInput.setModel(defaultTableModel);
 			return;
 		}
 		
@@ -152,15 +157,15 @@ public class JScrollPaneData extends JScrollPane{
 	 * @return
 	 */
 	public int[] getSelectRows() {
-		int selectRows=jTabFInputGo.getSelectedRows().length;// 取得用户所选行的行数
+		int selectRows=jTabFInput.getSelectedRows().length;// 取得用户所选行的行数
 		//单行
 		if(selectRows==1) {
-			int selectedRowIndex = jTabFInputGo.getSelectedRow(); // 取得用户所选单行
+			int selectedRowIndex = jTabFInput.getSelectedRow(); // 取得用户所选单行
 			return new int[]{selectedRowIndex + 1};
 		}
 		int[] selRowIndexs = null;
 		if(selectRows>1) {
-			selRowIndexs =jTabFInputGo.getSelectedRows();// 用户所选行的序列
+			selRowIndexs =jTabFInput.getSelectedRows();// 用户所选行的序列
 			for (int i = 0; i < selRowIndexs.length; i++) {
 				selRowIndexs[i] = selRowIndexs[i] + 1;
 			}
@@ -178,9 +183,9 @@ public class JScrollPaneData extends JScrollPane{
 	public void clean() {
 		String[][] tableValue = null;
 		defaultTableModel = new DefaultTableModel(tableValue, title);
-		jTabFInputGo = new JTable();
-		setViewportView(jTabFInputGo);
-		jTabFInputGo.setModel(defaultTableModel);
+		jTabFInput = new JTable();
+		setViewportView(jTabFInput);
+		jTabFInput.setModel(defaultTableModel);
 	}
 	/**
 	 * 从文件名获得文件的prefix并返回
