@@ -24,8 +24,12 @@ public class JScrollPaneData extends JScrollPane{
 	private static final long serialVersionUID = -4238706503361283499L;
 	
 	DefaultTableModel defaultTableModel = null;
-	JTable jTabFInput = null;
+	JTable jTabFInput = new JTable();
 	String[] title;
+	
+	public JScrollPaneData() {
+		setViewportView(jTabFInput);
+	}
 	
 	public JTable getjTabFInput() {
 		return jTabFInput;
@@ -38,8 +42,6 @@ public class JScrollPaneData extends JScrollPane{
 		String[][] tableValue = null;
 		title = lsInfo.get(0);
 		defaultTableModel = new DefaultTableModel(tableValue, title);
-		jTabFInput = new JTable();
-		setViewportView(jTabFInput);
 		jTabFInput.setModel(defaultTableModel);
 		for (int i = 1; i < lsInfo.size(); i++) {
 			defaultTableModel.addRow(lsInfo.get(i));
@@ -61,8 +63,6 @@ public class JScrollPaneData extends JScrollPane{
 		String[][] tableValue = null;
 		this.title = title;
 		defaultTableModel = new DefaultTableModel(tableValue, title);
-		jTabFInput = new JTable();
-		setViewportView(jTabFInput);
 		jTabFInput.setModel(defaultTableModel);
 	}
 	/**
@@ -108,8 +108,6 @@ public class JScrollPaneData extends JScrollPane{
 		if (defaultTableModel == null) {
 			String[][] tableValue = null;
 			defaultTableModel = new DefaultTableModel(tableValue, info);
-			jTabFInput = new JTable();
-			setViewportView(jTabFInput);
 			jTabFInput.setModel(defaultTableModel);
 			return;
 		}
@@ -183,8 +181,6 @@ public class JScrollPaneData extends JScrollPane{
 	public void clean() {
 		String[][] tableValue = null;
 		defaultTableModel = new DefaultTableModel(tableValue, title);
-		jTabFInput = new JTable();
-		setViewportView(jTabFInput);
 		jTabFInput.setModel(defaultTableModel);
 	}
 	/**

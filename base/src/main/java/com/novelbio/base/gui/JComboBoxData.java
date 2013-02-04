@@ -45,10 +45,18 @@ public class JComboBoxData<T> extends JComboBox{
 		this.resultSort = resultSort;
 	}
 	/**
-	 * 装载hash表
+	 * 装载hash表，首先会比较下输入的mapString2Value与内部的map是否一致
+	 * 如果需要实现比较，就要实现T的equals接口
 	 * @param hashInfo
 	 */
 	public void setMapItem(Map<String, T> mapString2Value) {
+		if (mapString2Value == null) {
+			return;
+		}
+		//当T实现了equals类的时候是可以用的
+		if (mapString2Value.equals(this.mapString2Value)) {
+			return;
+		}
 		this.mapString2Value = mapString2Value;
 		mapValue2String = new HashMap<T, String>();
 		for (Entry<String, T> entry : mapString2Value.entrySet()) {
