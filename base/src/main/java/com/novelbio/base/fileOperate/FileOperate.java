@@ -235,14 +235,18 @@ public class FileOperate {
 
 	/**
 	 * 给定路径名，返回其名字,不带后缀名<br>
-	 * 如给定/home/zong0jie.aa.txt/和/home/zong0jie.aa.txt<br>
-	 * 都返回zong0jie.aa 和 txt<br>
+	 * 如给定/home/zong0jie.aa.txt<br>
+	 * 则返回zong0jie.aa 和 txt<br><br>
+	 * 给定/home/zong0jie.aa.txt/，则返回""和""<br>
 	 * 可以给定不存在的路径<br>
 	 * 
 	 * @param fileName
 	 * @return string[2] 0:文件名 1:文件后缀
 	 */
 	public static String[] getFileNameSep(String fileName) {
+		if (fileName.endsWith("/") || fileName.endsWith("\\")) {
+			return new String[]{"", ""};
+		}
 		String[] result = new String[2];
 
 		File file = new File(fileName);
@@ -697,7 +701,7 @@ public class FileOperate {
 
 	/**
 	 * 只修输入的文件名，并不直接操作文件 文件添加<b>前缀</b>并改后缀名，如果一样则不修改
-	 * 
+	 * 如果文件以“/”结尾，则直接添加后缀
 	 * @param FileName
 	 *            原来文件的全名
 	 * @param append
@@ -706,26 +710,20 @@ public class FileOperate {
 	 *            要添加的后缀名，譬如 txt， jpg ，自动去空格 suffix == null则不改变后缀名，suffix = ""
 	 *            则去除后缀名
 	 */
-	public static String changeFilePrefix(String FileName, String append,
-			String suffix) {
-		String resultFile = "";
+	public static String changeFilePrefix(String fileName, String append, String suffix) {
 		if (append == null) {
 			append = "";
 		}
-		String parentPath = addSep(getParentPathName(FileName));
-		String[] fileName = getFileNameSep(FileName);
-		resultFile = parentPath + append + fileName[0];
-		if (suffix == null) {
-			if (fileName[1] == null || fileName[1].equals("")) {
-				return resultFile;
-			} else {
-				return resultFile + "." + fileName[1];
-			}
-		} else if (suffix.trim().equals("")) {
-			return resultFile;
-		} else {
-			return resultFile + "." + suffix;
+		suffix = getSuffixChange(fileName, suffix);
+		int indexSep = Math.max(fileName.lastIndexOf("/"), fileName.lastIndexOf("\\"));
+		String parentPath = "";
+		if (indexSep >= 0) {
+			parentPath = fileName.substring(0, indexSep + 1);
 		}
+		
+		String fileNameNoSuffix = getFileNameSep(fileName)[0];
+
+		return parentPath + append + fileNameNoSuffix + suffix;
 	}
 
 	/**
@@ -739,8 +737,7 @@ public class FileOperate {
 	 *            要添加的后缀名，譬如 txt， jpg ，自动去空格 suffix == null则不改变后缀名，suffix = ""
 	 *            则去除后缀名
 	 */
-	public static String changeFilePrefixReal(String FileName, String append,
-			String suffix) {
+	public static String changeFilePrefixReal(String FileName, String append, String suffix) {
 		String newFile = changeFilePrefix(FileName, append, suffix);
 		moveSingleFile(FileName, getParentPathName(newFile),
 				getFileName(newFile), true);
@@ -748,8 +745,8 @@ public class FileOperate {
 	}
 
 	/**
-	 * 只修输入的文件名，并不直接操作文件 文件添加<b>后缀</b>并改后缀名，如果一样则不修改
-	 * 
+	 * 只修输入的文件名，并不直接操作文件 文件添加<b>后缀</b>并改后缀名，如果一样则不修改<br>
+	 * 可以修改输入的uri
 	 * @param FileName
 	 *            原来文件的全名
 	 * @param append
@@ -758,28 +755,47 @@ public class FileOperate {
 	 *            要添加的后缀名，譬如 txt， jpg ，自动去空格 suffix == null则不改变后缀名，suffix = ""
 	 *            则去除后缀名
 	 */
-	public static String changeFileSuffix(String FileName, String append,
-			String suffix) {
-		String resultFile = "";
+	public static String changeFileSuffix(String fileName, String append, String suffix) {
 		if (append == null) {
 			append = "";
 		}
-		String parentPath = addSep(getParentPathName(FileName));
-		String[] fileName = getFileNameSep(FileName);
-		resultFile = parentPath + fileName[0] + append;
-		if (suffix == null) {
-			if (fileName[1] == null || fileName[1].equals("")) {
-				return resultFile;
-			} else {
-				return resultFile + "." + fileName[1];
-			}
-		} else if (suffix.trim().equals("")) {
-			return resultFile;
+		suffix = getSuffixChange(fileName, suffix);
+		
+		int endDot = fileName.lastIndexOf(".");
+		int indexSep = Math.max(fileName.lastIndexOf("/"), fileName.lastIndexOf("\\"));
+		String result;
+		if (endDot > indexSep) {
+			result = fileName.substring(0, endDot);
 		} else {
-			return resultFile + "." + suffix;
+			result = fileName;
 		}
-	}
+		
 
+
+		return result + append + suffix;
+	}
+	
+	/**
+	 * 输入文件名和需要修改的后缀，如果后缀为null则返回原来的后缀，否则返回新的后缀
+	 * 后缀加上"."
+	 * @param fileName
+	 * @param suffix
+	 * @return
+	 */
+	private static String getSuffixChange(String fileName, String suffix) {
+		if (suffix == null && !fileName.endsWith("/") && !fileName.endsWith("\\")) {
+			String[] fileNameSep = getFileNameSep(fileName);
+			suffix = fileNameSep[1];
+		}
+		if (suffix == null) {
+			suffix = "";
+		}
+		suffix = suffix.trim();
+		if (!suffix.equals("")) {
+			suffix = "." + suffix;
+		}
+		return suffix;
+	}
 	/**
 	 * 直接操作文件 文件添加<b>后缀</b>并改后缀名，如果一样则不修改
 	 * 
@@ -791,8 +807,7 @@ public class FileOperate {
 	 *            要添加的后缀名，譬如 txt， jpg ，自动去空格 suffix == null则不改变后缀名，suffix = ""
 	 *            则去除后缀名
 	 */
-	public static String changeFileSuffixReal(String FileName, String append,
-			String suffix) {
+	public static String changeFileSuffixReal(String FileName, String append, String suffix) {
 		String newFile = changeFileSuffix(FileName, append, suffix);
 		moveSingleFile(FileName, getParentPathName(newFile),
 				getFileName(newFile), true);

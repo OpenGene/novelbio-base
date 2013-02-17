@@ -13,9 +13,14 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
-
+/**
+ * 对BufferedImage做各种处理<br>
+ * 如果要读取或者写入BufferedImage，可以用ImageIO类
+ * @author zong0jie
+ *
+ */
 public class GraphicCope {
-	/** */
+
 	/**
 	 * 旋转图片为指定角度
 	 * 
@@ -25,8 +30,7 @@ public class GraphicCope {
 	 *            旋转角度 顺时针旋转
 	 * @return
 	 */
-	public static BufferedImage rotateImage(final BufferedImage bufferedimage,
-			final int degree) {
+	public static BufferedImage rotateImage(final BufferedImage bufferedimage, final int degree) {
 		int w = bufferedimage.getWidth();
 		int h = bufferedimage.getHeight();
 		int type = bufferedimage.getColorModel().getTransparency();
@@ -47,8 +51,7 @@ public class GraphicCope {
 	 * @param h 高
 	 * @return
 	 */
-	public static BufferedImage resizeImage(final BufferedImage bufferedimage,
-			final int w, final int h) {
+	public static BufferedImage resizeImage(final BufferedImage bufferedimage, final int w, final int h) {
 		return resizeImage(true,bufferedimage, w, h);
 	}
 	/**

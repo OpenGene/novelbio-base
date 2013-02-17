@@ -7,6 +7,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -95,7 +99,7 @@ public class HttpFetch {
 	
 	ArrayList<BasicHeader> lsHeaders = new ArrayList<BasicHeader>();
 	
-	String url;
+	URI uri;
 	DefaultHttpClient httpclient;
 	
 	HttpRequestBase httpRequest;
@@ -191,28 +195,49 @@ public class HttpFetch {
 		this.methodType = httpType;
 	}
 	/** 有些网站譬如pixiv，在下载图片时需要浏览器提供最近访问的链接，而且必须是其指定的链接才能下载 */
-	public void setRefUrl(String refUrl) {
+	public void setRefUri(String refUrl) {
 		if (refUrl == null) {
 			return;
 		}
 		lsHeaders.add(new BasicHeader("Referer", refUrl));
-	}
-	/** 输入网址，开头可以不加http:// */
-	public void setUrl(String url) {
-		if (url == null) {
+	}	
+	/** 有些网站譬如pixiv，在下载图片时需要浏览器提供最近访问的链接，而且必须是其指定的链接才能下载 */
+	public void setRefUri(URI refUri) {
+		if (refUri == null) {
 			return;
 		}
-		url = url.trim().toLowerCase();
-		if (url.startsWith("//")) {
-			url = "http:" + url;
-		} else if (url.startsWith("/")) {
-			url = "http:/" + url;
-		} else if (url.startsWith("http") || url.startsWith("ftp")) {
-			//Nothing will be do
-		} else {
-			url = "http://" + url;
+		lsHeaders.add(new BasicHeader("Referer", refUri.toString()));
+	}
+	/** 输入网址，开头可以不加http:// */
+	public void setUri(String uri) {
+		if (uri == null) {
+			return;
 		}
-		this.url = url;
+		uri = uri.trim().toLowerCase();
+		if (uri.startsWith("//")) {
+			uri = "http:" + uri;
+		} else if (uri.startsWith("/")) {
+			uri = "http:/" + uri;
+		} else if (uri.startsWith("http") || uri.startsWith("ftp")) {
+			if (uri.contains("http:/") && !uri.contains("http://")) {
+				uri = uri.replace("http:/", "http://");
+			}
+		} else {
+			uri = "http://" + uri;
+		}
+		try {
+			this.uri = new URI(uri);
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		querySucess = false;
+	}
+	public void setUri(URI uri) {
+		if (uri == null) {
+			return;
+		}
+		this.uri = uri;
 		querySucess = false;
 	}
 	/** 设定post提交的参数，设定后默认改为post method */
@@ -394,7 +419,7 @@ public class HttpFetch {
 		try {
 			httpResponse = httpclient.execute(getQuery());
 		} catch (Exception e) {
-			logger.error("query出错：" + url);
+			logger.error("query出错：" + uri);
 			return;
 		}
 		int httpStatusCode = httpResponse.getStatusLine().getStatusCode();
@@ -419,14 +444,14 @@ public class HttpFetch {
 	
 	private HttpUriRequest getQuery() {
 		if (methodType == HTTPTYPE_GET) {
-			httpRequest = new HttpGet(url);
+			httpRequest = new HttpGet(uri);
 		} else if (methodType == HTTPTYPE_POST) {
-			httpRequest = new HttpPost(url);
+			httpRequest = new HttpPost(uri);
 			((HttpPost)httpRequest).setEntity(postEntity);
 			methodType = HTTPTYPE_GET;
 			postEntity = null;
 		} else if (methodType == HTTPTYPE_HEAD) {
-			httpRequest = new HttpHead(url);
+			httpRequest = new HttpHead(uri);
 		}
 		
 		httpRequest.setHeaders(lsHeaders.toArray(new BasicHeader[1]));

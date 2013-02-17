@@ -124,7 +124,7 @@ public class GUIFileOpen  extends JFrame {
 	 * 打开文本选择器
 	 * @param description 如"txt/excel 2003"
 	 * @param extensions 如 "txt","xls" 如果不设定--譬如null，""，"*"，就显示全部文件
-	 * @return
+	 * @return 如果返回的是文件夹，则末尾加上“/”
 	 */
 	public String saveFileNameAndPath(String description, String... extensions) {
 		JFileChooser chooser = new JFileChooser();
