@@ -856,11 +856,9 @@ public class FileOperate {
 		return moveFile(oldPath, newPath, cover, "");
 	}
 	/**
-	 * @param oldPath
-	 * @param newPath
-	 * @param NewName
-	 *            新文件或文件夹名
-	 * @param cover
+	 * @param cover 是否覆盖
+	 * @param oldFileName 老文件全路径
+	 * @param newFileName 新文件全路径
 	 * @return
 	 */
 	public static boolean moveFile(boolean cover, String oldFileName, String newFileName) {

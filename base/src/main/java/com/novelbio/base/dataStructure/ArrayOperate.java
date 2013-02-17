@@ -62,10 +62,8 @@ public class ArrayOperate {
 		int rowNum=lsStrings.get(0).length;
 		int columnNum=lsStrings.size();
 		String[][] result=new String[rowNum][columnNum];
-		for (int i = 0; i < columnNum; i++) 
-		{
-			for (int j = 0; j < rowNum; j++) 
-			{
+		for (int i = 0; i < columnNum; i++) {
+			for (int j = 0; j < rowNum; j++) {
 				result[j][i]=lsStrings.get(i)[j][0];
 			}
 		}
@@ -90,18 +88,13 @@ public class ArrayOperate {
 		instNum--;
 		//通过反射的方法新建数组
 		T[][]  result = (T[][]) Array.newInstance(AT.getClass().getComponentType().getComponentType(),rowNum,colNum);
-		for (int i = 0; i < rowNum; i++) 
-		{
-			for (int j = 0; j < colNum; j++) 
-			{
+		for (int i = 0; i < rowNum; i++) {
+			for (int j = 0; j < colNum; j++) {
 				if (j<=instNum) {
 					result[i][j]=AT[i][j];
-				}
-				else if (j>instNum&&j<=instNum+BT[0].length) {
+				} else if (j>instNum&&j<=instNum+BT[0].length) {
 					result[i][j]=BT[i][j-instNum-1];
-				}
-				else
-				{
+				} else {
 					result[i][j]=AT[i][j-BT[0].length];
 				}
 			}
@@ -128,18 +121,13 @@ public class ArrayOperate {
 		//通过反射的方法新建数组
 		ArrayList<T[]> lsResult = new ArrayList<T[]>();
 		T[][]  result = (T[][]) Array.newInstance(lsAT.get(0).getClass().getComponentType(),rowNum,colNum);
-		for (int i = 0; i < rowNum; i++) 
-		{
-			for (int j = 0; j < colNum; j++) 
-			{
+		for (int i = 0; i < rowNum; i++) {
+			for (int j = 0; j < colNum; j++) {
 				if (j<=instNum) {
 					result[i][j]=lsAT.get(i)[j];
-				}
-				else if (j>instNum&&j<=instNum+lsBT.get(0).length) {
+				} else if (j>instNum&&j<=instNum+lsBT.get(0).length) {
 					result[i][j]=lsBT.get(i)[j-instNum-1];
-				}
-				else
-				{
+				} else {
 					result[i][j]=lsAT.get(i)[j-lsBT.get(i).length];
 				}
 				lsResult.add(result[i]);
@@ -151,54 +139,14 @@ public class ArrayOperate {
 	public static boolean compareString(String str1, String str2) {
 		if (str1 == str2) {
 			return true;
-		}
-		else if (str1 == null && str2 != null) {
+		} else if (str1 == null && str2 != null) {
 			return false;
-		}
-		else if (!str1.equals(str2)) {
+		} else if (!str1.equals(str2)) {
 			return false;
 		}
 		return true;
 	}
 	
-	/**
-	 * @deprecated
-	 * 采用{@link combArray}取代
-	 * String[][]的合并，给定Astring[][]和Bstring[][]
-	 * 将Aobject[][]和Bobject[][]合并，可以指定Bobject插入在Aobject的哪一列后
-	 * <b>注意，Aobject和Bobject的类型必须相等，行数必须相等,也就是第一维必须相等</b>
-	 * @param Aobject
-	 * @param Bobject
-	 * @param instNum 插入到Aobject的第几列之后，是Aobject的实际列,如果instNum<1则仅仅将Bobject并到Aobject的后面。
-	 * @return
-	 */
-	public static String[][] combStrArray(String[][] Astring,String[][] Bstring,int instNum) {
-		int rowNum=Astring.length;
-		int colNum=Astring[0].length+Bstring[0].length;
-		if (instNum<1) {
-			instNum=Astring[0].length;
-		}
-		instNum--;
-		
-		String[][] result=new String[rowNum][colNum];
-		for (int i = 0; i < rowNum; i++) 
-		{
-			for (int j = 0; j < colNum; j++) 
-			{
-				if (j<=instNum) {
-					result[i][j]=Astring[i][j];
-				}
-				else if (j>instNum&&j<=instNum+Bstring[0].length) {
-					result[i][j]=Bstring[i][j-instNum-1];
-				}
-				else
-				{
-					result[i][j]=Astring[i][j-Bstring[0].length];
-				}
-			}
-		}
-		return result;
-	}
 	public static<T> LinkedHashSet<T> removeDuplicate(Collection<T> colToverrideHashCode) {
 		LinkedHashSet<T> setRemoveDuplicate = new LinkedHashSet<T>();
 		for (T t : setRemoveDuplicate) {
@@ -246,11 +194,9 @@ public class ArrayOperate {
 		for (int i = 0; i < result.length; i++) {
 			if (i<=instNum) {
 				result[i]=Aarray[i];
-			}
-			else if (i>instNum&&i<=instNum+Barray.length) {
+			} else if (i>instNum&&i<=instNum+Barray.length) {
 				result[i]=Barray[i-instNum-1];
-			}
-			else {
+			} else {
 				result[i]=Aarray[i-Barray.length];
 			}
 		}
@@ -362,8 +308,7 @@ public class ArrayOperate {
 	 * 如果相同，则将AcolNum全部添加到lsB后面，最后返回添加好的lsA<br>
 	 * @return
 	 */
-	public static ArrayList<String[]> combArrayListHash(List<String[]> lsA ,List<String[]> lsB, int AcolNum, int BcolNum) 
-	{
+	public static ArrayList<String[]> combArrayListHash(List<String[]> lsA ,List<String[]> lsB, int AcolNum, int BcolNum) {
 		ArrayList<String[]> lsResult = new ArrayList<String[]>();
 		Hashtable<String, String[]> hashLsA = new Hashtable<String, String[]>();
 		for (String[] strings : lsA) {
@@ -391,8 +336,7 @@ public class ArrayOperate {
 	 * 用一个boolean参数来指定<br>
 	 * @return
 	 */
-	public static ArrayList<String[]> listCope(ArrayList<String[]> ls, int[] colNum, boolean include) 
-	{
+	public static ArrayList<String[]> listCope(ArrayList<String[]> ls, int[] colNum, boolean include) {
 		if (include) {
 			return listCope(ls, colNum);
 		}
@@ -433,6 +377,56 @@ public class ArrayOperate {
 		return lsResult;
 	}
 	
+	
+	/**
+	 * 将lsInfo里面的double叠加起来，最后加成一个double[]
+	 * @param lsInfo 里面的double[] 可以不等长，里面不可以包括null
+	 * @return
+	 */
+	public static double[] getSumList(List<double[]> lsInfo) {
+		if (lsInfo.size() == 0) {
+			return null;
+		}
+		ArrayList<Double> lsResult = new ArrayList<Double>();
+		for (double[] ds : lsInfo) {
+			for (int i = 0; i < ds.length; i++) {
+				if (i < lsResult.size()) {
+					lsResult.set(i, lsResult.get(i) + ds[i]);
+				} else {
+					lsResult.add(ds[i]);
+				}
+			}
+		}
+
+		double[] result = new double[lsResult.size()];
+		for (int i = 0; i < result.length; i++) {
+			result[i] = lsResult.get(i);
+		}
+		return result;
+	}
+	
+	/** 给定一系列double[]，计算覆盖度，
+	 * 因为输入的double[] 是不等长的
+	 * 就要知道第一位有几个 double[]，第二位有几个 double[]
+	 * @param lsInfo
+	 * @return
+	 */
+	public static List<Integer> getLsCoverage(List<double[]> lsInfo) {
+		if (lsInfo.size() == 0) {
+			return null;
+		}
+		List<Integer> lsResult = new ArrayList<Integer>();
+		for (double[] ds : lsInfo) {
+			for (int i = 0; i < ds.length; i++) {
+				if (i < lsResult.size()) {
+					lsResult.set(i, lsResult.get(i) +1);
+				} else {
+					lsResult.add(1);
+				}
+			}
+		}
+		return lsResult;
+	}
 	
 	/**
 	 * 两个list取交集,注意lsA和lsB里面不要有重复项
@@ -846,6 +840,3 @@ public class ArrayOperate {
 		return result;
 	}
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-

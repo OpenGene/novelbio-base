@@ -152,16 +152,13 @@ public class PlotScatter extends PlotNBCInteractive{
      */
     public void addXY(Collection<double[]> lsXY, DotStyle dotStyle) {
     	dataTable = new DataTable(Double.class, Double.class, String.class);
-    	logger.error("get1");
     	if (!hashDataTable.containsKey(dotStyle)) {
     		addPlot(dotStyle, dataTable);
 		} else {
 			dataTable = hashDataTable.get(dotStyle);
 		}
-    	logger.error("a");
     	for (double[] ds : lsXY) {
     		dataTable.add(ds[0], ds[1], dotStyle.getName());
-    		logger.error("b");
 		}
     }
     /**
