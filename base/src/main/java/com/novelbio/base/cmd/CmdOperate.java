@@ -27,23 +27,12 @@ import com.novelbio.generalConf.NovelBioConst;
  */
 public class CmdOperate extends RunProcess<String> {
 	public static void main(String[] args) {
-		try {
-			test();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		CmdOperate cmdOperate = new CmdOperate("bwa ", "/aswerfer");
+		cmdOperate.run();
+		System.out.println("aaaaaaaaaaaaaaaaaa");
+		System.out.println(cmdOperate.isFinishedNormal());
 	}
-	public static void test() throws InterruptedException {
-		String cmd = "Rscript /media/winD/fedora/gitNovelbio/Novelbio-Bioinformatics-Analysis-Platform/target/rscript/tmp/TopGO_2012-09-09040524123.R";
-		CmdOperate cmdOperate = new CmdOperate(cmd);
-		Thread thread = new Thread(cmdOperate);
-		thread.start();
-		while (cmdOperate.isRunning()) {
-			Thread.sleep(100);
-		}
-		System.out.println("stop");
-	}
+ 
 	private static Logger logger = Logger.getLogger(CmdOperate.class);
 
 	/** 是否将pid加2，如果是写入文本然后sh执行，则需要加上2 */
@@ -57,6 +46,9 @@ public class CmdOperate extends RunProcess<String> {
 	String scriptFold = "";
 	
 	GUIInfo guIcmd;
+	
+	/** 结束标志，0表示正常退出 */
+	int info = -1000;
 	
 	/**
 	 * 直接运行，不写入文本
@@ -72,8 +64,7 @@ public class CmdOperate extends RunProcess<String> {
 	public void setDisplayGUI(boolean displayGUI) {
 		if (displayGUI) {
 			guIcmd = new GUIInfo(this);
-		}
-		else {
+		} else {
 			guIcmd = null;
 		}
 	}
@@ -123,6 +114,7 @@ public class CmdOperate extends RunProcess<String> {
 	 * @throws Exception
 	 */
 	private void doInBackgroundB() throws Exception {
+		info = -1000;
 		try {
 			Thread thread = new Thread(guIcmd);
 			thread.start();
@@ -142,7 +134,7 @@ public class CmdOperate extends RunProcess<String> {
         errorGobbler.start();
         outputGobbler.start();
         
-		int info = process.waitFor();
+        info = process.waitFor();
 		finishAndCloseCmd(info);
 	}
 	private void finishAndCloseCmd(int info) {
@@ -166,6 +158,15 @@ public class CmdOperate extends RunProcess<String> {
 			logger.error("cmd cannot executed correctly: " + cmd);
 		}
 	}
+	
+	/** 是否正常结束 */
+	public boolean isFinishedNormal() {
+		if (info == 0) {
+			return true;
+		}
+		return false;
+	}
+	
 	/** 不能实现 */
 	@Deprecated
 	public void threadSuspend() {
