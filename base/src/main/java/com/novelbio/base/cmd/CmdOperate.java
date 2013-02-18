@@ -49,7 +49,7 @@ public class CmdOperate extends RunProcess<String> {
 	
 	/** 结束标志，0表示正常退出 */
 	int info = -1000;
-	
+	long runTime = 0;
 	/**
 	 * 直接运行，不写入文本
 	 * @param cmd
@@ -151,12 +151,15 @@ public class CmdOperate extends RunProcess<String> {
 	@Override
 	protected void running() {
 		logger.info(cmd);
+		DateTime dateTime = new DateTime();
+		dateTime.setStartTime();
 		try {
 			doInBackgroundB();
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("cmd cannot executed correctly: " + cmd);
 		}
+		runTime = dateTime.getEclipseTime();
 	}
 	
 	/** 是否正常结束 */
@@ -165,6 +168,13 @@ public class CmdOperate extends RunProcess<String> {
 			return true;
 		}
 		return false;
+	}
+	/**
+	 * 返回运行所耗时间，单位ms
+	 * @return
+	 */
+	public long getRunTime() {
+		return runTime;
 	}
 	
 	/** 不能实现 */
