@@ -533,6 +533,7 @@ public class FileOperate {
 		} catch (Exception e) {
 			logger.error(e.toString());
 		}
+		try { Thread.sleep(500); } catch (InterruptedException e) { }
 		return bea;
 	}
 
@@ -553,6 +554,7 @@ public class FileOperate {
 		} catch (Exception e) {
 			logger.error("删除文件夹操作出错");
 		}
+		try { Thread.sleep(500); } catch (InterruptedException e) { }
 	}
 
 	/**
@@ -586,6 +588,7 @@ public class FileOperate {
 				bea = true;
 			}
 		}
+		try { Thread.sleep(500); } catch (InterruptedException e) { }
 		return bea;
 	}
 

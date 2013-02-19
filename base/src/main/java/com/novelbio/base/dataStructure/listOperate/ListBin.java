@@ -28,8 +28,7 @@ public class ListBin<T extends ListDetailAbs> extends ListAbsSearch<T, ListCodAb
 	}
 
 	@Override
-	protected ListCodAbsDu<T, ListCodAbs<T>> creatGffCodDu(
-			ListCodAbs<T> gffCod1, ListCodAbs<T> gffCod2) {
+	protected ListCodAbsDu<T, ListCodAbs<T>> creatGffCodDu(ListCodAbs<T> gffCod1, ListCodAbs<T> gffCod2) {
 		ListCodAbsDu<T, ListCodAbs<T>> result = new ListCodAbsDu<T, ListCodAbs<T>>(gffCod1, gffCod2);
 		return result;
 	}
