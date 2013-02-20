@@ -47,6 +47,21 @@ public class JScrollPaneData extends JScrollPane{
 			defaultTableModel.addRow(lsInfo.get(i));
 		}
 	}
+	
+	/**
+	 * 往jScrollPane中添加表格(lsls结构)，第一行为title
+	 */
+	public void setItemLsLs( List<List<String>> lsInfo) {
+		ArrayList<String[]> lsStrs = new ArrayList<String[]>();
+		for (List<String> list : lsInfo) {		
+			String[] strs = new String[list.size()];
+			for (int j = 0; j < list.size(); j++) {
+				strs[j] = list.get(j);
+			}
+			lsStrs.add(strs);
+		}
+		setItemLs(lsStrs);
+	}
 	//不能用
 //	public void setColumn(int... width) {
 //		TableColumnModel tableColumnModel = new DefaultTableColumnModel();
