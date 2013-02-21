@@ -47,6 +47,18 @@ public class JScrollPaneData extends JScrollPane{
 			defaultTableModel.addRow(lsInfo.get(i));
 		}
 	}
+	
+	/** 往jScrollPane中添加表格，第一行为title */
+	public void setItemLsLs(List<List<String>> lslsExcel) {
+		String[][] tableValue = null;
+		title = lslsExcel.get(0).toArray(new String[0]);
+		defaultTableModel = new DefaultTableModel(tableValue, title);
+		jTabFInput.setModel(defaultTableModel);
+		for (int i = 1; i < lslsExcel.size(); i++) {
+			defaultTableModel.addRow(lslsExcel.get(i).toArray(new String[0]));
+		}
+	}
+	
 	//不能用
 //	public void setColumn(int... width) {
 //		TableColumnModel tableColumnModel = new DefaultTableColumnModel();
@@ -211,5 +223,6 @@ public class JScrollPaneData extends JScrollPane{
 		}
 		return lsFileName2Prefix;
 	}
+
 }
 
