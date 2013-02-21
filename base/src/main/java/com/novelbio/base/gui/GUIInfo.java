@@ -16,7 +16,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.WindowConstants;
-
 import com.novelbio.base.cmd.CmdOperate;
 import com.novelbio.base.multithread.RunProcess;
 

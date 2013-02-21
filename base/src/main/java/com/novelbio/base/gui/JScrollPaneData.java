@@ -58,7 +58,7 @@ public class JScrollPaneData extends JScrollPane{
 			defaultTableModel.addRow(lslsExcel.get(i).toArray(new String[0]));
 		}
 	}
-	
+
 	//不能用
 //	public void setColumn(int... width) {
 //		TableColumnModel tableColumnModel = new DefaultTableColumnModel();
