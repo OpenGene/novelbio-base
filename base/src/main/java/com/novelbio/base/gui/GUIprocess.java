@@ -16,8 +16,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.WindowConstants;
 
-//import org.jdesktop.application.Application;
-
 import com.novelbio.base.multithread.RunProcess;
 /**
  * 显示进度条和读取信息的框
@@ -64,7 +62,6 @@ public class GUIprocess extends javax.swing.JPanel implements Runnable {
 			JProgressBar progressBar = new JProgressBar();
 			progressBar.setBounds(12, 12, 619, 14);
 			add(progressBar);
-//			Application.getInstance().getContext().getResourceMap(getClass()).injectComponents(this);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

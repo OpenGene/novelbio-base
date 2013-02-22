@@ -407,4 +407,18 @@
 			</plugin>
 		</plugins>
 	</build>
+	<distributionManagement>  
+    <!-- use the following if you're not using a snapshot version. -->  
+    <repository>  
+        <id>nexus</id>  
+        <name>Internal Releases</name>  
+        <url>http://host:8080/nexus/content/repositories/releases</url>  
+    </repository>  
+    <!-- use the following if you ARE using a snapshot version. -->  
+    <snapshotRepository>  
+        <id>nexus</id>  
+        <name>Internal Releases</name>  
+        <url>http://host:8080/nexus/content/repositories/snapshots</url>  
+    </snapshotRepository>  
+</distributionManagement> 
 </project>

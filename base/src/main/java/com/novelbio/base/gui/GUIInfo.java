@@ -16,10 +16,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.WindowConstants;
-
-//import org.jdesktop.application.Application;
-
-
 import com.novelbio.base.cmd.CmdOperate;
 import com.novelbio.base.multithread.RunProcess;
 
@@ -104,7 +100,6 @@ public class GUIInfo extends javax.swing.JPanel  implements Runnable {
 			textArea = new JTextArea();
 			scrollPane.setViewportView(textArea);
 			textArea.setWrapStyleWord(true);
-//			Application.getInstance().getContext().getResourceMap(getClass()).injectComponents(this);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
