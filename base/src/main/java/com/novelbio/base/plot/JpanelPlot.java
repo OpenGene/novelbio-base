@@ -140,6 +140,11 @@ public class JpanelPlot extends JPanel{
 		this.plotNBC = plotNBC;
 	}
 	
+	public void setPlotNBC(PlotBufferedImage plotBufferedImage) {
+		plotType = PLOT_NORM;
+		this.plotNBC = plotBufferedImage;
+	}
+	
 	boolean painted = false;
  
     

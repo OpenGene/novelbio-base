@@ -8,7 +8,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 
 import javax.swing.WindowConstants;
-import org.jdesktop.application.Application;
+//import org.jdesktop.application.Application;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -78,7 +78,7 @@ public class GUIInfoAndProcess extends javax.swing.JPanel implements Runnable {
 			JProgressBar progressBar = new JProgressBar();
 			progressBar.setBounds(12, 514, 619, 14);
 			add(progressBar);
-			Application.getInstance().getContext().getResourceMap(getClass()).injectComponents(this);
+//			Application.getInstance().getContext().getResourceMap(getClass()).injectComponents(this);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
