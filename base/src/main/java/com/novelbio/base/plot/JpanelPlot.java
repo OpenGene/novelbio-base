@@ -78,11 +78,11 @@ public class JpanelPlot extends JPanel{
 			inPanel.setZoomable(plotNBCInteractive.isZoom());
 			inPanel.setPannable(plotNBCInteractive.isPannable());
 			add(inPanel);
-			repaint();
-			return;
+		} else {
+			plots.add(plotNBCInteractive.getPlot());
 		}
-		plots.add(plotNBCInteractive.getPlot());
 		repaint();
+
 	}
 	/**
 	 * add a drawable and set whether connect to other figure
@@ -125,10 +125,10 @@ public class JpanelPlot extends JPanel{
 			plots.add(plotNBCInteractive.getPlot());
 			inPanel = new InteractivePanel(plots);
 			add(inPanel);
-			repaint();
-			return;
+		} else {
+			plots.add(plotNBCInteractive.getPlot());
 		}
-		plots.add(plotNBCInteractive.getPlot());
+		
 		repaint();
 	}
 	/**
@@ -138,11 +138,17 @@ public class JpanelPlot extends JPanel{
 	public void setPlotNBC(PlotNBC plotNBC) {
 		plotType = PLOT_NORM;
 		this.plotNBC = plotNBC;
+		repaint();
 	}
 	
+	/**
+	 * 设定图片Image后，自动重新绘制画面
+	 * @param plotBufferedImage
+	 */
 	public void setPlotNBC(PlotBufferedImage plotBufferedImage) {
 		plotType = PLOT_NORM;
 		this.plotNBC = plotBufferedImage;
+		repaint();
 	}
 	
 	boolean painted = false;
@@ -154,10 +160,11 @@ public class JpanelPlot extends JPanel{
 			return;
 		}
         this.setOpaque(true);
-        g.setColor(plotNBC.getBg());
-        plotNBC.drawData(this.getWidth(), this.getHeight());
-        g.drawImage(plotNBC.getBufferedImage(), 0, 0, this);
-//        g.finalize();
+        if (plotNBC != null) {
+            g.setColor(plotNBC.getBg());
+            plotNBC.drawData(this.getWidth(), this.getHeight());
+            g.drawImage(plotNBC.getBufferedImage(), 0, 0, this);
+        }
       }
     
     

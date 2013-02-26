@@ -184,8 +184,11 @@ public abstract  class PlotNBC{
      * @param width
      * @param height
      */
-    protected static BufferedImage paintGraphicOut(BufferedImage bufferedImage, Color fg, boolean alpha, int Width, int Height)
-    {
+    protected static BufferedImage paintGraphicOut(BufferedImage bufferedImage, 
+    		Color fg, boolean alpha, int Width, int Height) {
+    	if (bufferedImage == null) {
+			return null;
+		}
     	if (bufferedImage.getWidth() == Width && bufferedImage.getHeight() == Height) {
 			return bufferedImage;
 		}
