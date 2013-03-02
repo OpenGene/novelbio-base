@@ -77,7 +77,9 @@ public class JScrollPaneData extends JScrollPane{
 		defaultTableModel = new DefaultTableModel(tableValue, title);
 		jTabFInput.setModel(defaultTableModel);
 	}
-	
+	public String[] getTitle() {
+		return title;
+	}
 	/**
 	 * 设定本表的选项
 	 */

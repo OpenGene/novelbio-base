@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -57,8 +58,12 @@ public class JComboBoxData<T> extends JComboBox{
 		if (mapString2Value.equals(this.mapString2Value)) {
 			return;
 		}
-		this.mapString2Value = mapString2Value;
-		mapValue2String = new HashMap<T, String>();
+		this.mapString2Value = new LinkedHashMap<String, T>();
+		for (String key : mapString2Value.keySet()) {
+			this.mapString2Value.put(key, mapString2Value.get(key));
+		}
+		
+		mapValue2String = new LinkedHashMap<T, String>();
 		for (Entry<String, T> entry : mapString2Value.entrySet()) {
 			mapValue2String.put(entry.getValue(), entry.getKey());
 		}
@@ -88,18 +93,18 @@ public class JComboBoxData<T> extends JComboBox{
 	 * @param lsInfo
 	 */
 	private void sortList(ArrayList<String> lsInfo) {
-		if (resultSort != null) {
-			if (resultSort) {
-				Collections.sort(lsInfo);
-			}
-			else {
-				Collections.sort(lsInfo, new Comparator<String>() {
-					@Override
-					public int compare(String o1, String o2) {
-						return -o1.compareTo(o2);
-					}
-				} );
-			}
+		if (resultSort == null) {
+			return;
+		}
+		if (resultSort) {
+			Collections.sort(lsInfo);
+		} else {
+			Collections.sort(lsInfo, new Comparator<String>() {
+				@Override
+				public int compare(String o1, String o2) {
+					return -o1.compareTo(o2);
+				}
+			} );
 		}
 	}
 	/** 设定展示的值 */
