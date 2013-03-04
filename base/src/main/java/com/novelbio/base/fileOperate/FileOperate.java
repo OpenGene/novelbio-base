@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 import org.omg.CosNaming._BindingIteratorImplBase;
 
-import com.novelbio.analysis.tools.compare.runCompSimple;
+//import com.novelbio.analysis.tools.compare.runCompSimple;
 import com.novelbio.base.cmd.CmdOperate;
 import com.novelbio.base.dataStructure.PatternOperate;
 
@@ -206,13 +206,7 @@ public class FileOperate {
 		}
 		if (file.isFile()) {
 			FileInputStream fis = null;
-			try {
-				fis = new FileInputStream(file);
-				return fis.available();
-			} catch (Exception e1) {
-				logger.error("IO出错！");
-				return -1000000000;
-			}
+			return file.length();
 		} else if (file.isDirectory()) {
 			ArrayList<String[]> lsFileName = getFoldFileName(filePath);
 
