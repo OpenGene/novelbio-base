@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 
 import com.novelbio.analysis.seq.genome.gffOperate.GffGeneIsoInfo;
-import com.novelbio.analysis.seq.genome.mappingOperate.Alignment;
+import com.novelbio.base.dataStructure.Alignment;
 import com.novelbio.database.domain.geneanno.SepSign;
 
 /**
@@ -444,7 +444,7 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 		return numberstart;
 	}
 	
-	public int Length() {
+	public int getLength() {
 		return Math.abs(numberend-numberstart) + 1;
 	}
 	
@@ -501,5 +501,6 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 				return result;
 			}
 	}
+
 	
 }

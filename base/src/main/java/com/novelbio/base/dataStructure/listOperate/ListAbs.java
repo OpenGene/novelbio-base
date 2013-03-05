@@ -8,7 +8,6 @@ import java.util.Set;
 
 import org.apache.commons.collections.functors.IfClosure;
 import org.apache.log4j.Logger;
-import org.apache.velocity.app.event.ReferenceInsertionEventHandler.referenceInsertExecutor;
 
 import com.novelbio.analysis.seq.genome.gffOperate.ExonInfo;
 import com.novelbio.analysis.seq.genome.gffOperate.GffGeneIsoInfo;
@@ -75,7 +74,7 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 	 * @return
 	 */
 	public int getEleLen(int num) {
-		return get(num-1).Length();
+		return get(num-1).getLength();
 	}
 	
 	public int getLen() {
@@ -84,7 +83,7 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
  		}
 		else {
 			if (size() == 1) {
-				return get(0).Length();
+				return get(0).getLength();
 			} else {
 				if (get(0).getStartAbs() < get(1).getStartAbs()) {
 					return get(size()-1).getEndAbs() - get(0).getStartAbs();
@@ -200,7 +199,7 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 		} else {
 			distance = getCod2ExInEnd(locSmall) + getCod2ExInStart(locBig) + 1;
 			for (int i = locSmallExInNum + 1; i <= locBigExInNum - 1; i++) {
-				distance = distance + get(i).Length();
+				distance = distance + get(i).getLength();
 			}
 		}
 		
@@ -279,7 +278,7 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 	public int getListLen() {
 		int isoLen = 0;
 		for (E exons : this) {
-			isoLen = isoLen + exons.Length();
+			isoLen = isoLen + exons.getLength();
 		}
 		return isoLen;
 	}
@@ -390,8 +389,8 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 				for (int i = exonNum - 1; i >= 0; i--) {
 					E tmpExon = get(i);
 					// 一个一个外显子的向前遍历
-					if (remain - tmpExon.Length() > 0) {
-						remain = remain - tmpExon.Length();
+					if (remain - tmpExon.getLength() > 0) {
+						remain = remain - tmpExon.getLength();
 						continue;
 					}
 					else {
@@ -421,8 +420,8 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 				for (int i = exonNum + 1; i < size(); i++) {
 					E tmpExon = get(i);
 					// 一个一个外显子的向前遍历
-					if (remain - tmpExon.Length() > 0) {
-						remain = remain - tmpExon.Length();
+					if (remain - tmpExon.getLength() > 0) {
+						remain = remain - tmpExon.getLength();
 						continue;
 					}
 					else {
