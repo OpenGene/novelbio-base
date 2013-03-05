@@ -2,7 +2,7 @@ package com.novelbio.base.dataStructure.listOperate;
 
 import java.util.ArrayList;
 
-import org.apache.ibatis.migration.commands.NewCommand;
+//import org.apache.ibatis.migration.commands.NewCommand;
 import org.apache.log4j.Logger;
 
 /**
