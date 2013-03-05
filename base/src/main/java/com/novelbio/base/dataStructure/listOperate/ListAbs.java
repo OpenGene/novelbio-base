@@ -8,7 +8,7 @@ import java.util.Set;
 
 import org.apache.commons.collections.functors.IfClosure;
 import org.apache.log4j.Logger;
-import org.apache.velocity.app.event.ReferenceInsertionEventHandler.referenceInsertExecutor;
+//import org.apache.velocity.app.event.ReferenceInsertionEventHandler.referenceInsertExecutor;
 
 import com.novelbio.analysis.seq.genome.gffOperate.ExonInfo;
 import com.novelbio.analysis.seq.genome.gffOperate.GffGeneIsoInfo;

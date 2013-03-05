@@ -19,7 +19,7 @@ import com.novelbio.base.dataOperate.DateTime;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.gui.GUIInfo;
 import com.novelbio.base.multithread.RunProcess;
-import com.novelbio.generalConf.NovelBioConst;
+//import com.novelbio.generalConf.NovelBioConst;
 /**
  * 输入cmd，执行完毕后可以将结果输出到界面，目前cmd只支持英文，否则会出错 只要继承后重写process方法即可
  * 如果只是随便用用，那么调用doInBackground方法就好

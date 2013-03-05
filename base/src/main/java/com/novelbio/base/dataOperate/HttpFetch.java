@@ -59,7 +59,7 @@ import org.apache.http.params.HttpProtocolParamBean;
 import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.log4j.Logger;
-import com.sun.xml.internal.xsom.impl.WildcardImpl.Other;
+//import com.sun.xml.internal.xsom.impl.WildcardImpl.Other;
 
 /**
  * 一次只能选择一项，要么post，要么get
