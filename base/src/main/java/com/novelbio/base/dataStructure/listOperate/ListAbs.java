@@ -466,11 +466,9 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 	public void sort() {
 		if (cis5to3 == null) {
 			Collections.sort(this, new CompS2MAbs());
-		}
-		else if (cis5to3) {
+		} else if (cis5to3) {
 			Collections.sort(this, new CompS2M());
-		}
-		else {
+		} else {
 			Collections.sort(this, new CompM2S());
 		}
 	}

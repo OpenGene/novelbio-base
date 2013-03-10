@@ -14,8 +14,8 @@ public abstract class RunProcess<T> implements Runnable {
 	
 	protected boolean flagStop = true;
 	protected boolean suspendFlag = false;
-	/** 是否结束 */
-	boolean flagFinish = false;
+	/** 是否正常结束 */
+	protected boolean flagFinish = false;
 	
 	/** 给定运行中需要修改的信息 */
 	public void setRunGetInfo(RunGetInfo runGetInfo) {
@@ -67,7 +67,8 @@ public abstract class RunProcess<T> implements Runnable {
 			running();
 		} catch (Exception e) {
 			//TODO 看是否能在runGetInfo中添加一个运行失败的处理方法
-			flagFinish = true;
+			e.printStackTrace();
+			flagFinish = false;
 			flagStop = true;
 		}
 		
@@ -88,10 +89,17 @@ public abstract class RunProcess<T> implements Runnable {
 			runGetInfo.setRunningInfo(runInfo);
 		}
 	}
+	/**
+	 * 是否在运行
+	 * @return
+	 */
 	public boolean isRunning() {
 		return !flagStop;
 	}
-	
+	/**
+	 * 是否正常结束，如果isRunning为false，而isFinished也为false，则表示运行出错。
+	 * @return
+	 */
 	public boolean isFinished() {
 		return flagFinish;
 	}

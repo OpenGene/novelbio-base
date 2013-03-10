@@ -34,10 +34,7 @@ public abstract class ListHashSearch < T extends ListDetailAbs, E extends ListCo
 	 * 用于快速将LOC编号对应到其对应的chr上的位置<br>
 	 */
 	protected LinkedHashMap<String,Integer> mapName2DetailNum;
-	/**  起点默认为开区间  */
-	int startRegion = 1;
-	/**  终点默认为闭区间 */
-	int endRegion = 0;
+	
 	/**
 	 * 这个是真正的查找用hash表<br>
 	 * 这个哈希表来存储
@@ -62,42 +59,7 @@ public abstract class ListHashSearch < T extends ListDetailAbs, E extends ListCo
 	public String getGffFilename() {
 		return gfffilename;
 	}
-	/**
-	 * 起点是否为闭区间，不是则为开区间，<br>
-	 * False: 开区间的意思是，24表示从0开始计数的24位，也就是实际的25位<br>
-	 * True: 闭区间的意思是，24就代表第24位<br>
-	 * UCSC的默认文件的起点是开区间
-	 */
-	public void setStartRegion(boolean region) {
-		if (region) 
-			this.startRegion = 0;
-		else 
-			this.startRegion = 1;
-	}
-	/**
-	 * 起点默认为开区间
-	 */
-	public int getStartRegion() {
-		return startRegion;
-	}
-	/**
-	 * 终点默认为闭区间
-	 */
-	public int getEndRegion() {
-		return endRegion;
-	}
-	/**
-	 * 起点是否为闭区间，不是则为开区间，<br>
-	 * False: 开区间的意思是，24表示从0开始计数的24位，也就是实际的25位<br>
-	 * True: 闭区间的意思是，24就代表第24位<br>
-	 * UCSC的默认文件的终点是闭区间间
-	 */
-	public void setEndRegion(boolean region) {
-		if (region) 
-			this.endRegion = 0;
-		else 
-			this.endRegion = 1;
-	}
+
 	/**
 	 * 返回哈希表 LOC--LOC细节<br/>
 	 * 用于快速将LOC编号对应到LOC的细节
@@ -252,9 +214,9 @@ public abstract class ListHashSearch < T extends ListDetailAbs, E extends ListCo
 	 * 在读取文件后如果有什么需要设置的，可以写在setOther();方法里面
 	 * @param gfffilename
 	 */
-	public void ReadGffarray(String gfffilename) {
+	public boolean ReadGffarray(String gfffilename) {
 		if (this.gfffilename.equals(gfffilename)) {
-			return;
+			return true;
 		}
 		this.gfffilename = gfffilename;
 		try {
@@ -266,7 +228,9 @@ public abstract class ListHashSearch < T extends ListDetailAbs, E extends ListCo
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return false;
 		}
+		return true;
 	}
 	/**
 	 * @本方法需要被覆盖
