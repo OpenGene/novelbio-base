@@ -96,18 +96,12 @@ public class PathDetail {
 	public static String getRworkspace() {
 		return getProjectPath() + "rscript"  + FileOperate.getSepPath();
 	}
-	/** 文件分割符为"/" */
-	public static String getRworkspaceLinux() {
-		return getProjectPath() + "rscript"  + FileOperate.getSepPath();
-	}
+
 	public static String getRworkspaceTmp() {
 		return getRworkspace() + "tmp"  + FileOperate.getSepPath();
 	}
-	/** 文件分割符为"/" */
-	public static String getRworkspaceTmpLinux() {
-		return getRworkspace() + "tmp"  + FileOperate.getSepPath();
-	}
 	
+	/** 内部自动加空格 */
 	public static String getRscript() {
 		return mapID2Path.get("R_SCRIPT") + " ";
 	}

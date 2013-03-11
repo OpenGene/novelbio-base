@@ -3,9 +3,9 @@ package com.novelbio.base.plot;
 import java.io.IOException;
 import java.util.Collection;
 
+import com.novelbio.base.PathDetail;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.fileOperate.FileOperate;
-import com.novelbio.generalConf.NovelBioConst;
 
 public class Rplot {
 	/**
@@ -23,28 +23,27 @@ public class Rplot {
 	public static void plotHist(Collection<? extends Number> data,double min,double max,String mainTitle,String xTitle,String yTitle,String resultPath,String resultPrix) throws Exception {
 		//写入数据
 		TxtReadandWrite txtR = new TxtReadandWrite();
-		txtR.setParameter(NovelBioConst.R_WORKSPACE_DENSITY_DATA, true, false);
+		txtR.setParameter(getRDensityData(), true, false);
 		if (min < max) {
 			for (Number d : data) {
 				if (d.doubleValue() >=min && d.doubleValue() <=max) {
 					txtR.writefile(d+"\n");
 				}
 			}
-		}
-		else {
+		} else {
 			for (Number d : data) {
 				txtR.writefile(d+"\n");
 			}
 		}
 		txtR.close();
 		TxtReadandWrite txtTitle = new TxtReadandWrite();
-		txtTitle.setParameter(NovelBioConst.R_WORKSPACE_DENSITY_PARAM, true, false);
+		txtTitle.setParameter(getRDensityParam(), true, false);
 		txtTitle.writefile(mainTitle+"\n");
 		txtTitle.writefile(xTitle+"\n");
 		txtTitle.writefile(yTitle);
 		txtTitle.close();
-		rscript(NovelBioConst.R_WORKSPACE_DENSITY_RSCRIPT);
-		FileOperate.moveFoldFile(NovelBioConst.R_WORKSPACE_DENSITY, resultPath, resultPrix,true);
+		rscript(getRDensityScript());
+		FileOperate.moveFoldFile(getRDensity(), resultPath, resultPrix,true);
 	}
 	/**
 	 * 用R画直方图,新图把老图覆盖
@@ -61,7 +60,7 @@ public class Rplot {
 	public static void plotHist(double[] data,double min,double max,String mainTitle,String xTitle,String yTitle,String resultPath,String resultPrix) throws Exception {
 		//写入数据
 		TxtReadandWrite txtR = new TxtReadandWrite();
-		txtR.setParameter(NovelBioConst.R_WORKSPACE_DENSITY_DATA, true, false);
+		txtR.setParameter(getRDensityData(), true, false);
 		if (min < max) {
 			for (double d : data) {
 				if (d>=min && d <=max) {
@@ -76,13 +75,26 @@ public class Rplot {
 		}
 		txtR.close();
 		TxtReadandWrite txtTitle = new TxtReadandWrite();
-		txtTitle.setParameter(NovelBioConst.R_WORKSPACE_DENSITY_PARAM, true, false);
+		txtTitle.setParameter(getRDensityParam(), true, false);
 		txtTitle.writefile(mainTitle+"\n");
 		txtTitle.writefile(xTitle+"\n");
 		txtTitle.writefile(yTitle);
 		txtTitle.close();
-		rscript(NovelBioConst.R_WORKSPACE_DENSITY_RSCRIPT);
-		FileOperate.moveFoldFile(NovelBioConst.R_WORKSPACE_DENSITY, resultPath, resultPrix,true);
+		rscript(getRDensityScript());
+		FileOperate.moveFoldFile(getRDensity(), resultPath, resultPrix,true);
+	}
+	
+	private static String getRDensity() {
+		return PathDetail.getRworkspace() + "NormalDensity/";
+	}
+	private static String getRDensityParam() {
+		return getRDensity() + "param.txt";
+	}
+	private static String getRDensityData() {
+		return getRDensity() + "data.txt";
+	}
+	private static String getRDensityScript() {
+		return getRDensity() + "NormalDensity.R";
 	}
 	
 //	/**
@@ -133,10 +145,9 @@ public class Rplot {
 	 * @throws InterruptedException 
 	 * @throws Exception
 	 */
-	private static int rscript(String scriptPath) throws IOException, InterruptedException  
-	{
+	private static int rscript(String scriptPath) throws IOException, InterruptedException {
 		//这个就是相对路径，必须在当前文件夹下运行
-		String command=NovelBioConst.R_SCRIPT + scriptPath;
+		String command= PathDetail.getRscript() + scriptPath;
 		Runtime   r=Runtime.getRuntime();
 		Process p = r.exec(command);
 		p.waitFor();
