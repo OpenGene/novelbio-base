@@ -4,14 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Set;
 
-import org.apache.commons.collections.functors.IfClosure;
 import org.apache.log4j.Logger;
 
-import com.novelbio.analysis.seq.genome.gffOperate.ExonInfo;
-import com.novelbio.analysis.seq.genome.gffOperate.GffGeneIsoInfo;
-import com.novelbio.database.domain.geneanno.SepSign;
 import com.novelbio.database.model.modgeneid.GeneID;
 /**
  * 考虑将其拆分成为三个不同的list，一个cis，一个trans，一个null
@@ -307,9 +302,6 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 	public HashMap<String, E> getMapName2DetailAbs() {
 		HashMap<String, E> mapName2DetailAbs = new HashMap<String, E>();
 		for (E ele : this) {
-			if (ele.getRefID().equals("chr10") && Math.abs(ele.getStartAbs() - 695888) < 50000) {
-				System.out.println("stop");
-			}
 			ArrayList<String> ss = ele.getName();
 			for (String string : ss) {
 				mapName2DetailAbs.put(string.toLowerCase(), ele);

@@ -50,7 +50,7 @@ public abstract class ListAbsSearch <E extends ListDetailAbs, T extends ListCodA
 		T gffCod1 = searchLocation(cod1);
 		T gffCod2 = searchLocation(cod2);
 		if (gffCod1 == null) {
-			System.out.println("error");
+			logger.error("error");
 		}
 		K lsAbsDu = creatGffCodDu(gffCod1, gffCod2);
 		

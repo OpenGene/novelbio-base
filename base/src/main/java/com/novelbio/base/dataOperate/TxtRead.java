@@ -4,34 +4,20 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.StringTokenizer;
-import java.util.TreeMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -42,51 +28,39 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 
 import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.dataStructure.PatternOperate;
+import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 
-/**
- * 使用前先用setParameter设置 使用完毕后调用close关闭流
- * 
- * @author zong0jie
- * 
- */
-public class TxtReadandWrite implements Closeable {
-	public static void main(String[] args) throws Exception {
-		TxtReadandWrite txtReadandWrite = new TxtReadandWrite("/media/winE/NBCplatform/genome/rice/tigr6.0/ChromFa/chr1.txt", false);
-		txtReadandWrite.getEnterType();
-	}
-	private static Logger logger = Logger.getLogger(TxtReadandWrite.class);
-	
-	public final static String GZIP = "gz";
-	public final static String BZIP2 = "bzip2";
-	public final static String ZIP = "zip";
-	public final static String TXT = "txt";
-	private String filetype = TXT;
+public class TxtRead {
+	private static final Logger logger = Logger.getLogger(TxtReadandWrite.class);
 	public final static String ENTER_LINUX = "\n";
 	public final static String ENTER_WINDOWS = "\r\n";
-	
+	/** 缓冲 */
 	static int bufferLen = 100000;
-
-	String sep = "\t";
+	/** 默认以制表符分割 */
+	static String sep = "\t";
 	
-	File txtfile;
+	public static enum System{
+		pc, hadoop
+	}
+	
+	public static enum TXTtype{
+		Gzip, Bzip2, Zip, Txt
+	}
+	
+	String txtfile;
 	BufferedInputStream inputStream;
-	BufferedOutputStream outputStream;
 	BufferedReader bufread;
-	BufferedWriter bufwriter;
-	boolean createNew = false;
-	boolean append = true;
-	/**
-	 * 仅仅为了最后关闭zip用
-	 */
-	ArchiveOutputStream zipOutputStream;
 	
 	/** 抓取文件中特殊的信息 */
 	String grepContent = "";
+	
 	/**
 	 * 设定缓冲长度，默认为10000
 	 * @param bufferLen
@@ -96,130 +70,69 @@ public class TxtReadandWrite implements Closeable {
 	}
 	
 	public String getFileName() {
-		return txtfile.getAbsolutePath();
+		return txtfile;
 	}
 	
-	public TxtReadandWrite () {
-		
-	}
-	public TxtReadandWrite (String fileType, String filepath, boolean createNew) {
-		if (createNew)
-			setParameter(fileType, filepath, createNew, false);
-		else
-			setParameter(fileType, filepath, createNew, true);
-	}
-	
-	public TxtReadandWrite (String filepath, boolean createNew) {
-		if (createNew)
-			setParameter(filepath, createNew, false);
-		else
-			setParameter(filepath, createNew, true);
-	}
-	/**
-	 * 待测试
-	 * 读取压缩文件，文件中只能有一个压缩文件，并且不能是子文件夹
-	 * @param zip
-	 * @param filePath
-	 */
-	public TxtReadandWrite (String fileType, String filePath) {
-		this.filetype = fileType;
-		setParameter(fileType, filePath, false, true);
-	}
-	public void setSep(String sep) {
-		this.sep = sep;
-	}
-	/**
-	 * 默认产生txt文本
-	 * @param filepath
-	 *            要读取或写入的文件名filepath
-	 * @param createNew
-	 *            当文本不存在时，是否需要新建文本
-	 * @param append
-	 *            是接着写入还是写新的。<b>读取文本时必须设置为true</b>
-	 * @return true：成功设置文本参数<br>
-	 *         false：没有设好文本参数
-	 */
-	public boolean setParameter(String filepath, boolean createNew,
-			boolean append) {
-		if (filepath.toLowerCase().endsWith("gz")) {
-			return setParameter(GZIP, filepath, createNew, append);
-		}
-		else if (filepath.toLowerCase().endsWith("bz2")) {
-			return setParameter(BZIP2, filepath, createNew, append);
-		}
-		else {
-			return setParameter(TXT, filepath, createNew, append);
-		}
-	}
-	/**
-	 * 按照最初的设定，重新设定各类信息，类似setParameter()
-	 * @return
-	 */
-	public boolean reSetInfo() {
-		return setParameter(this.filetype, txtfile.getAbsolutePath(), createNew, append);
-	}
-	
-	/**
-	 * @param fileType 压缩格式
-	 * @param filepath 要读取或写入的文件名filepath
-	 * @param createNew 当文本不存在时，是否需要新建文本
-	 * @param append 是接着写入还是写新的。<b>读取文本时必须设置为true</b>
-	 * @return true：成功设置文本参数<br>
-	 *         false：没有设好文本参数
-	 */
-	public boolean setParameter(String fileType, String filepath, boolean createNew, boolean append) {
-		close();
-		this.filetype = fileType;
-		txtfile = new File(filepath);
-		this.createNew = createNew;
-		this.append = append;
+	public TxtRead(String fileName) {
+		this.txtfile = fileName;
+		InputStream inStream = null;
 		try {
-			if (createNew) {
-				createFile(fileType, filepath, append);
-				return true;
-			}
-			else if (txtfile.exists()) {
-				try { createFile(filetype, txtfile.getAbsolutePath(), append); } catch (Exception e) { }
-				try { setReadFile(filetype); } catch (Exception e) { }
-				return true;
-			}
+			inStream = new FileInputStream(txtfile);
+			setInStream(getTxtType(fileName), inStream);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return false;
 	}
-	/**
-	 * 仅设定压缩格式,没有测试
-	 * @param filetype
-	 */
-	public void setFiletype(String filetype) {
-		this.filetype = filetype;
-		try { createFile(filetype, txtfile.getAbsolutePath(), this.append); } catch (Exception e) {}
+	
+	public TxtRead(FileHadoop fileHadoop) {
+		InputStream inputStream = fileHadoop.getInputStream();
 		try {
-			setReadFile(filetype);
-		} catch (Exception e) {
+			setInStream(getTxtType(fileHadoop.getFileNameHdfs()), inputStream);
+		} catch (IOException e) {e.printStackTrace();}
+	}
+	
+	/**
+	 * 根据文件后缀判断文件的类型，是gz还是txt等
+	 * @return
+	 */
+	private TXTtype getTxtType(String fileName) {
+		TXTtype txtTtype = null;
+		fileName = fileName.toLowerCase().trim();
+		if (fileName.endsWith(".gz")) {
+			txtTtype = TXTtype.Gzip;
+		} else if (fileName.endsWith(".bz2")) {
+			txtTtype = TXTtype.Bzip2;
+		} else if (fileName.endsWith("zip")) {
+			txtTtype = TXTtype.Zip;
+		} else {
+			txtTtype = TXTtype.Txt;
+		}
+		return txtTtype;
+	}
+	
+	private void setInStream(TXTtype txtType, InputStream inputStreamRaw) throws IOException {
+		if (txtType == TXTtype.Txt) {
+			inputStream = new BufferedInputStream(inputStreamRaw, bufferLen);
+		} else if (txtType == TXTtype.Zip) {
+			ZipArchiveInputStream zipArchiveInputStream = new ZipArchiveInputStream(inputStreamRaw);
+			ArchiveEntry zipEntry = null;
+			while ((zipEntry = zipArchiveInputStream.getNextEntry()) != null) {
+				if (!zipEntry.isDirectory() && zipEntry.getSize() > 0) {
+					break;
+				}
+			}
+			inputStream = new BufferedInputStream(zipArchiveInputStream, bufferLen);
+		} else if (txtType == TXTtype.Gzip) {
+			inputStream = new BufferedInputStream(new GZIPInputStream(inputStreamRaw, bufferLen), bufferLen);
+		} else if (txtType == TXTtype.Bzip2) {
+			inputStream = new BufferedInputStream(new BZip2CompressorInputStream(inputStreamRaw), bufferLen);
 		}
 	}
 	
-	private void createFile(String fileType, String fileName, boolean append) throws Exception {
-		outputStream = new BufferedOutputStream(new FileOutputStream(txtfile,append));
-		if (fileType.equals(TXT))
-			return;
-		
-		else if (fileType.equals(ZIP)) {
-			zipOutputStream = new ZipArchiveOutputStream(txtfile);
-			ZipArchiveEntry entry = new ZipArchiveEntry(FileOperate.getFileNameSep(fileName)[0]);
-			zipOutputStream.putArchiveEntry(entry);
-			outputStream = new BufferedOutputStream(zipOutputStream, bufferLen);
-		}
-		else if (fileType.equals(GZIP)) {
-			outputStream = new BufferedOutputStream(new GZIPOutputStream(outputStream), bufferLen);
-		}
-		else if (fileType.equals(BZIP2)) {
-			outputStream = new BufferedOutputStream(new BZip2CompressorOutputStream(outputStream), bufferLen);
-		}
-	}
-	
+	/**
+	 * 返回该文本的回车方式
+	 * @return
+	 */
 	public String getEnterType() {
 		String result = "";
 		try {
@@ -250,6 +163,7 @@ public class TxtReadandWrite implements Closeable {
 			return ENTER_LINUX;
 		}
 	}
+	
 	/**
 	 * 这个内部使用，外部用@readlines代替
 	 * 有时间改成private方法
@@ -1397,117 +1311,5 @@ public class TxtReadandWrite implements Closeable {
                }
                return charset;
        }
-}
-////大文件排
- class TestCountWords {  
-       public static void main(String[] args) {  
-           File wf = new File("words.txt");  
-           final CountWords cw1 = new CountWords(wf, 0, wf.length()/2);  
-           final CountWords cw2 = new CountWords(wf, wf.length()/2, wf.length());  
-           final Thread t1 = new Thread(cw1);  
-           final Thread t2 = new Thread(cw2);  
-           //开辟两个线程分别处理文件的不同片段  
-           t1.start();  
-           t2.start();  
-           Thread t = new Thread() {  
-               public void run() {  
-                   while(true) {  
-                       //两个线程均运行结束  
-                       if(Thread.State.TERMINATED==t1.getState() && Thread.State.TERMINATED==t2.getState()) {  
-                           //获取各自处理的结果  
-                           HashMap<String, Integer> hMap1 = cw1.getResult();  
-                           HashMap<String, Integer> hMap2 = cw2.getResult();  
-                           //使用TreeMap保证结果有序  
-                           TreeMap<String, Integer> tMap = new TreeMap<String, Integer>();  
-                           //对不同线程处理的结果进行整合  
-                           tMap.putAll(hMap1);  
-                           tMap.putAll(hMap2);  
-                           //打印输出，查看结果  
-                           for(Entry<String, Integer> entry : tMap.entrySet()) {  
-                               String key = entry.getKey();    
-                               int value = entry.getValue();    
-                               System.out.println(key+":\t"+value);    
-                           }  
-                           //将结果保存到文件中  
-                           mapToFile(tMap, new File("result.txt"));  
-                       }  
-                       return;  
-                   }  
-               }  
-           };  
-           t.start();  
-       }  
-       //将结果按照 "单词：次数" 格式存在文件中  
-       private static void mapToFile(Map<String, Integer> src, File dst) {  
-           try {  
-               //对将要写入的文件建立通道  
-               FileChannel fcout = new FileOutputStream(dst).getChannel();  
-               //使用entrySet对结果集进行遍历  
-               for(Map.Entry<String,Integer> entry : src.entrySet()) {  
-                   String key = entry.getKey();  
-                   int value = entry.getValue();  
-                   //将结果按照指定格式放到缓冲区中  
-                   ByteBuffer bBuf = ByteBuffer.wrap((key+":\t"+value).getBytes());  
-                   fcout.write(bBuf);  
-                   bBuf.clear();  
-               }  
-           } catch (FileNotFoundException e) {  
-               e.printStackTrace();  
-           } catch (IOException e) {  
-               e.printStackTrace();  
-           }  
-       }  
-   }
-     
-   class CountWords implements Runnable {  
-         
-       private FileChannel fc;  
-       private FileLock fl;  
-       private MappedByteBuffer mbBuf;  
-       private HashMap<String, Integer> hm;  
-         
-       public CountWords(File src, long start, long end) {  
-           try {  
-               //得到当前文件的通道  
-               fc = new RandomAccessFile(src, "rw").getChannel();  
-               //锁定当前文件的部分  
-               fl = fc.lock(start, end, false);  
-               //对当前文件片段建立内存映射，如果文件过大需要切割成多个片段  
-               mbBuf = fc.map(FileChannel.MapMode.READ_ONLY, start, end);  
-               //创建HashMap实例存放处理结果  
-               hm = new HashMap<String,Integer>();  
-           } catch (FileNotFoundException e) {  
-               e.printStackTrace();  
-           } catch (IOException e) {  
-               e.printStackTrace();  
-           }  
-       }  
-       
-       public void run() {  
-           String str = Charset.forName("UTF-8").decode(mbBuf).toString();  
-           //使用StringTokenizer分析单词  
-           StringTokenizer token = new StringTokenizer(str);  
-           String word;  
-           while(token.hasMoreTokens()) {  
-               //将处理结果放到一个HashMap中，考虑到存储速度  
-               word = token.nextToken();  
-               if(null != hm.get(word)) {  
-                   hm.put(word, hm.get(word)+1);  
-               } else {  
-                   hm.put(word, 1);  
-               }  
-           }  
-           try {  
-               //释放文件锁  
-               fl.release();  
-           } catch (IOException e) {  
-               e.printStackTrace();  
-           }  
-           return;  
-       }  
-         
-       //获取当前线程的执行结果  
-       public HashMap<String, Integer> getResult() {  
-           return hm;  
-       }
+
 }

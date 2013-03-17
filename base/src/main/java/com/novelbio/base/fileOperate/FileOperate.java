@@ -163,15 +163,7 @@ public class FileOperate {
 			return 0;
 		}
 		if (file.isFile()) {
-			FileInputStream fis = null;
-			try {
-				fis = new FileInputStream(file);
-				double size = (double) fis.available() / 1024;
-				return size;
-			} catch (Exception e1) {
-				logger.error("IO出错！");
-				return -1000000000;
-			}
+			return file.length()/1024;
 		} else if (file.isDirectory()) {
 			ArrayList<String[]> lsFileName = getFoldFileName(filePath);
 
@@ -205,8 +197,7 @@ public class FileOperate {
 			return 0;
 		}
 		if (file.isFile()) {
-			FileInputStream fis = null;
-			return file.length();
+			return file.length()/1024;
 		} else if (file.isDirectory()) {
 			ArrayList<String[]> lsFileName = getFoldFileName(filePath);
 
