@@ -16,8 +16,6 @@ public class FileHadoop {
 	FileSystem fsHDFS;
 	Path dst;
 	
-	
-	
 	/**
 	 * 输入另一个fileHadoop的内容，仅获得其配置信息，不获得其具体文件名
 	 * @param fileHadoop
