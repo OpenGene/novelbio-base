@@ -20,14 +20,14 @@ public class FileHadoop {
 	 * 输入另一个fileHadoop的内容，仅获得其配置信息，不获得其具体文件名
 	 * @param fileHadoop
 	 */
-	public FileHadoop(FileSystem fsHDFS, String hdfsFileName) {
+	public FileHadoop(FileSystem fsHDFS, String hdfsFilePath) {
 		this.fsHDFS = fsHDFS;
-		setFileName(hdfsFileName);
+		setHDFSFilePath(hdfsFilePath);
 	}
 	
-	public FileHadoop(String url, String userName, String hdfsFileName) {
+	public FileHadoop(String url, String userName, String hdfsFilePath) {
 		this(url, userName);
-		setFileName(hdfsFileName);
+		setHDFSFilePath(hdfsFilePath);
 	}
 	
 	/**
@@ -60,11 +60,11 @@ public class FileHadoop {
 	}
 		
 	/**
-	 * 设定hdfs的文件名
-	 * @param hdfsFileName
+	 * 设定hdfs的文件路径
+	 * @param hdfsFilePath
 	 */
-	public void setFileName(String hdfsFileName) {
-		dst = new Path(hdfsFileName);
+	public void setHDFSFilePath(String hdfsFilePath) {
+		dst = new Path(hdfsFilePath);
 	}
 	
 	/**
@@ -129,6 +129,21 @@ public class FileHadoop {
 		} catch (IOException e) {
 			return null;
 		}
+	}
+	
+	/**
+	 * 创建一个文件夹
+	 * @param path 路径+“/”+文件夹名字
+	 * @throws IOException
+	 */
+	public void mkdirHDFSFolder(Path path) throws IOException {
+		fsHDFS.mkdirs(path);
+	}
+	
+	/**删除文件
+	 * @throws IOException */
+	public void removeHDFSfile(Path path) throws IOException {
+		fsHDFS.delete(path, true);
 	}
 }
 
