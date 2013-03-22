@@ -804,44 +804,6 @@ public class MathComput {
 		return result;
 	}
 	
-
-	/**
-	 * 给定pvaule，获得相应的fdr，用R来计算的<br>
-	 * 使用R的workspace目前在  /media/winE/Bioinformatics/R/practice_script/platform/pvalue2fdr/  中
-	 * @param lsPvalue
-	 * @return
-	 * @throws Exception 
-	 */
-	public static ArrayList<Double> pvalue2FdrR(ArrayList<Double> lsPvalue) throws Exception {
-		TxtReadandWrite txtPvalue = new TxtReadandWrite();
-		txtPvalue.setParameter("/media/winE/Bioinformatics/R/practice_script/platform/pvalue2fdr/pvalue.txt", true, false);
-		double[] tmpDouble = new double[lsPvalue.size()];
-		for (int i = 0; i < tmpDouble.length; i++) {
-			tmpDouble[i] = lsPvalue.get(i);
-		}
-		txtPvalue.Rwritefile(tmpDouble);
-		getPvalue("/media/winE/Bioinformatics/R/practice_script/platform/");
-		txtPvalue.setParameter("/media/winE/Bioinformatics/R/practice_script/platform/pvalue2fdr/fdr.txt", false, true);
-		String[][] strFdr = txtPvalue.ExcelRead("\t", 2, 2, txtPvalue.ExcelRows(), 2);
-		ArrayList<Double> lsFdr = new ArrayList<Double>();
-		for (int i = 0; i < lsPvalue.size(); i++) {
-			lsFdr.add(Double.parseDouble(strFdr[i][0]));
-		}
-		return lsFdr;
-	}
-	
-	private static void getPvalue(String RworkSpace) throws Exception{
-		//这个就是相对路径，必须在当前文件夹下运行
-		String command="Rscript "+RworkSpace+ "pvalue2Fdr.R";
-		Runtime   r=Runtime.getRuntime();
-		Process p = r.exec(command);
-		p.waitFor();
-		System.out.println("ok");
-		Integer aa = 0;
-	}
-	
-	
-	
 	/**
 	 * 将List中的数字按照行取中位数，也就是每一个Number[]取一个中位数
 	 * 所以不要求Numbers[]的长度相等。

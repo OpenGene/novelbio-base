@@ -1,7 +1,6 @@
 package com.novelbio.base.fileOperate;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.ContentSummary;
@@ -9,8 +8,6 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.util.Progress;
-import org.apache.hadoop.util.Progressable;
 
 public class FileHadoop {
 	FileSystem fsHDFS;

@@ -23,12 +23,11 @@ public class LoggNBC {
 		setTxtLog(txtOutFile);
 	}
 	public void setTxtLog(String txtName) {
-		txtLog = new TxtReadandWrite();
+		txtLog = new TxtReadandWrite(txtName, true, true);
 		boolean createNew = true;
 		if (FileOperate.isFileExist(txtName)) {
 			createNew = false;
 		}
-		txtLog.setParameter(txtName, createNew, true);
 	}
 	public void error(Object message) {
 		logger.error(message);

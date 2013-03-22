@@ -189,16 +189,10 @@ public class ExcelTxtRead {
 	 * @throws Exception 
 	 */
     public static void uniq(String inputFIle,String sep, int column, String outPut) throws Exception {
-    	TxtReadandWrite txtInputFile=new TxtReadandWrite();
-    	txtInputFile.setParameter(inputFIle, false, true);
-    	TxtReadandWrite txtOutput = new TxtReadandWrite();
-    	txtOutput.setParameter(outPut, true, false);
-    	
-    	BufferedReader inputReader=txtInputFile.readfile();
-    	String content="";
+    	TxtReadandWrite txtInputFile=new TxtReadandWrite(inputFIle);
+    	TxtReadandWrite txtOutput = new TxtReadandWrite(outPut, true);
     	String tmp="";
-    	while ((content=inputReader.readLine())!=null) 
-    	{
+    	for (String content : txtInputFile.readlines()) {
     		String tmp2=content.split(sep)[column-1].trim();
 			if (tmp.equals(tmp2)) {
 				continue;
@@ -206,7 +200,6 @@ public class ExcelTxtRead {
 			tmp=tmp2;
 			txtOutput.writefile(content+"\n",false);
 		}
-    	txtOutput.writefile("",true);
     	txtInputFile.close();
     	txtOutput.close();
 	}
