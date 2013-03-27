@@ -79,11 +79,11 @@ public class MD5generate {
    
 		MappedByteBuffer byteBuffer = ch.map(FileChannel.MapMode.READ_ONLY, startPosition,file.length()-startPosition);  
 		messageDigest.update(byteBuffer);  
-           
+		in.close();
 		return bufferToHex(messageDigest.digest());  
 	}
 	
-	public static String getMD5String(String s) {  
+	public static String getMD5String(String s) {
 		return getMD5String(s.getBytes());  
 	}  
    
@@ -110,11 +110,6 @@ public class MD5generate {
 		char c1 = hexDigits[bt & 0xf];  
 		stringbuffer.append(c0);  
 		stringbuffer.append(c1);  
-	}  
-   
-	public static boolean checkPassword(String password, String md5PwdStr) {  
-		String s = getMD5String(password);  
-		return s.equals(md5PwdStr);  
 	}  
        
 	/**
@@ -151,5 +146,27 @@ public class MD5generate {
 		}
 		return s;
 	}
-		
+
+	/**
+	 * 提供一个MD5多次加密方法
+	 */
+	public static String getMD5String(String origString, int times) {
+		String md5 = getMD5String(origString);
+		for (int i = 0; i < times - 1; i++) {
+			md5 = getMD5String(md5);
+		}
+		return getMD5String(md5);
+	}
+	/**
+	 * 密码验证方法
+	 */
+	public static boolean verifyPassword(String inputStr, String MD5Code) {
+		return getMD5String(inputStr).equals(MD5Code);
+	}
+	/**
+	 * 多次加密时的密码验证方法
+	 */
+	public static boolean verifyPassword(String inputStr, String MD5Code, int times) {
+		return getMD5String(inputStr, times).equals(MD5Code);
+	}
 }

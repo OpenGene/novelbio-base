@@ -32,6 +32,33 @@
   		<type>jar</type>
   		<scope>compile</scope>
   	</dependency>
+	<dependency>
+		<groupId>org.apache.hadoop</groupId>
+		<artifactId>hadoop-core</artifactId>
+		<version>1.0.4</version>
+		<exclusions>
+			<exclusion>
+				<artifactId>jetty</artifactId>
+				<groupId>org.mortbay.jetty</groupId>
+			</exclusion>
+			<exclusion>
+				<artifactId>jsp-api-2.1</artifactId>
+				<groupId>org.mortbay.jetty</groupId>
+			</exclusion>
+			<exclusion>
+				<artifactId>jasper-runtime</artifactId>
+				<groupId>tomcat</groupId>
+			</exclusion>
+			<exclusion>
+				<artifactId>jasper-compiler</artifactId>
+				<groupId>tomcat</groupId>
+			</exclusion>
+			<exclusion>
+				<artifactId>jsp-2.1</artifactId>
+				<groupId>org.mortbay.jetty</groupId>
+			</exclusion>
+		</exclusions>
+	</dependency>
   	<dependency>
   		<groupId>org.simpleframework</groupId>
   		<artifactId>simple-xml</artifactId>

@@ -1,10 +1,11 @@
 package com.novelbio.base.dataOperate;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 
-import org.omg.CosNaming._BindingIteratorImplBase;
 /**
  * 时间日期类
  * 可以用来计算程序运行时间
@@ -12,6 +13,27 @@ import org.omg.CosNaming._BindingIteratorImplBase;
  *
  */
 public class DateTime {
+	enum Week {  
+		   星期一,星期二,星期三,星期四,星期五,星期六,星期日  
+		}  
+	/**
+	 * 年-月-日
+	 */
+	public static final String PATTERN_YYYY_MM_DD = "yyyy-MM-dd";
+
+	/** 年月日 */
+	public static final String PATTERN_YYYYMMDD = "yyyyMMdd";
+
+	/** 当前日期和时间 */
+	public static final String PATTERN_DATETIME = "yyyy-MM-dd HH:mm:ss";
+	
+	public static final String PATTERN_YYYYMM = "yyyy-MM";
+	/** 当前日期的年份 */
+	public static final String PATTERN_YYYY = "yyyy";
+	
+	/** 当前日期的月份 */
+	public static final String PATTERN_MM = "MM";
+	
 	long start = 0;
 	/**
 	 * 自动设定起始时间
@@ -36,14 +58,65 @@ public class DateTime {
 	}
 	
 	/**
+	 * 把date类型的日期转换成String
+	 * @param date
+	 * @param pattern
+	 * @return
+	 */
+	public static String date2String(Date date,String pattern) {
+		SimpleDateFormat sf = new SimpleDateFormat(pattern);
+		return sf.format(date);
+	}
+	
+	/**
+	 * 
+	 * 描述:把日历弄的日期转成String <br>
+	 * 作者 : gaozhu <br>
+	 * 日期 : 2012-11-16 <br>
+	 * 参数: 
+	 * 返回值 String
+	 * 异常
+	 */
+	public static String calendar2String(Calendar calendar){
+		return calendar.get(Calendar.YEAR)+"-"
+				+calendar.get(Calendar.MONTH)+"-"
+				+(calendar.get(Calendar.DATE)<10?("0"+calendar.get(Calendar.DATE)):(calendar.get(Calendar.DATE)));
+	}
+	
+	/**
+	 * String转date
+	 * @param date
+	 * @param pattern
+	 * @return
+	 */
+	public static Date string2Date(String date,String pattern) throws ParseException
+	{
+		SimpleDateFormat sf = new SimpleDateFormat(pattern);
+		Date newdate;
+		newdate = sf.parse(date);
+		return newdate;
+		
+		
+	}
+	
+	public static boolean isWeek(String week){
+		for(int i=0;i<Week.values().length;i++){
+			if(week.equals(Week.values()[i].toString())){
+				return true;
+			}
+		}
+		return false;
+	}
+	/**
 	 * 返回当前日期，格式 "yyyy-MM-dd"
 	 * @return
 	 */
 	public static String getDate() {
-	     SimpleDateFormat formatDate= new SimpleDateFormat( "yyyy-MM-dd");
+	     SimpleDateFormat formatDate= new SimpleDateFormat(PATTERN_YYYY_MM_DD);
 	     Date currentDate = new Date(); //得到当前系统时间
 	     return formatDate.format(currentDate); //将日期时间格式化
 	}
+	
 	/**
 	 * 返回当前日期加上一个随机数，做唯一文件编码用，格式 "yyyy-MM-ddhhss"
 	 * @return
