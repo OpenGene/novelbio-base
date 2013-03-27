@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 
 import com.novelbio.base.PathDetail;
-import com.novelbio.base.dataOperate.DateTime;
+import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.gui.GUIInfo;
 import com.novelbio.base.multithread.RunProcess;
@@ -94,7 +94,7 @@ public class CmdOperate extends RunProcess<String> {
 	public void setCmdFile(String cmdWriteInFileName) {
 		shPID = true;
 		logger.info(cmd);
-		String cmd1SH = PathDetail.getProjectConfPath() + cmdWriteInFileName.replace("\\", "/") + DateTime.getDateAndRandom() + ".sh";
+		String cmd1SH = PathDetail.getProjectConfPath() + cmdWriteInFileName.replace("\\", "/") + DateUtil.getDateAndRandom() + ".sh";
 		TxtReadandWrite txtCmd1 = new TxtReadandWrite(cmd1SH, true);
 		txtCmd1.writefile(cmd);
 		txtCmd1.close();
@@ -145,7 +145,7 @@ public class CmdOperate extends RunProcess<String> {
 	@Override
 	protected void running() {
 		logger.info(cmd);
-		DateTime dateTime = new DateTime();
+		DateUtil dateTime = new DateUtil();
 		dateTime.setStartTime();
 		try {
 			doInBackgroundB();

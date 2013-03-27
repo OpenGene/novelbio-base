@@ -12,7 +12,7 @@ import java.util.Random;
  * @author zong0jie
  *
  */
-public class DateTime {
+public class DateUtil {
 	enum Week {  
 		   星期一,星期二,星期三,星期四,星期五,星期六,星期日  
 		}  
@@ -38,7 +38,7 @@ public class DateTime {
 	/**
 	 * 自动设定起始时间
 	 */
-	public DateTime() {
+	public DateUtil() {
 		start = System.currentTimeMillis(); //获取最初时间
 	}
 	/**
