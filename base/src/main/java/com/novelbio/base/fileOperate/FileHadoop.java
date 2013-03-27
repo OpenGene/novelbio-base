@@ -103,7 +103,7 @@ public class FileHadoop {
 	
 	/**
 	 * 根据文件产生一个流
-	 * @param overwrite  false：如果文件存在，则返回nulll
+	 * @param overwrite  false：如果文件不存在，则返回nulll
 	 * @return
 	 */
 	public FSDataOutputStream getOutputStreamNew(boolean overwrite) {
