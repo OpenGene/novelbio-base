@@ -22,8 +22,7 @@ public class Rplot {
 	 */
 	public static void plotHist(Collection<? extends Number> data,double min,double max,String mainTitle,String xTitle,String yTitle,String resultPath,String resultPrix) throws Exception {
 		//写入数据
-		TxtReadandWrite txtR = new TxtReadandWrite();
-		txtR.setParameter(getRDensityData(), true, false);
+		TxtReadandWrite txtR = new TxtReadandWrite(getRDensityData(), true);
 		if (min < max) {
 			for (Number d : data) {
 				if (d.doubleValue() >=min && d.doubleValue() <=max) {
@@ -36,8 +35,7 @@ public class Rplot {
 			}
 		}
 		txtR.close();
-		TxtReadandWrite txtTitle = new TxtReadandWrite();
-		txtTitle.setParameter(getRDensityParam(), true, false);
+		TxtReadandWrite txtTitle = new TxtReadandWrite(getRDensityParam(), true);
 		txtTitle.writefile(mainTitle+"\n");
 		txtTitle.writefile(xTitle+"\n");
 		txtTitle.writefile(yTitle);
@@ -59,8 +57,7 @@ public class Rplot {
 	 */
 	public static void plotHist(double[] data,double min,double max,String mainTitle,String xTitle,String yTitle,String resultPath,String resultPrix) throws Exception {
 		//写入数据
-		TxtReadandWrite txtR = new TxtReadandWrite();
-		txtR.setParameter(getRDensityData(), true, false);
+		TxtReadandWrite txtR = new TxtReadandWrite(getRDensityData(), true);
 		if (min < max) {
 			for (double d : data) {
 				if (d>=min && d <=max) {
@@ -74,8 +71,7 @@ public class Rplot {
 			}
 		}
 		txtR.close();
-		TxtReadandWrite txtTitle = new TxtReadandWrite();
-		txtTitle.setParameter(getRDensityParam(), true, false);
+		TxtReadandWrite txtTitle = new TxtReadandWrite(getRDensityParam(), true);
 		txtTitle.writefile(mainTitle+"\n");
 		txtTitle.writefile(xTitle+"\n");
 		txtTitle.writefile(yTitle);
