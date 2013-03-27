@@ -79,7 +79,6 @@ public class GraphicCope {
 		}
 		return img;
 	}
-	/** */
 	/**
 	 * 水平翻转图像
 	 * 

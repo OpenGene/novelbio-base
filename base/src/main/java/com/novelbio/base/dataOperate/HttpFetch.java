@@ -42,6 +42,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.CookiePolicy;
 import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.ManagedClientConnection;
 import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
@@ -83,19 +84,6 @@ public class HttpFetch {
 	private final static int BUFFER = 1024;
 	
 	static PoolingClientConnectionManager cm;
-	static {
-		SchemeRegistry schemeRegistry = new SchemeRegistry();
-		schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-		schemeRegistry.register(new Scheme("https", 443, SSLSocketFactory.getSocketFactory()));
-		cm = new PoolingClientConnectionManager(schemeRegistry);
-		// Increase max total connection to 200
-		cm.setMaxTotal(20);//setMaxTotalConnections(200);
-		// Increase default max connection per route to 20
-		cm.setDefaultMaxPerRoute(10);
-		// Increase max connections for localhost:80 to 50
-		HttpHost localhost = new HttpHost("locahost", 80);
-		cm.setMaxPerRoute(new HttpRoute(localhost), 50);
-	}
 	
 	ArrayList<BasicHeader> lsHeaders = new ArrayList<BasicHeader>();
 	
@@ -148,6 +136,7 @@ public class HttpFetch {
 			this.httpclient = httpClient;
 			return;
 		}
+		initialCM();
 		httpclient = new DefaultHttpClient(cm);
 		//设定重试
 		httpclient.setHttpRequestRetryHandler(new MyRetryHandler());
@@ -179,6 +168,23 @@ public class HttpFetch {
 				 return isRedirect;
 			 }
 		 });
+	}
+	private static PoolingClientConnectionManager initialCM(){
+		if (cm == null) {
+			SchemeRegistry schemeRegistry = new SchemeRegistry();
+			schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
+			schemeRegistry.register(new Scheme("https", 443, SSLSocketFactory.getSocketFactory()));
+			cm = new PoolingClientConnectionManager(schemeRegistry);
+			// Increase max total connection to 200
+			cm.setMaxTotal(20);//setMaxTotalConnections(200);
+			// Increase default max connection per route to 20
+			cm.setDefaultMaxPerRoute(10);
+			// Increase max connections for localhost:80 to 50
+			HttpHost localhost = new HttpHost("locahost", 80);
+			cm.setMaxPerRoute(new HttpRoute(localhost), 50);
+		}
+		return cm;
+	
 	}
 	private void setHeader() {
 		lsHeaders.clear();
@@ -465,9 +471,23 @@ public class HttpFetch {
 		try { httpRequest.abort(); } catch (Exception e) { }
 	}
 	
+	/**
+	 * 释放连接
+	 */
+	public void relaseConnection() {
+		closeStream();
+	}
+	
 	public void close() {
 		closeStream();
-		try { httpclient.getConnectionManager().shutdown(); } catch (Exception e) { }
+		try { cm.shutdown(); } catch (Exception e) { }
+		cm = null;
+	}
+	public static void ressetCM() {
+		if (cm != null) {
+			cm.shutdown();
+		}
+		cm = null;
 	}
 	/** html解码还很薄弱 */
 	public static String decode(String inputUrl) {
