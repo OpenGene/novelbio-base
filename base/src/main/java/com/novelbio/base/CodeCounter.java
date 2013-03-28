@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 
 import com.novelbio.base.dataOperate.TxtReadandWrite;
-import com.novelbio.project.fy.Script;
 
 public class CodeCounter {
 	public static void main(String[] args) {

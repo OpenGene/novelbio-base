@@ -1,6 +1,5 @@
 package com.novelbio.base.dataStructure.listOperate;
 
-import com.novelbio.analysis.seq.genome.gffOperate.ListDetailBin;
 
 /**
  * 频率直方图的每个bin

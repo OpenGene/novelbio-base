@@ -4,8 +4,6 @@ import java.util.AbstractQueue;
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import com.novelbio.analysis.seq.fastq.FastQRecord;
-import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.multithread.RunProcess;
 
 /** 多线程中一个线程读取文件<br>

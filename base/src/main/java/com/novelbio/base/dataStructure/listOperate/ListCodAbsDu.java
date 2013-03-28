@@ -6,7 +6,6 @@ import java.util.Hashtable;
 import org.apache.commons.math.stat.descriptive.moment.ThirdMoment;
 //import org.apache.ibatis.migration.commands.NewCommand;
 
-import com.novelbio.analysis.seq.genome.gffOperate.GffDetailGene;
 
 /**
  * 双坐标

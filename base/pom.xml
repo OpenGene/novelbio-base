@@ -461,11 +461,6 @@
 		</dependency>
 		<dependency>
 			<groupId>com.novelbio</groupId>
-			<artifactId>NovelBio_Platform</artifactId>
-			<version>1.0.7</version>
-		</dependency>
-		<dependency>
-			<groupId>com.novelbio</groupId>
 			<artifactId>ftp4j</artifactId>
 			<version>1.7.2</version>
 		</dependency>
