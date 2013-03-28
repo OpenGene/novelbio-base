@@ -6,8 +6,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
-
-import com.novelbio.database.model.modgeneid.GeneID;
 /**
  * 考虑将其拆分成为三个不同的list，一个cis，一个trans，一个null
  * @author zong0jie
@@ -305,10 +303,35 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 			ArrayList<String> ss = ele.getName();
 			for (String string : ss) {
 				mapName2DetailAbs.put(string.toLowerCase(), ele);
-				mapName2DetailAbs.put(GeneID.removeDot(string.toLowerCase()), ele);
+				mapName2DetailAbs.put(removeDot(string.toLowerCase()), ele);
 			}
 		}
 		return mapName2DetailAbs;
+	}
+	/**
+	 *  首先除去空格，如果为""或“-”
+	 *  则返回null
+	 * 如果类似XM_002121.1类型，那么将.1去除
+	 * @param accID
+	 * @return accID without .1
+	 */
+	public static String removeDot(String accID) {
+		if (accID == null) {
+			return null;
+		}
+		String tmpGeneID = accID.replace("\"", "").trim();
+		if (tmpGeneID.equals("") || accID.equals("-")) {
+			return null;
+		}
+		int dotIndex = tmpGeneID.lastIndexOf(".");
+		//如果类似XM_002121.1类型
+		if (dotIndex>0 && tmpGeneID.length() - dotIndex <= 3) {
+			String subIndex = tmpGeneID.substring(dotIndex + 1, tmpGeneID.length());
+			try {
+				tmpGeneID = tmpGeneID.substring(0,dotIndex);
+			} catch (Exception e) { }
+		}
+		return tmpGeneID;
 	}
 	/**
 	 * 返回本ListAbs中的所有string名字

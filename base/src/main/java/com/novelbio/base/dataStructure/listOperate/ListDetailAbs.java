@@ -4,9 +4,8 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 
-import com.novelbio.analysis.seq.genome.gffOperate.GffGeneIsoInfo;
+import com.novelbio.base.SepSign;
 import com.novelbio.base.dataStructure.Alignment;
-import com.novelbio.database.domain.geneanno.SepSign;
 
 /**
  * compare的比较取决于父节点的方向，如果父节点的方向为null，则按照绝对值排序，如果是cis，那么就按cis的排序，如果为trans就按照trans的方式排序

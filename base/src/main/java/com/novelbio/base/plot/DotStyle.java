@@ -8,9 +8,6 @@ import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
-import java.util.HashMap;
-
-import de.erichseifert.gral.util.GraphicsUtils;
 
 /**
  * 将数据的点分成几块，每一块都标记不同的颜色和点的样式
