@@ -9,6 +9,8 @@ import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 
+import de.erichseifert.gral.util.GraphicsUtils;
+
 /**
  * 将数据的点分成几块，每一块都标记不同的颜色和点的样式
  * 重写了equal但是没有重写hash
