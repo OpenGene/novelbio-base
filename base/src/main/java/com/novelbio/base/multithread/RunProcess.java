@@ -65,14 +65,14 @@ public abstract class RunProcess<T> implements Runnable {
 		flagStop = false;
 		try {
 			running();
+			flagFinish = true;
 		} catch (Exception e) {
 			//TODO 看是否能在runGetInfo中添加一个运行失败的处理方法
 			e.printStackTrace();
 			flagFinish = false;
-			flagStop = true;
 		}
 		
-		flagFinish = true;
+	
 		flagStop = true;
 		if (runGetInfo != null) {
 			runGetInfo.done(this);
