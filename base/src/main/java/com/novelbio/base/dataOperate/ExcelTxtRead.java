@@ -67,37 +67,23 @@ public class ExcelTxtRead {
 	}
 	
 	/**
-	 * 内部close
-	 * 给定文件，xls2003/2007/txt，获得它们的信息，用arraylist-string[]保存
-	 * @param File 文件名
-	 * @param firstlinels1 从第几行开始读去，实际行数
-	 * @param sep 如果是txt的话，间隔是什么
+	 * 读文件返回一个List<List<String>>
+	 * @param excelFile 读入文件
+	 * @param firstlinels1 第几行开始读
 	 * @return
-	 * @throws Exception
 	 */
-	public static ArrayList<String[]> readLsExcelTxt(String excelFile,int firstlinels1) {
-		ArrayList<String[]> ls1=null;
-		if (ExcelOperate.isExcel(excelFile)) {
-			ExcelOperate excel = new ExcelOperate(excelFile);
-			ls1 = excel.ReadLsExcel(firstlinels1, 1, excel.getRowCount(), excel.getColCount());
-			excel.Close();
-			return ls1;
-		}
-		TxtReadandWrite txt = new TxtReadandWrite(excelFile, false);
-		int txtRowNum = txt.ExcelRows();
-		ls1 = txt.ExcelRead(firstlinels1, 1, txtRowNum , -1, 0);//从目标行读取
-		return ls1;
+	public static List<List<String>> readLsExcelTxtls(String excelFile, int firstlinels1) {
+		return readLsExcelTxtls(excelFile, 0, firstlinels1);
 	}
-	
 	/**
 	 * 读文件返回一个List<List<String>>
 	 * @param excelFile 读入文件
 	 * @param firstlinels1 第几行开始读
 	 * @return
 	 */
-	public static List<List<String>> readLsExcelTxtls(String excelFile,int firstlinels1) {
+	public static List<List<String>> readLsExcelTxtls(String excelFile, int sheetNum, int firstlinels1) {
 		List<List<String>> lsls = new ArrayList<List<String>>();
-		ArrayList<String[]> lsStrs = readLsExcelTxt( excelFile, firstlinels1);
+		ArrayList<String[]> lsStrs = readLsExcelTxt( excelFile, sheetNum, firstlinels1);
 		for (String[] strings : lsStrs) {
 			List<String> oneLineList = new ArrayList<String>();
 			for (String string : strings) {
@@ -108,6 +94,43 @@ public class ExcelTxtRead {
 		return lsls;
 	}
 	
+	/**
+	 * 内部close
+	 * 给定文件，xls2003/2007/txt，获得它们的信息，用arraylist-string[]保存
+	 * @param File 文件名
+	 * @param firstlinels1 从第几行开始读去，实际行数
+	 * @param sep 如果是txt的话，间隔是什么
+	 * @return
+	 * @throws Exception
+	 */
+	public static ArrayList<String[]> readLsExcelTxt(String excelFile,int firstlinels1) {
+		return readLsExcelTxt(excelFile, 0, firstlinels1);
+	}
+	
+	/**
+	 * 内部close
+	 * 给定文件，xls2003/2007/txt，获得它们的信息，用arraylist-string[]保存
+	 * @param File 文件名
+	 * @param firstlinels1 从第几行开始读去，实际行数
+	 * @param sep 如果是txt的话，间隔是什么
+	 * @return
+	 * @throws Exception
+	 */
+	public static ArrayList<String[]> readLsExcelTxt(String excelFile, int sheetNum, int firstlinels1) {
+		ArrayList<String[]> ls1=null;
+		if (ExcelOperate.isExcel(excelFile)) {
+			ExcelOperate excel = new ExcelOperate(excelFile);
+			ls1 = excel.ReadLsExcel(sheetNum, firstlinels1, 1, excel.getRowCount(), excel.getColCount());
+			excel.Close();
+			return ls1;
+		}
+		TxtReadandWrite txt = new TxtReadandWrite(excelFile, false);
+		int txtRowNum = txt.ExcelRows();
+		ls1 = txt.ExcelRead(firstlinels1, 1, txtRowNum , -1, 0);//从目标行读取
+		txt.close();
+		return ls1;
+	}
+
 	/**
 	 * 用readLsExcelTxtFile代替
 	 * 给定文件，xls2003/2007/txt，获得它们的信息，用arraylist-string[]保存
