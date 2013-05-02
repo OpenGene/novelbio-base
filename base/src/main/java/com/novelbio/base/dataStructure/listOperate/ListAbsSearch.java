@@ -17,7 +17,11 @@ public abstract class ListAbsSearch <E extends ListDetailAbs, T extends ListCodA
 		if (coordLocationInfo == null) {
 			return null;
 		}
-		T gffCod = creatGffCod(listName, Coordinate);
+		String refID = "";
+		if (listName == null) {
+			refID = getName();
+		}
+		T gffCod = creatGffCod(refID, Coordinate);
 		if (coordLocationInfo.isInsideElement()) {
 			gffCod.setGffDetailThis( get(coordLocationInfo.getElementNumThisElementFrom0() ) ); 
 			gffCod.booFindCod = true;

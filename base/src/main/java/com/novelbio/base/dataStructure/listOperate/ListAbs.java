@@ -202,6 +202,7 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 		return -Math.abs(distance);
 	}
 	/**
+	 * <b>结果恒大于0</b><br>
 	 * 必须首先设定ListAbs的方向，并且该方向和其内部的element的方向要一致
 	 * 坐标到element 起点距离，如果重叠则为0
 	 * @param location 坐标
@@ -234,6 +235,7 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 	}
 
 	/**
+	 * <b>结果恒大于0</b><br>
 	 * 坐标到element 终点距离，当重叠时，为0
 	 * @param location 坐标
 	 */

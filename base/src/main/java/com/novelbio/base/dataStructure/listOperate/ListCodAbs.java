@@ -12,7 +12,7 @@ public class ListCodAbs<T extends ListDetailAbs> {
 	/** 所有坐标的起始信息  */
 	public static final int LOC_ORIGINAL = -1000000000;
 	String chrID = "";
-	int Coordinate = -1;
+	protected int Coordinate = -1;
 	/**  坐标是否查到 查找到/没找到  */
 	protected boolean booFindCod = false;
 	/** 上个条目在ChrHash-list中的编号，从0开始，<b>如果上个条目不存在，则为-1*/

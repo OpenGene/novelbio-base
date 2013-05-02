@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.util.ResourceBundle;
 
 /**
+ * 感觉不准
  * <p>Title: BufferedRandomAccessFile</p>
  * <p>Description: this class provide Buffered Read & Write by extend RandomAccessFile</p>
  * <p>Copyright: Copyright (c) 2002 Cui Zhixiang </p>
