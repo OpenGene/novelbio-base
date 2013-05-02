@@ -39,6 +39,9 @@ public class PathDetail {
 			}
 			mapID2Path.put(ss[0], ss[1]);
 		}
+		if (mapID2Path.containsKey("TMPpath")) {
+			setTmpDir(mapID2Path.get("TMPpath"));
+		}
 	}
 	/** 返回jar所在的路径 */
 	public static String getProjectPath() {

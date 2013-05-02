@@ -18,7 +18,7 @@ import javax.swing.JComboBox;
  * @author zong0jie
  *
  */
-public class JComboBoxData<T> extends JComboBox{
+public class JComboBoxData<T> extends JComboBox {
 	private static final long serialVersionUID = -1651148386751801706L;
 	/**
 	 * 保存key和value的map

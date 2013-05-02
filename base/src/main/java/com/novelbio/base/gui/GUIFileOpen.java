@@ -67,6 +67,7 @@ public class GUIFileOpen  extends JFrame {
 		return null;
 	}
 	/**
+	 * 可以同时打开文件和Fold
 	 * 打开文本选择器
 	 * @param description 如"txt/excel 2003"
 	 * @param extensions 如 "txt","xls" 如果不设定--譬如null，""，"*"，就显示全部文件
@@ -75,6 +76,7 @@ public class GUIFileOpen  extends JFrame {
 	public ArrayList<String> openLsFileName(String  description, String... extensions) {
 		ArrayList<String> lsResult = new ArrayList<String>();
 		JFileChooser chooser = new JFileChooser();
+		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		String[] extensionFinal = filterExtension(extensions);
 		if (extensionFinal != null) {
 			FileNameExtensionFilter filter = new FileNameExtensionFilter(description, extensionFinal);
