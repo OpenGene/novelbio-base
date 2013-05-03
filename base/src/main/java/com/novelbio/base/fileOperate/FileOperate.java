@@ -1082,7 +1082,7 @@ public class FileOperate {
 	 * @return
 	 */
 	public static boolean isFileExistAndBigThanSize(String fileName, double size) {
-		if (isFileExist(fileName) && getFileSize(fileName) >= size) {
+		if (isFileExist(fileName) && getFileSize(fileName) > size) {
 			return true;
 		}
 		return false;

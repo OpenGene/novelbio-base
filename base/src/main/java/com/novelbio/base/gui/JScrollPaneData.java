@@ -136,6 +136,9 @@ public class JScrollPaneData extends JScrollPane{
 	 */
 	public ArrayList<String[]> getLsDataInfo() {
 		ArrayList<String[]> lsResult = new ArrayList<String[]>();
+		if (defaultTableModel == null) {
+			return new ArrayList<String[]>();
+		}
 		for (int i = 0; i < defaultTableModel.getRowCount(); i++) {
 			String[] tmpResult = new String[defaultTableModel.getColumnCount()];
 			for (int j = 0; j < defaultTableModel.getColumnCount(); j++) {
