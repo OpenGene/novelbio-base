@@ -1,6 +1,8 @@
 package com.novelbio.base.dataStructure.listOperate;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -41,7 +43,7 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 	 * CpG：107_chr1_CpG_36568608: 27 其中107是CpG gff文件中的索引,36568608是该CpG在染色体上的起点
 	 * peak: peak起点_peak终点
 	 */
-	protected ArrayList<String> lsItemName = new ArrayList<String>(); //loc name
+	protected Set<String> setItemName = new LinkedHashSet<String>(); //loc name
 	/**  染色体编号，都小写 */
 	protected String parentName="";
 	/** 转录方向，假设同一基因不管多少转录本都同一转录方向 */
@@ -76,7 +78,7 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 		if (chrID != null) {
 			this.parentName = chrID;
 		}
-		this.lsItemName.add(ItemName);
+		this.setItemName.add(ItemName);
 		this.cis5to3 = cis5to3;
 	}
 	/**
@@ -88,7 +90,7 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 	public ListDetailAbs(ListAbs<? extends ListDetailAbs> listAbs, String ItemName, Boolean cis5to3) {
 		this.listAbs = listAbs;
 		this.parentName = listAbs.getName();
-		this.lsItemName.add(ItemName);
+		this.setItemName.add(ItemName);
 		this.cis5to3 = cis5to3;
 	}
 	public void setParentListAbs(ListAbs<? extends ListDetailAbs> listAbs) {
@@ -186,14 +188,14 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 	 * peak: peak起点_peak终点
      */
 	public String getNameSingle() {
-		if (lsItemName.size() == 0) {
+		if (setItemName.size() == 0) {
 			return null;
 		}
-		return this.lsItemName.get(0);
+		return this.setItemName.iterator().next();
 	}
 	/** 全体item的名字 */
 	public ArrayList<String > getName() {
-		return this.lsItemName;
+		return new ArrayList<String>(setItemName);
 	}
     /**
  	 * LOCID，<br>
@@ -204,7 +206,7 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 	 * peak: peak起点_peak终点
      */
 	public void addItemName(String itemName) {
-		this.lsItemName.add(itemName);
+		this.setItemName.add(itemName);
 	}
 	/**
 	 * 染色体编号等信息，父ID
@@ -454,7 +456,10 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 			result.cis5to3 = cis5to3;
 			result.downGeneEnd3UTR = downGeneEnd3UTR;
 			result.downTss = downTss;
-			result.lsItemName = (ArrayList<String>) lsItemName.clone();
+			result.setItemName = new LinkedHashSet<String>();
+			for (String itemName : setItemName) {
+				result.setItemName.add(itemName);
+			}
 //			result.itemNum = itemNum;
 			result.readsInElementNumber = readsInElementNumber;
 			result.numberend = numberend;

@@ -78,6 +78,7 @@ public class ExcelTxtRead {
 	/**
 	 * 读文件返回一个List<List<String>>
 	 * @param excelFile 读入文件
+	 * @param sheetNum 实际sheet数
 	 * @param firstlinels1 第几行开始读
 	 * @return
 	 */
@@ -93,7 +94,24 @@ public class ExcelTxtRead {
 		}
 		return lsls;
 	}
-	
+	/**
+	 * 读文件返回一个List<List<String>>
+	 * @param excelFile 读入文件
+	 * @param firstlinels1 第几行开始读
+	 * @return
+	 */
+	public static List<List<String>> readLsExcelTxtls(String excelFile, int sheetNum, int firstlinels1, int lastlins) {
+		List<List<String>> lsls = new ArrayList<List<String>>();
+		ArrayList<String[]> lsStrs = readLsExcelTxtFile(excelFile, firstlinels1, 0, lastlins, 0);
+		for (String[] strings : lsStrs) {
+			List<String> oneLineList = new ArrayList<String>();
+			for (String string : strings) {
+				oneLineList.add(string);
+			}
+			lsls.add(oneLineList);
+		}
+		return lsls;
+	}
 	/**
 	 * 内部close
 	 * 给定文件，xls2003/2007/txt，获得它们的信息，用arraylist-string[]保存
@@ -124,7 +142,7 @@ public class ExcelTxtRead {
 			excel.Close();
 			return ls1;
 		}
-		TxtReadandWrite txt = new TxtReadandWrite(excelFile, false);
+		TxtReadandWrite txt = new TxtReadandWrite(excelFile);
 		int txtRowNum = txt.ExcelRows();
 		ls1 = txt.ExcelRead(firstlinels1, 1, txtRowNum , -1, 0);//从目标行读取
 		txt.close();
@@ -166,10 +184,22 @@ public class ExcelTxtRead {
 	 * @return
 	 */
 	public static ArrayList<String[]> readLsExcelTxtFile(String excelFile,int rowStart, int colStart, int rowEnd, int colEnd) {
+		return readLsExcelTxtFile(excelFile, 1, rowStart, colStart, rowEnd, colEnd);
+	}
+	/**
+	 * 给定文件，xls2003/2007/txt，获得它们的信息，用arraylist-string[]保存
+	 * @param excelFile
+	 * @param rowStart
+	 * @param colStart
+	 * @param rowEnd 值小于等于0时，读取全部行
+	 * @param colEnd 值小于等于0时，读取全部列
+	 * @return
+	 */
+	public static ArrayList<String[]> readLsExcelTxtFile(String excelFile, int sheetNum, int rowStart, int colStart, int rowEnd, int colEnd) {
 		ArrayList<String[]> ls1=null;
 		if (ExcelOperate.isExcel(excelFile)) {
 			ExcelOperate excel = new ExcelOperate(excelFile);
-			ls1 = excel.ReadLsExcel(rowStart, colStart, rowEnd, colEnd);
+			ls1 = excel.ReadLsExcel(sheetNum, rowStart, colStart, rowEnd, colEnd);
 			excel.Close();
 			return ls1;
 		}

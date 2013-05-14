@@ -20,7 +20,7 @@ import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
 import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 
-public class TxtWrite implements Closeable {
+class TxtWrite implements Closeable {
 	private static Logger logger = Logger.getLogger(TxtReadandWrite.class);
 		
 	String txtfile;

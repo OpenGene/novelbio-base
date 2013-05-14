@@ -357,6 +357,12 @@ public class ExcelOperate {
 			columnEndNum = getColCountSheet(sheetNum);
 		 
 		sheetNum--;rowStartNum--;columnStartNum--;rowEndNum--;columnEndNum--;
+		if (rowStartNum <= 0) {
+			rowStartNum = 0;
+		}
+		if (columnStartNum <= 0) {
+			columnStartNum = 0;
+		}
 		
 		if (sheetNum < 0)
 			sheetNum = wb.getSheetIndex(sheet);

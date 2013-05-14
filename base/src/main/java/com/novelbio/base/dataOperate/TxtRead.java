@@ -3,7 +3,6 @@ package com.novelbio.base.dataOperate;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.Closeable;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,11 +22,10 @@ import org.apache.log4j.Logger;
 
 import com.novelbio.base.dataOperate.TxtReadandWrite.PlatForm;
 import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
-import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.dataStructure.PatternOperate;
 import com.novelbio.base.fileOperate.FileHadoop;
 
-public class TxtRead implements Closeable {
+class TxtRead implements Closeable {
 	private static final Logger logger = Logger.getLogger(TxtRead.class);
 	
 	/** 读取本地文件时设定 */

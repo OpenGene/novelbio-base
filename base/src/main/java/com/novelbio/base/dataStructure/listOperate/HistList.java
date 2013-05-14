@@ -75,7 +75,7 @@ public abstract class HistList extends ListAbsSearch<HistBin, ListCodAbs<HistBin
 	}
 	
 	/**
-	 * 自动设置histlist的bin，每隔interval设置一位，名字就起interval
+	 * 自动设置histlist的bin，从0开始，每隔interval设置一位，名字就起interval
 	 * @param histList
 	 * @param binNum bin的个数
 	 * @param interval 间隔
@@ -332,6 +332,38 @@ public abstract class HistList extends ListAbsSearch<HistBin, ListCodAbs<HistBin
  		return lsXY;
 	}
 
+	/**
+	 * 积分值
+	 * @param cis true：从前往后，就是最前面是10%，越往后越高
+	 * false：从后往前，就是最前面是100%，越往后越低
+	 * @reture 0: 求和 1:积分的prop
+	 */
+	public double[] getIntegral(int Num, boolean cis) {
+		double thisNum = 0;
+		double thisIntergralProp = 0;
+		if (cis) {
+			for (int count = 0; count < size(); count++) {
+				HistBin histBin = get(count);
+				//TODO 没有考虑左开右闭和左闭右开
+				if (histBin.getStartAbs() >= Num) {
+					break;
+				}
+				thisNum = thisNum + histBin.getCountNumber();
+			}
+			thisIntergralProp = thisNum/allNum;
+		} else {
+			for (int count = size() - 1; count >= 0; count--) {
+				HistBin histBin = get(count);
+				if (histBin.getEndAbs() < Num) {
+					break;
+				}
+				thisNum = thisNum + histBin.getCountNumber();
+				thisIntergralProp = thisNum/allNum;
+			}
+		}
+ 		return new double[]{thisNum, thisIntergralProp};
+	}
+	
 	/**
 	 * @param name hist的名字，务必不能重复，否则hash表会有冲突
 	 * @param cisList true 从小到大排序的list。 false 从大到小排序的list

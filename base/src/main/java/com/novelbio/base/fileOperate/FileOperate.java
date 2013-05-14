@@ -185,7 +185,7 @@ public class FileOperate {
 	}
 
 	/**
-	 * <b>未经测试</b> 给定文件路径，返回大小，单位为K
+	 * <b>未经测试</b> 给定文件路径，返回大小，单位为byte
 	 * 
 	 * @param filePath
 	 * @return 没有文件返回0；出错返回-1000000000
@@ -197,7 +197,7 @@ public class FileOperate {
 			return 0;
 		}
 		if (file.isFile()) {
-			return file.length()/1024;
+			return file.length();
 		} else if (file.isDirectory()) {
 			ArrayList<String[]> lsFileName = getFoldFileName(filePath);
 
@@ -1078,11 +1078,11 @@ public class FileOperate {
 	 * @param fileName
 	 *            如果为null, 直接返回false
 	 * @param size
-	 *            大小 K为单位
+	 *            大小 byte为单位
 	 * @return
 	 */
 	public static boolean isFileExistAndBigThanSize(String fileName, double size) {
-		if (isFileExist(fileName) && getFileSize(fileName) > size) {
+		if (isFileExist(fileName) && getFileSizeLong(fileName) > size) {
 			return true;
 		}
 		return false;
