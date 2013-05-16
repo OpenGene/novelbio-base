@@ -125,14 +125,14 @@ public class Equations {
 	}
 	
 	/**
+	 * <b>仅用于test</b>
 	 * 指定上一个点和下一个点的坐标，给定两点之间的x值，计算该点的Y值
 	 * @param upXY
 	 * @param downXY
 	 * @param X
 	 * @return
 	 */
-	private double getYinside(double[] upXY, double[] downXY, double x)
-	{
+	public double getYinside(double[] upXY, double[] downXY, double x) {
 		double x1 = upXY[0]; double  y1 = upXY[1];
 		double x2 = downXY[0]; double y2 = downXY[1];
 		if (x1 == x2) {
