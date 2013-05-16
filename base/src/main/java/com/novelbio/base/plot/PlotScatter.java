@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -178,8 +179,9 @@ public class PlotScatter extends PlotNBCInteractive{
 		} else {
 			dataTable = hashDataTable.get(dotStyle);
 		}
+    	Iterator<? extends Number> itY = lsY.iterator();
     	for (Number numberX : lsX) {
-			Number numberY = lsY.iterator().next();
+			Number numberY = itY.next();
 			dataTable.add(numberX.doubleValue(), numberY.doubleValue(), dotStyle.getName());
     	}
     }

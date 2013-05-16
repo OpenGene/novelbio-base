@@ -29,7 +29,7 @@ public class BarStyle extends DotStyle {
 	 */
 	public void setBarAndStrokeWidth(double barWidth) {
 		this.barWidth = barWidth;
-		this.basicStroke = new BasicStroke(3f);
+		this.basicStroke = new BasicStroke((float)(barWidth*0.2));
 	}
 
 	/**
