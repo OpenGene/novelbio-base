@@ -1,6 +1,5 @@
 package com.novelbio.base.plot;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -37,34 +36,56 @@ import de.erichseifert.gral.plots.points.DefaultPointRenderer2D;
 import de.erichseifert.gral.plots.points.PointRenderer;
 import de.erichseifert.gral.util.Insets2D;
 import de.erichseifert.gral.util.Orientation;
-
+/**
+ * 绘制工具<br>
+ * 步骤1、设置参数，调用各种set方法<br>
+ * 步骤2、用add**方法传入点参数<br>
+ * 步骤3、用save**方法保存图表
+ * @author novelbio
+ *
+ */
 public class PlotScatter extends PlotNBCInteractive{
+	/** 类型，绘制条形图 */
 	public static final int PLOT_TYPE_BARPLOT = 1;
+	/** 类型，绘制盒形图 */
 	public static final int PLOT_TYPE_BOXPLOT = 2;
+	/** 类型，绘制散点图 */
 	public static final int PLOT_TYPE_SCATTERPLOT = 3;
 	
+	/** 外框尺寸　小尺寸 */
     public static final int INSETS_SIZE_S = 100;
+    /** 外框尺寸　中小尺寸 */
     public static final int INSETS_SIZE_SM = 200;
+    /** 外框尺寸　中尺寸 */
     public static final int INSETS_SIZE_M = 300;
+    /** 外框尺寸　中大尺寸 */
     public static final int INSETS_SIZE_ML = 400;
+    /** 外框尺寸　大尺寸 */
     public static final int INSETS_SIZE_L = 500;
     
     private static final Logger logger = Logger.getLogger(PlotScatter.class);
     
-	HashMap<DotStyle, DataTable> hashDataTable = new HashMap<DotStyle, DataTable>();
 	
-	XYPlot plot;
+	/** 标题 title图表总标题  titleX　x轴下的标题　titleY y轴侧的标题*/
 	String title = null, titleX = null, titleY = null;
+    /** 坐标轴的title到坐标轴的距离 */
+    double inset = 5, insetsX = 5, insetsY = 5;
+	/** 标题的字体 */
+    Font fontTitle = new Font(Font.SANS_SERIF, Font.PLAIN, 15), fontTitleX = null, fontTitleY = null;
+    /** 标题文字的旋转度 */
+    Number fontTitleXRotation = null,fontTitleYRotation = null;
+   
+    
+    /** xy轴的样式参数 Double指xy轴上的刻度位置，String此刻度的说明 */
+    Map<Double, String> mapAxisX = null,mapAxisY = null;
+    /** xy轴上的刻度下的文字字体 */
+    Font fontTicksX = null,fontTicksY = null;
+    /** 刻度之间的距离 */
 	Double spaceX = null, spaceY = null;
-    Font fontTitle = new Font(Font.SANS_SERIF, Font.PLAIN, 15), fontX = null, fontY = null;
-    int InsetsSize = 200;
-
-    /** custom axis X's ticks */
-    Map<Double, String> mapAxisX = null;
-    Font fontTicksX = null;
-    /** custom axis Y's ticks */
-    Map<Double, String> mapAxisY = null;
-    Font fontTicksY = null;
+    /** xy轴上的刻度文字的旋转度 */
+    Number fontTicksXRotation = null,fontTicksYRotation = null;
+    
+    
     /** 坐标轴边界 */
     Axis axisX = null, axisY = null;
     /**内部坐标轴边界，如果外部没有设定坐标轴边界，就用内部的 */
@@ -74,17 +95,26 @@ public class PlotScatter extends PlotNBCInteractive{
      * 图片坐标轴到图片边缘的距离
      */
     double insetsTop = 30, insetsLeft = 90, insetsBottom = 70, insetsRight = 40;
-    /** 坐标轴的title到坐标轴的距离 */
-    double insetsX = 5, insetsY = 5;
-    
-    DataTable dataTable;
-    //背景是否画成格子的
+    /** 默认尺寸 */
+    int InsetsSize = PlotScatter.INSETS_SIZE_SM;
+    /** 背景是否画成格子的 */
     boolean isBGgrid = true;
+    /** 背景主色调 */
     Color colorBGgridMajor;
+    /** 背景次色调 */
     Color colorBGgridMinor;
     
+    
+    
+    /** 用来绘图的数据集合 */
+    DataTable dataTable;
+    /** 为dataTable中的点数据设置点的样式dotStyle */
+  	HashMap<DotStyle, DataTable> hashDataTable = new HashMap<DotStyle, DataTable>();
+  	/** 二维点坐标 */
+  	XYPlot plot;
+    
     /** 
-     * 哪一种图，是scatter还是盒图还是bar图
+     * 指定图形类型，如{@link PlotScatter#PLOT_TYPE_BARPLOT}等
      */
     public PlotScatter(int PLOT_TYPE) {
     	if (PLOT_TYPE == PLOT_TYPE_BARPLOT) {
@@ -107,9 +137,9 @@ public class PlotScatter extends PlotNBCInteractive{
     	this.colorBGgridMinor = colorBGgridMinor;
     }
     /**
-     * add point
-     * @param x
-     * @param y
+     * 添加点数据，xy坐标和点样式
+     * @param x　x坐标
+     * @param y	　y坐标
      * @param dotStyle 如果是不同名字的点，需要创建新的dotStyle，dotStyle仅按地址保存
      */
     public void addXY(double x, double y, DotStyle dotStyle) {
@@ -123,9 +153,9 @@ public class PlotScatter extends PlotNBCInteractive{
     	dataTable.add(x,y,dotStyle.getName());
     }
     /**
-     * add point array, x.length must equals y.length
-     * @param x
-     * @param y
+     * 添加点数据，xy坐标和点样式　x数组和y数组长度应该一样
+     * @param x　x坐标数组
+     * @param y	　y坐标数组
      * @param dotStyle 如果是不同名字的点，需要创建新的dotStyle，dotStyle仅按地址保存
      */
     public void addXY(double[] x, double[] y, DotStyle dotStyle) {
@@ -151,6 +181,11 @@ public class PlotScatter extends PlotNBCInteractive{
      * @param x
      * @param y
      */
+    /**
+     * 添加点数据，xy坐标和点样式　
+     * @param　lsXY　xy数组集合　double[0]: x坐标数组　double[1]: y坐标数组
+     * @param dotStyle 如果是不同名字的点，需要创建新的dotStyle，dotStyle仅按地址保存
+     */
     public void addXY(Collection<double[]> lsXY, DotStyle dotStyle) {
     	dataTable = new DataTable(Double.class, Double.class, String.class);
     	if (!hashDataTable.containsKey(dotStyle)) {
@@ -163,10 +198,10 @@ public class PlotScatter extends PlotNBCInteractive{
 		}
     }
     /**
-     * check the method
-     * add lsX, lsY
-     * @param x
-     * @param y
+     * 添加点数据，xy坐标和点样式　lsX集合和lsY集合长度应该一样
+     * @param lsX　x坐标集合
+     * @param lsY　y坐标集合
+     * @param dotStyle 如果是不同名字的点，需要创建新的dotStyle，dotStyle仅按地址保存
      */
     public void addXY(Collection<? extends Number> lsX, Collection<? extends Number> lsY, DotStyle dotStyle) {
     	if (lsX.size() != lsY.size()) {
@@ -185,6 +220,7 @@ public class PlotScatter extends PlotNBCInteractive{
 			dataTable.add(numberX.doubleValue(), numberY.doubleValue(), dotStyle.getName());
     	}
     }
+    
     /**
      * 除去加入的信息
      * @param dotStyle
@@ -218,7 +254,12 @@ public class PlotScatter extends PlotNBCInteractive{
     	logger.error("get3");
     	return dataTable;
     }
-   
+    
+    /**
+     * 把点集合dataTable加入到画图工具中
+     * @param dotStyle
+     * @param dataTable
+     */
     private void addPlot(DotStyle dotStyle, DataTable dataTable) {
 		hashDataTable.put(dotStyle, dataTable);
 		logger.error("get2");
@@ -234,6 +275,8 @@ public class PlotScatter extends PlotNBCInteractive{
 		}
 		setPointStyle(dataTable, dotStyle);
     }
+    
+    
     ////////////////////////////////////////////////////////////////
     /**
      * 以前用某个dotStyle设定的输入值(譬如一条曲线)，
@@ -245,11 +288,12 @@ public class PlotScatter extends PlotNBCInteractive{
 		setPointStyle(dataTable, dotStyle);
 	}
     /**
+     * 设置需要统计的数据
      * 待修正，将dataTable装入hash表中
-     * using data to plot the histogram
-     * @param lsNum data 
-     * @param breakNum Number of subdivisions for analysis.
-     * @param dotStyle
+	 *　直方图，统计点的分布情况
+     * @param lsNum 一组数据 
+     * @param breakNum 第隔多少算为一组
+     * @param dotStyle 点的样式
      */
     public void addHistData(Collection<? extends Number> lsNum, int breakNum, BarStyle dotStyle) {
     	DataTable dataTable = new DataTable(Double.class);
@@ -259,10 +303,12 @@ public class PlotScatter extends PlotNBCInteractive{
     	addHistData(dataTable, breakNum, dotStyle);
     }
     /**
-     * using data to plot the histogram
-     * @param lsNum data 
-     * @param breakNum Number of subdivisions for analysis.
-     * @param dotStyle
+     * 设置需要统计的数据
+     * 待修正，将dataTable装入hash表中
+	 *　直方图，统计点的分布情况
+     * @param lsNum 一组数据 
+     * @param breakNum 第隔多少算为一组
+     * @param dotStyle 点的样式
      */
     public void addHistData(double[] lsNum, int breakNum, BarStyle dotStyle) {
     	DataTable dataTable = new DataTable(Double.class);
@@ -322,6 +368,14 @@ public class PlotScatter extends PlotNBCInteractive{
     	setPointStyle(dataTable2, barStyle);
     }
     
+    /**
+     * 设置轴参数
+     * @param min
+     * @param max
+     * @param X
+     * @param extendRangeMin
+     * @param extendRangeMax
+     */
     private void setAxis(double min, double max, boolean X, double extendRangeMin, double extendRangeMax) {
     	Axis axis = null;
     	double range = Math.abs(max - min);
@@ -348,6 +402,7 @@ public class PlotScatter extends PlotNBCInteractive{
     	axisX = new Axis(x1, x2);
     	painted = false;
     }
+    
     /**
      * 设置标题
      * @param title main title
@@ -368,57 +423,156 @@ public class PlotScatter extends PlotNBCInteractive{
      * 设置标题
      * @param titleX tile on axis x
      * @param fontX font of the title 可以设定为null
-     * @param spaceX ticks interval, 0 means not set the space 可以设定为0
+     * @param distance 距离x轴的距离
+     * @param spaceX 坐标刻度的距离  可以设定为0为不设定
      */
-    public void setTitleX(String titleX, Font fontX, double spaceX)  {
+    @Deprecated
+    public void setTitleX(String titleX, Font fontTitleX, double spaceX)  {
     	if (titleX != null)
     		this.titleX = titleX;
-    	if (fontX != null)
-    		this.fontX = fontX;
+    	if (fontTitleX != null)
+    		this.fontTitleX = fontTitleX;
     	if (spaceX != 0)
     		this.spaceX = spaceX;
-    	
-    	painted = false;
+    	//painted = false;
     }
-    
     /**
      * 设置标题
      * @param titleY tile on axis y
      * @param fontY font of the title
      * @param spaceY ticks interval, 0 means not set the space
      */
-    public void setTitleY(String titleY, Font fontY, double spaceY)  {
+    @Deprecated
+    public void setTitleY(String titleY, Font fontTitleY, double spaceY)  {
     	if (titleY != null)
     		this.titleY = titleY;
-    	if (fontY != null)
-    		this.fontY = fontY;
+    	if (fontTitleY != null)
+    		this.fontTitleY = fontTitleY;
     	if (spaceY != 0)
     		this.spaceY = spaceY;
     }
+    /**
+     * 
+     * 设置x轴的标题
+     * @param titleX 标题内容
+     * @param fontX 标题字体 null为默认
+     * @param distance 标题距离x轴的距离
+     * @param fontTitleXRotation 标题的旋转角度
+     */
+    public void setTitleX(String titleX, Font fontTitleX,double distance, double spaceX,Number fontTitleXRotation)  {
+    	if (titleX != null)
+    		this.titleX = titleX;
+    	if (fontTitleX != null)
+    		this.fontTitleX = fontTitleX;
+    	if (distance != 0)
+    		this.insetsX = distance;
+    	if (spaceX != 0)
+    		this.spaceX = spaceX;
+    	if (fontTitleXRotation != null)
+    		this.fontTitleXRotation = fontTitleXRotation;
+    	painted = false;
+    }
     
+    /**
+     * 设置y轴的标题
+     * @param titleY 标题内容
+     * @param fontY 标题字体 null为默认
+     * @param distance 标题距离x轴的距离
+     * @param fontTitleYRotation 标题的旋转角度
+     */
+    public void setTitleY(String titleY, Font fontTitleY,double distance, Number fontTitleYRotation)  {
+    	if (titleY != null)
+    		this.titleY = titleY;
+    	if (fontTitleY != null)
+    		this.fontTitleY = fontTitleY;
+    	if (distance != 0)
+    		this.insetsY = distance;
+    	if (fontTitleYRotation != null)
+    		this.fontTitleYRotation = fontTitleYRotation;
+    	painted = false;
+    }
+    
+    
+    /** x轴的样式参数 Double指xy轴上的刻度位置，String此刻度的说明 */
     public void setAxisTicksXMap(Map<Double, String> mapTicks) {
     	if (mapTicks != null) {
     		this.mapAxisX = mapTicks;
 		}
     	painted = false;
 	}
+    /** x轴上的刻度下的文字字体 */
+    @Deprecated
     public void setAxisTicksXFont(Font fontTicks) {
 		if (fontTicks != null) {
 			this.fontTicksX = fontTicks;
 		}
 		painted = false;
-	}    
+	}
     
+    /** 
+     * x轴上的刻度下的文字字体
+     * @param fontTicks 字体样式
+     * @param spaceX 坐标刻度的距离  0为默认
+     * @param fontTicksXRotation字体旋转角度
+     */
+    public void setAxisTicksXFont(Font fontTicks,double spaceX,Number fontTicksXRotation) {
+		if (fontTicks != null) {
+			this.fontTicksX = fontTicks;
+		}
+		if(fontTicksXRotation != null){
+			this.fontTitleXRotation = fontTicksXRotation;
+		}
+		if (spaceX != 0)
+    		this.spaceX = spaceX;
+		painted = false;
+	}
+    /** 标题文字的旋转度 */
+    public void setFontTitleXRotation(Number fontTitleXRotation) {
+		this.fontTitleXRotation = fontTitleXRotation;
+	}
+    /** 标题文字的旋转度 */
+	public void setFontTitleYRotation(Number fontTitleYRotation) {
+		this.fontTitleYRotation = fontTitleYRotation;
+	}
+	/** x轴上的刻度文字的旋转度 */
+	public void setFontTicksXRotation(Number fontTicksXRotation) {
+		this.fontTicksXRotation = fontTicksXRotation;
+	}
+	/** y轴上的刻度文字的旋转度 */
+	public void setFontTicksYRotation(Number fontTicksYRotation) {
+		this.fontTicksYRotation = fontTicksYRotation;
+	}
+
+	/** y轴的样式参数 Double指xy轴上的刻度位置，String此刻度的说明 */
     public void setAxisTicksYMap(Map<Double, String> mapTicks) {
     	if (mapTicks != null) {
     		this.mapAxisY = mapTicks;
 		}
     	painted = false;
 	}
+    /** xy轴上的刻度下的文字字体 */
+    @Deprecated
     public void setAxisTicksYFont(Font fontTicks) {
 		if (fontTicks != null) {
 			this.fontTicksY = fontTicks;
 		}
+		painted = false;
+	}
+    /** 
+     * y轴上的刻度下的文字字体
+     * @param fontTicks 字体样式
+     * @param spaceY 坐标刻度的距离  0为默认
+     * @param fontTicksXRotation字体旋转角度
+     */
+    public void setAxisTicksYFont(Font fontTicks,double spaceY,Number fontTicksYRotation) {
+		if (fontTicks != null) {
+			this.fontTicksY = fontTicks;
+		}
+		if(fontTicksYRotation != null){
+			this.fontTitleYRotation = fontTicksYRotation;
+		}
+		if (spaceY != 0)
+    		this.spaceY = spaceY;
 		painted = false;
 	}
     /**
@@ -443,10 +597,11 @@ public class PlotScatter extends PlotNBCInteractive{
     	this.insetsBottom = bottom; this.insetsRight = right;
     	painted = false;
     }
+    
     /**
-     * set the marge size of a figure, the bigger the marge be, the font of the tile will also bigger
+     * 把所有参数都设定为一种默认标准<br>
      * 设定各个地方的字体，包括x，y轴的字体和刻度字体
-     * @param int size 
+     * @param size  例如{@link PlotSctter#INSETS_SIZE_S}
      */
     public void setInsets(int size) {
     	double insetsTop = 20, insetsLeft = 83, insetsBottom = 68, insetsRight = 40;
@@ -475,8 +630,8 @@ public class PlotScatter extends PlotNBCInteractive{
     	this.insetsTop = (insetsTop * scaleInsets); this.insetsLeft = (insetsLeft * scaleInsets);
 		this.insetsBottom = (insetsBottom * scaleInsets); this.insetsRight = (insetsRight * scaleInsets);	
 		this.insetsX = 2; this.insetsY =  2;
-    	this.fontX = new Font(Font.SANS_SERIF, Font.PLAIN, (int)(20*scaleFont));
-    	this.fontY = new Font(Font.SANS_SERIF, Font.PLAIN, (int)(20*scaleFont));
+    	this.fontTitleX = new Font(Font.SANS_SERIF, Font.PLAIN, (int)(20*scaleFont));
+    	this.fontTitleY = new Font(Font.SANS_SERIF, Font.PLAIN, (int)(20*scaleFont));
 		this.fontTicksX = new Font(Font.SANS_SERIF, Font.PLAIN, (int)(15*scaleFont));
 		this.fontTicksY = new Font(Font.SANS_SERIF, Font.PLAIN, (int)(15*scaleFont));
 		this.fontTitle =  new Font(Font.SANS_SERIF, Font.PLAIN, (int)(25*scaleFont));
@@ -503,6 +658,7 @@ public class PlotScatter extends PlotNBCInteractive{
 //		//TODO 修改配置文件获得图片的改变，初步考虑修改hashDataTable里面的dotstyle
 //	}
 	/**
+	 * 开始绘制图表
 	 * @param width
 	 * @param heigh
 	 */
@@ -517,12 +673,16 @@ public class PlotScatter extends PlotNBCInteractive{
         plot.getAxis(XYPlot.AXIS_X).setRange(axisxthis.getMin() ,axisxthis.getMax());//设置坐标轴
         plot.getAxis(XYPlot.AXIS_Y).setRange(axisythis.getMin() ,axisythis.getMax());//设置坐标轴
         
-        setAxisAndTitle();
+        drawAxisAndTitle();
         //坐标轴在figure最下方
         plot.getAxisRenderer(XYPlot.AXIS_X).setSetting(AxisRenderer.INTERSECTION, -Double.MAX_VALUE);
         plot.getAxisRenderer(XYPlot.AXIS_Y).setSetting(AxisRenderer.INTERSECTION, -Double.MAX_VALUE);
 	}
-	
+	/**
+	 * 转换成图片
+	 * @param width
+	 * @param heigh
+	 */
 	protected void toImage(int width, int heigh) {
 		int imageType = (alpha ? BufferedImage.TYPE_4BYTE_ABGR : BufferedImage.TYPE_3BYTE_BGR);
 		//TODO 一直都是 不透明
@@ -604,11 +764,14 @@ public class PlotScatter extends PlotNBCInteractive{
 		}
 	}
 	
-	private void setAxisAndTitle() {
+	/**
+	 * 绘制坐标轴和标题
+	 */
+	private void drawAxisAndTitle() {
 		// Style axes
 		if (titleX != null) {
 			plot.getAxisRenderer(XYPlot.AXIS_X).setSetting(AxisRenderer.LABEL, titleX);
-			plot.getAxisRenderer(XYPlot.AXIS_Y).setSetting(AxisRenderer.LABEL_DISTANCE, insetsX);
+			plot.getAxisRenderer(XYPlot.AXIS_X).setSetting(AxisRenderer.LABEL_DISTANCE, insetsX);
 		}
 		if (titleY != null) {
 			plot.getAxisRenderer(XYPlot.AXIS_Y).setSetting(AxisRenderer.LABEL, titleY);
@@ -616,6 +779,12 @@ public class PlotScatter extends PlotNBCInteractive{
 		}
 		if (title != null) {
 			plot.setSetting(BarPlot.TITLE, title);
+		}
+		if (fontTitleXRotation != null) {
+			plot.getAxisRenderer(XYPlot.AXIS_X).setSetting(AxisRenderer.LABEL_ROTATION, fontTitleXRotation);
+		}
+		if (fontTitleYRotation != null) {
+			plot.getAxisRenderer(XYPlot.AXIS_Y).setSetting(AxisRenderer.LABEL_FONT, fontTitleYRotation);
 		}
 		
 		if (spaceX != null) {
@@ -634,19 +803,25 @@ public class PlotScatter extends PlotNBCInteractive{
 
 		}
 		
+		if (fontTicksXRotation != null) {
+			plot.getAxisRenderer(XYPlot.AXIS_X).setSetting(AxisRenderer.TICK_LABELS_ROTATION, fontTicksXRotation);//坐标轴刻度
+		}
+		if (fontTicksYRotation != null) {
+			plot.getAxisRenderer(XYPlot.AXIS_Y).setSetting(AxisRenderer.TICK_LABELS_ROTATION, fontTicksYRotation);//坐标轴刻度
+		}
 		if (fontTicksX != null) {
 			plot.getAxisRenderer(XYPlot.AXIS_X).setSetting(AxisRenderer.TICKS_FONT, fontTicksX);//坐标轴刻度
 		}
 		if (fontTicksY != null) {
 			plot.getAxisRenderer(XYPlot.AXIS_Y).setSetting(AxisRenderer.TICKS_FONT, fontTicksY);//坐标轴刻度
 		}
+		if (fontTitleX != null) {
+			plot.getAxisRenderer(XYPlot.AXIS_X).setSetting(AxisRenderer.LABEL_FONT, fontTitleX);
+		}
+		if (fontTitleY != null) {
+			plot.getAxisRenderer(XYPlot.AXIS_Y).setSetting(AxisRenderer.LABEL_FONT, fontTitleY);
+		}
 		
-		if (fontX != null) {
-			plot.getAxisRenderer(XYPlot.AXIS_X).setSetting(AxisRenderer.LABEL_FONT, fontX);
-		}
-		if (fontY != null) {
-			plot.getAxisRenderer(XYPlot.AXIS_Y).setSetting(AxisRenderer.LABEL_FONT, fontY);
-		}
 		if (fontTitle != null) {
 			plot.setSetting(BarPlot.TITLE_FONT, fontTitle);
 		}
@@ -669,8 +844,7 @@ public class PlotScatter extends PlotNBCInteractive{
 		}
 	}
 	/**
-	 * fill the insets with BG color, means fill the marginal area between the frame and the plot border.<br>
-	 * because gral will not color the marginal area, so we should color the marginal area using this method
+	 * 设置背景
 	 * @param width
 	 * @param heigh
 	 */
@@ -708,6 +882,7 @@ public class PlotScatter extends PlotNBCInteractive{
 		painted = false;
 	}
 	/**
+	 * 映射数字，就是将1-100映射成1000-1000000这种
 	 * map the ticks number to actual axis, using the linear transformation 
 	 * @return
 	 */
@@ -717,6 +892,7 @@ public class PlotScatter extends PlotNBCInteractive{
 		painted = false;
 	}
 	/**
+	 * 映射数字，就是将1-100映射成1000-1000000这种
 	 * map the ticks number to actual axis, using the linear transformation 
 	 * @return
 	 */
