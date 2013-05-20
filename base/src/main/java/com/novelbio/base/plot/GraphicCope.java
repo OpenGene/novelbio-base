@@ -13,6 +13,14 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
+
+import org.apache.batik.transcoder.TranscoderInput;
+import org.apache.batik.transcoder.TranscoderOutput;
+import org.apache.batik.transcoder.image.ImageTranscoder;
+import org.apache.batik.transcoder.image.PNGTranscoder;
+
+import com.novelbio.base.dataOperate.TxtReadandWrite;
+import com.novelbio.base.dataStructure.PatternOperate;
 /**
  * 对BufferedImage做各种处理<br>
  * 如果要读取或者写入BufferedImage，可以用ImageIO类
@@ -20,7 +28,100 @@ import javax.imageio.ImageIO;
  *
  */
 public class GraphicCope {
+	public static void main(String[] args) throws Exception {
+		BufferedImage bufferedImage = convertSvg2BfImg("/home/zong0jie/desktop/IdegramSsSc0707031_v3.svg", 1.0);
+		try {
+			ImageIO.write(bufferedImage, "png", new File("/home/zong0jie/desktop/2.png"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * 将svg转化为BufferedImage，方便后期处理
+	 * @param svgFile
+	 * @param zoomeSize 相对于svg的原始图片进行缩放
+	 * @return 出错返回null 
+	 */
+	public static BufferedImage convertSvg2BfImg(String svgFile, double zoomeSize) {
+		double[] svgResolution = getResolution(svgFile); 
+		float width = (float) (zoomeSize * svgResolution[0]);
+		float heigth = (float) (zoomeSize * svgResolution[1]);
+		try {
+			return convertSvg2BfImgExp(svgFile, width, heigth);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	/**
+	 * 将svg转化为BufferedImage，方便后期处理
+	 * @param svgFile
+	 * @param width 如果为0，则走svg的默认值
+	 * @param height 如果小于等于0，则按照width进行按比例缩放
+	 * @return 出错返回null
+	 */
+	public static BufferedImage convertSvg2BfImg(String svgFile, double width, double heigth) {
+		double[] svgResolution = getResolution(svgFile); 
+		if (width <= 0) {
+			width = svgResolution[0]; heigth = svgResolution[1];
+		} else if (width > 0 && heigth <= 0) {
+			heigth = (svgResolution[1] * width / svgResolution[0]);
+		}
+		try {
+			return convertSvg2BfImgExp(svgFile, (float)width, (float)heigth);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	/**
+	 * 将svg转化为BufferedImage，方便后期处理
+	 * @param svgFile
+	 * @param width 如果为0，则走svg的默认值
+	 * @param height 如果小于等于0，则按照width进行按比例缩放
+	 * @return
+	 * @throws Exception 
+	 */
+	private static BufferedImage convertSvg2BfImgExp(String svgFile, float width, float heigth) throws Exception {
+		BufferedImageTranscoder imageTranscoder = new BufferedImageTranscoder();
+		
+		imageTranscoder.addTranscodingHint(PNGTranscoder.KEY_WIDTH, width);
+		imageTranscoder.addTranscodingHint(PNGTranscoder.KEY_HEIGHT, heigth);
 
+		String svgURI = new File(svgFile).toURL().toString();
+		TranscoderInput input = new TranscoderInput(svgURI);
+		imageTranscoder.transcode(input, null);
+		 
+		return imageTranscoder.getBufferedImage();
+	}
+	
+	/** 获得svg文件的长宽 */
+	private static double[] getResolution(String svgFile) {
+		PatternOperate patternOperate = new PatternOperate("\\d+(\\.?\\d+){0,1}", false);
+		TxtReadandWrite txtRead = new TxtReadandWrite(svgFile);
+		double[] resolution = new double[2];
+		for (String content : txtRead.readlines()) {
+			content = content.trim().toLowerCase();
+			if (content.startsWith("width=")) {
+				String info = content.replace("width=", "").replace("\"", "");
+				resolution[0] = Double.parseDouble(patternOperate.getPatFirst(info));
+			}
+			if (content.startsWith("height=")) {
+				String info = content.replace("height=", "").replace("\"", "");
+				resolution[1] = Double.parseDouble(patternOperate.getPatFirst(info));
+			}
+			if (resolution[0] > 0 && resolution[1] > 0) {
+				break;
+			}
+		}
+		txtRead.close();
+		return resolution;
+	}
+	
+	
 	/**
 	 * 旋转图片为指定角度
 	 * 
@@ -538,4 +639,24 @@ class ImageScale {
             return 255;
         return x;
     }
+}
+
+
+class BufferedImageTranscoder extends ImageTranscoder {
+  @Override
+  public BufferedImage createImage(int w, int h) {
+    BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+    return bi;
+  }
+ 
+  @Override
+  public void writeImage(BufferedImage img, TranscoderOutput output) {
+    this.img = img;
+  }
+ 
+  public BufferedImage getBufferedImage() {
+    return img;
+  }
+  private BufferedImage img = null;
+
 }
