@@ -34,7 +34,9 @@ import de.erichseifert.gral.plots.axes.AxisRenderer;
 import de.erichseifert.gral.plots.lines.DefaultLineRenderer2D;
 import de.erichseifert.gral.plots.points.DefaultPointRenderer2D;
 import de.erichseifert.gral.plots.points.PointRenderer;
+import de.erichseifert.gral.plots.settings.SettingChangeEvent;
 import de.erichseifert.gral.util.Insets2D;
+import de.erichseifert.gral.util.Location;
 import de.erichseifert.gral.util.Orientation;
 /**
  * 绘制工具<br>
@@ -68,12 +70,16 @@ public class PlotScatter extends PlotNBCInteractive{
 	
 	/** 标题 title图表总标题  titleX　x轴下的标题　titleY y轴侧的标题*/
 	String title = null, titleX = null, titleY = null;
+	/** 主标题的位置*/
+	Location titleLocation = Location.NORTH;
+	/** 主标题的距离*/
+	Number titleDistance = 5;
     /** 坐标轴的title到坐标轴的距离 */
     double inset = 5, insetsX = 5, insetsY = 5;
 	/** 标题的字体 */
     Font fontTitle = new Font(Font.SANS_SERIF, Font.PLAIN, 15), fontTitleX = null, fontTitleY = null;
     /** 标题文字的旋转度 */
-    Number fontTitleXRotation = null,fontTitleYRotation = null;
+    Number fontTitleXRotation = 0,fontTitleYRotation = 0;
    
     
     /** xy轴的样式参数 Double指xy轴上的刻度位置，String此刻度的说明 */
@@ -83,7 +89,7 @@ public class PlotScatter extends PlotNBCInteractive{
     /** 刻度之间的距离 */
 	Double spaceX = null, spaceY = null;
     /** xy轴上的刻度文字的旋转度 */
-    Number fontTicksXRotation = null,fontTicksYRotation = null;
+    Number fontTicksXRotation = 0,fontTicksYRotation = 0;
     
     
     /** 坐标轴边界 */
@@ -404,11 +410,13 @@ public class PlotScatter extends PlotNBCInteractive{
     }
     
     /**
-     * 设置标题
+     * 设置总标题<br>
+     * 可以用setTitle(String title, Font fontTitle,Location titleLocation,Number titleDistance)替换
      * @param title main title
      * @param fontTitle font of the title
      * @param title
      */
+    @Deprecated
     public void setTitle(String title, Font fontTitle)  {
     	if (title != null)
     		this.title = title;
@@ -419,8 +427,29 @@ public class PlotScatter extends PlotNBCInteractive{
     }
     
     /**
+     * 设置总标题
+     * @param title 总标题内容
+     * @param fontTitle 字体
+     * @param titleLocation 位置　例如{@link de.erichseifert.gral.util.Location#CENTER}
+     * @param titleDistance 距离
+     */
+    public void setTitle(String title, Font fontTitle,Location titleLocation,Number titleDistance)  {
+    	if (title != null)
+    		this.title = title;
+    	if (fontTitle != null)
+    		this.fontTitle =fontTitle;
+    	if (titleLocation != null)
+    		this.titleLocation = titleLocation;
+    	if (titleDistance != null)
+    		this.titleDistance = titleDistance;
+    	painted = false;
+    }
+    
+    
+    /**
      * 
-     * 设置标题
+     * 设置标题<br>
+     * 可以用setTitleX(String titleX, Font fontTitleX,double distance,Number fontTitleXRotation) 替换
      * @param titleX tile on axis x
      * @param fontX font of the title 可以设定为null
      * @param distance 距离x轴的距离
@@ -437,7 +466,8 @@ public class PlotScatter extends PlotNBCInteractive{
     	//painted = false;
     }
     /**
-     * 设置标题
+     * 设置标题<br>
+     * 可以用setTitleY(String titleY, Font fontTitleY,double distance,Number fontTitleYRotation) 替换
      * @param titleY tile on axis y
      * @param fontY font of the title
      * @param spaceY ticks interval, 0 means not set the space
@@ -459,15 +489,13 @@ public class PlotScatter extends PlotNBCInteractive{
      * @param distance 标题距离x轴的距离
      * @param fontTitleXRotation 标题的旋转角度
      */
-    public void setTitleX(String titleX, Font fontTitleX,double distance, double spaceX,Number fontTitleXRotation)  {
+    public void setTitleX(String titleX, Font fontTitleX,double distance,Number fontTitleXRotation)  {
     	if (titleX != null)
     		this.titleX = titleX;
     	if (fontTitleX != null)
     		this.fontTitleX = fontTitleX;
     	if (distance != 0)
     		this.insetsX = distance;
-    	if (spaceX != 0)
-    		this.spaceX = spaceX;
     	if (fontTitleXRotation != null)
     		this.fontTitleXRotation = fontTitleXRotation;
     	painted = false;
@@ -476,11 +504,11 @@ public class PlotScatter extends PlotNBCInteractive{
     /**
      * 设置y轴的标题
      * @param titleY 标题内容
-     * @param fontY 标题字体 null为默认
+     * @param fontTitleY 标题字体 null为默认
      * @param distance 标题距离x轴的距离
      * @param fontTitleYRotation 标题的旋转角度
      */
-    public void setTitleY(String titleY, Font fontTitleY,double distance, Number fontTitleYRotation)  {
+    public void setTitleY(String titleY, Font fontTitleY,double distance,Number fontTitleYRotation)  {
     	if (titleY != null)
     		this.titleY = titleY;
     	if (fontTitleY != null)
@@ -500,7 +528,11 @@ public class PlotScatter extends PlotNBCInteractive{
 		}
     	painted = false;
 	}
-    /** x轴上的刻度下的文字字体 */
+    /**
+     *  x轴上的刻度下的文字字体<br>
+     *  可以用setAxisTicksXFont(Font fontTicks,double spaceX,Number fontTicksXRotation)替换
+     *	
+     */
     @Deprecated
     public void setAxisTicksXFont(Font fontTicks) {
 		if (fontTicks != null) {
@@ -513,18 +545,15 @@ public class PlotScatter extends PlotNBCInteractive{
      * x轴上的刻度下的文字字体
      * @param fontTicks 字体样式
      * @param spaceX 坐标刻度的距离  0为默认
-     * @param fontTicksXRotation字体旋转角度
+     * @param fontTicksXRotation 字体旋转角度
      */
     public void setAxisTicksXFont(Font fontTicks,double spaceX,Number fontTicksXRotation) {
-		if (fontTicks != null) {
+		if (fontTicks != null)
 			this.fontTicksX = fontTicks;
-		}
-		if(fontTicksXRotation != null){
-			this.fontTitleXRotation = fontTicksXRotation;
-		}
+		if(fontTicksXRotation != null)
+			this.fontTicksXRotation = fontTicksXRotation;
 		if (spaceX != 0)
     		this.spaceX = spaceX;
-		painted = false;
 	}
     /** 标题文字的旋转度 */
     public void setFontTitleXRotation(Number fontTitleXRotation) {
@@ -550,7 +579,11 @@ public class PlotScatter extends PlotNBCInteractive{
 		}
     	painted = false;
 	}
-    /** xy轴上的刻度下的文字字体 */
+    /**
+     *  xy轴上的刻度下的文字字体<br>
+     *  可以用setAxisTicksYFont(Font fontTicks,double spaceY,Number fontTicksYRotation)替换
+     *  
+     */
     @Deprecated
     public void setAxisTicksYFont(Font fontTicks) {
 		if (fontTicks != null) {
@@ -558,11 +591,12 @@ public class PlotScatter extends PlotNBCInteractive{
 		}
 		painted = false;
 	}
+    
     /** 
      * y轴上的刻度下的文字字体
      * @param fontTicks 字体样式
      * @param spaceY 坐标刻度的距离  0为默认
-     * @param fontTicksXRotation字体旋转角度
+     * @param fontTicksYRotation 字体旋转角度
      */
     public void setAxisTicksYFont(Font fontTicks,double spaceY,Number fontTicksYRotation) {
 		if (fontTicks != null) {
@@ -780,11 +814,21 @@ public class PlotScatter extends PlotNBCInteractive{
 		if (title != null) {
 			plot.setSetting(BarPlot.TITLE, title);
 		}
+		if (fontTitle != null) {
+			plot.setSetting(BarPlot.TITLE_FONT, fontTitle);
+		}
+		if (titleLocation != null) {
+			plot.setSetting(BarPlot.LEGEND_LOCATION, titleLocation);
+		}
+		if (titleDistance != null) {
+			plot.setSetting(BarPlot.LEGEND_DISTANCE, titleDistance);
+		}
+		
 		if (fontTitleXRotation != null) {
 			plot.getAxisRenderer(XYPlot.AXIS_X).setSetting(AxisRenderer.LABEL_ROTATION, fontTitleXRotation);
 		}
 		if (fontTitleYRotation != null) {
-			plot.getAxisRenderer(XYPlot.AXIS_Y).setSetting(AxisRenderer.LABEL_FONT, fontTitleYRotation);
+			plot.getAxisRenderer(XYPlot.AXIS_Y).setSetting(AxisRenderer.LABEL_ROTATION, fontTitleYRotation);
 		}
 		
 		if (spaceX != null) {
@@ -820,10 +864,6 @@ public class PlotScatter extends PlotNBCInteractive{
 		}
 		if (fontTitleY != null) {
 			plot.getAxisRenderer(XYPlot.AXIS_Y).setSetting(AxisRenderer.LABEL_FONT, fontTitleY);
-		}
-		
-		if (fontTitle != null) {
-			plot.setSetting(BarPlot.TITLE_FONT, fontTitle);
 		}
 		
 		//background color
