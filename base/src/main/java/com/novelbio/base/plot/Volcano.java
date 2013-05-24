@@ -1,7 +1,16 @@
 package com.novelbio.base.plot;
 
 import java.awt.Color;
+import java.awt.Font;
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.jws.soap.SOAPBinding.Style;
+
+import com.novelbio.base.dataOperate.ExcelTxtRead;
+import com.novelbio.base.dataOperate.TxtReadandWrite;
+
+import de.erichseifert.gral.util.Location;
 
 /**
  * 火山图绘制
@@ -16,7 +25,7 @@ public class Volcano {
 	boolean logTransform = false;
 	
 	//也可以直接输入logFC和Pvalue的值
-	List<double[]> lsLogFC2Pvalue;
+	List<double[]> lsLogFC2Pvalue = new ArrayList<double[]>();
 	
 	/**
 	 * 输入一个读好的文本，并制定列，实际列。然后获得待画图的数据
@@ -24,8 +33,24 @@ public class Volcano {
 	 * @param colLogFC
 	 * @param colPvalue
 	 */
+	
+	public static void main(String[] args) {
+		List<List<String>> lsls = ExcelTxtRead.readLsExcelTxtls("/home/novelbio/桌面/project/AutoReport/Report/Novelbio Result/1、Difference Expression/1、Difference Expression_result/AvsB_Dif-Gene_A.xls", 1);
+		Volcano volcano = new Volcano();
+		volcano.setLogFC2Pvalue(lsls, 4, 7);
+		volcano.setLogFCBorder(1);
+		double a = -Math.log10(0.01);
+		System.out.println(a);
+		volcano.setLogPvalueBorder(a);
+//		PlotScatter plotScatter = volcano.drawVolimage("FDR");
+//		volcano.saveAs(plotScatter, 1000, 1000, "/home/novelbio/桌面/project/AutoReport/Report/Novelbio Result/1、Difference Expression/1、Difference Expression_result/1.png");
+		
+	}
+	
+	
 	public void setLogFC2Pvalue(List<List<String>> lslsExcel, int colLogFC, int colPvalue) {
-		colLogFC--; colPvalue--;
+		//这里不需要--
+//		colLogFC--; colPvalue--;
 		lsLogFC2Pvalue.clear();
 		for (List<String> list : lslsExcel) {
 			try {
@@ -52,15 +77,15 @@ public class Volcano {
 	}
 	
 	/** 画火山图 */
-	public PlotScatter drawVolimage(int logFCcolNum, int pValuecolNum, String YTitle) {
+	public PlotScatter drawVolimage(String YTitle) {
 		/* 定义坐标系 */
 		PlotScatter plotScatter = new PlotScatter(PlotScatter.PLOT_TYPE_SCATTERPLOT);
 		plotScatter.setBg(Color.WHITE);
 		plotScatter.setAlpha(false);
-		plotScatter.setTitle( "Volcano plot", null);
-		plotScatter.setTitleX("LogFC", null, 0);
-		plotScatter.setTitleY("-Log10(" + YTitle + ")", null, 0);
-		plotScatter.setInsets(PlotScatter.INSETS_SIZE_L);
+		plotScatter.setTitle("火山图");
+		plotScatter.setTitleX("LogFC");
+		plotScatter.setTitleY("-Log10(" + YTitle + ")");
+		plotScatter.setInsets(PlotScatter.INSETS_SIZE_ML);
 
 		double minX = -5;
 		double maxX = 5;

@@ -79,7 +79,7 @@ public class PlotScatter extends PlotNBCInteractive{
 	/** 标题的字体 */
     Font fontTitle = new Font(Font.SANS_SERIF, Font.PLAIN, 15), fontTitleX = null, fontTitleY = null;
     /** 标题文字的旋转度 */
-    Number fontTitleXRotation = 0,fontTitleYRotation = 0;
+    Number fontTitleXRotation = 0,fontTitleYRotation = 90;
    
     
     /** xy轴的样式参数 Double指xy轴上的刻度位置，String此刻度的说明 */
@@ -481,6 +481,34 @@ public class PlotScatter extends PlotNBCInteractive{
     	if (spaceY != 0)
     		this.spaceY = spaceY;
     }
+    
+    public void setTitle(String title){
+    	if (title == null) {
+			this.title = title;
+		}
+    }
+    
+    /**
+     * 只设置X轴内容，其他走默认
+     * @param titleX
+     */
+    public void setTitleX(String titleX){
+    	if (titleX != null){
+    		this.titleX = titleX;
+    	}
+    }
+    
+    /**
+     * 只设置Y轴内容，其他走默认
+     * @param titleY
+     */
+    public void setTitleY(String titleY){
+    	if (titleY != null) {
+			this.titleY = titleY;
+		}
+    }
+    
+    
     /**
      * 
      * 设置x轴的标题
@@ -663,7 +691,7 @@ public class PlotScatter extends PlotNBCInteractive{
 		}
     	this.insetsTop = (insetsTop * scaleInsets); this.insetsLeft = (insetsLeft * scaleInsets);
 		this.insetsBottom = (insetsBottom * scaleInsets); this.insetsRight = (insetsRight * scaleInsets);	
-		this.insetsX = 2; this.insetsY =  2;
+		this.insetsX = 1; this.insetsY =  1;
     	this.fontTitleX = new Font(Font.SANS_SERIF, Font.PLAIN, (int)(20*scaleFont));
     	this.fontTitleY = new Font(Font.SANS_SERIF, Font.PLAIN, (int)(20*scaleFont));
 		this.fontTicksX = new Font(Font.SANS_SERIF, Font.PLAIN, (int)(15*scaleFont));
