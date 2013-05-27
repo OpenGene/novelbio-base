@@ -134,6 +134,25 @@ public class TxtReadandWrite implements Closeable {
 		return txtRead.getEnterType();
 	}
 	
+	/** 读取的具体长度，出错返回 -1 */
+	public long getReadByte() {
+		if (txtRead != null) {
+			return txtRead.getReadByte();
+		}
+		return -1;
+	}
+	
+	/**
+	 * 获得读取的百分比
+	 * @return 结果在0-1之间，小于0表示出错
+	 */
+	public double getReadPercentage() {
+		if (txtRead != null) {
+			return txtRead.getReadPercentage();
+		}
+		return -1;
+	}
+	
 	public Iterable<String> readlines() {
 		return txtRead.readlines();
 	}
@@ -421,13 +440,23 @@ public class TxtReadandWrite implements Closeable {
 	}
 	
 	/**
+	 * @deprecated
+	 * 用{@link #writefilelnls(List)} 替代 <br>
 	 * 直接写入一个表格ArrayList<ArrayList<String>>;
 	 * @param lsls
 	 */
 	public void writefileln(ArrayList<ArrayList<String>> lsls) {
 		txtWrite.writefileln(lsls);
 	}
-	
+	/**
+	 * 直接写入一个表格List<List<String>>;
+	 * @param lsls
+	 */
+	public void writefilelnls(List<List<String>> lsls) {
+		for (List<String> list : lsls) {
+			txtWrite.writefileln(list);
+		}
+	}
 	/**
 	 * 写入并换行
 	 * @param content 要写入文件内容

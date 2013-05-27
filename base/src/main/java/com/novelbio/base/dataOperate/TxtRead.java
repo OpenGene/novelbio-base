@@ -19,11 +19,13 @@ import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.log4j.Logger;
+import org.apache.hadoop.fs.FSDataInputStream;
 
 import com.novelbio.base.dataOperate.TxtReadandWrite.PlatForm;
 import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
 import com.novelbio.base.dataStructure.PatternOperate;
 import com.novelbio.base.fileOperate.FileHadoop;
+import com.novelbio.base.fileOperate.FileOperate;
 
 class TxtRead implements Closeable {
 	private static final Logger logger = Logger.getLogger(TxtRead.class);
@@ -33,6 +35,7 @@ class TxtRead implements Closeable {
 	/** 读取hadoop文件时设定 */
 	FileHadoop fileHadoop;
 	
+	InputStream inputStreamRaw;
 	InputStream inputStream;
 	BufferedReader bufread;
 	
@@ -40,6 +43,8 @@ class TxtRead implements Closeable {
 	String grepContent = "";
 	
 	PlatForm platform = PlatForm.pc;
+	
+	long filesize = 0;
 
 	public TxtRead(String fileName) {
 		this.txtfile = fileName;
@@ -513,26 +518,30 @@ class TxtRead implements Closeable {
 	 * @throws Exception
 	 */
 	private void initialReading() throws IOException {
+		if (bufread != null) {
+			bufread.close();
+			bufread = null;
+		}
 		if (inputStream != null) {
 			inputStream.close();
 			inputStream = null;
 		}
-		if (bufread != null) {
-			bufread.close();
-			bufread = null;
+		if (inputStreamRaw != null) {
+			inputStreamRaw.close();
+			inputStreamRaw = null;
 		}
 		setInStreamExp();
 	}
 	
 	private void setInStreamExp() throws IOException {
-		InputStream inputStreamRaw = null;
 		TXTtype txtType = null;
 		if (platform == PlatForm.pc) {
+			filesize = FileOperate.getFileSizeLong(txtfile);
 			inputStreamRaw = new FileInputStream(txtfile);
 			txtType = TXTtype.getTxtType(txtfile);
-			this.inputStream = inputStreamRaw;
 		} else if (platform == PlatForm.hadoop) {
-			inputStream = fileHadoop.getInputStream();
+			filesize = fileHadoop.getFileSize();
+			inputStreamRaw = fileHadoop.getInputStream();
 			txtType = TXTtype.getTxtType(fileHadoop.getFileNameHdfs());
 		}
 		
@@ -555,12 +564,47 @@ class TxtRead implements Closeable {
 	}
 	
 	/**
+	 * 获得读取的百分比
+	 * @return 结果在0-1之间，小于0表示出错
+	 */
+	public double getReadPercentage() {
+		long readByte = getReadByte();
+		if (readByte < 0 || filesize < 0) {
+			return -1;
+		} else {
+			return readByte/filesize;
+		}
+	}
+	
+	public long getReadByte() {
+		if (platform == PlatForm.pc) {
+			FileInputStream fileInputStream = (FileInputStream)inputStreamRaw;
+			try {
+				return fileInputStream.getChannel().position();
+			} 
+			catch (IOException e) {
+				e.printStackTrace();
+			}
+		} else if (platform == PlatForm.hadoop) {
+			FSDataInputStream fileInputStream = (FSDataInputStream)inputStreamRaw;
+			try {
+				return fileInputStream.getPos();
+			} 
+			catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return -1;
+	}
+	
+	/**
 	 * 必须关闭
 	 * 关闭流文件
 	 */
 	public void close() {
 		try { bufread.close(); } catch (Exception e) {}
 		try { inputStream.close(); } catch (Exception e) {}
+		try { inputStreamRaw.close(); } catch (Exception e) {}
 	}
 
 }

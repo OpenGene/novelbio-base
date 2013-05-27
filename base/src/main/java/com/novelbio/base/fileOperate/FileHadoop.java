@@ -101,6 +101,14 @@ public class FileHadoop {
 		}
 	}
 	
+	/** 返回小于0表示出错 */
+	public long getFileSize() {        
+		try {
+			return fsHDFS.getFileStatus(dst).getLen();
+		} catch (IOException e) {
+			return -1;
+		}
+	}
 	/**
 	 * 根据文件产生一个流
 	 * @param overwrite  false：如果文件不存在，则返回nulll

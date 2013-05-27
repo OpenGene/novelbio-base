@@ -1,16 +1,10 @@
 package com.novelbio.base.plot;
 
 import java.awt.Color;
-import java.awt.Font;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.jws.soap.SOAPBinding.Style;
-
 import com.novelbio.base.dataOperate.ExcelTxtRead;
-import com.novelbio.base.dataOperate.TxtReadandWrite;
-
-import de.erichseifert.gral.util.Location;
 
 /**
  * 火山图绘制
@@ -51,7 +45,7 @@ public class Volcano {
 	public void setLogFC2Pvalue(List<List<String>> lslsExcel, int colLogFC, int colPvalue) {
 		//这里不需要--
 //		colLogFC--; colPvalue--;
-		lsLogFC2Pvalue.clear();
+		lsLogFC2Pvalue = new ArrayList<double[]>();
 		for (List<String> list : lslsExcel) {
 			try {
 				double logFC = Double.parseDouble(list.get(colLogFC));
@@ -67,6 +61,22 @@ public class Volcano {
 		this.lsLogFC2Pvalue = lsLogFC2Pvalue;
 	}
 	
+	/**
+	 * lsLogFC 和 lsPvalue的长度必须一致
+	 * @param lsLogFC
+	 * @param lsPvalue
+	 */
+	public void setLogFC2Pvalue(List<Double> lsLogFC, List<Double> lsPvalue) {
+		lsLogFC2Pvalue = new ArrayList<double[]>();
+		if (lsLogFC == null || lsPvalue == null || lsLogFC.size() != lsPvalue.size()) {
+			return;
+		}
+		for (int i = 0; i < lsLogFC.size(); i++) {
+			double[] logFC2Pvalue = new double[]{lsLogFC.get(i), lsPvalue.get(i)};
+			lsLogFC2Pvalue.add(logFC2Pvalue);
+		}
+	}
+	
 	/** 设定LogFC的边界 */
 	public void setLogFCBorder(double logFCBorder) {
 		this.logFCBorder = logFCBorder;
@@ -76,7 +86,11 @@ public class Volcano {
 		this.logPvalueBorder = logPvalueBorder;
 	}
 	
-	/** 画火山图 */
+	/**
+	 *  画火山图
+	 * @param YTitle 轴上是什么
+	 * @return
+	 */
 	public PlotScatter drawVolimage(String YTitle) {
 		/* 定义坐标系 */
 		PlotScatter plotScatter = new PlotScatter(PlotScatter.PLOT_TYPE_SCATTERPLOT);

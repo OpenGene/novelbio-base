@@ -1,23 +1,19 @@
 package com.novelbio.base.dataStructure;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+
+import com.google.common.collect.ArrayListMultimap;
 
 import org.apache.commons.math.stat.StatUtils;
-import org.apache.commons.math.stat.inference.TestUtils;
-//import org.apache.ibatis.annotations.Insert;
 import org.apache.log4j.Logger;
-
-import com.novelbio.base.dataOperate.ExcelOperate;
-import com.novelbio.base.dataOperate.ExcelTxtRead;
-import com.novelbio.base.dataOperate.TxtReadandWrite;
+//import org.apache.ibatis.annotations.Insert;
 
 
 public class MathComput {
@@ -127,17 +123,13 @@ public class MathComput {
 	 * 每列表示不同的信息，每行表示一个基因
 	 * 可能存在重复基因，所以要对重复行(也就是重复基因)，取中位数
 	 * @param lsIn
-	 * @param colAccID
+	 * @param colAccID 实际列，从1开始计数
 	 * @param colNum
 	 * @return
 	 */
 	public static ArrayList<String[]> getMedian(List<String[]> lsIn, int colAccID, List<Integer> colNum) {
-		/**
-		 * 每个ID一个基因
-		 */
-		HashMap<String, ArrayList<String[]>> hashGeneInfo = new HashMap<String, ArrayList<String[]>>();
-		
-		hashGeneInfo = new HashMap<String, ArrayList<String[]>>();
+		/** 每个ID一个基因 */
+		ArrayListMultimap<String, String[]> mapAccID2Info = ArrayListMultimap.create();
 		ArrayList<String[]> lsResult = new ArrayList<String[]>();
 		colAccID--;
 		ArrayList<Integer> lsColNum = new ArrayList<Integer>();
@@ -146,19 +138,11 @@ public class MathComput {
 		}
 		lsResult.add(lsIn.remove(0));
 		for (String[] strings : lsIn) {
-			if (hashGeneInfo.containsKey(strings[colAccID].trim()) ) {
-				ArrayList<String[]> lsInfo = hashGeneInfo.get(strings[colAccID].trim());
-				lsInfo.add(strings);
-			}
-			else {
-				ArrayList<String[]> lsInfo = new ArrayList<String[]>();
-				lsInfo.add(strings);
-				hashGeneInfo.put(strings[colAccID].trim(), lsInfo);
-			}
+			mapAccID2Info.put(strings[colAccID].trim(), strings);
 		}
-		Collection<ArrayList<String[]>> values = hashGeneInfo.values();
-		for(ArrayList<String[]> value:values)
-		{
+		
+		for (String accID : mapAccID2Info.keySet()) {
+			List<String[]> value = mapAccID2Info.get(accID);
 			try {
 				lsResult.add(getMediaInfo(value, lsColNum));
 			} catch (Exception e) {
@@ -183,7 +167,12 @@ public class MathComput {
 		for (int i = 0; i < col.size(); i++) {
 			double[] info = new double[lsInfo.size()];
 			for (int m = 0; m < lsInfo.size(); m++) {
-				info[m] = Double.parseDouble(lsInfo.get(m)[col.get(i)]);
+				try {
+					info[m] = Double.parseDouble(lsInfo.get(m)[col.get(i)].trim());
+				} catch (Exception e) {
+					info[m] = 0;
+				}
+				
 			}
 			double infoNew = median(info);
 			result[col.get(i)] = infoNew + "";

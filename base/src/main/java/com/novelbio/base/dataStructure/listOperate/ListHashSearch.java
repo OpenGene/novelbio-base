@@ -253,7 +253,34 @@ public abstract class ListHashSearch < T extends ListDetailAbs, E extends ListCo
 	 * @return 返回该LOCID的具体GffDetail信息，用相应的GffDetail类接收
 	 */
 	public T searchLOC(String LOCID) {
-		return  getMapName2Detail().get(LOCID.toLowerCase());
+		T t = getMapName2Detail().get(LOCID.toLowerCase());
+		if (t == null) {
+			LOCID = removeDot(LOCID);
+			t = getMapName2Detail().get(LOCID.toLowerCase());
+		}
+		return t;
+	}
+	/**
+	 *  首先除去空格，如果为""或“-”
+	 *  则返回null
+	 * 如果类似XM_002121.1类型，那么将.1去除
+	 * @param accID
+	 * @return accID without .1
+	 */
+	public static String removeDot(String accID) {
+		if (accID == null) {
+			return null;
+		}
+		String tmpGeneID = accID.replace("\"", "").trim();
+		if (tmpGeneID.equals("") || accID.equals("-")) {
+			return null;
+		}
+		int dotIndex = tmpGeneID.lastIndexOf(".");
+		//如果类似XM_002121.1类型
+		if (dotIndex>0 && tmpGeneID.length() - dotIndex <= 3) {
+			tmpGeneID = tmpGeneID.substring(0,dotIndex);
+		}
+		return tmpGeneID;
 	}
 	/**
 	 * 需要覆盖
