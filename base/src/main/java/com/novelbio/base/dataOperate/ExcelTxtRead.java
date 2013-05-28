@@ -102,7 +102,25 @@ public class ExcelTxtRead {
 	 */
 	public static List<List<String>> readLsExcelTxtls(String excelFile, int sheetNum, int firstlinels1, int lastlins) {
 		List<List<String>> lsls = new ArrayList<List<String>>();
-		ArrayList<String[]> lsStrs = readLsExcelTxtFile(excelFile, firstlinels1, 0, lastlins, 0);
+		ArrayList<String[]> lsStrs = readLsExcelTxtFile(excelFile, sheetNum, firstlinels1, 0, lastlins, 0);
+		for (String[] strings : lsStrs) {
+			List<String> oneLineList = new ArrayList<String>();
+			for (String string : strings) {
+				oneLineList.add(string);
+			}
+			lsls.add(oneLineList);
+		}
+		return lsls;
+	}
+	/**
+	 * 读文件返回一个List<List<String>>
+	 * @param excelFile 读入文件
+	 * @param firstlinels1 第几行开始读
+	 * @return
+	 */
+	public static List<List<String>> readLsExcelTxtls(String excelFile, String sheetName, int firstlinels1, int lastlins) {
+		List<List<String>> lsls = new ArrayList<List<String>>();
+		ArrayList<String[]> lsStrs = readLsExcelTxtFile(excelFile, sheetName, firstlinels1, 0, lastlins, 0);
 		for (String[] strings : lsStrs) {
 			List<String> oneLineList = new ArrayList<String>();
 			for (String string : strings) {
@@ -189,6 +207,7 @@ public class ExcelTxtRead {
 	/**
 	 * 给定文件，xls2003/2007/txt，获得它们的信息，用arraylist-string[]保存
 	 * @param excelFile
+	 * @param sheetNum
 	 * @param rowStart
 	 * @param colStart
 	 * @param rowEnd 值小于等于0时，读取全部行
@@ -200,6 +219,29 @@ public class ExcelTxtRead {
 		if (ExcelOperate.isExcel(excelFile)) {
 			ExcelOperate excel = new ExcelOperate(excelFile);
 			ls1 = excel.ReadLsExcel(sheetNum, rowStart, colStart, rowEnd, colEnd);
+			excel.Close();
+			return ls1;
+		}
+		TxtReadandWrite txt = new TxtReadandWrite(excelFile, false);
+		ls1=txt.ExcelRead(rowStart, colStart,rowEnd , colEnd, 0);//从目标行读取
+		txt.close();
+		return ls1;
+	}
+	/**
+	 * 给定文件，xls2003/2007/txt，获得它们的信息，用arraylist-string[]保存
+	 * @param excelFile
+	 * @param sheetName
+	 * @param rowStart
+	 * @param colStart
+	 * @param rowEnd 值小于等于0时，读取全部行
+	 * @param colEnd 值小于等于0时，读取全部列
+	 * @return
+	 */
+	public static ArrayList<String[]> readLsExcelTxtFile(String excelFile, String sheetName, int rowStart, int colStart, int rowEnd, int colEnd) {
+		ArrayList<String[]> ls1=null;
+		if (ExcelOperate.isExcel(excelFile)) {
+			ExcelOperate excel = new ExcelOperate(excelFile);
+			ls1 = excel.ReadLsExcel(sheetName, rowStart, colStart, rowEnd, colEnd);
 			excel.Close();
 			return ls1;
 		}
