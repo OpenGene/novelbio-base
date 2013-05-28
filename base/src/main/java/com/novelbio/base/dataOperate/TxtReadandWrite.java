@@ -278,6 +278,9 @@ public class TxtReadandWrite implements Closeable {
 	 * @throws Exception
 	 */
 	public ArrayList<String[]> ExcelRead(int rowStartNum, int columnStartNum, int rowEndNum, int columnEndNum, int colNotNone) {
+		if (columnStartNum <= 0) {
+			columnStartNum = 1;
+		}
 		if (columnEndNum <= 0) {
 			columnEndNum = ExcelColumns();
 		}

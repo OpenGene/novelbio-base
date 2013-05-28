@@ -2,6 +2,7 @@ package com.novelbio.base.plot;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.novelbio.base.dataOperate.ExcelTxtRead;
@@ -18,6 +19,25 @@ public class Volcano {
 	/** 是否需要log转换 */
 	boolean logTransform = false;
 	
+	/**横坐标和纵坐标的最大值和最小值*/
+	double minX;
+	double maxX;
+	double maxY;
+	
+	public void setMinX(double minX) {
+		this.minX = minX;
+	}
+	
+	public void setMaxX(double maxX) {
+		this.maxX = maxX;
+	}
+	
+	public void setMaxY(double maxY) {
+		this.maxY = maxY;
+	}
+	
+	
+	
 	//也可以直接输入logFC和Pvalue的值
 	List<double[]> lsLogFC2Pvalue = new ArrayList<double[]>();
 	
@@ -29,15 +49,46 @@ public class Volcano {
 	 */
 	
 	public static void main(String[] args) {
-		List<List<String>> lsls = ExcelTxtRead.readLsExcelTxtls("/home/novelbio/桌面/project/AutoReport/Report/Novelbio Result/1、Difference Expression/1、Difference Expression_result/AvsB_Dif-Gene_A.xls", 1);
+		List<List<String>> lsls = ExcelTxtRead.readLsExcelTxtls("/home/novelbio/桌面/project/difGene/1.xls", 1);
+		List<Double> lsDoubles = new ArrayList<Double>();
+		for (List<String> lsList : lsls) {
+			double pvalue;
+			try {
+				 pvalue = Double.parseDouble(lsList.get(5));
+				 lsDoubles.add(pvalue);
+			} catch (NumberFormatException e) {
+				pvalue = 0;
+			}
+		}
+		Collections.sort(lsDoubles);
+		int b = (int)(lsDoubles.size()*0.01);
+		System.out.println(b);
+		Double pvalue =-Math.log10(lsDoubles.get(b));
+		List<Double> lsLogFC = new ArrayList<Double>();
+		for (List<String> lsList : lsls) {
+			double LogFC;
+			try {
+				LogFC = Double.parseDouble(lsList.get(4));
+				lsLogFC.add(LogFC);
+			} catch (NumberFormatException e) {
+				LogFC = 0;
+			}
+		}
+		Collections.sort(lsLogFC);
+		double logFC = lsLogFC.get((int)(lsLogFC.size()*0.99));
+		
 		Volcano volcano = new Volcano();
-		volcano.setLogFC2Pvalue(lsls, 4, 7);
+		volcano.setMaxY(pvalue);
+		volcano.setMinX(-logFC);
+		volcano.setMaxX(logFC);
+		volcano.setLogFC2Pvalue(lsls, 4, 5);
 		volcano.setLogFCBorder(1);
 		double a = -Math.log10(0.01);
 		System.out.println(a);
 		volcano.setLogPvalueBorder(a);
-//		PlotScatter plotScatter = volcano.drawVolimage("FDR");
-//		volcano.saveAs(plotScatter, 1000, 1000, "/home/novelbio/桌面/project/AutoReport/Report/Novelbio Result/1、Difference Expression/1、Difference Expression_result/1.png");
+		
+		PlotScatter plotScatter = volcano.drawVolimage("FDR");
+		volcano.saveAs(plotScatter, 1000, 1000, "/home/novelbio/桌面/project/difGene/2_volcano.png");
 		
 	}
 	
@@ -100,10 +151,6 @@ public class Volcano {
 		plotScatter.setTitleX("LogFC");
 		plotScatter.setTitleY("-Log10(" + YTitle + ")");
 		plotScatter.setInsets(PlotScatter.INSETS_SIZE_ML);
-
-		double minX = -5;
-		double maxX = 5;
-		double maxY = 10;
 		plotScatter.setAxisX(minX, maxX);
 		plotScatter.setAxisY(0, maxY);
 		/* 定义红的的半透明的点 */
@@ -111,7 +158,7 @@ public class Volcano {
 		Color halfRed = new Color(255, 0, 0, 100);
 		dotStyleHalfRed.setColor(halfRed);
 		dotStyleHalfRed.setStyle(DotStyle.STYLE_CYCLE);
-		dotStyleHalfRed.setSize(DotStyle.SIZE_MB);
+		dotStyleHalfRed.setSize(DotStyle.SIZE_B);
 
 		/* 定义深绿的的半透明的点 */
 		DotStyle dotStyleHalfGreen = new DotStyle();
