@@ -120,7 +120,7 @@ public class ExcelTxtRead {
 	 */
 	public static List<List<String>> readLsExcelTxtls(String excelFile, String sheetName, int firstlinels1, int lastlins) {
 		List<List<String>> lsls = new ArrayList<List<String>>();
-		ArrayList<String[]> lsStrs = readLsExcelTxtFile(excelFile, sheetName, firstlinels1, 0, lastlins, 0);
+		ArrayList<String[]> lsStrs = readLsExcelTxtFile(excelFile, sheetName, firstlinels1, 1, lastlins, 0);
 		for (String[] strings : lsStrs) {
 			List<String> oneLineList = new ArrayList<String>();
 			for (String string : strings) {
@@ -232,7 +232,7 @@ public class ExcelTxtRead {
 	 * @param excelFile
 	 * @param sheetName
 	 * @param rowStart
-	 * @param colStart
+	 * @param colStart 实际起点，从1开始计算
 	 * @param rowEnd 值小于等于0时，读取全部行
 	 * @param colEnd 值小于等于0时，读取全部列
 	 * @return
