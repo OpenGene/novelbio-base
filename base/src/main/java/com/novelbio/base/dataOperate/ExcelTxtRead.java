@@ -241,7 +241,11 @@ public class ExcelTxtRead {
 		ArrayList<String[]> ls1=null;
 		if (ExcelOperate.isExcel(excelFile)) {
 			ExcelOperate excel = new ExcelOperate(excelFile);
-			ls1 = excel.ReadLsExcel(sheetName, rowStart, colStart, rowEnd, colEnd);
+			if (sheetName == null || sheetName.equals("")) {
+				ls1 = excel.ReadLsExcel(rowStart, colStart, rowEnd, colEnd);
+			} else {
+				ls1 = excel.ReadLsExcel(sheetName, rowStart, colStart, rowEnd, colEnd);
+			}
 			excel.Close();
 			return ls1;
 		}
