@@ -384,7 +384,7 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 	public Integer getCod2Start(int coord) {
 		if (cis5to3 == null) {
 			logger.error("不能确定该Item的方向");
-			return null;
+			return coord - getStartAbs();
 		}
 		if (cis5to3) {
 			return coord -numberstart;
