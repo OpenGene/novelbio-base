@@ -302,10 +302,13 @@ class TxtWrite implements Closeable {
 	 *            内部close 流
 	 * @throws Exception
 	 */
-	public<T> void writefile(List<T> lsContent){
+	public<T> void writefile(List<T> lsContent) {
+		if (lsContent == null) {
+			return;
+		}
 		try {
-			for (int i = 0; i < lsContent.size(); i++) {
-				outputStream.write(lsContent.get(i).toString().getBytes());
+			for (T t : lsContent) {
+				outputStream.write(t.toString().getBytes());
 				outputStream.write(TxtReadandWrite.ENTER_LINUX.getBytes());
 			}
 			outputStream.flush();

@@ -14,14 +14,14 @@ import org.apache.log4j.Logger;
  */
 public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements Cloneable {
 	private static final long serialVersionUID = -3356076601369239937L;
-	private static Logger logger = Logger.getLogger(ListAbs.class);
+	private static final Logger logger = Logger.getLogger(ListAbs.class);
 	/**保存某个坐标到所在的内含子/外显子起点的距离 */
 	HashMap<Integer, Integer> hashLocExInStart;
 	/** 保存某个坐标到所在的内含子/外显子终点的距离 */
 	HashMap<Integer, Integer> hashLocExInEnd;
 	/** 本条目的名字 */
 	protected String listName;
-	/** 方向 */
+	/** List的方向 */
 	Boolean cis5to3 = null;
 	
 	public void setName(String listName) {
@@ -50,15 +50,19 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
  	}
 	/**
 	 * 返回实际第num个element间区的长度
-	 * @param num 实际数目
+	 * @param num 实际数目，必须小于sizeNumber
 	 * @return
 	 */
 	public int getInterGenic(int num) {
-		if (cis5to3 == null) {
-			return get(num).getStartAbs() - get(num - 1).getEndAbs();
+		if (num < 0 || num > size() - 1) {
+			throw new ArrayIndexOutOfBoundsException();
 		}
-		else {
-			return Math.abs(get(num).getStartCis() - get(num - 1).getEndCis());
+		if (cis5to3 == null) {
+			return Math.abs(get(num + 1).getStartAbs() - get(num).getEndAbs());
+		} else if (cis5to3) {
+			return Math.abs(get(num + 1).getStartAbs() - get(num).getEndAbs());
+		} else {
+			return Math.abs(get(num).getStartAbs() - get(num+1).getEndAbs());
 		}
 	}
 	/**
@@ -71,19 +75,13 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 	}
 	
 	public int getLen() {
-		if (cis5to3 != null) {
-			return Math.abs(get(0).getStartCis() - get(size()-1).getEndCis()) + 1;
- 		}
-		else {
-			if (size() == 1) {
-				return get(0).getLength();
+		if (size() == 1) {
+			return get(0).getLength();
+		} else {
+			if (get(0).getStartAbs() < get(1).getStartAbs()) {
+				return get(size()-1).getEndAbs() - get(0).getStartAbs();
 			} else {
-				if (get(0).getStartAbs() < get(1).getStartAbs()) {
-					return get(size()-1).getEndAbs() - get(0).getStartAbs();
-				}
-				else {
-					return get(0).getEndAbs() - get(size()-1).getStartAbs();
-				}
+				return get(0).getEndAbs() - get(size()-1).getStartAbs();
 			}
 		}
 	}
@@ -149,17 +147,18 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 	}
 	/** 根据方向返回 */
 	public int getStart() {
-		if (cis5to3 != null) {
-			return get(0).getStartCis();
+		if (cis5to3 == null || cis5to3) {
+			return get(0).getStartAbs();
+		} else {
+			return get(0).getEndAbs();
 		}
-		return get(0).getStartAbs();
 	}
 	/** 根据方向返回 */
 	public int getEnd() {
-		if (cis5to3 != null) {
-			return get(size() - 1).getEndCis();
+		if (cis5to3 == null || cis5to3) {
+			return get(size() - 1).getEndAbs();
 		}
-		return get(size() - 1).getEndAbs();
+		return get(size() - 1).getStartAbs();
 	}
 	
 	/**
@@ -171,21 +170,29 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 	 * @param loc2 第二个坐标
 	 */
 	public int getLocDistmRNA(int loc1, int loc2) {
-		int locSmall = 0; int locBig = 0;
-		if (isCis5to3()) {
-			locSmall = Math.min(loc1, loc2);  locBig = Math.max(loc1, loc2);
+		int locNum1 = getNumCodInEle(loc1); int locNum2 = getNumCodInEle(loc2);
+		if (locNum1 <= 0 || locNum2 <= 0) return ListCodAbs.LOC_ORIGINAL;
+		
+		int locSmall = 0, locBig = 0;
+		int locSmallExInNum = 0, locBigExInNum = 0;
+		if (locNum1 < locNum2) {
+			locSmall = loc1; locSmallExInNum = locNum1;
+			locBig = loc2; locBigExInNum = locNum2;
+		} else if (locNum1 > locNum2) {
+			locSmall = loc2; locSmallExInNum = locNum2;
+			locBig = loc1; locBigExInNum = locNum1;
+		} else {
+			E e = get(locNum1 - 1);
+			if (e.isCis5to3() == null || e.isCis5to3()) {
+				locSmall = loc1; locBig = loc2;
+			} else {
+				locSmall = loc2; locBig = loc1;
+			}
+			locSmallExInNum = locNum1;
+			locBigExInNum = locNum1;
 		}
-		else {
-			locSmall = Math.max(loc1, loc2);  locBig = Math.min(loc1, loc2);
-		}
-		int locSmallExInNum = getNumCodInEle(locSmall); 
-		int locBigExInNum = getNumCodInEle(locBig);
 		
-		int distance = ListCodAbs.LOC_ORIGINAL;
-		
-		if (locSmallExInNum <= 0 || locBigExInNum <= 0) 
-			return distance;
-		
+		int distance = 0;
 		locSmallExInNum--; locBigExInNum--;
 		if (locSmallExInNum == locBigExInNum) {
 			distance = locBig - locSmall;
@@ -217,18 +224,11 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 		int loc2ExInStart = -1000000000;
 		int exIntronNum = getNumCodInEle(location);
 		int NumExon = Math.abs(exIntronNum) - 1; //实际数量减去1，方法内用该变量运算
+		E element = get(NumExon);
 		if (exIntronNum > 0) {
-			if (cis5to3 != null)
-				loc2ExInStart = Math.abs(location - get(NumExon).getStartCis());//距离本外显子起始 nnnnnnnnC
-			else
-				loc2ExInStart = Math.abs(location - get(NumExon).getStartAbs());//距离本外显子起始 nnnnnnnnC
-		}
-		else if(exIntronNum < 0) 
-		{   //0-0 0-1        1-0 1-1          2-0 2-1            3-0  3-1   cood     4-0      4-1               5
-			if (cis5to3 != null) 
-				loc2ExInStart = Math.abs(location - get(NumExon).getEndCis()) -1;// 距前一个外显子 NnnnCnnnn
-			else
-				loc2ExInStart = Math.abs(location - get(NumExon).getEndAbs()) -1;// 距前一个外显子 NnnnCnnnn
+			loc2ExInStart = Math.abs(element.getCod2Start(location));//距离本外显子起始 nnnnnnnnC
+		} else if(exIntronNum < 0) {   //0-0 0-1        1-0 1-1          2-0 2-1            3-0  3-1   cood     4-0      4-1               5
+			loc2ExInStart = Math.abs(element.getCod2End(location)) - 1;// 距前一个外显子 NnnnCnnnn
 		}
 		hashLocExInStart.put(location, loc2ExInStart);
 		return loc2ExInStart;
@@ -250,19 +250,13 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 		int exIntronNum = getNumCodInEle(location);
 		int NumExon = Math.abs(exIntronNum) - 1; //实际数量减去1，方法内用该变量运算
 		if (exIntronNum > 0) {
-			if (cis5to3 != null) {
-				loc2ExInEnd = Math.abs(get(NumExon).getEndCis() - location);//距离本外显子终止  Cnnnnnnn
-			} else {
-				loc2ExInEnd = Math.abs(get(NumExon).getEndAbs() - location);//距离本外显子终止  Cnnnnnnn
-			}
+			E element = get(NumExon);
+			loc2ExInEnd = Math.abs(element.getCod2End(location));//距离本外显子终止  Cnnnnnnn}
 		}
 		//0-0 0-1        1-0 1-1          2-0 2-1            3-0  3-1   cood     4-0      4-1               5
 		else if(exIntronNum < 0) {
-			if (cis5to3 != null) {
-				 loc2ExInEnd = Math.abs(get(NumExon+1).getStartCis() - location) - 1;// 距后一个外显子 nnCnnnnN
-			} else {
-				 loc2ExInEnd = Math.abs(get(NumExon+1).getStartAbs() - location) - 1;// 距后一个外显子 nnCnnnnN
-			}
+			E element = get(NumExon+1);
+			loc2ExInEnd = Math.abs(element.getCod2Start(location)) - 1;
 		}
 		hashLocExInEnd.put(location, loc2ExInEnd);
 		return loc2ExInEnd;
@@ -685,13 +679,13 @@ class BinarySearch {
 		int beginnum = 0;
 		int number = 0;
 		// 在第一个Item之前
-		if (Coordinate < lsElement.get(beginnum).getStartCis()){
+		if (Coordinate < lsElement.get(beginnum).getStartAbs()){
 			coordLocationInfo.setElementInsideOutSideNum(0);
 			return coordLocationInfo;
 		}
 		// 在最后一个Item之后
-		else if (Coordinate >= lsElement.get(endnum).getStartCis()) {
-			if (Coordinate > lsElement.get(endnum).getEndCis()) {
+		else if (Coordinate >= lsElement.get(endnum).getStartAbs()) {
+			if (Coordinate > lsElement.get(endnum).getEndAbs()) {
 				coordLocationInfo.setElementInsideOutSideNum(-lsElement.size());
 			}
 			else {
@@ -701,24 +695,24 @@ class BinarySearch {
 		}
 		do {
 			number = (beginnum + endnum + 1) / 2;// 3/2=1,5/2=2
-			if (Coordinate == lsElement.get(number).getStartCis()) {
+			if (Coordinate == lsElement.get(number).getStartAbs()) {
 				beginnum = number;
 				endnum = number + 1;
 				break;
 			}
-			else if (Coordinate < lsElement.get(number).getStartCis()
+			else if (Coordinate < lsElement.get(number).getStartAbs()
 					&& number != 0) {
 				endnum = number;
 			} else {
 				beginnum = number;
 			}
 		} while ((endnum - beginnum) > 1);
-		if (Coordinate <= lsElement.get(beginnum).getEndCis())// 不知道会不会出现PeakNumber比biginnum小的情况
+		if (Coordinate <= lsElement.get(beginnum).getEndAbs())// 不知道会不会出现PeakNumber比biginnum小的情况
 		{ // location在基因内部
 			coordLocationInfo.setElementInsideOutSideNum(beginnum + 1);
 			return coordLocationInfo;
 		}
-		else if (Coordinate >= lsElement.get(endnum).getStartCis())// 不知道会不会出现PeakNumber比biginnum小的情况
+		else if (Coordinate >= lsElement.get(endnum).getStartAbs())// 不知道会不会出现PeakNumber比biginnum小的情况
 		{ // location在基因内部
 			coordLocationInfo.setElementInsideOutSideNum(endnum + 1);
 			return coordLocationInfo;
@@ -748,39 +742,37 @@ class BinarySearch {
 		int beginnum = 0;
 		int number = 0;
 		// 在第一个Item之前
-		if (Coordinate > lsElement.get(beginnum).getStartCis()){
+		if (Coordinate > lsElement.get(beginnum).getEndAbs()){
 			coordLocationInfo.setElementInsideOutSideNum(0);
 			return coordLocationInfo;
 		}
 		// 在最后一个Item之后
-		else if (Coordinate <= lsElement.get(endnum).getStartCis()) {
-			if (Coordinate < lsElement.get(endnum).getEndCis()) {
+		else if (Coordinate <= lsElement.get(endnum).getEndAbs()) {
+			if (Coordinate < lsElement.get(endnum).getStartAbs()) {
 				coordLocationInfo.setElementInsideOutSideNum(-lsElement.size());
-			}
-			else {
+			} else {
 				coordLocationInfo.setElementInsideOutSideNum(lsElement.size());
 			}
 			return coordLocationInfo;
 		}
 		do {
 			number = (beginnum + endnum + 1) / 2;// 3/2=1,5/2=2
-			if (Coordinate == lsElement.get(number).getStartCis()) {
+			if (Coordinate == lsElement.get(number).getEndAbs()) {
 				beginnum = number;
 				endnum = number + 1;
 				break;
 			}
-			else if (Coordinate > lsElement.get(number).getStartCis()
-					&& number != 0) {
+			else if (Coordinate > lsElement.get(number).getEndAbs() && number != 0) {
 				endnum = number;
 			} else {
 				beginnum = number;
 			}
 		} while ((endnum - beginnum) > 1);
-		if (Coordinate >= lsElement.get(beginnum).getEndCis()) { // location在基因内部
+		if (Coordinate >= lsElement.get(beginnum).getStartAbs()) { // location在基因内部
 			coordLocationInfo.setElementInsideOutSideNum(beginnum + 1);
 			return coordLocationInfo;
 		}
-		else if (Coordinate <= lsElement.get(endnum).getStartCis()) 
+		else if (Coordinate <= lsElement.get(endnum).getEndAbs()) 
 		{// location在基因内部
 			coordLocationInfo.setElementInsideOutSideNum(endnum + 1);
 			return coordLocationInfo;
