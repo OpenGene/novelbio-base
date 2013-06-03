@@ -170,21 +170,29 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 	 * @param loc2 第二个坐标
 	 */
 	public int getLocDistmRNA(int loc1, int loc2) {
-		int locSmall = 0; int locBig = 0;
-		if (isCis5to3()) {
-			locSmall = Math.min(loc1, loc2);  locBig = Math.max(loc1, loc2);
+		int locNum1 = getNumCodInEle(loc1); int locNum2 = getNumCodInEle(loc2);
+		if (locNum1 <= 0 || locNum2 <= 0) return ListCodAbs.LOC_ORIGINAL;
+		
+		int locSmall = 0, locBig = 0;
+		int locSmallExInNum = 0, locBigExInNum = 0;
+		if (locNum1 < locNum2) {
+			locSmall = loc1; locSmallExInNum = locNum1;
+			locBig = loc2; locBigExInNum = locNum2;
+		} else if (locNum1 > locNum2) {
+			locSmall = loc2; locSmallExInNum = locNum2;
+			locBig = loc1; locBigExInNum = locNum1;
+		} else {
+			E e = get(locNum1 - 1);
+			if (e.isCis5to3() == null || e.isCis5to3()) {
+				locSmall = loc1; locBig = loc2;
+			} else {
+				locSmall = loc2; locBig = loc1;
+			}
+			locSmallExInNum = locNum1;
+			locBigExInNum = locNum1;
 		}
-		else {
-			locSmall = Math.max(loc1, loc2);  locBig = Math.min(loc1, loc2);
-		}
-		int locSmallExInNum = getNumCodInEle(locSmall); 
-		int locBigExInNum = getNumCodInEle(locBig);
 		
-		int distance = ListCodAbs.LOC_ORIGINAL;
-		
-		if (locSmallExInNum <= 0 || locBigExInNum <= 0) 
-			return distance;
-		
+		int distance = 0;
 		locSmallExInNum--; locBigExInNum--;
 		if (locSmallExInNum == locBigExInNum) {
 			distance = locBig - locSmall;

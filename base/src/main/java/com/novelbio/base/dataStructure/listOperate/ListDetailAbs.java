@@ -90,7 +90,9 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 	public ListDetailAbs(ListAbs<? extends ListDetailAbs> listAbs, String ItemName, Boolean cis5to3) {
 		this.listAbs = listAbs;
 		this.parentName = listAbs.getName();
-		this.setItemName.add(ItemName);
+		if (ItemName != null) {
+			this.setItemName.add(ItemName);
+		}
 		this.cis5to3 = cis5to3;
 	}
 	public void setParentListAbs(ListAbs<? extends ListDetailAbs> listAbs) {
