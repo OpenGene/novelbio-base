@@ -48,7 +48,7 @@ public class Volcano {
 	 * @param colPvalue
 	 */
 	
-	public static void main(String[] args) {
+public void test() {
 		List<List<String>> lsls = ExcelTxtRead.readLsExcelTxtls("/home/novelbio/桌面/project/difGene/1.xls", 1);
 		List<Double> lsDoubles = new ArrayList<Double>();
 		for (List<String> lsList : lsls) {
@@ -88,7 +88,7 @@ public class Volcano {
 		volcano.setLogPvalueBorder(a);
 		
 		PlotScatter plotScatter = volcano.drawVolimage("FDR");
-		volcano.saveAs(plotScatter, 1000, 1000, "/home/novelbio/桌面/project/difGene/2_volcano.png");
+		volcano.saveAs(plotScatter, 1000, 1000, "/home/novelbio/桌面/project/difGene/2_volcano.jpg");
 		
 	}
 	

@@ -142,6 +142,7 @@ public abstract  class PlotNBC{
 				e.printStackTrace();
 			}
 		} else {
+		
 			try {
 				FileOutputStream fileOutputStream = new FileOutputStream(fileOut);
 				Iterator<ImageWriter> writers = ImageIO.getImageWritersByMIMEType("image/png");
