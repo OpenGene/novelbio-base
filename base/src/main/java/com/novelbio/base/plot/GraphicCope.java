@@ -9,6 +9,7 @@ import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -268,7 +269,7 @@ public class GraphicCope {
 		graphics2d.dispose();
 		return img;
 	}
-
+	
 	/**
 	 * 变更图像为指定大小
 	 * 
@@ -485,7 +486,7 @@ public class GraphicCope {
 		}
 	}
 
-	public static int getLength(String text) {
+	private static int getLength(String text) {
 		int length = 0;
 		for (int i = 0; i < text.length(); i++) {
 			if (new String(text.charAt(i) + "").getBytes().length > 1) {
@@ -496,6 +497,43 @@ public class GraphicCope {
 		}
 		return length / 2;
 	}
+	
+	/**
+	 * @param horizon 是否为水平连接，否则为垂直合并
+	 * @param sepPix 两张图片中间间隔多少像素
+	 * @param bufferedImages
+	 * @return
+	 */
+	public static BufferedImage combineBfImage( boolean horizon, int sepPix, BufferedImage... bufferedImages) {
+		if (bufferedImages.length == 0) return null;
+		
+		int type = ColorModel.TRANSLUCENT;
+		int width = bufferedImages[0].getWidth(), height = bufferedImages[0].getHeight();
+		for (int i = 1; i < bufferedImages.length; i++) {
+			BufferedImage bufferedImage = bufferedImages[i];
+			if (horizon) {
+				width = width + sepPix + bufferedImage.getWidth();
+			} else {
+				height = height + sepPix + bufferedImage.getHeight();
+			}
+		}
+		
+		BufferedImage bufferedImageResult = new BufferedImage(width, height, type);
+		Graphics2D graphics2d = bufferedImageResult.createGraphics();
+		int xLoc = 0, yLoc = 0;
+		for (BufferedImage bufferedImage : bufferedImages) {
+			graphics2d.drawImage(bufferedImage, xLoc, yLoc, bufferedImage.getWidth(), bufferedImage.getHeight(), null);
+			if (horizon) {
+				xLoc = xLoc + bufferedImage.getWidth() + sepPix;
+			} else {
+				yLoc = yLoc + bufferedImage.getHeight() + sepPix;
+			}
+		}
+
+		return bufferedImageResult;
+	}
+	
+	
 }
 
 class ImageScale {
@@ -796,5 +834,64 @@ class BufferedImageTranscoder extends ImageTranscoder {
 	}
 
 	private BufferedImage img = null;
+
+}
+
+
+
+class CombinePic {
+	public static void xPic(){//横向处理图片
+		try {
+			/* 1 读取第一张图片*/ 
+			File fileOne = new File("E:\\1.png");
+			BufferedImage imageFirst = ImageIO.read(fileOne);
+			int width = imageFirst.getWidth();// 图片宽度
+			int height = imageFirst.getHeight();// 图片高度
+			int[] imageArrayFirst = new int[width * height];// 从图片中读取RGB
+			imageArrayFirst = imageFirst.getRGB(0, 0, width, height, imageArrayFirst, 0, width);
+
+			/* 1 对第二张图片做相同的处理 */
+			File fileTwo = new File("E:\\2.png");
+			BufferedImage imageSecond = ImageIO.read(fileTwo);
+			int[] imageArraySecond = new int[width * height];
+			imageArraySecond = imageSecond.getRGB(0, 0, width, height, imageArraySecond, 0, width);
+			
+			// 生成新图片 
+			BufferedImage imageResult = new BufferedImage(width * 2 , height,BufferedImage.TYPE_INT_RGB);
+			imageResult.setRGB(0, 0, width, height, imageArrayFirst, 0, width);// 设置左半部分的RGB
+			imageResult.setRGB(width, 0, width, height, imageArraySecond, 0, width);// 设置右半部分的RGB
+			File outFile = new File("D:\\out.jpg");
+			ImageIO.write(imageResult, "jpg", outFile);// 写图片
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void yPic(){//纵向处理图片
+		try {
+			/* 1 读取第一张图片*/ 
+			File fileOne = new File("D:\\1.GIF");
+			BufferedImage imageFirst = ImageIO.read(fileOne);
+			int width = imageFirst.getWidth();// 图片宽度
+			int height = imageFirst.getHeight();// 图片高度
+			int[] imageArrayFirst = new int[width * height];// 从图片中读取RGB
+			imageArrayFirst = imageFirst.getRGB(0, 0, width, height, imageArrayFirst, 0, width);
+
+			/* 1 对第二张图片做相同的处理 */
+			File fileTwo = new File("D:\\1.GIF");
+			BufferedImage imageSecond = ImageIO.read(fileTwo);
+			int[] imageArraySecond = new int[width * height];
+			imageArraySecond = imageSecond.getRGB(0, 0, width, height, imageArraySecond, 0, width);
+			
+			// 生成新图片 
+			BufferedImage imageResult = new BufferedImage(width, height * 2,BufferedImage.TYPE_INT_RGB);
+			imageResult.setRGB(0, 0, width, height, imageArrayFirst, 0, width);// 设置左半部分的RGB
+			imageResult.setRGB(0, height, width, height, imageArraySecond, 0, width);// 设置右半部分的RGB
+			File outFile = new File("D:\\out.jpg");
+			ImageIO.write(imageResult, "jpg", outFile);// 写图片
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 }
