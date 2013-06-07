@@ -26,4 +26,6 @@ public class SepSign {
 	 * "#/#"
 	 */
 	public static final String SEP_INFO_SAMEDB = "#/#";
+	
+	public static final String SEP_AND = "&&";
 }
