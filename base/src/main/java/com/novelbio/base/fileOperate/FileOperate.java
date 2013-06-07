@@ -3,7 +3,6 @@ package com.novelbio.base.fileOperate;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -12,26 +11,14 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.StringTokenizer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-import org.omg.CosNaming._BindingIteratorImplBase;
 
-//import com.novelbio.analysis.tools.compare.runCompSimple;
 import com.novelbio.base.cmd.CmdOperate;
 import com.novelbio.base.dataStructure.PatternOperate;
+//import com.novelbio.analysis.tools.compare.runCompSimple;
 
 public class FileOperate {
-	public static void main(String[] args) {
-		ArrayList<String> lsFileName = FileOperate.getFoldFileNameLs("/media/winF/NBC/Project/MethyArray_QZL110907/QZL_Fifth/FastQ/result/",
-				"mir.+All", "txt");
-		for (String string : lsFileName) {
-			System.out.println(string);
-		}
-	}
 	private static Logger logger = Logger.getLogger(FileOperate.class);
 
 	/**
