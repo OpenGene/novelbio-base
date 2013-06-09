@@ -568,7 +568,7 @@ public class PlotScatter extends PlotNBCInteractive{
 		}
 		painted = false;
 	}
-    
+
     /** 
      * x轴上的刻度下的文字字体
      * @param fontTicks 字体样式
@@ -626,12 +626,12 @@ public class PlotScatter extends PlotNBCInteractive{
      * @param spaceY 坐标刻度的距离  0为默认
      * @param fontTicksYRotation 字体旋转角度
      */
-    public void setAxisTicksYFont(Font fontTicks,double spaceY,Number fontTicksYRotation) {
+    public void setAxisTicksYFont(Font fontTicks,double spaceY, Number fontTicksYRotation) {
 		if (fontTicks != null) {
 			this.fontTicksY = fontTicks;
 		}
 		if(fontTicksYRotation != null){
-			this.fontTitleYRotation = fontTicksYRotation;
+			this.fontTicksXRotation = fontTicksYRotation;
 		}
 		if (spaceY != 0)
     		this.spaceY = spaceY;
@@ -666,7 +666,7 @@ public class PlotScatter extends PlotNBCInteractive{
      * @param size  例如{@link PlotSctter#INSETS_SIZE_S}
      */
     public void setInsets(int size) {
-    	double insetsTop = 20, insetsLeft = 83, insetsBottom = 68, insetsRight = 40;
+    	double insetsTop = 20, insetsLeft = 90, insetsBottom = 68, insetsRight = 40;
     	double insetsX = 5, insetsY = 2;
     	double scaleInsets = 1; double scaleFont = 1;
     	if (size == INSETS_SIZE_S) {
@@ -691,7 +691,7 @@ public class PlotScatter extends PlotNBCInteractive{
 		}
     	this.insetsTop = (insetsTop * scaleInsets); this.insetsLeft = (insetsLeft * scaleInsets);
 		this.insetsBottom = (insetsBottom * scaleInsets); this.insetsRight = (insetsRight * scaleInsets);	
-		this.insetsX = 1; this.insetsY =  1;
+		this.insetsX = 2; this.insetsY =  5;
     	this.fontTitleX = new Font(Font.SANS_SERIF, Font.PLAIN, (int)(20*scaleFont));
     	this.fontTitleY = new Font(Font.SANS_SERIF, Font.PLAIN, (int)(20*scaleFont));
 		this.fontTicksX = new Font(Font.SANS_SERIF, Font.PLAIN, (int)(15*scaleFont));
