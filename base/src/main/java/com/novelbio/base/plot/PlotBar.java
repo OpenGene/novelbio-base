@@ -85,5 +85,38 @@ public class PlotBar extends PlotScatter{
     		return y;
     	}
     }
-
+	
+	/** 给定Y轴大小，返回Y的间隔
+	 * 要把间隔凑个整数。
+	 * 譬如Y轴为1120，分割为5份的时候是224
+	 * 凑成整数就是200，其他类推  
+	 * @param axis 输入的坐标轴长度
+	 * @param sepNum 要分成几份
+	 */
+	public static double getSpace(double axis, int sepNum) {
+		double sep = axis/sepNum;
+		double septmp = sep;
+		double fold = 1;
+		boolean multip = false;
+		if (sep >= 10) {
+			multip = true;
+			while (septmp >= 10) {
+				septmp = septmp/10;
+				fold = fold * 10;
+			}
+		} else {
+			while (septmp < 1) {
+				septmp = septmp*10;
+				fold = fold * 10;
+			}
+		}
+		double sepResult = (int)(septmp + 0.5);
+		if (multip) {
+			sepResult = sepResult * fold;
+		} else {
+			sepResult = sepResult / fold;
+		}
+		
+		return sepResult;
+	}
 }

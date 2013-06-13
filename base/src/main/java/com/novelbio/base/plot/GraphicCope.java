@@ -14,7 +14,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,6 +35,7 @@ import org.faceless.graph2.SVGOutput;
 
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
+import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.fileOperate.FileOperate;
 
 /**
@@ -505,12 +510,22 @@ public class GraphicCope {
 	 * @return
 	 */
 	public static BufferedImage combineBfImage( boolean horizon, int sepPix, BufferedImage... bufferedImages) {
-		if (bufferedImages.length == 0) return null;
+		List<BufferedImage> lsBufferedImages = ArrayOperate.converArray2List(bufferedImages);
+		return combineBfImage(horizon, sepPix, lsBufferedImages);
+	}
+	/**
+	 * @param horizon 是否为水平连接，否则为垂直合并
+	 * @param sepPix 两张图片中间间隔多少像素
+	 * @param bufferedImages
+	 * @return
+	 */
+	public static BufferedImage combineBfImage( boolean horizon, int sepPix, List<BufferedImage> bufferedImages) {
+		if (bufferedImages.size() == 0) return null;
 		
 		int type = ColorModel.TRANSLUCENT;
-		int width = bufferedImages[0].getWidth(), height = bufferedImages[0].getHeight();
-		for (int i = 1; i < bufferedImages.length; i++) {
-			BufferedImage bufferedImage = bufferedImages[i];
+		int width = bufferedImages.get(0).getWidth(), height = bufferedImages.get(0).getHeight();
+		for (int i = 1; i < bufferedImages.size(); i++) {
+			BufferedImage bufferedImage = bufferedImages.get(i);
 			if (horizon) {
 				width = width + sepPix + bufferedImage.getWidth();
 			} else {
@@ -532,7 +547,6 @@ public class GraphicCope {
 
 		return bufferedImageResult;
 	}
-	
 	
 }
 
