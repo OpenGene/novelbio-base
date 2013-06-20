@@ -1,6 +1,7 @@
 package com.novelbio.base.dataOperate;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -63,6 +64,7 @@ import org.apache.log4j.Logger;
 //import com.sun.xml.internal.xsom.impl.WildcardImpl.Other;
 
 /**
+ * <b>单个HttpFetch用完后务必调用方法{@link #close()} 来释放连接，但是不能使用close</b><br>
  * 一次只能选择一项，要么post，要么get
  * 
  * 还没有设定获得网页的信息，譬如404或者200等
@@ -72,7 +74,7 @@ import org.apache.log4j.Logger;
  * @author zongjie
  *
  */
-public class HttpFetch {
+public class HttpFetch implements Closeable {
 	private static Logger logger = Logger.getLogger(HttpFetch.class);
 	
 	public static final int HTTPTYPE_POST = 2;
@@ -466,22 +468,13 @@ public class HttpFetch {
 	
 	/** 除了httpclient 其他都关掉 */
 	private void closeStream() {
-		try { instream.close(); } catch (Exception e) { }
+		try { instream = null; } catch (Exception e) { }
 		try { httpRequest.releaseConnection(); } catch (Exception e) { }
 		try { httpRequest.abort(); } catch (Exception e) { }
 	}
 	
-	/**
-	 * 释放连接
-	 */
-	public void relaseConnection() {
-		closeStream();
-	}
-	
 	public void close() {
 		closeStream();
-		try { cm.shutdown(); } catch (Exception e) { }
-		cm = null;
 	}
 	public static void ressetCM() {
 		if (cm != null) {

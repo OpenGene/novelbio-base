@@ -458,10 +458,7 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 			result.cis5to3 = cis5to3;
 			result.downGeneEnd3UTR = downGeneEnd3UTR;
 			result.downTss = downTss;
-			result.setItemName = new LinkedHashSet<String>();
-			for (String itemName : setItemName) {
-				result.setItemName.add(itemName);
-			}
+			result.setItemName = new LinkedHashSet<String>(setItemName);
 //			result.itemNum = itemNum;
 			result.readsInElementNumber = readsInElementNumber;
 			result.numberend = numberend;
