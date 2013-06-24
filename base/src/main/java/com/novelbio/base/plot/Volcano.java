@@ -9,6 +9,7 @@ import com.novelbio.base.dataOperate.ExcelTxtRead;
 
 /**
  * 火山图绘制
+ * 
  * @author zong0jie
  */
 public class Volcano {
@@ -18,101 +19,73 @@ public class Volcano {
 	double logPvalueBorder = 1.5;
 	/** 是否需要log转换 */
 	boolean logTransform = false;
-	
-	/**横坐标和纵坐标的最大值和最小值*/
+
+	/** 横坐标和纵坐标的最大值和最小值 */
 	double minX;
 	double maxX;
 	double maxY;
-		
-	//也可以直接输入logFC和Pvalue的值
+
+	// 也可以直接输入logFC和Pvalue的值
 	List<double[]> lsLogFC2Pvalue = new ArrayList<double[]>();
-	
+
+	public static void main(String[] args) {
+		Volcano volcano = new Volcano();
+		volcano.test();
+	}
+
 	public void setMinX(double minX) {
 		this.minX = minX;
 	}
-	
+
 	public void setMaxX(double maxX) {
 		this.maxX = maxX;
 	}
-	
+
 	public void setMaxY(double maxY) {
 		this.maxY = maxY;
 	}
 
-	
 	/**
 	 * 输入一个读好的文本，并制定列，实际列。然后获得待画图的数据
+	 * 
 	 * @param lslsExcel
 	 * @param colLogFC
 	 * @param colPvalue
 	 */
-	
+
 	public void test() {
-		List<List<String>> lsls = ExcelTxtRead.readLsExcelTxtls("/home/novelbio/桌面/project/difGene/1.xls", 1);
-		List<Double> lsDoubles = new ArrayList<Double>();
-		for (List<String> lsList : lsls) {
-			double pvalue;
-			try {
-				 pvalue = Double.parseDouble(lsList.get(5));
-				 lsDoubles.add(pvalue);
-			} catch (NumberFormatException e) {
-				pvalue = 0;
-			}
-		}
-		Collections.sort(lsDoubles);
-		int b = (int)(lsDoubles.size()*0.01);
-		System.out.println(b);
-		Double pvalue =-Math.log10(lsDoubles.get(b));
-		List<Double> lsLogFC = new ArrayList<Double>();
-		for (List<String> lsList : lsls) {
-			double LogFC;
-			try {
-				LogFC = Double.parseDouble(lsList.get(4));
-				lsLogFC.add(LogFC);
-			} catch (NumberFormatException e) {
-				LogFC = 0;
-			}
-		}
-		Collections.sort(lsLogFC);
-		double logFC = lsLogFC.get((int)(lsLogFC.size()*0.99));
-		
+		List<List<String>> lsls = ExcelTxtRead.readLsExcelTxtls("/home/novelbio/桌面/project/difGene/1、Difference Expression/1、Difference Expression_result/1.xls", 1);
 		Volcano volcano = new Volcano();
-		volcano.setMaxY(pvalue);
-		volcano.setMinX(-logFC);
-		volcano.setMaxX(logFC);
+		volcano.setMaxX(2);
+		volcano.setMinX(-2);
+		volcano.setMaxY(3.5);
 		volcano.setLogFC2Pvalue(lsls, 4, 5);
-		volcano.setLogFCBorder(1);
-		double a = -Math.log10(0.01);
-		System.out.println(a);
-		volcano.setLogPvalueBorder(a);
-		
 		PlotScatter plotScatter = volcano.drawVolimage("FDR");
-		volcano.saveAs(plotScatter, 1000, 1000, "/home/novelbio/桌面/project/difGene/2_volcano.jpg");
-		
+		plotScatter.saveToFile("/home/novelbio/桌面/1.png", 1000, 1000);	
 	}
-	
-	
+
 	public void setLogFC2Pvalue(List<List<String>> lslsExcel, int colLogFC, int colPvalue) {
-		//这里不需要--
-//		colLogFC--; colPvalue--;
+		// 这里不需要--
+		// colLogFC--; colPvalue--;
 		lsLogFC2Pvalue = new ArrayList<double[]>();
 		for (List<String> list : lslsExcel) {
 			try {
 				double logFC = Double.parseDouble(list.get(colLogFC));
 				double pvalue = Double.parseDouble(list.get(colPvalue));
-				double[] xy = new double[]{logFC, pvalue};
+				double[] xy = new double[] { logFC, pvalue };
 				lsLogFC2Pvalue.add(xy);
 			} catch (Exception e) {
 			}
 		}
 	}
-	
+
 	public void setLogFC2Pvalue(List<double[]> lsLogFC2Pvalue) {
 		this.lsLogFC2Pvalue = lsLogFC2Pvalue;
 	}
-	
+
 	/**
 	 * lsLogFC 和 lsPvalue的长度必须一致
+	 * 
 	 * @param lsLogFC
 	 * @param lsPvalue
 	 */
@@ -122,11 +95,11 @@ public class Volcano {
 			return;
 		}
 		for (int i = 0; i < lsLogFC.size(); i++) {
-			double[] logFC2Pvalue = new double[]{lsLogFC.get(i), lsPvalue.get(i)};
+			double[] logFC2Pvalue = new double[] { lsLogFC.get(i), lsPvalue.get(i) };
 			lsLogFC2Pvalue.add(logFC2Pvalue);
 		}
 	}
-	
+
 	/** 设定LogFC的边界 */
 	public void setLogFCBorder(double logFCBorder) {
 		this.logFCBorder = logFCBorder;
@@ -135,10 +108,12 @@ public class Volcano {
 	public void setLogPvalueBorder(double logPvalueBorder) {
 		this.logPvalueBorder = logPvalueBorder;
 	}
-	
+
 	/**
-	 *  画火山图
-	 * @param YTitle 轴上是什么
+	 * 画火山图
+	 * 
+	 * @param YTitle
+	 *            轴上是什么
 	 * @return
 	 */
 	public PlotScatter drawVolimage(String YTitle) {
@@ -175,21 +150,21 @@ public class Volcano {
 
 		/* 定义深蓝的的半透明的点 */
 		DotStyle dotStyleHalfBlue = new DotStyle();
-		Color halfBlue = new Color(16,78,139, 100);
+		Color halfBlue = new Color(16, 78, 139, 100);
 		dotStyleHalfBlue.setColor(halfBlue);
 		dotStyleHalfBlue.setStyle(DotStyle.STYLE_CYCLE);
 		dotStyleHalfBlue.setSize(DotStyle.SIZE_MB);
-		
-		/*画出分界线*/
-		DotStyle dotStyleBorder= new DotStyle();
+
+		/* 画出分界线 */
+		DotStyle dotStyleBorder = new DotStyle();
 		dotStyleBorder.setColor(Color.black);
 		dotStyleBorder.setStyle(DotStyle.STYLE_LINE);
 		dotStyleBorder.setSize(DotStyle.SIZE_M);
-		
+
 		for (double[] xy : lsLogFC2Pvalue) {
 			double x;
 			if (logTransform) {
-				x = Math.log(xy[0])/Math.log(2);
+				x = Math.log(xy[0]) / Math.log(2);
 			} else {
 				x = xy[0];
 			}
@@ -204,25 +179,25 @@ public class Volcano {
 				plotScatter.addXY(x, y, dotStyleHalfGrey);
 			}
 		}
-		/*添加一条与X平行的边界*/
-		double[] xBorder1 = {minX,maxX}; 
-		double[] yBorder1 = {logPvalueBorder,logPvalueBorder}; 
-	
+		/* 添加一条与X平行的边界 */
+		double[] xBorder1 = { minX, maxX };
+		double[] yBorder1 = { logPvalueBorder, logPvalueBorder };
+
 		plotScatter.addXY(xBorder1, yBorder1, dotStyleBorder);
-		
-		/*添加两条与Y平行的边界*/
-		double[] xBorder2 = {-logFCBorder,-logFCBorder}; 
-		double[] yBorder2 = {0,maxY}; 
+
+		/* 添加两条与Y平行的边界 */
+		double[] xBorder2 = { -logFCBorder, -logFCBorder };
+		double[] yBorder2 = { 0, maxY };
 		plotScatter.addXY(xBorder2, yBorder2, dotStyleBorder.clone());
 
-		double[] xBorder3 = {logFCBorder,logFCBorder};
+		double[] xBorder3 = { logFCBorder, logFCBorder };
 		double[] yBorder3 = yBorder2;
 		plotScatter.addXY(xBorder3, yBorder3, dotStyleBorder.clone());
 		return plotScatter;
 	}
-	
-	public void saveAs(PlotScatter plotScatter , int width , int height ,String outImageFile) {
+
+	public void saveAs(PlotScatter plotScatter, int width, int height, String outImageFile) {
 		plotScatter.saveToFile(outImageFile, width, height);
 	}
-	
+
 }

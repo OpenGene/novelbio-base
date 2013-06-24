@@ -691,7 +691,8 @@ public class PlotScatter extends PlotNBCInteractive{
 		}
     	this.insetsTop = (insetsTop * scaleInsets); this.insetsLeft = (insetsLeft * scaleInsets);
 		this.insetsBottom = (insetsBottom * scaleInsets); this.insetsRight = (insetsRight * scaleInsets);	
-		this.insetsX = 2; this.insetsY =  5;
+		//TODO 修改距离Y轴和X的值
+		this.insetsX = 1; this.insetsY =  1;
     	this.fontTitleX = new Font(Font.SANS_SERIF, Font.PLAIN, (int)(20*scaleFont));
     	this.fontTitleY = new Font(Font.SANS_SERIF, Font.PLAIN, (int)(20*scaleFont));
 		this.fontTicksX = new Font(Font.SANS_SERIF, Font.PLAIN, (int)(15*scaleFont));
