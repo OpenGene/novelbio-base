@@ -23,6 +23,9 @@ public class Volcano {
 	double minX;
 	double maxX;
 	double maxY;
+		
+	//也可以直接输入logFC和Pvalue的值
+	List<double[]> lsLogFC2Pvalue = new ArrayList<double[]>();
 	
 	public void setMinX(double minX) {
 		this.minX = minX;
@@ -35,11 +38,7 @@ public class Volcano {
 	public void setMaxY(double maxY) {
 		this.maxY = maxY;
 	}
-	
-	
-	
-	//也可以直接输入logFC和Pvalue的值
-	List<double[]> lsLogFC2Pvalue = new ArrayList<double[]>();
+
 	
 	/**
 	 * 输入一个读好的文本，并制定列，实际列。然后获得待画图的数据
@@ -48,7 +47,7 @@ public class Volcano {
 	 * @param colPvalue
 	 */
 	
-public void test() {
+	public void test() {
 		List<List<String>> lsls = ExcelTxtRead.readLsExcelTxtls("/home/novelbio/桌面/project/difGene/1.xls", 1);
 		List<Double> lsDoubles = new ArrayList<Double>();
 		for (List<String> lsList : lsls) {
