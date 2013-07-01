@@ -5,38 +5,39 @@ import java.io.File;
 import java.io.FileReader;
 
 import com.novelbio.base.dataOperate.TxtReadandWrite;
+import com.novelbio.base.fileOperate.FileOperate;
 
 public class CodeCounter {
 	public static void main(String[] args) {
-		CodeCounter codeCounter = new CodeCounter("/home/zong0jie/git/Novelbio-Bioinformatics-Analysis-Platform/src/main/java/com/novelbio", "/media/winD/fedora/codestatistics/allCodeLines.txt");
+		CodeCounter codeCounter = new CodeCounter("/home/zong0jie/software/git/NBCplatform/src/main/java/com/novelbio", "/media/winD/fedora/codestatistics/allCodeLines.txt");
 		
-		codeCounter = new CodeCounter("/home/zong0jie/git/Novelbio-Bioinformatics-Analysis-Platform/src/main/java/com/novelbio/analysis/annotation/functiontest", "/media/winD/fedora/codestatistics/functiontestCodeLines.txt");
+		codeCounter = new CodeCounter("/home/zong0jie/software/git/NBCplatform/src/main/java/com/novelbio/analysis/annotation/functiontest", "/media/winD/fedora/codestatistics/functiontestCodeLines.txt");
 
-		codeCounter = new CodeCounter("/home/zong0jie/git/Novelbio-Bioinformatics-Analysis-Platform/src/main/java/com/novelbio/project", "/media/winD/fedora/codestatistics/projectMinusCodeLines.txt");
-		codeCounter = new CodeCounter("/home/zong0jie/git/Novelbio-Bioinformatics-Analysis-Platform/src/test/java", "/media/winD/fedora/codestatistics/testCodeLines.txt");
+		codeCounter = new CodeCounter("/home/zong0jie/software/git/NBCplatform/src/main/java/com/novelbio/project", "/media/winD/fedora/codestatistics/projectMinusCodeLines.txt");
+		codeCounter = new CodeCounter("/home/zong0jie/software/git/NBCplatform/src/test/java", "/media/winD/fedora/codestatistics/testCodeLines.txt");
 		
-		codeCounter = new CodeCounter("/home/zong0jie/git/Novelbio-Bioinformatics-Analysis-Platform/src/main/java/com/novelbio/analysis/seq", "/media/winD/fedora/codestatistics/seqCodeLines.txt");
-		codeCounter = new CodeCounter("/home/zong0jie/git/Novelbio-Bioinformatics-Analysis-Platform/src/main/java/com/novelbio/base", "/media/winD/fedora/codestatistics/baseCodeLines.txt");
-		codeCounter = new CodeCounter("/home/zong0jie/git/Novelbio-Bioinformatics-Analysis-Platform/src/main/java/com/novelbio/database", "/media/winD/fedora/codestatistics/databaseCodeLines.txt");
-		codeCounter = new CodeCounter("/home/zong0jie/git/Novelbio-Bioinformatics-Analysis-Platform/src/main/java/com/novelbio/nbcgui", "/media/winD/fedora/codestatistics/nbcguiCodeLines.txt");
-		codeCounter = new CodeCounter("/home/zong0jie/git/Novelbio-Bioinformatics-Analysis-Platform/src/main/java/com/novelbio/nbcgui/GUI", "/media/winD/fedora/codestatistics/nbcguiGUICodeLines.txt");
-		codeCounter = new CodeCounter("/home/zong0jie/git/Novelbio-Bioinformatics-Analysis-Platform/src/main/java/com/novelbio/analysis/annotation", "/media/winD/fedora/codestatistics/annotationCodeLines.txt");
-		codeCounter = new CodeCounter("/home/zong0jie/git/Novelbio-Bioinformatics-Analysis-Platform/src/main/java/com/novelbio/analysis/diffexpress", "/media/winD/fedora/codestatistics/diffexpressCodeLines.txt");
-		codeCounter = new CodeCounter("/home/zong0jie/git/Novelbio-Bioinformatics-Analysis-Platform/src/main/java/com/novelbio/analysis/tools", "/media/winD/fedora/codestatistics/toolsCodeLines.txt");
-		codeCounter = new CodeCounter("/home/zong0jie/git/Novelbio-Bioinformatics-Analysis-Platform/src/main/java/com/novelbio/analysis/seq/resequencing", "/media/winD/fedora/codestatistics/resequencingCodeLines.txt");
-		codeCounter = new CodeCounter("/home/zong0jie/git/Novelbio-Bioinformatics-Analysis-Platform/src/main/java/com/novelbio/analysis/seq/resequencing/statistics", "/media/winD/fedora/codestatistics/resequencingstatisticsCodeLines.txt");
+		codeCounter = new CodeCounter("/home/zong0jie/software/git/NBCplatform/src/main/java/com/novelbio/analysis/seq", "/media/winD/fedora/codestatistics/seqCodeLines.txt");
+		codeCounter = new CodeCounter("/home/zong0jie/software/git/NBCplatform/src/main/java/com/novelbio/base", "/media/winD/fedora/codestatistics/baseCodeLines.txt");
+		codeCounter = new CodeCounter("/home/zong0jie/software/git/NBCplatform/src/main/java/com/novelbio/database", "/media/winD/fedora/codestatistics/databaseCodeLines.txt");
+		codeCounter = new CodeCounter("/home/zong0jie/software/git/NBCplatform/src/main/java/com/novelbio/nbcgui", "/media/winD/fedora/codestatistics/nbcguiCodeLines.txt");
+		codeCounter = new CodeCounter("/home/zong0jie/software/git/NBCplatform/src/main/java/com/novelbio/nbcgui/GUI", "/media/winD/fedora/codestatistics/nbcguiGUICodeLines.txt");
+		codeCounter = new CodeCounter("/home/zong0jie/software/git/NBCplatform/src/main/java/com/novelbio/analysis/annotation", "/media/winD/fedora/codestatistics/annotationCodeLines.txt");
+		codeCounter = new CodeCounter("/home/zong0jie/software/git/NBCplatform/src/main/java/com/novelbio/analysis/diffexpress", "/media/winD/fedora/codestatistics/diffexpressCodeLines.txt");
+		codeCounter = new CodeCounter("/home/zong0jie/software/git/NBCplatform/src/main/java/com/novelbio/analysis/tools", "/media/winD/fedora/codestatistics/toolsCodeLines.txt");
+		codeCounter = new CodeCounter("/home/zong0jie/software/git/NBCplatform/src/main/java/com/novelbio/analysis/seq/resequencing", "/media/winD/fedora/codestatistics/resequencingCodeLines.txt");
+		codeCounter = new CodeCounter("/home/zong0jie/software/git/NBCplatform/src/main/java/com/novelbio/analysis/seq/resequencing/statistics", "/media/winD/fedora/codestatistics/resequencingstatisticsCodeLines.txt");
 
-//		codeCounter = new CodeCounter("/home/zong0jie/git/Novelbio-Bioinformatics-Analysis-Platform/src/main/java/com/novelbio/analysis/seq/blast", "/media/winD/fedora/codestatistics/blastCodeLines.txt");
-//		codeCounter = new CodeCounter("/home/zong0jie/git/Novelbio-Bioinformatics-Analysis-Platform/src/main/java/com/novelbio/analysis/seq/blastZJ", "/media/winD/fedora/codestatistics/blastZJCodeLines.txt");
-//		codeCounter = new CodeCounter("/home/zong0jie/git/Novelbio-Bioinformatics-Analysis-Platform/src/main/java/com/novelbio/analysis/seq/chipseq", "/media/winD/fedora/codestatistics/chipseqCodeLines.txt");
-//		codeCounter = new CodeCounter("/home/zong0jie/git/Novelbio-Bioinformatics-Analysis-Platform/src/main/java/com/novelbio/analysis/seq/genomeNew", "/media/winD/fedora/codestatistics/genomeNewCodeLines.txt");
-//		codeCounter = new CodeCounter("/home/zong0jie/git/Novelbio-Bioinformatics-Analysis-Platform/src/main/java/com/novelbio/analysis/seq/HanYanRebsome", "/media/winD/fedora/codestatistics/HanYanRebsomeCodeLines.txt");
-//		codeCounter = new CodeCounter("/home/zong0jie/git/Novelbio-Bioinformatics-Analysis-Platform/src/main/java/com/novelbio/analysis/seq/mapping", "/media/winD/fedora/codestatistics/mappingCodeLines.txt");
+//		codeCounter = new CodeCounter("/home/zong0jie/software/git/NBCplatform/src/main/java/com/novelbio/analysis/seq/blast", "/media/winD/fedora/codestatistics/blastCodeLines.txt");
+//		codeCounter = new CodeCounter("/home/zong0jie/software/git/NBCplatform/src/main/java/com/novelbio/analysis/seq/blastZJ", "/media/winD/fedora/codestatistics/blastZJCodeLines.txt");
+//		codeCounter = new CodeCounter("/home/zong0jie/software/git/NBCplatform/src/main/java/com/novelbio/analysis/seq/chipseq", "/media/winD/fedora/codestatistics/chipseqCodeLines.txt");
+//		codeCounter = new CodeCounter("/home/zong0jie/software/git/NBCplatform/src/main/java/com/novelbio/analysis/seq/genomeNew", "/media/winD/fedora/codestatistics/genomeNewCodeLines.txt");
+//		codeCounter = new CodeCounter("/home/zong0jie/software/git/NBCplatform/src/main/java/com/novelbio/analysis/seq/HanYanRebsome", "/media/winD/fedora/codestatistics/HanYanRebsomeCodeLines.txt");
+//		codeCounter = new CodeCounter("/home/zong0jie/software/git/NBCplatform/src/main/java/com/novelbio/analysis/seq/mapping", "/media/winD/fedora/codestatistics/mappingCodeLines.txt");
 //
-//		codeCounter = new CodeCounter("/home/zong0jie/git/Novelbio-Bioinformatics-Analysis-Platform/src/main/java/com/novelbio/analysis/seq/mirna", "/media/winD/fedora/codestatistics/mirnaCodeLines.txt");
-//		codeCounter = new CodeCounter("/home/zong0jie/git/Novelbio-Bioinformatics-Analysis-Platform/src/main/java/com/novelbio/analysis/seq/reseq", "/media/winD/fedora/codestatistics/reseqCodeLines.txt");
-//		codeCounter = new CodeCounter("/home/zong0jie/git/Novelbio-Bioinformatics-Analysis-Platform/src/main/java/com/novelbio/analysis/seq/resequencing", "/media/winD/fedora/codestatistics/resequencingCodeLines.txt");
-//		codeCounter = new CodeCounter("/home/zong0jie/git/Novelbio-Bioinformatics-Analysis-Platform/src/main/java/com/novelbio/analysis/seq/rnaseq", "/media/winD/fedora/codestatistics/rnaseqCodeLines.txt");
+//		codeCounter = new CodeCounter("/home/zong0jie/software/git/NBCplatform/src/main/java/com/novelbio/analysis/seq/mirna", "/media/winD/fedora/codestatistics/mirnaCodeLines.txt");
+//		codeCounter = new CodeCounter("/home/zong0jie/software/git/NBCplatform/src/main/java/com/novelbio/analysis/seq/reseq", "/media/winD/fedora/codestatistics/reseqCodeLines.txt");
+//		codeCounter = new CodeCounter("/home/zong0jie/software/git/NBCplatform/src/main/java/com/novelbio/analysis/seq/resequencing", "/media/winD/fedora/codestatistics/resequencingCodeLines.txt");
+//		codeCounter = new CodeCounter("/home/zong0jie/software/git/NBCplatform/src/main/java/com/novelbio/analysis/seq/rnaseq", "/media/winD/fedora/codestatistics/rnaseqCodeLines.txt");
 
 	
 	}
@@ -63,6 +64,9 @@ public class CodeCounter {
 	 * @param filePath java文件路径
 	 */
 	public CodeCounter(String filePath, String txtOutFile){
+		if (!FileOperate.isFileFoldExist(filePath)) {
+			return;
+		}
 		txtOut = new TxtReadandWrite(txtOutFile, true);
 		tree(filePath);
 		conclution(filePath);
