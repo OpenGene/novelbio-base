@@ -72,6 +72,7 @@ public class FileOperate {
 	 * @return
 	 */
 	public static String getParentPathName(String fileName) {
+		if (fileName == null) return null;
 		File file = new File(fileName);
 		String fileParent = file.getParent();
 		if (fileParent == null) {
@@ -80,7 +81,20 @@ public class FileOperate {
 			return addSep(fileParent);
 		}
 	}
-
+	/**
+	 * 给定路径名，返回其最近一层路径，带"/" 如给定 /wer/fw4e/sr/frw/s3er.txt 返回 /wer/fw4e/sr/frw/<br>
+	 * 给定/wef/tesw/tre/还是返回/wef/tesw/tre/
+	 * @param fileName
+	 * @return
+	 */
+	public static String getPathName(String fileName) {
+		if (fileName == null) return null;
+		
+		if (fileName.endsWith("/") || fileName.endsWith("\\")) {
+			return fileName;
+		}
+		return getParentPathName(fileName);
+	}
 	/**
 	 * 给定文件名，加上后缀
 	 * 
