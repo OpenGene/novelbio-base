@@ -78,7 +78,7 @@ public class TxtReadandWrite implements Closeable {
 	TxtWrite txtWrite;
 	
 	boolean read = true;
-	
+	@Deprecated
 	public TxtReadandWrite(FileHadoop fileHadoop) {
 		this(fileHadoop, false);
 	}
@@ -90,7 +90,7 @@ public class TxtReadandWrite implements Closeable {
 	public TxtReadandWrite(String fileName, boolean creatFile) {
 		this(fileName, creatFile, false);
 	}
-	
+	@Deprecated
 	public TxtReadandWrite(FileHadoop fileHadoop, boolean creatFile) {
 		this(fileHadoop, creatFile, false);
 	}
@@ -106,7 +106,7 @@ public class TxtReadandWrite implements Closeable {
 			read = true;
 		}
 	}
-	
+	@Deprecated
 	public TxtReadandWrite(FileHadoop fileHadoop, boolean writeFile, boolean append) {
 		if (writeFile) {
 			txtWrite = new TxtWrite(fileHadoop);
