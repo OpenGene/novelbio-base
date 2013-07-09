@@ -12,9 +12,12 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 
 import com.novelbio.base.cmd.CmdOperate;
+import com.novelbio.base.dataOperate.HdfsBase;
 import com.novelbio.base.dataStructure.PatternOperate;
 //import com.novelbio.analysis.tools.compare.runCompSimple;
 
@@ -36,7 +39,12 @@ public class FileOperate {
 		StringBuffer str = new StringBuffer("");
 		String st = "";
 		try {
-			FileInputStream fs = new FileInputStream(filePathAndName);
+			InputStream fs = null;
+			if (filePathAndName.startsWith("hdfs://")) {
+				fs = HdfsBase.getFileSystem().open(new Path(filePathAndName));
+			}else {
+				fs = new FileInputStream(filePathAndName);
+			}
 			InputStreamReader isr;
 			if (encoding.equals("")) {
 				isr = new InputStreamReader(fs);
@@ -72,6 +80,10 @@ public class FileOperate {
 	 * @return
 	 */
 	public static String getParentPathName(String fileName) {
+		if (fileName.startsWith(HdfsBase.HEAD)) {
+			Path path = new Path(fileName);
+			return addSep(path.getParent().toString());
+		}
 		if (fileName == null) return null;
 		File file = new File(fileName);
 		String fileParent = file.getParent();

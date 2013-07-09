@@ -41,7 +41,7 @@ public class FileHadoop {
 		if (!url.endsWith("/")) {
 			url = url + "/";
 		}
-		if (!url.startsWith("hdfs://")) {
+		if (!url.startsWith(HdfsBase.HEAD)) {
 			if (!url.startsWith(":") && !url.startsWith("//")) {
 				url = "hdfs://" + url;
 			} else if (url.startsWith(":")) {

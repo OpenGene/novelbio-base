@@ -37,7 +37,7 @@ class TxtWrite implements Closeable {
 	ArchiveOutputStream zipOutputStream;
 	
 	public TxtWrite(String fileName) {
-		if (fileName.startsWith("hdfs://")) {
+		if (fileName.startsWith(HdfsBase.HEAD)) {
 			fileHadoop = new FileHadoop(fileName);
 			platform = PlatForm.hadoop;
 		}
