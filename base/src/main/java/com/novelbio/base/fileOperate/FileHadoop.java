@@ -9,6 +9,8 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
+import com.novelbio.base.dataOperate.HdfsBase;
+
 public class FileHadoop {
 	FileSystem fsHDFS;
 	Path dst;
@@ -17,11 +19,11 @@ public class FileHadoop {
 	 * 输入另一个fileHadoop的内容，仅获得其配置信息，不获得其具体文件名
 	 * @param fileHadoop
 	 */
-	public FileHadoop(FileSystem fsHDFS, String hdfsFilePath) {
-		this.fsHDFS = fsHDFS;
+	public FileHadoop(String hdfsFilePath) {
+		this.fsHDFS = HdfsBase.getFileSystem();
 		setHDFSFilePath(hdfsFilePath);
 	}
-	
+	@Deprecated
 	public FileHadoop(String url, String userName, String hdfsFilePath) {
 		this(url, userName);
 		setHDFSFilePath(hdfsFilePath);
@@ -34,6 +36,7 @@ public class FileHadoop {
 	 * 可以为hdfs://192.168.0.188:9000/
 	 * @param userName
 	 */
+	@Deprecated
 	public FileHadoop(String url, String userName) {
 		if (!url.endsWith("/")) {
 			url = url + "/";
