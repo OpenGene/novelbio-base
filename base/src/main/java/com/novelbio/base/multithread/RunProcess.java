@@ -12,6 +12,7 @@ package com.novelbio.base.multithread;
 public abstract class RunProcess<T> implements Runnable {
 	protected RunGetInfo runGetInfo;
 	
+	/** 是否要停止本线程 */
 	protected boolean flagStop = true;
 	protected boolean suspendFlag = false;
 	/** 是否正常结束 */

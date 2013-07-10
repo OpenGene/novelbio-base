@@ -139,6 +139,15 @@ public class DateUtil {
 	     return formatDate.format(currentDate); //将日期时间格式化
 	}
 	/**
+	 * 返回当前日期，格式 "YYYY"
+	 * @return
+	 */
+	public static String getDateYear() {
+	     SimpleDateFormat formatDate= new SimpleDateFormat( "yyyy");
+	     Date currentDate = new Date(); //得到当前系统时间
+	     return formatDate.format(currentDate); //将日期时间格式化
+	}
+	/**
 	 * 返回当前日期，格式 "yyyy-MM"
 	 * @return
 	 */
