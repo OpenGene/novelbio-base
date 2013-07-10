@@ -23,6 +23,11 @@ public class FileHadoop {
 		this.fsHDFS = HdfsBase.getFileSystem();
 		setHDFSFilePath(hdfsFilePath);
 	}
+	
+	public FileHadoop() {
+		this.fsHDFS = HdfsBase.getFileSystem();
+	}
+	
 	@Deprecated
 	public FileHadoop(String url, String userName, String hdfsFilePath) {
 		this(url, userName);
@@ -152,6 +157,15 @@ public class FileHadoop {
 	 * @throws IOException */
 	public void removeHDFSfile(Path path) throws IOException {
 		fsHDFS.delete(path, true);
+	}
+	
+	/**
+	 * 找到上级文件全路径
+	 * @param fileName
+	 * @return
+	 */
+	public String getParentPathName(){
+		return FileOperate.addSep(dst.getParent().toString());
 	}
 }
 

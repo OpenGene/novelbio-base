@@ -6,9 +6,10 @@ import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
+
+import com.novelbio.base.fileOperate.FileOperate;
 
 public class HdfsBase {
 	public static String HEAD = "";
@@ -36,6 +37,12 @@ public class HdfsBase {
 		}
 	} 
 	
+	public static boolean isHdfs(String fileName){
+		if(fileName.toLowerCase().startsWith(HEAD)){
+			return true;
+		}
+		return false;
+	}
 	
 	public static FileSystem getFileSystem(){
 		FileSystem hdfs = null;
@@ -49,7 +56,8 @@ public class HdfsBase {
 	
 	
 	public static void main(String[] args) throws IOException {
-		Path path = new Path("hdfs://192.168.0.104:9000/abc/aaa.txt");
+		String fileName = "hdfs://192.168.0.104:9000/abc/aaa";
+		System.out.println(FileOperate.getParentPathName(fileName));
 		System.out.println(HdfsBase.HEAD);
 		DistributedFileSystem hdfs = (DistributedFileSystem)HdfsBase.getFileSystem();
 		DatanodeInfo[] dataNodeStats = hdfs.getDataNodeStats();

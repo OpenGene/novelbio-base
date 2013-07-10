@@ -80,11 +80,11 @@ public class FileOperate {
 	 * @return
 	 */
 	public static String getParentPathName(String fileName) {
-		if (fileName.startsWith(HdfsBase.HEAD)) {
-			Path path = new Path(fileName);
-			return addSep(path.getParent().toString());
-		}
 		if (fileName == null) return null;
+		if (fileName.startsWith(HdfsBase.HEAD)) {
+			FileHadoop fileHadoop = new FileHadoop(fileName);
+			return fileHadoop.getParentPathName();
+		}
 		File file = new File(fileName);
 		String fileParent = file.getParent();
 		if (fileParent == null) {
@@ -101,7 +101,6 @@ public class FileOperate {
 	 */
 	public static String getPathName(String fileName) {
 		if (fileName == null) return null;
-		
 		if (fileName.endsWith("/") || fileName.endsWith("\\")) {
 			return fileName;
 		}
@@ -246,9 +245,15 @@ public class FileOperate {
 			return new String[]{"", ""};
 		}
 		String[] result = new String[2];
-
-		File file = new File(fileName);
-		String filename = file.getName();
+		
+		String filename = null;
+		if (HdfsBase.isHdfs(fileName)) {
+			Path path = new Path(fileName);
+			filename = path.getName();
+		}else {
+			File file = new File(fileName);
+			filename = file.getName();
+		}
 		int endDot = filename.lastIndexOf(".");
 		if (endDot > 0) {
 			result[0] = (String) filename.subSequence(0, endDot);
@@ -328,7 +333,12 @@ public class FileOperate {
 			suffix = ".*";
 		}
 		// ================================================================//
-		ArrayList<String> ListFilename = new ArrayList<String>();
+		ArrayList<String> lsFilenames = new ArrayList<String>();
+		if (HdfsBase.isHdfs(filePath)) {
+			Path path = new Path(filePath);
+		}else {
+			
+		}
 		File file = new File(filePath);
 		if (!file.exists()) {// 没有文件，则返回空
 			return null;
@@ -342,8 +352,8 @@ public class FileOperate {
 		if (!file.isDirectory()) { // 获取文件名与后缀名
 			String fileName = file.getName();
 			if (isNeedFile(patName, patSuffix, fileName, filename, suffix)) {
-				ListFilename.add(fileName);
-				return ListFilename;
+				lsFilenames.add(fileName);
+				return lsFilenames;
 			}
 		}
 		// 如果是文件夹
@@ -353,10 +363,10 @@ public class FileOperate {
 		}
 		for (int i = 0; i < filenameraw.length; i++) {
 			if (isNeedFile(patName, patSuffix, filenameraw[i], filename, suffix)) {
-				ListFilename.add(addSep(filePath) + filenameraw[i]);
+				lsFilenames.add(addSep(filePath) + filenameraw[i]);
 			}
 		}
-		return ListFilename;
+		return lsFilenames;
 	}
 
 	/**
