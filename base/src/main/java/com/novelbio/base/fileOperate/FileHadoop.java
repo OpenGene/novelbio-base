@@ -49,15 +49,6 @@ public class FileHadoop extends File{
 	}
 	
 	/**
-	 * 返回文件在hdfs上的文件名
-	 * @return
-	 */
-	public String getFileNameHdfs() {
-		//TODO 看一下返回的文件名是否正确
-		return dst.getName();
-	}
-	
-	/**
 	 * @return 返回文件总结信息
 	 * 通过该summary可以获得文件长度等信息
 	 */
@@ -77,7 +68,8 @@ public class FileHadoop extends File{
 		}
 	}
 	
-	/** 返回小于0表示出错 */
+	/** 返回小于0表示出错 使用length()代替*/
+	@Deprecated
 	public long getFileSize() {        
 		try {
 			return fsHDFS.getFileStatus(dst).getLen();

@@ -65,7 +65,7 @@ class TxtRead implements Closeable {
 	
 	public String getFileName() {
 		if (platform == PlatForm.hadoop) {
-			return fileHadoop.getFileNameHdfs();
+			return fileHadoop.getName();
 		}
 		return txtfile;
 	}
@@ -554,7 +554,7 @@ class TxtRead implements Closeable {
 		} else if (platform == PlatForm.hadoop) {
 			filesize = fileHadoop.getFileSize();
 			inputStreamRaw = fileHadoop.getInputStream();
-			txtType = TXTtype.getTxtType(fileHadoop.getFileNameHdfs());
+			txtType = TXTtype.getTxtType(fileHadoop.getName());
 		}
 		
 		if (txtType == TXTtype.Txt) {
