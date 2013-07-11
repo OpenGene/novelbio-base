@@ -38,7 +38,11 @@ class TxtWrite implements Closeable {
 	
 	public TxtWrite(String fileName) {
 		if (HdfsBase.isHdfs(fileName)) {
-			fileHadoop = new FileHadoop(fileName);
+			try {
+				fileHadoop = new FileHadoop(fileName);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			platform = PlatForm.hadoop;
 		}
 		this.txtfile = fileName;

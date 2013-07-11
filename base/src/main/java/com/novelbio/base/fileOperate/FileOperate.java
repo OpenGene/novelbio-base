@@ -8,11 +8,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 
@@ -33,14 +33,13 @@ public class FileOperate {
 	 *            文本文件打开的编码方式
 	 * @return 返回文本文件的内容
 	 */
-	public String readTxt(String filePathAndName, String encoding)
-			throws IOException {
+	public String readTxt(String filePathAndName, String encoding){
 		encoding = encoding.trim();
 		StringBuffer str = new StringBuffer("");
 		String st = "";
 		try {
 			InputStream fs = null;
-			if (filePathAndName.startsWith("hdfs://")) {
+			if (HdfsBase.isHdfs(filePathAndName)) {
 				fs = HdfsBase.getFileSystem().open(new Path(filePathAndName));
 			}else {
 				fs = new FileInputStream(filePathAndName);
@@ -66,7 +65,26 @@ public class FileOperate {
 		}
 		return st;
 	}
-
+	
+	/**
+	 * 根据不同的文件类型得到File
+	 * @param filePath
+	 * @return
+	 */
+	public static File getFile(String filePath){
+		File file = null;
+		if (HdfsBase.isHdfs(filePath)) {
+			try {
+				file = new FileHadoop(filePath);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}else {
+			file = new File(filePath);
+		}
+		return file;
+	}
+	
 	/** 文件尾巴加个 "/" */
 	public static String getSepPath() {
 		return File.separator;
@@ -78,14 +96,11 @@ public class FileOperate {
 	 * 
 	 * @param fileName
 	 * @return
+	 * @throws IOException 
 	 */
-	public static String getParentPathName(String fileName) {
+	public static String getParentPathName(String fileName){
 		if (fileName == null) return null;
-		if (fileName.startsWith(HdfsBase.HEAD)) {
-			FileHadoop fileHadoop = new FileHadoop(fileName);
-			return fileHadoop.getParentPathName();
-		}
-		File file = new File(fileName);
+		File file = getFile(fileName);
 		String fileParent = file.getParent();
 		if (fileParent == null) {
 			return "";
@@ -98,8 +113,9 @@ public class FileOperate {
 	 * 给定/wef/tesw/tre/还是返回/wef/tesw/tre/
 	 * @param fileName
 	 * @return
+	 * @throws IOException 
 	 */
-	public static String getPathName(String fileName) {
+	public static String getPathName(String fileName){
 		if (fileName == null) return null;
 		if (fileName.endsWith("/") || fileName.endsWith("\\")) {
 			return fileName;
@@ -135,7 +151,7 @@ public class FileOperate {
 	 * @return
 	 */
 	public static String getFileName(String fileName) {
-		File file = new File(fileName);
+		File file = getFile(fileName);
 		return file.getName();
 	}
 
@@ -144,8 +160,9 @@ public class FileOperate {
 	 * 不准，只是估计而已
 	 * 
 	 * @return
+	 * @throws IOException 
 	 */
-	public static double getFileSizeEvaluateK(Collection<String> colFileName) {
+	public static double getFileSizeEvaluateK(Collection<String> colFileName){
 		double allFileSize = 0;
 		for (String fileName : colFileName) {
 			double size = FileOperate.getFileSize(fileName);
@@ -167,10 +184,11 @@ public class FileOperate {
 	 * 
 	 * @param filePath
 	 * @return 没有文件返回0；出错返回-1000000000
+	 * @throws IOException 
 	 */
 	public static double getFileSize(String filePath) {
-		File file = new File(filePath);
 		double totalsize = 0;
+		File file = getFile(filePath);
 		if (!file.exists()) {
 			return 0;
 		}
@@ -201,9 +219,10 @@ public class FileOperate {
 	 * 
 	 * @param filePath
 	 * @return 没有文件返回0；出错返回-1000000000
+	 * @throws IOException 
 	 */
-	public static long getFileSizeLong(String filePath) {
-		File file = new File(filePath);
+	public static long getFileSizeLong(String filePath){
+		File file = getFile(filePath);
 		long totalsize = 0;
 		if (!file.exists()) {
 			return 0;
@@ -245,15 +264,8 @@ public class FileOperate {
 			return new String[]{"", ""};
 		}
 		String[] result = new String[2];
-		
-		String filename = null;
-		if (HdfsBase.isHdfs(fileName)) {
-			Path path = new Path(fileName);
-			filename = path.getName();
-		}else {
-			File file = new File(fileName);
-			filename = file.getName();
-		}
+		File file = getFile(fileName);
+		String filename = file.getName();
 		int endDot = filename.lastIndexOf(".");
 		if (endDot > 0) {
 			result[0] = (String) filename.subSequence(0, endDot);
@@ -275,8 +287,9 @@ public class FileOperate {
 	 *         "wfese.fse"和"fe"<br>
 	 *         文件 wfese.fse.认作 "wfese.fse."和""<br>
 	 *         文件 wfese 认作 "wfese"和""<br>
+	 * @throws IOException 
 	 */
-	public static ArrayList<String[]> getFoldFileName(String filePath) {
+	public static ArrayList<String[]> getFoldFileName(String filePath){
 		return getFoldFileName(filePath, "*", "*");
 	}
 
@@ -295,9 +308,10 @@ public class FileOperate {
 	 *            文件 wfese.fse.认作 "wfese.fse."和""<br>
 	 *            文件 wfese 认作 "wfese"和""<br>
 	 * @return 返回包含目标文件名的ArrayList。里面是string[2] 1:文件名 2：后缀
+	 * @throws IOException 
 	 */
 	public static ArrayList<String[]> getFoldFileName(String filePath,
-			String filename, String suffix) {
+			String filename, String suffix){
 		ArrayList<String> lsFileName = getFoldFileNameLs(filePath, filename,
 				suffix);
 		ArrayList<String[]> lsResult = new ArrayList<String[]>();
@@ -323,6 +337,7 @@ public class FileOperate {
 	 *            文件 wfese.fse.认作 "wfese.fse."和""<br>
 	 *            文件 wfese 认作 "wfese"和""<br>
 	 * @return 返回包含目标文件全名的ArrayList
+	 * @throws IOException 
 	 */
 	public static ArrayList<String> getFoldFileNameLs(String filePath, String filename, String suffix) {
 		filePath = removeSep(filePath);
@@ -334,20 +349,15 @@ public class FileOperate {
 		}
 		// ================================================================//
 		ArrayList<String> lsFilenames = new ArrayList<String>();
-		if (HdfsBase.isHdfs(filePath)) {
-			Path path = new Path(filePath);
-		}else {
-			
-		}
-		File file = new File(filePath);
-		if (!file.exists()) {// 没有文件，则返回空
-			return null;
-		}
 		// 开始判断
 		PatternOperate patName = new PatternOperate(filename, false);
 		// 开始判断
 		PatternOperate patSuffix = new PatternOperate(suffix, false);
-		
+		String[] filenameraw = null;
+		File file = getFile(filePath);
+		if (!file.exists()) {// 没有文件，则返回空
+			return null;
+		}
 		// 如果只是文件则返回文件名
 		if (!file.isDirectory()) { // 获取文件名与后缀名
 			String fileName = file.getName();
@@ -356,8 +366,7 @@ public class FileOperate {
 				return lsFilenames;
 			}
 		}
-		// 如果是文件夹
-		String[] filenameraw = file.list();
+		filenameraw = file.list();
 		if (filenameraw.length == 0) {
 			System.out.println("stop");
 		}
@@ -404,7 +413,7 @@ public class FileOperate {
 	 * @return 返回目录创建后的路径
 	 */
 	private static boolean createFolder(String folderPath) {
-		File myFilePath = new File(folderPath);
+		File myFilePath = getFile(folderPath);
 		if (!myFilePath.exists()) {
 			return myFilePath.mkdir();
 		}
@@ -474,23 +483,27 @@ public class FileOperate {
 		try {
 			String filePath = filePathAndName;
 			filePath = filePath.toString();
-			File myFilePath = new File(filePath);
+			File myFilePath = getFile(filePath);
 			if (!myFilePath.exists()) {
 				myFilePath.createNewFile();
 			}
-			FileWriter resultFile = new FileWriter(myFilePath);
-			PrintWriter myFile = new PrintWriter(resultFile);
-			String strContent = fileContent;
-			myFile.println(strContent);
-			myFile.close();
-			resultFile.close();
+			if (myFilePath instanceof FileHadoop) {
+				FileHadoop fileHadoop = (FileHadoop)myFilePath;
+				fileHadoop.writeln(fileContent,false);
+			}else {
+				FileWriter resultFile = new FileWriter(myFilePath);
+				PrintWriter myFile = new PrintWriter(resultFile);
+				myFile.println(fileContent);
+				myFile.close();
+				resultFile.close();
+			}
 		} catch (Exception e) {
 			logger.error("创建文件操作出错");
-		}
+		} 
 	}
 
 	/**
-	 * 有编码方式的文件创建
+	 * 有编码方式的文件创建,HDFS上只支持UTF8
 	 * 
 	 * @param filePathAndName
 	 *            文本文件完整绝对路径及文件名
@@ -506,14 +519,19 @@ public class FileOperate {
 		try {
 			String filePath = filePathAndName;
 			filePath = filePath.toString();
-			File myFilePath = new File(filePath);
+			File myFilePath = getFile(filePath);
 			if (!myFilePath.exists()) {
 				myFilePath.createNewFile();
 			}
-			PrintWriter myFile = new PrintWriter(myFilePath, encoding);
-			String strContent = fileContent;
-			myFile.println(strContent);
-			myFile.close();
+			if (myFilePath instanceof FileHadoop) {
+				FileHadoop fileHadoop = (FileHadoop)myFilePath;
+				fileHadoop.writeln(fileContent,false);
+			}else {
+				PrintWriter myFile = new PrintWriter(myFilePath, encoding);
+				String strContent = fileContent;
+				myFile.println(strContent);
+				myFile.close();
+			}
 		} catch (Exception e) {
 			logger.error("创建文件操作出错");
 		}
@@ -530,10 +548,9 @@ public class FileOperate {
 		boolean bea = false;
 		try {
 			String filePath = filePathAndName;
-			File myDelFile = new File(filePath);
+			File myDelFile = getFile(filePath);
 			if (myDelFile.exists()) {
-				myDelFile.delete();
-				bea = true;
+				bea = myDelFile.delete();
 			} else {
 				bea = false;
 				// message = (filePathAndName+"删除文件操作出错");
@@ -557,7 +574,7 @@ public class FileOperate {
 			delAllFile(folderPath); // 删除完里面所有内容
 			String filePath = folderPath;
 			filePath = filePath.toString();
-			java.io.File myFilePath = new java.io.File(filePath);
+			File myFilePath = getFile(filePath);
 			myFilePath.delete(); // 删除空文件夹
 		} catch (Exception e) {
 			logger.error("删除文件夹操作出错");
@@ -576,7 +593,7 @@ public class FileOperate {
 	public static boolean delAllFile(String path) {
 		path = addSep(path);
 		boolean bea = false;
-		File file = new File(path);
+		File file = getFile(path);
 		if (!file.exists()) {
 			return bea;
 		}
@@ -618,8 +635,8 @@ public class FileOperate {
 		try {
 			int bytesum = 0;
 			int byteread = 0;
-			File oldfile = new File(oldPathFile);
-			File newfile = new File(newPathFile);
+			File oldfile = getFile(oldPathFile);
+			File newfile = getFile(newPathFile);
 
 			if (oldfile.exists()) { // 文件存在时
 				if (newfile.exists()) {
@@ -628,8 +645,21 @@ public class FileOperate {
 					}
 					newfile.delete();
 				}
-				InputStream inStream = new FileInputStream(oldPathFile); // 读入原文件
-				FileOutputStream fs = new FileOutputStream(newPathFile);
+				InputStream inStream = null;// 读入原文件
+				OutputStream fs = null;
+				if (oldfile instanceof FileHadoop) {
+					FileHadoop fileHadoop = (FileHadoop) oldfile;
+					inStream = fileHadoop.getInputStream();
+				}else {
+					inStream = new FileInputStream(oldfile); 
+				}
+				if (newfile instanceof FileHadoop) {
+					FileHadoop fileHadoop = (FileHadoop) oldfile;
+					fs = fileHadoop.getOutputStreamNew(cover);
+				}else {
+					fs = new FileOutputStream(newfile);
+				}
+				
 				byte[] buffer = new byte[1444];
 				while ((byteread = inStream.read(buffer)) != -1) {
 					bytesum += byteread; // 字节数 文件大小
@@ -660,14 +690,14 @@ public class FileOperate {
 		newPath = addSep(newPath);
 		oldPath = addSep(oldPath);
 		try {
-			new File(newPath).mkdirs(); // 如果文件夹不存在 则建立新文件夹
-			File a = new File(oldPath);
+			getFile(newPath).mkdirs(); // 如果文件夹不存在 则建立新文件夹
+			File a = getFile(oldPath);
 			String[] file = a.list();
 			File temp = null;
 			for (int i = 0; i < file.length; i++) {
-				temp = new File(oldPath + file[i]);
+				temp = getFile(oldPath + file[i]);
 				if (temp.isFile()) { // 如果目标文件夹已经存在文件，则跳过
-					File targetfile = new File(newPath
+					File targetfile = getFile(newPath
 							+ (temp.getName()).toString());
 					if (targetfile.exists()) {
 						if (!cover) {
@@ -675,9 +705,20 @@ public class FileOperate {
 						}
 						targetfile.delete();
 					}
-					FileInputStream input = new FileInputStream(temp);
-					FileOutputStream output = new FileOutputStream(newPath
-							+ (temp.getName()).toString());
+					InputStream input = null;
+					OutputStream output = null;
+					if (temp instanceof FileHadoop) {
+						FileHadoop fileHadoop = (FileHadoop) temp;
+						input = fileHadoop.getInputStream();
+					}else {
+						input = new FileInputStream(temp); 
+					}
+					if (targetfile instanceof FileHadoop) {
+						FileHadoop fileHadoop = (FileHadoop) targetfile;
+						output = fileHadoop.getOutputStreamNew(cover);
+					}else {
+						output = new FileOutputStream(targetfile);
+					}
 					byte[] b = new byte[1024 * 5];
 					int len;
 					while ((len = input.read(b)) != -1) {
@@ -740,7 +781,7 @@ public class FileOperate {
 	/**
 	 * 直接操作文件 文件添加<b>前缀</b>并改后缀名，如果一样则不修改
 	 * 
-	 * @param FileName
+	 * @param fileName
 	 *            原来文件的全名
 	 * @param append
 	 *            要添加的后缀，譬如_1，_new，如果为null，则不添加
@@ -748,9 +789,9 @@ public class FileOperate {
 	 *            要添加的后缀名，譬如 txt， jpg ，自动去空格 suffix == null则不改变后缀名，suffix = ""
 	 *            则去除后缀名
 	 */
-	public static String changeFilePrefixReal(String FileName, String append, String suffix) {
-		String newFile = changeFilePrefix(FileName, append, suffix);
-		moveSingleFile(FileName, getParentPathName(newFile),
+	public static String changeFilePrefixReal(String fileName, String append, String suffix) {
+		String newFile = changeFilePrefix(fileName, append, suffix);
+		moveSingleFile(fileName, getParentPathName(newFile),
 				getFileName(newFile), true);
 		return newFile;
 	}
@@ -810,7 +851,7 @@ public class FileOperate {
 	/**
 	 * 直接操作文件 文件添加<b>后缀</b>并改后缀名，如果一样则不修改
 	 * 
-	 * @param FileName
+	 * @param fileName
 	 *            原来文件的全名
 	 * @param append
 	 *            要添加的后缀，譬如_1，_new，如果为null，则不添加
@@ -818,9 +859,9 @@ public class FileOperate {
 	 *            要添加的后缀名，譬如 txt， jpg ，自动去空格 suffix == null则不改变后缀名，suffix = ""
 	 *            则去除后缀名
 	 */
-	public static String changeFileSuffixReal(String FileName, String append, String suffix) {
-		String newFile = changeFileSuffix(FileName, append, suffix);
-		moveSingleFile(FileName, getParentPathName(newFile),
+	public static String changeFileSuffixReal(String fileName, String append, String suffix) {
+		String newFile = changeFileSuffix(fileName, append, suffix);
+		moveSingleFile(fileName, getParentPathName(newFile),
 				getFileName(newFile), true);
 		return newFile;
 	}
@@ -837,9 +878,9 @@ public class FileOperate {
 	public static boolean changeFileName(String oldName, String newName,
 			boolean cover) {
 		// 文件原地址
-		File oldFile = new File(oldName);
+		File oldFile = getFile(oldName);
 		// 文件新（目标）地址
-		File fnew = new File(oldFile.getParentFile() + File.separator + newName);
+		File fnew = getFile(oldFile.getParentFile() + File.separator + newName);
 		if (oldFile.getAbsolutePath().equals(fnew.getAbsolutePath())) {
 			return true;
 		}
@@ -848,7 +889,7 @@ public class FileOperate {
 		} else {
 			fnew.delete();
 		}
-		fnew = new File(oldFile.getParentFile() + File.separator + newName);
+		fnew = getFile(oldFile.getParentFile() + File.separator + newName);
 		return oldFile.renameTo(fnew);
 	}
 
@@ -960,10 +1001,10 @@ public class FileOperate {
 			String newName, boolean cover) {
 		newPath = addSep(newPath);
 		// 文件原地址
-		File oldFile = new File(oldFileName);
+		File oldFile = getFile(oldFileName);
 		// 文件新（目标）地址
 		// new一个新文件夹
-		File fnewpath = new File(newPath);
+		File fnewpath = getFile(newPath);
 		if (!oldFile.exists()) {
 			return false;
 		}
@@ -971,7 +1012,7 @@ public class FileOperate {
 		if (!fnewpath.exists())
 			fnewpath.mkdirs();// 创建新文件
 		// 将文件移到新文件里
-		File fnew = new File(newPath + newName);
+		File fnew = getFile(newPath + newName);
 		if (fnew.exists()) {
 			if (!cover) {
 				return false;
@@ -1008,7 +1049,7 @@ public class FileOperate {
 		newfolderfile = addSep(newfolderfile);
 
 		boolean ok = true;
-		File olddir = new File(oldfolderfile);
+		File olddir = getFile(oldfolderfile);
 		File[] files = olddir.listFiles(); // 文件一览
 		if (files == null)
 			return false;
@@ -1030,7 +1071,7 @@ public class FileOperate {
 				}
 				continue;
 			}
-			File fnew = new File(newfolderfile + prix + files[i].getName());
+			File fnew = getFile(newfolderfile + prix + files[i].getName());
 			// 目标文件夹下存在的话，不变
 			if (fnew.exists()) {
 				if (!cover) {
@@ -1053,7 +1094,7 @@ public class FileOperate {
 
 	/**
 	 * 创建快捷方式，目前只能在linux下使用 内部会根据linkTo的路径自动创建文件夹
-	 * 
+	 * <br>HDFS上没有用
 	 * @param rawFile
 	 * @param linkTo
 	 * @param cover 是否覆盖
@@ -1087,7 +1128,7 @@ public class FileOperate {
 		if (fileName == null) {
 			return false;
 		}
-		File file = new File(fileName);
+		File file = getFile(fileName);
 		if (file.exists() && !file.isDirectory()) {// 没有文件，则返回空
 			return true;
 		} else {
@@ -1121,7 +1162,7 @@ public class FileOperate {
 		if (fileName == null) {
 			return false;
 		}
-		File file = new File(fileName);
+		File file = getFile(fileName);
 		if (file.isDirectory()) {// 没有文件，则返回空
 			return true;
 		} else {
@@ -1133,7 +1174,7 @@ public class FileOperate {
 		if (fileName == null) {
 			return false;
 		}
-		File file = new File(fileName);
+		File file = getFile(fileName);
 		if (file.exists() || file.isDirectory()) {// 没有文件，则返回空
 			return true;
 		} else {
@@ -1150,7 +1191,7 @@ public class FileOperate {
 	 */
 	private static boolean deleteFile(String sPath) {
 		boolean flag = false;
-		File file = new File(sPath);
+		File file = getFile(sPath);
 		// 路径为文件且不为空则进行删除
 		if (file.isFile() && file.exists()) {
 			file.delete();
@@ -1169,7 +1210,7 @@ public class FileOperate {
 	private static boolean deleteDirectory(String sPath) {
 		// 如果sPath不以文件分隔符结尾，自动添加文件分隔符
 		sPath = addSep(sPath);
-		File dirFile = new File(sPath);
+		File dirFile = getFile(sPath);
 		// 如果dir对应的文件不存在，或者不是一个目录，则退出
 		if (!dirFile.exists() || !dirFile.isDirectory()) {
 			return false;
@@ -1209,7 +1250,7 @@ public class FileOperate {
 	 */
 	public static boolean DeleteFileFolder(String sPath) {
 		boolean flag = false;
-		File file = new File(sPath);
+		File file = getFile(sPath);
 		// 判断目录或文件是否存在
 		if (!file.exists()) { // 不存在返回 false
 			return flag;

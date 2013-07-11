@@ -48,7 +48,11 @@ class TxtRead implements Closeable {
 
 	public TxtRead(String fileName) {
 		if (HdfsBase.isHdfs(fileName)) {
-			fileHadoop = new FileHadoop(fileName);
+			try {
+				fileHadoop = new FileHadoop(fileName);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			platform = PlatForm.hadoop;
 		}else {
 			this.txtfile = fileName;

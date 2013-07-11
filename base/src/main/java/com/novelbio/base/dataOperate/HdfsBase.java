@@ -6,6 +6,7 @@ import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
 
@@ -53,7 +54,20 @@ public class HdfsBase {
 		}
 		return hdfs;
 	}
+	/**
+	 * 创建一个文件夹
+	 * @param path 路径+“/”+文件夹名字
+	 * @throws IOException
+	 */
+	public static void mkdirHDFSFolder(Path path) throws IOException {
+		getFileSystem().mkdirs(path);
+	}
 	
+	/**删除文件
+	 * @throws IOException */
+	public static void removeHDFSfile(Path path) throws IOException {
+		getFileSystem().delete(path, true);
+	}
 	
 	public static void main(String[] args) throws IOException {
 		String fileName = "hdfs://192.168.0.104:9000/abc/aaa";
