@@ -8,6 +8,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.hadoop.fs.ContentSummary;
@@ -16,9 +17,8 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hdfs.web.resources.OverwriteParam;
-import org.apache.hadoop.security.UserGroupInformation.HadoopLoginModule;
 
+import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.HdfsBase;
 
 public class FileHadoop extends File{
@@ -37,7 +37,9 @@ public class FileHadoop extends File{
 		super(hdfsFilePath);
 		this.fsHDFS = HdfsBase.getFileSystem();
 		dst = new Path(hdfsFilePath);
-		fileStatus = fsHDFS.getFileStatus(dst);
+		if (fsHDFS.exists(dst)) {
+			fileStatus = fsHDFS.getFileStatus(dst);
+		}
 	}
 	
 	/**
@@ -122,6 +124,10 @@ public class FileHadoop extends File{
 		}
 	}
 	
+	public String getModificationTime(){
+		return DateUtil.date2String(new Date(fileStatus.getModificationTime()), DateUtil.PATTERN_DATETIME);
+	}
+	
 	/**
 	 * 找到上级文件全路径
 	 * @param fileName
@@ -129,7 +135,11 @@ public class FileHadoop extends File{
 	 */
 	@Override
 	public String getParent(){
-		return dst.getParent().toString();
+		try {
+			return dst.getParent().toString();
+		} catch (NullPointerException e) {
+			return null;
+		}
 	}
 	
 	/**
@@ -176,7 +186,10 @@ public class FileHadoop extends File{
 			e.printStackTrace();
 			return null;
 		}
-		String[] files = new String[fileStatus.length-1];
+		String[] files = {};
+		if (fileStatus.length != 0) {
+			files = new String[fileStatus.length];
+		}
 		for (int i = 0; i < fileStatus.length; i++) {
 			files[i] = fileStatus[i].getPath().toString();
 		}
@@ -195,14 +208,12 @@ public class FileHadoop extends File{
 
 	@Override
 	public File getParentFile() {
-		// TODO Auto-generated method stub
 		return super.getParentFile();
 	}
 
 	@Override
 	public String getPath() {
-		// TODO Auto-generated method stub
-		return super.getPath();
+		return fileStatus.getPath().toString();
 	}
 
 	@Override
@@ -344,8 +355,12 @@ public class FileHadoop extends File{
 
 	@Override
 	public boolean renameTo(File dest) {
-		// TODO Auto-generated method stub
-		return super.renameTo(dest);
+		try {
+			return fsHDFS.rename(dst, new Path(dest.getPath()));
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	@Override
