@@ -196,7 +196,7 @@ public class MathComput {
 	 * @param Num
 	 * @return
 	 */
-	public static	double sum(ArrayList<? extends Number> lsNum) {
+	public static	double sum(List<? extends Number> lsNum) {
 		double sum = 0;
 		for (Number d : lsNum) {
 			sum = sum + d.doubleValue();

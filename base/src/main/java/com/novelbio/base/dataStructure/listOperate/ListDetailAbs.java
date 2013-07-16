@@ -75,10 +75,12 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 	 * @param cis5to3 不确定就输入null
 	 */
 	public ListDetailAbs(String chrID, String ItemName, Boolean cis5to3) {
-		if (chrID != null) {
+		if (chrID != null && !chrID.equals("")) {
 			this.parentName = chrID;
 		}
-		this.setItemName.add(ItemName);
+		if (ItemName != null && !ItemName.equals("")) {
+			this.setItemName.add(ItemName);
+		}
 		this.cis5to3 = cis5to3;
 	}
 	/**
@@ -191,7 +193,7 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
      */
 	public String getNameSingle() {
 		if (setItemName.size() == 0) {
-			return null;
+			return "";
 		}
 		return this.setItemName.iterator().next();
 	}
