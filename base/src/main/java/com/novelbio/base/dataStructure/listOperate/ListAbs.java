@@ -529,7 +529,7 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 	/**
 	 * 
 	 * 将一个List中的Iso全部合并起来。
-	 * @param cis5to3 null,不考虑方向
+	 * @param cis5to3 是否只合并指定方向的iso， null,不考虑方向
 	 * @param lsIso
 	 * @return
 	 */
