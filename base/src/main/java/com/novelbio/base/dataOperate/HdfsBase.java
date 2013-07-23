@@ -26,7 +26,7 @@ public class HdfsBase {
 			// 在你的文件地址前自动添加：hdfs://192.168.0.188:9000/
 			conf.set("fs.default.name", properties.getProperty("defaultName"));
 			// 指定用户名
-			conf.set("hadoop.job.user", properties.getProperty("user"));
+			// conf.set("hadoop.job.user", properties.getProperty("user"));
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} finally{
