@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import org.apache.log4j.Logger;
 /**
@@ -293,8 +294,8 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 	 * key都是小写
 	 * @return
 	 */
-	public HashMap<String, E> getMapName2DetailAbs() {
-		HashMap<String, E> mapName2DetailAbs = new HashMap<String, E>();
+	public LinkedHashMap<String, E> getMapName2DetailAbs() {
+		LinkedHashMap<String, E> mapName2DetailAbs = new LinkedHashMap<String, E>();
 		for (E ele : this) {
 			ArrayList<String> ss = ele.getName();
 			for (String string : ss) {
@@ -528,7 +529,7 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 	/**
 	 * 
 	 * 将一个List中的Iso全部合并起来。
-	 * @param cis5to3 null,不考虑方向
+	 * @param cis5to3 是否只合并指定方向的iso， null,不考虑方向
 	 * @param lsIso
 	 * @return
 	 */

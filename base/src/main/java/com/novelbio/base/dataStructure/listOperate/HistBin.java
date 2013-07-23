@@ -11,10 +11,10 @@ public class HistBin extends ListDetailAbs {
 	double binNum = -Double.MAX_VALUE;
 	
 	
-	protected HistBin() {
+	public HistBin() {
 		super("", "", true);
 	}
-	protected HistBin(Double binNum) {
+	public HistBin(Double binNum) {
 		super("", "", true);
 		if (binNum != null) {
 			this.binNum = binNum;

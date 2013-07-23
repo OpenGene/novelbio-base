@@ -151,7 +151,7 @@ public abstract class HistList extends ListAbsSearch<HistBin, ListCodAbs<HistBin
 	 * 意思本区间为上一个num和本num之间
 	 * @param number 本bin所代表的数值，null就用终点和起点的平均值
 	 * @param name
-	 * @param thisNum
+	 * @param thisNum 本bin的终点
 	 */
 	public void addHistBin(Double number, String name, int thisNum) {
 		HistBin histBinLast = get(size() - 1);
@@ -160,6 +160,7 @@ public abstract class HistList extends ListAbsSearch<HistBin, ListCodAbs<HistBin
 		histBinThis.addItemName(name);
 		histBinThis.setStartCis(histBinLast.getEndCis());
 		histBinThis.setEndCis(thisNum);
+		histBinThis.setParentName(getName());
 		add(histBinThis);
 	}
 	
@@ -237,7 +238,7 @@ public abstract class HistList extends ListAbsSearch<HistBin, ListCodAbs<HistBin
 		if (plotScatter == null) {
 			plotScatter = new PlotScatter(PlotScatter.PLOT_TYPE_BARPLOT);
 		}
-		double minY = MathComput.min(Ycount);
+		double minY = MathComput.min(Ycount)/3;
 		double maxY = MathComput.max(Ycount);
 
 		if (dotStyle.getBarWidth() == 0 && Xrange.length > 1) {
@@ -247,6 +248,7 @@ public abstract class HistList extends ListAbsSearch<HistBin, ListCodAbs<HistBin
 		plotScatter.setAxisX(Xrange[0] - 1, Xrange[Xrange.length - 1] + 1);
 		plotScatter.setAxisY(minY, maxY * 1.2);
 		plotScatter.addXY(Xrange, Ycount, dotStyle);
+		plotScatter.setAxisTicksXMap(mapX2Name);
 //		plotScatter.setAxisTicksXMap(mapX2Name);
 		return plotScatter;
 	}

@@ -79,7 +79,7 @@ public class PlotScatter extends PlotNBCInteractive{
 	/** 标题的字体 */
     Font fontTitle = new Font(Font.SANS_SERIF, Font.PLAIN, 15), fontTitleX = null, fontTitleY = null;
     /** 标题文字的旋转度 */
-    Number fontTitleXRotation = 0,fontTitleYRotation = 90;
+    Integer fontTitleXRotation = 0,fontTitleYRotation = 90;
    
     
     /** xy轴的样式参数 Double指xy轴上的刻度位置，String此刻度的说明 */
@@ -517,7 +517,7 @@ public class PlotScatter extends PlotNBCInteractive{
      * @param distance 标题距离x轴的距离
      * @param fontTitleXRotation 标题的旋转角度
      */
-    public void setTitleX(String titleX, Font fontTitleX,double distance,Number fontTitleXRotation)  {
+    public void setTitleX(String titleX, Font fontTitleX,double distance,Integer fontTitleXRotation)  {
     	if (titleX != null)
     		this.titleX = titleX;
     	if (fontTitleX != null)
@@ -536,7 +536,7 @@ public class PlotScatter extends PlotNBCInteractive{
      * @param distance 标题距离x轴的距离
      * @param fontTitleYRotation 标题的旋转角度
      */
-    public void setTitleY(String titleY, Font fontTitleY,double distance,Number fontTitleYRotation)  {
+    public void setTitleY(String titleY, Font fontTitleY,double distance,Integer fontTitleYRotation)  {
     	if (titleY != null)
     		this.titleY = titleY;
     	if (fontTitleY != null)
@@ -584,11 +584,11 @@ public class PlotScatter extends PlotNBCInteractive{
     		this.spaceX = spaceX;
 	}
     /** 标题文字的旋转度 */
-    public void setFontTitleXRotation(Number fontTitleXRotation) {
+    public void setFontTitleXRotation(Integer fontTitleXRotation) {
 		this.fontTitleXRotation = fontTitleXRotation;
 	}
     /** 标题文字的旋转度 */
-	public void setFontTitleYRotation(Number fontTitleYRotation) {
+	public void setFontTitleYRotation(Integer fontTitleYRotation) {
 		this.fontTitleYRotation = fontTitleYRotation;
 	}
 	/** x轴上的刻度文字的旋转度 */
