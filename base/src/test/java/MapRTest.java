@@ -30,21 +30,21 @@ public class MapRTest {
 		// /opt/mapr/conf/mapr-clusters.conf
 		// maprfs:///mapr/my.cluster.com/
 		// /mapr/my.cluster.com/
-		FileHadoop fileHadoop = new FileHadoop("/haha/hoo");
-		fileHadoop.mkdirs();
-//		String uri = "maprfs://192.168.0.100";
-//		String dirname = "/haha/hoho";
+//		FileHadoop fileHadoop = new FileHadoop("/haha/hoo");
+//		fileHadoop.mkdirs();
+		String uri = "maprfs://192.168.0.161/";
+		String dirname = "/my.cluster.com/hoho";
 //
-//		Configuration conf = new Configuration();
-//		FileSystem fs = FileSystem.get(URI.create(uri), conf); // if wanting
+		Configuration conf = new Configuration();
+		FileSystem fs = FileSystem.get(URI.create(uri), conf); // if wanting
 //		// to use a different cluster
 //		//FileSystem fs = FileSystem.get(conf);
 //
-//		Path dirpath = new Path(dirname + "/dir");
+		Path dirpath = new Path(dirname + "/dir");
 //		// Path rfilepath = new Path( dirname + "/file.r");
 //		System.out.println(dirpath.getParent());
 //		// try mkdir
-//		boolean res = fs.mkdirs(dirpath);
+		boolean res = fs.mkdirs(dirpath);
 //		if (!res) {
 //			System.out.println("mkdir failed, path: " + dirpath);
 //			return;
