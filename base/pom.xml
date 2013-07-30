@@ -4,6 +4,7 @@
 	<groupId>com.novelbio</groupId>
 	<artifactId>base</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
@@ -18,41 +19,6 @@
 			<version>3.8-beta2</version>
 			<type>jar</type>
 			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.hadoop</groupId>
-			<artifactId>hadoop-core</artifactId>
-			<version>1.0.4</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>jetty</artifactId>
-					<groupId>org.mortbay.jetty</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jsp-api-2.1</artifactId>
-					<groupId>org.mortbay.jetty</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jasper-runtime</artifactId>
-					<groupId>tomcat</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jasper-compiler</artifactId>
-					<groupId>tomcat</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jsp-2.1</artifactId>
-					<groupId>org.mortbay.jetty</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>commons-httpclient</artifactId>
-					<groupId>commons-httpclient</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jets3t</artifactId>
-					<groupId>net.java.dev.jets3t</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache</groupId>
@@ -474,6 +440,22 @@
 			<groupId>com.novelbio</groupId>
 			<artifactId>bfograph-signed</artifactId>
 			<version>1.0.14</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jfree</groupId>
+			<artifactId>jfreechart</artifactId>
+			<version>1.0.14</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>bcprov-jdk14</artifactId>
+					<groupId>bouncycastle</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-core</artifactId>
+			<version>1.0.3-mapr-2.1.2.1</version>
 		</dependency>
 	</dependencies>
 	<build>
