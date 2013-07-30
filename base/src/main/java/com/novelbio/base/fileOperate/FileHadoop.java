@@ -349,8 +349,12 @@ public class FileHadoop extends File{
 
 	@Override
 	public boolean mkdirs() {
-		// TODO Auto-generated method stub
-		return super.mkdirs();
+		try {
+			return fsHDFS.mkdirs(dst);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	@Override

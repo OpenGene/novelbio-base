@@ -2,6 +2,7 @@ package com.novelbio.base.dataOperate;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
@@ -23,10 +24,8 @@ public class HdfsBase {
 			properties.load(in);
 			HEAD = properties.getProperty("defaultName");
 			conf = new Configuration();
-			// 在你的文件地址前自动添加：hdfs://192.168.0.188:9000/
-			conf.set("fs.default.name", properties.getProperty("defaultName"));
 			// 指定用户名
-			conf.set("hadoop.job.user", properties.getProperty("user"));
+			// conf.set("hadoop.job.user", properties.getProperty("user"));
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} finally{
@@ -48,7 +47,7 @@ public class HdfsBase {
 	public static FileSystem getFileSystem(){
 		FileSystem hdfs = null;
 		try {
-			hdfs = FileSystem.get(conf);
+			hdfs = FileSystem.get(URI.create(HEAD), conf);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
