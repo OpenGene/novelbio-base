@@ -44,6 +44,14 @@
 					<artifactId>jsp-2.1</artifactId>
 					<groupId>org.mortbay.jetty</groupId>
 				</exclusion>
+				<exclusion>
+					<artifactId>commons-httpclient</artifactId>
+					<groupId>commons-httpclient</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>jets3t</artifactId>
+					<groupId>net.java.dev.jets3t</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
