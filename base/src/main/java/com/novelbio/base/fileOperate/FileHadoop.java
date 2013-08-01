@@ -224,7 +224,7 @@ public class FileHadoop extends File{
 
 	@Override
 	public String getAbsolutePath() {
-		return dst.getParent().toString();
+		return dst.toString();
 	}
 
 	@Override

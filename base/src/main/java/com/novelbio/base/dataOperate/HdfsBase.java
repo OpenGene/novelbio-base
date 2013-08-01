@@ -38,7 +38,7 @@ public class HdfsBase {
 	} 
 	
 	public static boolean isHdfs(String fileName){
-		if(fileName.toLowerCase().startsWith(HEAD)){
+		if(fileName.toLowerCase().startsWith("maprfs:")){
 			return true;
 		}
 		return false;
