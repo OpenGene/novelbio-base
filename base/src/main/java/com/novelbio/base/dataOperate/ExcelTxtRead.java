@@ -1,16 +1,9 @@
 package com.novelbio.base.dataOperate;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JOptionPane;
-
 import org.apache.log4j.Logger;
-
-import com.novelbio.base.dataStructure.ArrayOperate;
 
 
 /**

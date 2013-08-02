@@ -5,8 +5,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+
+
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -15,6 +16,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.novelbio.base.dataStructure.ArrayOperate;
+import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 
 /**
@@ -83,6 +85,10 @@ public class ExcelOperate {
 		 if (!FileOperate.isFileExist(filename))
 			return EXCEL_NO_FILE;
 		 File f = new File(filename);
+		 if (HdfsBase.isHdfs(filename)) {
+			f = new FileHadoop(filename);
+		}
+		 
 		 FileInputStream fos = null;
 		try {
 			fos = new FileInputStream(f);
@@ -163,6 +169,9 @@ public class ExcelOperate {
 			 return false; 
 		 
 		 File f = new File(filename);
+		 if (HdfsBase.isHdfs(filename)) {
+				f = new FileHadoop(filename);
+			}
 		 if (!FileOperate.isFileExist(filename)) {
 			return false;
 		}
@@ -884,9 +893,14 @@ public class ExcelOperate {
 	 public boolean Save() {
 		 if(filename=="") return false;
 		 try {
-			 FileOutputStream out = new FileOutputStream(filename);
-			 wb.write(out);
-			 out.close();
+			 if (HdfsBase.isHdfs(filename)) {
+				 FileHadoop fileHadoop = new FileHadoop(filename);
+				 wb.write(fileHadoop.getOutputStreamNew(true));
+			}else{
+				 FileOutputStream out = new FileOutputStream(filename);
+				 wb.write(out);
+				 out.close();
+			}
 			 return true;
 		 } catch (Exception e) {
 			 // TODO: handle exception
@@ -900,10 +914,15 @@ public class ExcelOperate {
 		 */
 	 public boolean Save(String newfilename) {
 		 try {
-			 FileOutputStream out = new FileOutputStream(newfilename);
-			    wb.write(out);
-			    out.close();
-			    return true;
+			 if (HdfsBase.isHdfs(newfilename)) {
+				 FileHadoop fileHadoop = new FileHadoop(newfilename);
+				 wb.write(fileHadoop.getOutputStreamNew(true));
+			}else{
+				 FileOutputStream out = new FileOutputStream(newfilename);
+				 wb.write(out);
+				 out.close();
+			}
+			   return true;
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
