@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 /**
@@ -516,7 +517,7 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 	 * 如果cis5to3为false，从大到小排列
 	 * 内部的int[] 0: startAbs 1: endAbs
 	 */
-	public static ArrayList<int[]> getCombSep(Boolean cis5to3, ArrayList<? extends ListAbs<? extends ListDetailAbs>> lsIso, boolean sepSingle) {
+	public static ArrayList<int[]> getCombSep(Boolean cis5to3, List<? extends ListAbs<? extends ListDetailAbs>> lsIso, boolean sepSingle) {
 		ArrayList<? extends ListDetailAbs> lsAllelement = combListAbs(cis5to3, lsIso);
 		ArrayList<int[]> lsSep = null;
 		if (sepSingle) {
@@ -533,7 +534,7 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 	 * @param lsIso
 	 * @return
 	 */
-	private static ArrayList<? extends ListDetailAbs> combListAbs(Boolean cis5to3, ArrayList<? extends ListAbs<? extends ListDetailAbs>> lsIso) {
+	private static ArrayList<? extends ListDetailAbs> combListAbs(Boolean cis5to3, List<? extends ListAbs<? extends ListDetailAbs>> lsIso) {
 		ArrayList<ListDetailAbs> lsAll = new ArrayList<ListDetailAbs>();
 		//将全部的exon放在一个list里面并且排序
 		for (ListAbs<? extends ListDetailAbs> listAbs : lsIso) {
