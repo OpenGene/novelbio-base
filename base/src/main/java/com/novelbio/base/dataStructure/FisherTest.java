@@ -174,6 +174,9 @@ public class FisherTest implements StatisticsTest{
             p += getP(++a, --b, --c, ++d);
 
         }
+        if (p > 1) {
+			p = 1;
+		}
         return p;
     }
 
@@ -200,6 +203,9 @@ public class FisherTest implements StatisticsTest{
             p += getP(++a, --b, --c, ++d);
 
         }
+        if (p > 1) {
+			p = 1;
+		}
         return p;
     }
 
@@ -231,8 +237,9 @@ public class FisherTest implements StatisticsTest{
             p += pTemp;
             if (DEBUG) {System.out.println("\ta=" + a + " b=" + b + " c=" + c + " d=" + d);}
         }
-
-
+        if (p > 1) {
+			p = 1;
+		}
         return p;
     }
 
@@ -304,6 +311,9 @@ public class FisherTest implements StatisticsTest{
             }
             if (DEBUG) {System.out.println(" a=" + a + " b=" + b + " c=" + c + " d=" + d);}
         }
+        if (p > 1) {
+			p = 1;
+		}
         return p;
     }
 }

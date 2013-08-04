@@ -610,6 +610,9 @@ public class MathComput {
 	 * @return
 	 */
 	public static double[] mySpline(double[] treatNum, int binNum,double startBias,double endBias,int type) {
+		if (startBias == 0 && endBias == 0 && treatNum.length == binNum) {
+			return treatNum;
+		}
 		double rawlength=treatNum.length - startBias - endBias;
 		double binlength=rawlength/binNum; //将每一个分隔的长度标准化为一个比值，基准为invNum为1 
 		double[] resultBinValue=new double[binNum];

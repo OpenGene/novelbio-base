@@ -2,6 +2,9 @@ package com.novelbio.base.dataStructure.listOperate;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.math.stat.descriptive.moment.ThirdMoment;
 //import org.apache.ibatis.migration.commands.NewCommand;
@@ -126,8 +129,8 @@ public class ListCodAbsDu<T extends ListDetailAbs, K extends ListCodAbs<T>>  {
 	 * @return
 	 * 空的则返回一个size为0的list
 	 */
-	public ArrayList<T> getAllGffDetail() {
-		ArrayList<T> lsGffDetailAll = new ArrayList<T>();
+	public List<T> getAllGffDetail() {
+		Set<T> lsGffDetailAll = new LinkedHashSet<T>();
 		if (getGffCodLeft() != null && getGffCodLeft().isInsideLoc()) {
 			if (getGffCodLeft().isInsideUp())
 				lsGffDetailAll.add(getGffCodLeft().getGffDetailUp());
@@ -139,11 +142,12 @@ public class ListCodAbsDu<T extends ListDetailAbs, K extends ListCodAbs<T>>  {
 			}
 		}
 		if (getGffCodRight() != null && getGffCodRight().isInsideLoc()) {
+			lsGffDetailAll.add(getGffCodRight().getGffDetailThis());
 			if (getGffCodRight().isInsideDown())
 				lsGffDetailAll.add(getGffCodRight().getGffDetailDown());
-			lsGffDetailAll.add(getGffCodRight().getGffDetailThis());
 		}
-		return lsGffDetailAll;
+		List<T> lsResult = new ArrayList<T>(lsGffDetailAll);
+		return lsResult;
 	}
 	/**
 	 * 双坐标查找 输入相关的GffHash类，然后填充相关信息<br>

@@ -315,11 +315,13 @@ public abstract class ListHashSearch < T extends ListDetailAbs, E extends ListCo
 	}
 	/**
 	 * 设定每个GffDetail的tss2UpGene和tes2DownGene
+	 * 同时设定每个gffDetail的itemNum
 	 */
 	protected void setItemDistance() {
 		for (M lsGffDetail : mapChrID2ListGff.values()) {
 			for (int i = 0; i < lsGffDetail.size(); i++) {
 				T gffDetail = lsGffDetail.get(i);
+				gffDetail.setItemNum(i);
 				T gffDetailUp = null;
 				T gffDetailDown = null;
 				if (i > 0) {
