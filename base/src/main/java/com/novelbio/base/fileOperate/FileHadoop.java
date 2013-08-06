@@ -156,6 +156,9 @@ public class FileHadoop extends File{
 	 */
 	@Override
 	public boolean isDirectory() {
+		if (!exists()) {
+			return false; 
+		}
 		return fileStatus.isDir();
 	}
 	/**

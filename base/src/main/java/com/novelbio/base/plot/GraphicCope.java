@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,8 +35,10 @@ import org.faceless.graph2.Output;
 import org.faceless.graph2.SVGOutput;
 
 import com.novelbio.base.dataOperate.DateUtil;
+import com.novelbio.base.dataOperate.HdfsBase;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.dataStructure.ArrayOperate;
+import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 
 /**
@@ -115,35 +118,50 @@ public class GraphicCope {
 	 */
 	public static void saveBufferedImage(BufferedImage chart, String outputFile) {
 		String ext = FileOperate.getFileNameSep(outputFile)[1];
-		File fileOut = new File(outputFile);
-		// Handle jpg without transparency.
-		if (ext.toLowerCase().equals("jpg") || ext.toLowerCase().equals("jpeg")) {
-			try {
-				ImageIO.write(chart, "jpg", fileOut);
-			} catch (Exception e) {
-				e.printStackTrace();
+		OutputStream out = null;
+		try {
+			if (HdfsBase.isHdfs(outputFile)) {
+				FileHadoop fileHadoop = new FileHadoop(outputFile);
+				out = fileHadoop.getOutputStreamNew(true);
+			} else {
+				out = new FileOutputStream(outputFile);
 			}
-		} else {
-			try {
-				FileOutputStream fileOutputStream = new FileOutputStream(
-						fileOut);
-				Iterator<ImageWriter> writers = ImageIO
-						.getImageWritersByMIMEType("image/png");
-				while (writers.hasNext()) {
-					ImageWriter writer = writers.next();
-					ImageOutputStream ios = ImageIO
-							.createImageOutputStream(fileOutputStream);
-					writer.setOutput(ios);
-					try {
-						writer.write(chart);
-					} finally {
-						ios.close();
-					}
+			// Handle jpg without transparency.
+			if (ext.toLowerCase().equals("jpg") || ext.toLowerCase().equals("jpeg")) {
+				try {
+					ImageIO.write(chart,  "jpg", out);
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-			} catch (Exception e) {
+			} else {
+				try {
+					Iterator<ImageWriter> writers = ImageIO
+							.getImageWritersByMIMEType("image/png");
+					while (writers.hasNext()) {
+						ImageWriter writer = writers.next();
+						ImageOutputStream ios = ImageIO
+								.createImageOutputStream(out);
+						writer.setOutput(ios);
+						try {
+							writer.write(chart);
+						} finally {
+							ios.close();
+						}
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}finally{
+			try {
+				out.close();
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
+	
 	}
 
 	/**

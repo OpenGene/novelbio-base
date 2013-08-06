@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -201,7 +202,7 @@ public class ExcelOperate {
 			wb = new HSSFWorkbook(fos);
 		else if (versionXls == EXCEL2007)
 			wb = new XSSFWorkbook(fos);
-
+		
 		sheet = wb.getSheetAt(0);
 		sheetNum = 0;
 		fos.close();
@@ -1004,20 +1005,29 @@ public class ExcelOperate {
 	public boolean Save() {
 		if (filename == "")
 			return false;
+		OutputStream out = null;
 		try {
 			if (HdfsBase.isHdfs(filename)) {
 				FileHadoop fileHadoop = new FileHadoop(filename);
-				wb.write(fileHadoop.getOutputStreamNew(true));
-			} else {
-				FileOutputStream out = new FileOutputStream(filename);
+				out = fileHadoop.getOutputStreamNew(true);
 				wb.write(out);
 				out.close();
+			} else {
+				out = new FileOutputStream(filename);
+				wb.write(out);
 			}
+			out.close();
 			return true;
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
 			return false;
+		}finally{
+			try {
+				out.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -1025,20 +1035,28 @@ public class ExcelOperate {
 	 * 输入文件名 保存excel文件，另存为
 	 */
 	public boolean Save(String newfilename) {
+		OutputStream out = null;
 		try {
 			if (HdfsBase.isHdfs(newfilename)) {
 				FileHadoop fileHadoop = new FileHadoop(newfilename);
-				wb.write(fileHadoop.getOutputStreamNew(true));
-			} else {
-				FileOutputStream out = new FileOutputStream(newfilename);
+				out = fileHadoop.getOutputStreamNew(true);
 				wb.write(out);
-				out.close();
+			} else {
+				out = new FileOutputStream(newfilename);
+				wb.write(out);
 			}
+			out.close();
 			return true;
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
 			return false;
+		}finally{
+			try {
+				out.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
