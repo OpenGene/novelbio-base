@@ -11,9 +11,11 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,7 +50,7 @@ import com.novelbio.base.fileOperate.FileOperate;
  * @author zong0jie
  * 
  */
-public class GraphicCope {
+public class ImageUtils {
 	public static void main(String[] args) throws Exception {
 //		BufferedImage bufferedImage = convertSvg2BfImg("/home/zong0jie/desktop/IdegramSsSc0707031_v3.svg", 1.0);
 //		try {
@@ -59,7 +61,27 @@ public class GraphicCope {
 //		}
 
 	}
-
+	public static BufferedImage read(String fileName) {
+		InputStream input = null;
+		try {
+			if (HdfsBase.isHdfs(fileName)) {
+				FileHadoop fileHadoop = new FileHadoop(fileName);
+				input = fileHadoop.getInputStream();
+			} else {
+				input = new FileInputStream(new File(fileName));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if (input != null) {
+			try {
+				return ImageIO.read(input);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
 	/**
 	 * 将svg转化为BufferedImage，方便后期处理
 	 * 

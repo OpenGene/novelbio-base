@@ -17,7 +17,7 @@ import javax.swing.*;
 import org.apache.commons.math.analysis.solvers.LaguerreSolver;
 
 import com.novelbio.base.fileOperate.FileOperate;
-import com.novelbio.base.plot.GraphicCope;
+import com.novelbio.base.plot.ImageUtils;
 import com.novelbio.base.plot.JpanelPlot;
 import com.novelbio.base.plot.PlotNBC;
 import com.novelbio.base.plot.java.HeatChartDataInt;

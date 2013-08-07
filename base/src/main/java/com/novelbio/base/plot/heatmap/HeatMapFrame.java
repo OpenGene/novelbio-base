@@ -8,7 +8,7 @@ import javax.imageio.stream.FileImageOutputStream;
 import javax.swing.*;
 
 import com.novelbio.base.fileOperate.FileOperate;
-import com.novelbio.base.plot.GraphicCope;
+import com.novelbio.base.plot.ImageUtils;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -159,7 +159,7 @@ class HeatMapFrame extends JFrame
     	        
     	        com.paint(g2);
     	        g2.dispose();  
-    	        bufferImage = GraphicCope.resizeImage(bufferImage, 100, 100);
+    	        bufferImage = ImageUtils.resizeImage(bufferImage, 100, 100);
     	        try {
 					saveGraphicJpeg(bufferImage,path, 1.0f);
 				} catch (IOException e) {

@@ -367,9 +367,10 @@ public abstract class ListHashSearch < T extends ListDetailAbs, E extends ListCo
 	 * @return
 	 */
 	public ArrayList<T> getGffDetailAll() {
-		if (lsGffDetailAll.size() != 0) {
-			return lsGffDetailAll;
-		}
+//		if (lsGffDetailAll.size() != 0) {
+//			return lsGffDetailAll;
+//		}
+		lsGffDetailAll = new ArrayList<T>();
 		for (M lsGffDetailGenes : mapChrID2ListGff.values()) {
 			lsGffDetailAll.addAll(lsGffDetailGenes);
 		}

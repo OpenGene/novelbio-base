@@ -193,7 +193,7 @@ public abstract  class PlotNBC{
     	if (bufferedImage.getWidth() == Width && bufferedImage.getHeight() == Height) {
 			return bufferedImage;
 		}
-    	BufferedImage bufferedImageResult = GraphicCope.resizeImage(bufferedImage, Width, Height);
+    	BufferedImage bufferedImageResult = ImageUtils.resizeImage(bufferedImage, Width, Height);
     	Graphics2D graphics2d = (Graphics2D) bufferedImageResult.createGraphics();
     	// ----------   增加下面的代码使得背景透明   -----------------  
     	if (alpha) {
