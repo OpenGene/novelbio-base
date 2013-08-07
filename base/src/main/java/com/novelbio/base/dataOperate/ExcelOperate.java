@@ -10,11 +10,16 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.novelbio.base.dataStructure.ArrayOperate;
@@ -997,7 +1002,139 @@ public class ExcelOperate {
 			return false;
 		}
 	}
-
+	
+	/**
+	 * 改变excel多单元格的背景颜色
+	 * @param sheetNum sheet位置,从1开始
+	 * @param cellBGColorNBCs 单元格背景颜色对象数组
+	 */
+	public boolean changeCellBGColor(int sheetNum,CellBGColorNBC[] cellBGColorNBCs){
+		sheetNum--;
+		if (sheetNum < -1)
+			return false;
+		initialExcel();
+		for (int i = 0; i < cellBGColorNBCs.length; i++) {
+			int rowNum = cellBGColorNBCs[i].getRowNum()-1;
+			int colNum = cellBGColorNBCs[i].getColNum()-1;
+			if (rowNum < 0 || colNum < 0)
+				continue;
+			try {
+				sheet = wb.getSheetAt(sheetNum);
+			} catch (Exception e) {
+				sheet = wb.createSheet("sheet" + (getSheetCount() + 1));// 新建sheet
+			}
+			Row row = sheet.getRow(rowNum);
+			if (row == null) {
+				row = sheet.createRow(rowNum);
+			}
+			Cell cell = row.createCell((colNum));
+			CellStyle style = wb.createCellStyle();
+		    style.setFillForegroundColor(cellBGColorNBCs[i].getColor());//设置前景色
+	        style.setFillPattern(CellStyle.BIG_SPOTS);//设置填充模式
+			cell.setCellStyle(style);
+		}
+		try {
+			if (filename != "")
+				Save();
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	/**
+	 * 改变excel多行的背景颜色
+	 * @param sheetNum sheet位置,从1开始
+	 * @param rowBGColorNBCs 行背景颜色对象数组
+	 */
+	public boolean changeRowBGColor(int sheetNum,RowBGColorNBC[] rowBGColorNBCs){
+		sheetNum--;
+		if (sheetNum < -1)
+			return false;
+		initialExcel();
+		for (int j = 0; j < rowBGColorNBCs.length; j++) {
+			int rowNum = rowBGColorNBCs[j].getRowNum() - 1;
+			if (rowNum < 0)
+				continue;
+			for (int i = 0; i < getColCount(); i++) {
+				try {
+					try {
+						sheet = wb.getSheetAt(sheetNum);
+					} catch (Exception e) {
+						sheet = wb.createSheet("sheet" + (getSheetCount() + 1));// 新建sheet
+					}
+					Row row = sheet.getRow(rowNum);
+					if (row == null) {
+						row = sheet.createRow(rowNum);
+					}
+					Cell cell = row.createCell(i);
+					CellStyle style = wb.createCellStyle();
+				    style.setFillForegroundColor(rowBGColorNBCs[j].getColor());//设置前景色
+			        style.setFillPattern(CellStyle.BIG_SPOTS);//设置填充模式
+					cell.setCellStyle(style);
+				} catch (Exception e) {
+					e.printStackTrace();
+					continue;
+				}
+			}
+		}
+		try {
+			if (filename != "")
+				Save();
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	/**
+	 * 改变excel多列的背景颜色
+	 * @param sheetNum sheet位置,从1开始
+	 * @param colBGColorNBCs 列背景颜色数量
+	 */
+	public boolean changeColBGColor(int sheetNum,ColBGColorNBC[] colBGColorNBCs){
+		sheetNum--;
+		if (sheetNum < -1)
+			return false;
+		initialExcel();
+		for (int j = 0; j < colBGColorNBCs.length; j++) {
+			int colNum = colBGColorNBCs[j].getColNum() - 1;
+			if (colNum < 0)
+				continue;
+			for (int i = 0; i < getRowCount(); i++) {
+				try {
+					try {
+						sheet = wb.getSheetAt(sheetNum);
+					} catch (Exception e) {
+						sheet = wb.createSheet("sheet" + (getSheetCount() + 1));// 新建sheet
+					}
+					Row row = sheet.getRow(i);
+					if (row == null) {
+						row = sheet.createRow(i);
+					}
+					Cell cell = row.createCell(colNum);
+					CellStyle style = wb.createCellStyle();
+				    style.setFillForegroundColor(colBGColorNBCs[j].getColor());//设置前景色
+			        style.setFillPattern(CellStyle.BIG_SPOTS);//设置填充模式
+					cell.setCellStyle(style);
+				} catch (Exception e) {
+					e.printStackTrace();
+					continue;
+				}
+			}
+		}
+		try {
+			if (filename != "")
+				Save();
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
 	// /////////////////////保存文件方法/////////////////////////////////////
 	/**
 	 * 保存excel文件，使用以前的文件名。有重载
@@ -1067,5 +1204,89 @@ public class ExcelOperate {
 	public void Close() {// 暂时不会
 		wb = null;// book [includes sheet]
 		sheet = null;
+	}
+	
+	/**
+	 * 行颜色对象
+	 * @author novelbio
+	 */
+	public static class RowBGColorNBC {
+		private int rowNum = 1;
+		private Short color = IndexedColors.WHITE.getIndex();
+		/**
+		 * 改变excel一行的背景颜色
+		 * @param rowNum 行号，从1开始
+		 * @param color 例如<b>IndexedColors.ORANGE.getIndex()<b>等等
+		 */
+		public RowBGColorNBC(int rowNum,Short color) {
+			this.rowNum = rowNum;
+			this.color = color;
+		}
+		
+		public Short getColor() {
+			return color;
+		}
+		
+		public int getRowNum() {
+			return rowNum;
+		}
+	}
+	
+	/**
+	 * 列颜色对象
+	 * @author novelbio
+	 */
+	public static class ColBGColorNBC {
+		private int colNum = 1;
+		private Short color = IndexedColors.WHITE.getIndex();
+		/**
+		 * 改变excel一行的背景颜色
+		 * @param colNum 列号，从1开始
+		 * @param color 例如<b>IndexedColors.ORANGE.getIndex()<b>等等
+		 */
+		public ColBGColorNBC(int colNum,Short color) {
+			this.colNum = colNum;
+			this.color = color;
+		}
+		
+		public Short getColor() {
+			return color;
+		}
+		
+		public int getColNum() {
+			return colNum;
+		}
+	}
+	
+	/**
+	 * 单元格颜色对象
+	 * @author novelbio
+	 */
+	public static class CellBGColorNBC {
+		private int rowNum = 1;
+		private int colNum = 1;
+		private Short color = IndexedColors.WHITE.getIndex();
+		/**
+		 * 改变excel一行的背景颜色
+		 * @param rowNum 行号，从1开始
+		 * @param color 例如<b>IndexedColors.ORANGE.getIndex()<b>等等
+		 */
+		public CellBGColorNBC(int rowNum,int colNum,Short color) {
+			this.rowNum = rowNum;
+			this.colNum = colNum;
+			this.color = color;
+		}
+		
+		public Short getColor() {
+			return color;
+		}
+		
+		public int getRowNum() {
+			return rowNum;
+		}
+		
+		public int getColNum() {
+			return colNum;
+		}
 	}
 }
