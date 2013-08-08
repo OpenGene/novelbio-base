@@ -76,11 +76,10 @@ public class PathDetail {
 	}
 	/** 零时文件的文件夹，没有就创建一个 */
 	public static String getTmpConfFold() {
-		String fold = PathDetail.getProjectPath() + "ConfFold" + FileOperate.getSepPath();
+		String fold = getProjectPath() + "ConfFold" + FileOperate.getSepPath();
 		FileOperate.createFolders(fold);
 		return fold;
 	}
-
 	
 	public static String getRworkspace() {
 		String rworkspace = getProjectPath() + "rscript"  + FileOperate.getSepPath();
@@ -97,7 +96,7 @@ public class PathDetail {
 	}
 	/** 一个大的能容纳一些中间过程的文件夹 */
 	public static String getTmpPath() {
-		String tmpPath = getProjectPath() + "tmp";
+		String tmpPath = properties.getProperty("TMPpath");
 		FileOperate.createFolders(tmpPath);
 		return tmpPath;
 	}
