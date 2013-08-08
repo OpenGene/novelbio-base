@@ -28,6 +28,7 @@ public class PathDetail {
 				e.printStackTrace();
 			}
 		}
+		System.setProperty("java.io.tmpdir", getTmpPath()); 
 	}
 	
 	/** 设定java的临时文件夹 */
