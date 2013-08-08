@@ -132,51 +132,9 @@ public abstract  class PlotNBC{
 	}
     
     protected static void saveGraphic(BufferedImage chart, String outputFile, float quality) {
-    	String ext = FileOperate.getFileNameSep(outputFile)[1];
-    	File fileOut = new File(outputFile);
-		// Handle jpg without transparency.
-		if (ext.toLowerCase().equals("jpg") || ext.toLowerCase().equals("jpeg")) {
-			try {
-				 ImageIO.write(chart,"jpg",fileOut);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		} else {
-		
-			try {
-				FileOutputStream fileOutputStream = new FileOutputStream(fileOut);
-				Iterator<ImageWriter> writers = ImageIO.getImageWritersByMIMEType("image/png");
-				while (writers.hasNext()) {
-					ImageWriter writer = writers.next();
-					ImageOutputStream ios = ImageIO.createImageOutputStream(fileOutputStream);
-					writer.setOutput(ios);
-					try {
-						writer.write(chart);
-					} finally {
-						ios.close();
-					}
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+    	ImageUtils.saveBufferedImage(chart, outputFile);
 	}
 	
-	private static void saveGraphicJpeg(BufferedImage chart, File outputFile, float quality) throws IOException {
-		// Setup correct compression for jpeg.
-		Iterator<ImageWriter> iter = ImageIO.getImageWritersByFormatName("jpeg");
-		ImageWriter writer = (ImageWriter) iter.next();
-		ImageWriteParam iwp = writer.getDefaultWriteParam();
-		iwp.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-		iwp.setCompressionQuality(quality);
-		
-		// Output the image.
-		FileImageOutputStream output = new FileImageOutputStream(outputFile);
-		writer.setOutput(output);
-		IIOImage image = new IIOImage(chart, null, null);
-		writer.write(null, image, iwp);
-		writer.dispose();
-	}
     /**
      * 最后保存在Graphics g中所对应的另一个BufferedImage中
      * 如果保存的图案的大小和显示图案大小一致，则赋值：bufferedImageResult = bufferedImage;

@@ -1,9 +1,7 @@
 package com.novelbio.base.dataOperate;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
-import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -11,30 +9,16 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
 
+import com.novelbio.base.PathDetail;
 import com.novelbio.base.fileOperate.FileOperate;
 
 public class HdfsBase {
 	public static String HEAD = "";
 	private static Configuration conf;
 	
-	static{ 
-		InputStream in = HdfsBase.class.getClassLoader().getResourceAsStream("hdfs.properties");
-		Properties properties = new Properties();
-		try {
-			properties.load(in);
-			HEAD = properties.getProperty("defaultName");
-			conf = new Configuration();
-			// 指定用户名
-			// conf.set("hadoop.job.user", properties.getProperty("user"));
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		} finally{
-			try {
-				in.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+	static{
+		HEAD = PathDetail.getHdfsHead();
+		conf = new Configuration();
 	} 
 	
 	public static boolean isHdfs(String fileName){

@@ -213,41 +213,11 @@ class HeatMapFrame extends JFrame
 		if (extPoint < 0) {
 			throw new IOException("Illegal filename, no extension used.");
 		}
-		Image chartImage = this.createImage(Width, Height);
-//		System.out.println(this.getWidth());
-//		int width = chartImage.getWidth(null);  
-//		int height = chartImage.getHeight(null); 
 		BufferedImage image = new BufferedImage(Width, Height, BufferedImage.TYPE_INT_RGB);
 		 Graphics2D g2=image.createGraphics();  
 		 paint(g2);
 		 g2.dispose();
-		// Determine the extension of the filename.
-		String ext = filename.substring(extPoint + 1);
-		// Handle jpg without transparency.
-		if (ext.toLowerCase().equals("jpg") || ext.toLowerCase().equals("jpeg")) {
-			// Save our graphic.
-			saveGraphicJpeg(image, outputFileName, 1.0f);
-		} else {
-			ImageIO.write(image, ext, outputFile);
-		}
-	}
-	
-	
-	
-	private void saveGraphicJpeg(BufferedImage chart, String pathname, float quality) throws IOException {
-		File outputFile = new File(pathname);
-		// Setup correct compression for jpeg.
-		Iterator<ImageWriter> iter = ImageIO.getImageWritersByFormatName("jpeg");
-		ImageWriter writer = (ImageWriter) iter.next();
-		ImageWriteParam iwp = writer.getDefaultWriteParam();
-		iwp.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-		iwp.setCompressionQuality(quality);
-		
-		// Output the image.
-		FileImageOutputStream output = new FileImageOutputStream(outputFile);
-		writer.setOutput(output);
-		IIOImage image = new IIOImage(chart, null, null);
-		writer.write(null, image, iwp);
-		writer.dispose();
+		 
+		 ImageUtils.saveBufferedImage(image, outputFileName);
 	}
 }

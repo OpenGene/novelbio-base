@@ -31,6 +31,8 @@ import java.util.Iterator;
 import javax.imageio.*;
 import javax.imageio.stream.FileImageOutputStream;
 
+import com.novelbio.base.plot.ImageUtils;
+
 /**
  * The <code>HeatChart</code> class describes a chart which can display 
  * 3-dimensions of values - x,y and z, where x and y are the usual 2-dimensional
@@ -1290,46 +1292,9 @@ public class HeatChart {
 	 * parent directory), or the permissions of the write location may be 
 	 * incorrect.
 	 */
-	public void saveToFile(File outputFile) throws IOException {
-		String filename = outputFile.getName();
-
-		int extPoint = filename.lastIndexOf('.');
-
-		if (extPoint < 0) {
-			throw new IOException("Illegal filename, no extension used.");
-		}
-
-		// Determine the extension of the filename.
-		String ext = filename.substring(extPoint + 1);
-		
-		// Handle jpg without transparency.
-		if (ext.toLowerCase().equals("jpg") || ext.toLowerCase().equals("jpeg")) {
-			BufferedImage chart = (BufferedImage) getChartImage(false);
-
-			// Save our graphic.
-			saveGraphicJpeg(chart, outputFile, 1.0f);
-		} else {
-			BufferedImage chart = (BufferedImage) getChartImage(true);
-			
-			ImageIO.write(chart, ext, outputFile);
-		}
-	}
-	
-	private void saveGraphicJpeg(BufferedImage chart, File outputFile, float quality) throws IOException {
-		// Setup correct compression for jpeg.
-		Iterator<ImageWriter> iter = ImageIO.getImageWritersByFormatName("jpeg");
-		ImageWriter writer = (ImageWriter) iter.next();
-		ImageWriteParam iwp = writer.getDefaultWriteParam();
-		iwp.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-		iwp.setCompressionQuality(quality);
-		
-		// Output the image.
-		FileImageOutputStream output = new FileImageOutputStream(outputFile);
-		writer.setOutput(output);
-		IIOImage image = new IIOImage(chart, null, null);
-		writer.write(null, image, iwp);
-		writer.dispose();
-		
+	public void saveToFile(String outputFileName) throws IOException {
+		BufferedImage chart = (BufferedImage) getChartImage(true);
+		ImageUtils.saveBufferedImage(chart, outputFileName);
 	}
 	
 	/**
