@@ -23,6 +23,7 @@ import org.dom4j.io.XMLWriter;
 
 import com.hg.xdoc.XDoc;
 import com.hg.xdoc.XDocIO;
+import com.novelbio.base.PathDetail;
 import com.novelbio.base.SepSign;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.fileOperate.FileOperate;
@@ -37,26 +38,17 @@ import freemarker.template.Template;
  */
 public class XdocTemplate {
 	public static void main(String[] args) {
-		XdocTemplate.setRootXdocTemp("/home/zong0jie/software/git/NBCWebApp1.0/NBCWebApp1.0/target/classes/");
-		XdocTemplate xdocTemplate = new XdocTemplate("","/home/zong0jie/desktop/Novelbio Result");
+		System.out.println(XdocTemplate.class.getClassLoader().getResource("picTemp.PNG").getFile());
+//		XdocTemplate xdocTemplate = new XdocTemplate("","/home/zong0jie/desktop/Novelbio Result");
 //		XdocTemplate xdocTemplate = new XdocTemplate("","/home/zong0jie/Atmp/Test/Novelbio Result");
-		xdocTemplate.readParamAndGenerateXdoc();
-		xdocTemplate.outputReport("/home/zong0jie/desktop/result3.docx");
+//		xdocTemplate.readParamAndGenerateXdoc();
+//		xdocTemplate.outputReport("/home/zong0jie/desktop/result3.docx");
 //		xdocTemplate.outputReport("/home/zong0jie/Atmp/Test/result.docx");
 	}
 	
 	public static final Logger logger = Logger.getLogger(XdocTemplate.class);
-	/** 模板所在根路径 */
-	public static String rootXdocTemp = "/home/zong0jie/git/NBCWebApp1.0/NBCWebApp1.0/target/classes/";
 	public static final String XdocRootTmplt = "Novelbio Result.xdoc";
-	/** 
-	 * 设置模板根路径，这个方法会在第一次生成模板的时候调用
-	 * 为了方便，决定在客户端请求到来的时候调用
-	 */
-	public static void setRootXdocTemp(String rootXdocTemp) {
-		XdocTemplate.rootXdocTemp = rootXdocTemp;
-	}
-
+	
 	/** 对应的模板位置， */
 	public String xdocPath = FileOperate.addSep(rootXdocTemp) + "xdocTemplate";
 	
@@ -334,10 +326,18 @@ public class XdocTemplate {
 			List<String> lsImageSrcs = findAllImageSrc(tmpResult);
 			// 用字符串构建XDoc
 			XDoc xdoc = new XDoc(tmpResult);
+			String fileName = FileOperate.getFileName(outPathFile);
+			String resultTempFile = FileOperate.addSep(PathDetail.getTmpPath())+fileName;
 			//加上一个封面模板，因为封面模板是没有页眉页脚的
 			// 生成的文件保存目录
-			XDocIO.write(xdoc, new File(outPathFile));
-			motifyReport(lsImageSrcs, outPathFile);
+			XDocIO.write(xdoc, new File(resultTempFile));
+			motifyReport(lsImageSrcs, resultTempFile);
+			boolean copyResult = FileOperate.copyFile(resultTempFile, outPathFile, true);
+			if (copyResult) {
+				FileOperate.delFile(resultTempFile);
+			}else {
+				logger.error("报告拷贝出错！");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("保存目录无效或不能转换成此类文件！");
@@ -388,6 +388,7 @@ public class XdocTemplate {
 	public List<String> findAllImageSrc(String result) {
 		List<String> lsImageSrcs = new ArrayList<String>(); 
 		Document doc = null;
+		String picTempPath = FileOperate.addSep(XdocTemplate.class.getClassLoader().getResource("pictureTemplate").getFile()) + "picTemp.PNG";
 	    try {
 		 
             // 读取并解析XML文档
@@ -401,7 +402,7 @@ public class XdocTemplate {
             for (Element element : elements ){
             	lsImageSrcs.add(element.attribute("src").getValue());
             	if(!element.attribute("src").getValue().startsWith("data:im")){
-            		element.attribute("src").setValue( FileOperate.addSep(rootXdocTemp) + "pictureTemplate" + FileOperate.getSepPath() + "picTemp.PNG");
+            		element.attribute("src").setValue(picTempPath);
             		System.out.println("图片" + element.attribute("src").getValue());
             	}
             }
@@ -565,22 +566,6 @@ public class XdocTemplate {
 		template.process(map, sw);
 		// 返回渲染好的xdoc字符串
 		return sw.toString();
-	}
-	
-	/**
-	 * 目前只支持excel和picutre
-	 * @param strXdocType XdocType里面的tostring
-	 * @param fileName
-	 * @return
-	 */
-	protected static XdocTemplate createTemplate(EnumXdocType xdocType, String pathFileName) {
-		if (xdocType == EnumXdocType.Excel) {
-			return new XdocTmpltExcel(pathFileName);
-		} else if (xdocType == EnumXdocType.Picture) {
-			return new XdocTmpltPic(pathFileName);
-		}
-		logger.debug("未知类型");
-		return null;
 	}
 	
 }

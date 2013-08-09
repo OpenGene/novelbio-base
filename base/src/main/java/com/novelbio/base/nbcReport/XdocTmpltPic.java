@@ -1,24 +1,26 @@
 package com.novelbio.base.nbcReport;
 
+import java.io.File;
+import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Locale;
+import java.util.Map;
 
-import com.novelbio.base.SepSign;
-import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.fileOperate.FileOperate;
+
+import freemarker.template.Configuration;
+import freemarker.template.Template;
 
 
 /**
- *  图片对应的实体类
+ *  图片模板对应的实体类
  * @author gaozhu
  *
  */
-public class XdocTmpltPic extends XdocTemplate{
-	
-	/** 图片对应的说明文件名，全名 */
-	private String descFile = "";
+public class XdocTmpltPic{
+	private static final String TEMPNAME = "Picture.xdoc";
 	/** 图片的标题 */
 	private String title = "";
 	/** 图片的注： */
@@ -29,109 +31,95 @@ public class XdocTmpltPic extends XdocTemplate{
 	private String downCompare = "";
 	/** 实验组名 */
 	private String expTeamName = "";
+	/** 用于并排显示的图片名 */
+	List<String> lsPicPaths;
 	
-	List<String> lsPictureNames;
-	
-	/** 根据picture路径完成本类的构造 */
-	public XdocTmpltPic(String fileNames) {
-		lsPictureNames = new ArrayList<String>();
-		String[] names = fileNames.split(SepSign.SEP_ID);
-		String path = FileOperate.getParentPathName(names[0]);
-		for (int i = 0; i < names.length; i++) {
-			if (i == 0) {
-				lsPictureNames.add(names[i]);
-				continue;
+	/** 一张图片的构造方法 */
+	public XdocTmpltPic(String picPath) {
+		lsPicPaths = new ArrayList<String>();
+		lsPicPaths.add(picPath);
+		String titleDefault = "";
+		for (String filePath : lsPicPaths) {
+			if (!titleDefault.equals("")) {
+				titleDefault += "、";
 			}
-			lsPictureNames.add(FileOperate.addSep(path)+names[i]);
+			titleDefault += FileOperate.getFileNameSep(filePath)[0];
 		}
-		resolvePictureName(names[0]);
+		this.title = "上图为文件 "+titleDefault+" 所展示的图片";
+	}
+	
+	/** 并列多张图片的构造方法 */
+	public XdocTmpltPic(List<String> lsPicPaths){
+		this.lsPicPaths = lsPicPaths;
+		String titleDefault = "";
+		for (String filePath : lsPicPaths) {
+			if (!titleDefault.equals("")) {
+				titleDefault += "、";
+			}
+			titleDefault += FileOperate.getFileNameSep(filePath)[0];
+		}
+		this.title = "上图为文件 "+titleDefault+" 所展示的图片";
 	}
 	
 	/**
-	 * 解析文件名
+	 * 生成freemarker所需要的参数
 	 */
-	private void resolvePictureName(String pictureName) {
-		//去掉后缀名
-		String pictureNameNoSuffix = FileOperate.getFileNameSep(pictureName)[0];
-		this.descFile = FileOperate.changeFileSuffix(pictureName, "_pic", "txt");
-		super.tempName = "Picture.xdoc";
-		String[] names = FileOperate.getFileNameSep(pictureNameNoSuffix)[0].split("_");
-		this.expTeamName = names[0];
-		
-		this.title = "上图为"+FileOperate.getFileNameSep(pictureName)[0]+"所展示的图片";
-	}
-	
-	/**
-	 * 读取excel的说明文件中的参数（允许不存在）
-	 */
-	@Override
-	public void readParamAndGenerateXdoc(){
-		if (FileOperate.isFileExist(descFile)) {
-			TxtReadandWrite txtRead = new TxtReadandWrite(descFile, false);
-			for (String content : txtRead.readlines()) {
-				if (content.trim().equals("")) {
-					continue;
-				}
-				String[] params = content.split("@@");
-				if (params.length == 1) {
-					logger.error(descFile+".txt文件书写不规范");
-				}
-			
-				if(params[0].equals("title")){
-					this.title = params[1];
-				}else if(params[0].equals("note")){
-					this.note = params[1];
-				}else if(params[0].equals("upCompare")){
-					this.upCompare = params[1];
-				}else if(params[0].equals("downCompare")){
-					this.downCompare = params[1];
-				}
-			}
-			txtRead.close();
-		}
-		
-		mapParams.put("lsSrcs", lsPictureNames);
+	private Map<String, Object> addParams(){
+		Map<String, Object> mapParams = new HashMap<String, Object>();
+		mapParams.put("lsSrcs", lsPicPaths);
 		mapParams.put("title",title);
 		mapParams.put("note",note);
 		mapParams.put("upCompare",upCompare);
 		mapParams.put("downCompare",downCompare);
+		mapParams.put("expTeamName",expTeamName);
+		return mapParams;
 	}
 	
 	/** 输出渲染好的xdoc的toString结果 */
 	@Override
 	public String toString(){
+		Map<String, Object> mapKey2Params = addParams();
 		/** 把子xdoc的toString方法封装成集合传递给本xdoc */
+		String tempPath = XdocTmpltPic.class.getClassLoader().getResource("pictureTemplate").getFile();
 		try {
-			if (!FileOperate.isFileExist(xdocPath+"/"+tempName)) {
+			if (!FileOperate.isFileExist(tempPath)) {
 				return "";
 			}
-			return renderXdoc(xdocPath,tempName,mapParams);
+			Configuration cf = new Configuration();
+			cf.setClassicCompatible(true);
+			// 模板存放路径
+			cf.setDirectoryForTemplateLoading(new File(tempPath));
+			cf.setEncoding(Locale.getDefault(), "UTF-8");
+			// 模板名称
+			Template template = cf.getTemplate(TEMPNAME);
+			StringWriter sw = new StringWriter();
+			// 处理并把结果输出到字符串中
+			template.process(mapKey2Params, sw);
+			return sw.toString();
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("渲染模板"+tempName+"出错");
 			return "";
 		}
 	}
-
-	/**
-	 * 这种类型 PICTURE::value1#/#1;value2#/#1;value3#/#1;value4#/#1....读取为picture集合 #/#后面代表是一组的<br>
-	 * @param path 文件所在父级路径
-	 * @param param PICTURE::value1#/#1;value2#/#1;value3#/#1;value4#/#1....读取为picture集合<br>
-	 * @param num 读取前几个文件 
-	 * @return
-	 */
-	public static Set<String> getLsFile(String path, String param, int num) {
-		Set<String> setResultFileName = new LinkedHashSet<String>();
-		path = FileOperate.addSep(path);
-		String[] ss = param.split(";");
-		int numThis = 0;
-		for (String string : ss) {
-			numThis++;
-			setResultFileName.add(path + string);
-			if (numThis > num) {
-				break;
-			}
-		}
-		return setResultFileName;
+	/** 图片的标题 */
+	public void setTitle(String title) {
+		this.title = title;
 	}
+	/** 图片的注： */
+	public void setNote(String note) {
+		this.note = note;
+	}
+	/** 图片上方说明 */
+	public void setUpCompare(String upCompare) {
+		this.upCompare = upCompare;
+	}
+	/** 图片下方说明 */
+	public void setDownCompare(String downCompare) {
+		this.downCompare = downCompare;
+	}
+	/** 组名 */
+	public void setExpTeamName(String expTeamName) {
+		this.expTeamName = expTeamName;
+	}
+
 }

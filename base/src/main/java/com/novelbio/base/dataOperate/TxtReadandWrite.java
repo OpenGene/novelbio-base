@@ -196,7 +196,18 @@ public class TxtReadandWrite implements Closeable {
 	public ArrayList<String> readFirstLines(int Num) {
 		return txtRead.readFirstLines(Num);
 	}
-
+	
+	/**
+	 * 把所有的内容读成一个字符串
+	 * @return
+	 */
+	public String readAllAsString(){
+		String content = "";
+		for (String line : readfileLs()) {
+			content += line;
+		}
+		return content;
+	}
 	/**
 	 * 按照excel方法读取文本时使用，用于 获得txt文本的行数，如果最后一行是""，则忽略最后一行
 	 * @return

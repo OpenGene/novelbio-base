@@ -2,12 +2,12 @@ package com.novelbio.base.nbcReport;
 
 
 public enum EnumXdocType {
-	Excel("EXCEL"), Picture("PICTURE");
+	Excel_Dif("EXCEL"), Picture(""),Catalog("background_catalog.xdoc");
 	
-	String type = "";
+	String tempPath = "";
 
-	EnumXdocType(String type) {
-		this.type = type;
+	EnumXdocType(String temp) {
+		this.tempPath = tempPath;
 	}
 	
 	/**
