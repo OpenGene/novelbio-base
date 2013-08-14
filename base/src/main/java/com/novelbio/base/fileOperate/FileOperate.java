@@ -13,6 +13,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 
@@ -633,11 +634,8 @@ public class FileOperate {
 			return true;
 		}
 		try {
-			int bytesum = 0;
-			int byteread = 0;
 			File oldfile = getFile(oldPathFile);
 			File newfile = getFile(newPathFile);
-
 			if (oldfile.exists()) { // 文件存在时
 				if (newfile.exists()) {
 					if (!cover) {
@@ -654,19 +652,15 @@ public class FileOperate {
 					inStream = new FileInputStream(oldfile); 
 				}
 				if (newfile instanceof FileHadoop) {
-					FileHadoop fileHadoop = (FileHadoop) oldfile;
+					FileHadoop fileHadoop = (FileHadoop) newfile;
 					fs = fileHadoop.getOutputStreamNew(cover);
 				}else {
 					fs = new FileOutputStream(newfile);
 				}
-				
-				byte[] buffer = new byte[1444];
-				while ((byteread = inStream.read(buffer)) != -1) {
-					bytesum += byteread; // 字节数 文件大小
-					// System.out.println(bytesum);
-					fs.write(buffer, 0, byteread);
-				}
+				IOUtils.copy(inStream, fs);
 				inStream.close();
+				fs.flush();
+				fs.close();
 				return true;
 			} else {
 				return false;

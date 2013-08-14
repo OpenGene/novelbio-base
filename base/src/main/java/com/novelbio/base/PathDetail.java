@@ -103,7 +103,7 @@ public class PathDetail {
 	}
 	/** 在tmp文件夹下新建一个随机文件名的临时文件夹 */
 	public static String getTmpPathRandom() {
-		String tmpPathRandom = getTmpPath() + "tmp" + DateUtil.getDateAndRandom();
+		String tmpPathRandom = FileOperate.addSep(getTmpPath()) + "tmp" + DateUtil.getDateAndRandom();
 		FileOperate.createFolders(tmpPathRandom);
 		return tmpPathRandom;
 	}
