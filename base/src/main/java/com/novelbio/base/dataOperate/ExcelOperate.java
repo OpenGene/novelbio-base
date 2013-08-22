@@ -174,6 +174,8 @@ public class ExcelOperate {
 		} catch (Exception e) {
 			versionXls = EXCEL_NO_FILE;
 		}
+		wb = null;
+		sheet = null;
 		return initialExcel();
 	}
 
@@ -189,11 +191,13 @@ public class ExcelOperate {
 	private boolean resetExcelExp() throws Exception {
 		if (versionXls != EXCEL2003 && versionXls != EXCEL2007)
 			return false;
-
+		
+		if (wb != null) return true;
+		
+		
 		InputStream fos;
 		
 		if (HdfsBase.isHdfs(filename)) {
-			
 			FileHadoop f = new FileHadoop(filename);
 			fos = f.getInputStream();
 		}else {
