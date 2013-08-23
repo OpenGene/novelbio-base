@@ -146,7 +146,7 @@ public class ImageUtils {
 				FileHadoop fileHadoop = new FileHadoop(outputFile);
 				out = fileHadoop.getOutputStreamNew(true);
 			} else {
-				out = new FileOutputStream(outputFile);
+				out = new FileOutputStream(new File(outputFile));
 			}
 			// Handle jpg without transparency.
 			if (ext.toLowerCase().equals("jpg") || ext.toLowerCase().equals("jpeg")) {
@@ -157,19 +157,7 @@ public class ImageUtils {
 				}
 			} else {
 				try {
-					Iterator<ImageWriter> writers = ImageIO
-							.getImageWritersByMIMEType("image/png");
-					while (writers.hasNext()) {
-						ImageWriter writer = writers.next();
-						ImageOutputStream ios = ImageIO
-								.createImageOutputStream(out);
-						writer.setOutput(ios);
-						try {
-							writer.write(chart);
-						} finally {
-							ios.close();
-						}
-					}
+					ImageIO.write(chart, "png", out);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

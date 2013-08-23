@@ -651,10 +651,10 @@ public class ArrayOperate {
 	public static double[] cmpArray(double[] region1, double[] region2) {
 		/**
 		 * 结果信息：
-		 * 0：位置情况,总共6种情况， 0：一致 1：数组1在前  2：数组2在前
-		 * 1：overlap的bp
-		 * 2：overlap占1的比值
-		 * 3：overlap占2的比值
+		 * 0：位置情况,总共6种情况， 0：一致 1：数组1在前  2：数组2在前<br>
+		 * 1：overlap的bp<br>
+		 * 2：overlap占1的比值<br>
+		 * 3：overlap占2的比值<br>
 		 */
 		double[] result = new double[4];
 

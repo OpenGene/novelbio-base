@@ -28,7 +28,10 @@ public class PathDetail {
 				e.printStackTrace();
 			}
 		}
-		System.setProperty("java.io.tmpdir", getTmpPath()); 
+		String tmp = getTmpPath();
+		if (FileOperate.isFileDirectory(tmp)) {
+			System.setProperty("java.io.tmpdir", tmp); 
+		}
 	}
 	
 	/** 设定java的临时文件夹 */

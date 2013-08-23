@@ -19,6 +19,7 @@ public class HdfsBase {
 	static{
 		HEAD = PathDetail.getHdfsHead();
 		conf = new Configuration();
+		conf.set("dfs.permissions", "false");
 	} 
 	
 	public static boolean isHdfs(String fileName){
