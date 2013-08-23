@@ -45,7 +45,7 @@ public class ExcelOperate {
 	private String filename = "";
 	/** excel 2003 或者 excel 2007 */
 	int versionXls = 0;
-
+	private boolean isNBCExcel = false;
 	public ExcelOperate() {
 	}
 
@@ -56,6 +56,10 @@ public class ExcelOperate {
 	 */
 	public ExcelOperate(String imputfilename) {
 		openExcel(imputfilename, false);
+	}
+	
+	public void setNBCExcel(boolean isNBCExcel) {
+		this.isNBCExcel = isNBCExcel;
 	}
 
 	public ExcelOperate(String imputfilename, boolean excel2003) {
@@ -116,6 +120,20 @@ public class ExcelOperate {
 			}
 			return EXCEL2003;
 		}
+		
+		if (HdfsBase.isHdfs(filename)) {
+			FileHadoop f1 = new FileHadoop(filename);
+			fos = f1.getInputStream();
+		} else {
+			try {
+				File f = new File(filename);
+				fos = new FileInputStream(f);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+				return EXCEL_NO_FILE;
+			}
+		}
+		
 		if (isExcel2007(fos)) {
 			try {
 				fos.close();
@@ -207,7 +225,6 @@ public class ExcelOperate {
 			wb = new HSSFWorkbook(fos);
 		else if (versionXls == EXCEL2007)
 			wb = new XSSFWorkbook(fos);
-		
 		sheet = wb.getSheetAt(0);
 		sheetNum = 0;
 		fos.close();
@@ -637,7 +654,7 @@ public class ExcelOperate {
 	public boolean WriteExcel(int rowNum, int cellNum, String content) {
 		return WriteExcel(null, 1, rowNum, cellNum, content);
 	}
-
+	
 	/**
 	 * 块文件写入excel文件，并设定sheetName，如果没有该sheetName，那么就新建一个
 	 * 设置写入的sheet名字，行数，列数和内容，写入的内容默认为String[][] String[][]中的null会自动跳过
@@ -823,6 +840,14 @@ public class ExcelOperate {
 		cellNum--;// 将sheet和行列都还原为零状态
 		if (rowNum < 0)
 			return false;
+		CellStyle styleSingle = null;
+		CellStyle styleDouble = null;
+		CellStyle styleTitle = null;
+		if (isNBCExcel) {
+			setNBCCellStyle(IndexedColors.LIGHT_TURQUOISE.getIndex(),styleSingle);
+			setNBCCellStyle(IndexedColors.WHITE.getIndex(),styleDouble);
+			setNBCCellStyle(IndexedColors.AQUA.getIndex(),styleTitle);
+		}
 		try {
 			int i = 0;
 			for (String[] rowcontent : content) {
@@ -845,6 +870,13 @@ public class ExcelOperate {
 					} catch (Exception e) {
 						cell.setCellValue(rowcontent[j]);
 					}
+					if (isNBCExcel && writerow == rowNum) {
+						cell.setCellStyle(styleTitle);
+					}else if(isNBCExcel && i%2 == 0) {
+						cell.setCellStyle(styleSingle);
+					}else if (isNBCExcel) {
+						cell.setCellStyle(styleDouble);
+					}
 				}
 				i++;
 			}
@@ -854,7 +886,19 @@ public class ExcelOperate {
 			return false;
 		}
 	}
-
+	private void setNBCCellStyle(short color,CellStyle style){
+		style = wb.createCellStyle();
+		style.setFillForegroundColor(color);//设置前景色
+		style.setBorderBottom(CellStyle.BORDER_THIN);
+		style.setBorderLeft(CellStyle.BORDER_THIN);
+		style.setBorderRight(CellStyle.BORDER_THIN);
+		style.setBorderTop(CellStyle.BORDER_THIN);
+		style.setBottomBorderColor(IndexedColors.WHITE.getIndex());
+		style.setTopBorderColor(IndexedColors.WHITE.getIndex());
+		style.setLeftBorderColor(IndexedColors.WHITE.getIndex());
+		style.setRightBorderColor(IndexedColors.WHITE.getIndex());
+		style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+	}
 	/**
 	 * 条文件写入excel文件， 设置写入的sheet数，行数，列数和内容，写入的内容默认为String[],设定写入行/列
 	 * String[]中的null会自动跳过 其中sheet数，行数，列数，都为实际数目，不用减去1
@@ -1027,11 +1071,97 @@ public class ExcelOperate {
 			if (row == null) {
 				row = sheet.createRow(rowNum);
 			}
-			Cell cell = row.createCell((colNum));
-			CellStyle style = wb.createCellStyle();
-		    style.setFillForegroundColor(cellBGColorNBCs[i].getColor());//设置前景色
-	        style.setFillPattern(CellStyle.BIG_SPOTS);//设置填充模式
+			Cell cell = row.getCell(colNum);
+			if (cell == null) {
+				cell = row.createCell(colNum);
+			}
+			CellStyle style = null;
+			for (short k = 0; k < wb.getNumCellStyles(); k++) {
+				if (wb.getCellStyleAt(k).getFillForegroundColor() == cellBGColorNBCs[i].getColor()) {
+					style = wb.getCellStyleAt(k);
+					break;
+				}
+			}
+			if (style == null) {
+				style = wb.createCellStyle();
+				style.setFillForegroundColor(cellBGColorNBCs[i].getColor());// 设置前景色
+				// 设置填充模式
+			}
+			style.setFillPattern(CellStyle.SOLID_FOREGROUND);
 			cell.setCellStyle(style);
+		}
+		try {
+			if (filename != "")
+				Save();
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	/**
+	 * 改变为Novelbio的表格样式
+	 * @param sheetNum 从1开始的sheet号
+	 * @return
+	 */
+	public boolean changeToNBCExcel(int sheetNum){
+		sheetNum--;
+		if (sheetNum < -1)
+			return false;
+		initialExcel();
+		for (int j = 0; j < getRowCount(); j++) {
+			short nowColor = 0;
+			if(j == 0){
+				nowColor = IndexedColors.AQUA.getIndex();
+			}else if(j%2 == 0){
+				nowColor = IndexedColors.WHITE.getIndex();
+			}else{
+				nowColor = IndexedColors.LIGHT_TURQUOISE.getIndex();
+			}
+			for (int i = 0; i < getColCount(); i++) {
+				try {
+					try {
+						sheet = wb.getSheetAt(sheetNum);
+					} catch (Exception e) {
+						sheet = wb.createSheet("sheet" + (getSheetCount() + 1));// 新建sheet
+					}
+					Row row = sheet.getRow(j);
+					if (row == null) {
+						row = sheet.createRow(j);
+					}
+					Cell cell = row.getCell(i);
+					if (cell == null) {
+						cell = row.createCell(i);
+					}
+					CellStyle style = null;
+				    for (short k = 0; k < wb.getNumCellStyles(); k++)
+				    {
+				    	if (wb.getCellStyleAt(k).getFillForegroundColor() == nowColor) {
+				    		style = wb.getCellStyleAt(k);
+				    		break;
+						}
+				    }
+				    if (style == null) {
+				    	style = wb.createCellStyle();
+				    	style.setFillForegroundColor(nowColor);//设置前景色
+				    	//设置填充模式
+					}
+				    style.setBorderBottom(CellStyle.BORDER_THIN);
+				    style.setBorderLeft(CellStyle.BORDER_THIN);
+				    style.setBorderRight(CellStyle.BORDER_THIN);
+				    style.setBorderTop(CellStyle.BORDER_THIN);
+				    style.setBottomBorderColor(IndexedColors.WHITE.getIndex());
+		    		style.setTopBorderColor(IndexedColors.WHITE.getIndex());
+		    		style.setLeftBorderColor(IndexedColors.WHITE.getIndex());
+		    		style.setRightBorderColor(IndexedColors.WHITE.getIndex());
+				    style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+				    cell.setCellStyle(style);
+				} catch (Exception e) {
+					e.printStackTrace();
+					continue;
+				}
+			}
 		}
 		try {
 			if (filename != "")
@@ -1068,11 +1198,25 @@ public class ExcelOperate {
 					if (row == null) {
 						row = sheet.createRow(rowNum);
 					}
-					Cell cell = row.createCell(i);
-					CellStyle style = wb.createCellStyle();
-				    style.setFillForegroundColor(rowBGColorNBCs[j].getColor());//设置前景色
-			        style.setFillPattern(CellStyle.BIG_SPOTS);//设置填充模式
-					cell.setCellStyle(style);
+					Cell cell = row.getCell(i);
+					if (cell == null) {
+						cell = row.createCell(i);
+					}
+					CellStyle style = null;
+				    for (short k = 0; k < wb.getNumCellStyles(); k++)
+				    {
+				    	if (wb.getCellStyleAt(k).getFillForegroundColor() == rowBGColorNBCs[j].getColor()) {
+				    		style = wb.getCellStyleAt(k);
+				    		break;
+						}
+				    }
+				    if (style == null) {
+				    	style = wb.createCellStyle();
+				    	style.setFillForegroundColor(rowBGColorNBCs[j].getColor());//设置前景色
+				    	//设置填充模式
+					}
+				    style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+				    cell.setCellStyle(style);
 				} catch (Exception e) {
 					e.printStackTrace();
 					continue;
@@ -1114,10 +1258,23 @@ public class ExcelOperate {
 					if (row == null) {
 						row = sheet.createRow(i);
 					}
-					Cell cell = row.createCell(colNum);
-					CellStyle style = wb.createCellStyle();
-				    style.setFillForegroundColor(colBGColorNBCs[j].getColor());//设置前景色
-			        style.setFillPattern(CellStyle.BIG_SPOTS);//设置填充模式
+					Cell cell = row.getCell(colNum);
+					if (cell == null) {
+						cell = row.createCell(colNum);
+					}
+					CellStyle style = null;
+					for (short k = 0; k < wb.getNumCellStyles(); k++) {
+						if (wb.getCellStyleAt(k).getFillForegroundColor() == colBGColorNBCs[j].getColor()) {
+							style = wb.getCellStyleAt(k);
+							break;
+						}
+					}
+					if (style == null) {
+						style = wb.createCellStyle();
+						style.setFillForegroundColor(colBGColorNBCs[j].getColor());// 设置前景色
+						// 设置填充模式
+					}
+					style.setFillPattern(CellStyle.SOLID_FOREGROUND);
 					cell.setCellStyle(style);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -1268,7 +1425,7 @@ public class ExcelOperate {
 		private Short color = IndexedColors.WHITE.getIndex();
 		/**
 		 * 改变excel一行的背景颜色
-		 * @param rowNum 行号，从1开始
+		 * @param rowNum colNum 行号，列号 从1开始
 		 * @param color 例如<b>IndexedColors.ORANGE.getIndex()<b>等等
 		 */
 		public CellBGColorNBC(int rowNum,int colNum,Short color) {

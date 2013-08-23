@@ -39,7 +39,7 @@ public class MapRTest {
 //		Configuration conf = new Configuration();
 //		conf.set("dfs.permissions", "false");
 		FileSystem fs = HdfsBase.getFileSystem();
-		fs.mkdirs(new Path(dirname));
+		//fs.mkdirs(new Path(dirname));
 		//FileSystem fs = FileSystem.get(URI.create(uri), conf); // if wanting
 //		// to use a different cluster
 //		//FileSystem fs = FileSystem.get(conf);
