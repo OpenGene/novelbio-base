@@ -848,8 +848,11 @@ public class ExcelOperate {
 		CellStyle styleDouble = null;
 		CellStyle styleTitle = null;
 		if (isNBCExcel) {
+			styleSingle = wb.createCellStyle();
 			setNBCCellStyle(IndexedColors.LIGHT_TURQUOISE.getIndex(),styleSingle);
+			styleDouble = wb.createCellStyle();
 			setNBCCellStyle(IndexedColors.WHITE.getIndex(),styleDouble);
+			styleTitle = wb.createCellStyle();
 			setNBCCellStyle(IndexedColors.AQUA.getIndex(),styleTitle);
 		}
 		try {
@@ -891,7 +894,6 @@ public class ExcelOperate {
 		}
 	}
 	private void setNBCCellStyle(short color,CellStyle style){
-		style = wb.createCellStyle();
 		style.setFillForegroundColor(color);//设置前景色
 		style.setBorderBottom(CellStyle.BORDER_THIN);
 		style.setBorderLeft(CellStyle.BORDER_THIN);
