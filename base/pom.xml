@@ -234,13 +234,6 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.google.collections</groupId>
-			<artifactId>google-collections</artifactId>
-			<version>1.0</version>
-			<type>jar</type>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
 			<groupId>com.jolbox</groupId>
 			<artifactId>bonecp</artifactId>
 			<version>0.7.1.RELEASE</version>
@@ -304,13 +297,6 @@
 					<groupId>com.sun</groupId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>13.0.1</version>
-			<type>jar</type>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-net</groupId>
