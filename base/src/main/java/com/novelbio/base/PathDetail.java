@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import org.aspectj.org.eclipse.jdt.core.dom.ThisExpression;
+
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.HttpFetch;
 import com.novelbio.base.fileOperate.FileOperate;
@@ -34,7 +36,7 @@ public class PathDetail {
 		}
 	}
 	
-	/** 设定java的临时文件夹 */
+	/** 设定java的临时文件夹(本地) */
 	public static void setTmpDir(String filePath) {
 		File f = new File(filePath);
         if (!f.exists()) f.mkdirs();
@@ -42,6 +44,8 @@ public class PathDetail {
         f.setWritable(true, false);
         System.setProperty("java.io.tmpdir", f.getAbsolutePath()); // in loop so that last one takes effect
 	}
+	
+	
 	
 	/** 返回jar所在的路径 */
 	public static String getProjectPath() {
@@ -78,11 +82,16 @@ public class PathDetail {
 		filePath = FileOperate.getParentPathName(filePath);
 		return FileOperate.addSep(filePath).replace("\\", "/");
 	}
-	/** 零时文件的文件夹，没有就创建一个 */
+	/** 零时文件的文件夹，没有就创建一个(本地) */
 	public static String getTmpConfFold() {
 		String fold = getProjectPath() + "ConfFold" + FileOperate.getSepPath();
 		FileOperate.createFolders(fold);
 		return fold;
+	}
+	
+	public static String getHDFSTmpFold() {
+		String hdfsTmpPath = getHdfsHead() + "nbCloud/public/contract/appendix/";
+		return hdfsTmpPath;
 	}
 	
 	public static String getRworkspace() {
