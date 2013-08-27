@@ -43,7 +43,7 @@ public class VennImage {
 	 * @param height 图片高度
 	 */
 	public VennImage(String savePath,int width,int height) {
-		this.savePath = savePath;
+		this.savePath = savePath.replace("\\", "/");
 		this.width = width;
 		this.height = height;
 	}

@@ -13,6 +13,7 @@ public class SepSign {
 	public static final String SEP_ID = "@//@";
 
 	/**
+	 * <b>不要往这个symbol中添加"/"或"\"</b><br>
 	 * 中间等级
 	 * 分割 NCBIID的title和内容
 	 * 如NCBI@@protein coding
