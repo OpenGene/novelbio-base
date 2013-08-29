@@ -35,9 +35,9 @@ public class FileHadoop extends File {
 	 * @throws IOException 
 	 */
 	public FileHadoop(String hdfsFilePath) throws IOException {
-		super(hdfsFilePath.replace(PathDetail.getHdfsHeadPath(), PathDetail.getHdfsHeadSymbol()));
+		super(hdfsFilePath.replace(FileHadoop.getHdfsHeadPath(), FileHadoop.getHdfsHeadSymbol()));
 		this.fsHDFS = HdfsBase.getFileSystem();
-		hdfsFilePath = hdfsFilePath.replace(PathDetail.getHdfsHeadSymbol(), PathDetail.getHdfsHeadPath());
+		hdfsFilePath = hdfsFilePath.replace(FileHadoop.getHdfsHeadSymbol(), FileHadoop.getHdfsHeadPath());
 		dst = new Path(hdfsFilePath);
 		if (fsHDFS.exists(dst)) {
 			fileStatus = fsHDFS.getFileStatus(dst);
