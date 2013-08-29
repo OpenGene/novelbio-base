@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import org.aspectj.org.eclipse.jdt.core.dom.ThisExpression;
-
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.HttpFetch;
 import com.novelbio.base.fileOperate.FileOperate;
@@ -90,7 +88,7 @@ public class PathDetail {
 	}
 	
 	public static String getHDFSTmpFold() {
-		String hdfsTmpPath = getHdfsHead() + "nbCloud/public/contract/appendix/";
+		String hdfsTmpPath = getHdfsHeadSymbol() + "/nbCloud/public/contract/appendix/";
 		return hdfsTmpPath;
 	}
 	
@@ -119,7 +117,31 @@ public class PathDetail {
 		FileOperate.createFolders(tmpPathRandom);
 		return tmpPathRandom;
 	}
-	public static String getHdfsHead() {
+	/** 
+	 * 用{@link com.novelbio.base.fileOperate.FileHadoop#getHdfsHeadSymbol()}替换<br>
+	 * 文件名前添加的HDFS的头，末尾没有"/" */
+	@Deprecated
+	public static String getHdfsHeadSymbol() {
+		return properties.getProperty("hdfsHeadSymbol");
+	}
+	
+	/** 
+	 * 用{@link com.novelbio.base.fileOperate.FileHadoop#getHdfsHeadSymbol(path)}替换<br>
+	 * 在输入的文件名前添加的HDFS的头<br>
+	 * <b>务必输入绝对路径，也就是要以"/"开头</b>
+	 * @param path
+	 * @return
+	 */
+	@Deprecated
+	public static String getHdfsHeadSymbol(String path) {
+		return properties.getProperty("hdfsHeadSymbol") + path;
+	}
+	
+	/** 
+	 * 用{@link com.novelbio.base.fileOperate.FileHadoop#getHdfsHeadPath()}替换<br>
+	 * hadoop实际的hdfs前缀，末尾没有"/" */
+	@Deprecated
+	public static String getHdfsHeadPath() {
 		return properties.getProperty("hdfsHead");
 	}
 }

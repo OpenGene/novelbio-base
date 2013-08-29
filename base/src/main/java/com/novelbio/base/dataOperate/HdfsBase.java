@@ -17,13 +17,13 @@ public class HdfsBase {
 	private static Configuration conf;
 	
 	static{
-		HEAD = PathDetail.getHdfsHead();
+		HEAD = PathDetail.getHdfsHeadPath();
 		conf = new Configuration();
 		conf.set("dfs.permissions", "false");
 	} 
 	
 	public static boolean isHdfs(String fileName){
-		if(fileName.toLowerCase().startsWith("maprfs:")){
+		if(fileName.toLowerCase().startsWith(PathDetail.getHdfsHeadSymbol())){
 			return true;
 		}
 		return false;

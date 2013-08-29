@@ -3,7 +3,9 @@ import java.net.*;
 import org.apache.hadoop.fs.*;
 import org.apache.hadoop.conf.*;
 
+import com.novelbio.base.PathDetail;
 import com.novelbio.base.dataOperate.HdfsBase;
+import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 
@@ -33,13 +35,28 @@ public class MapRTest {
 		// /mapr/my.cluster.com/
 //		FileHadoop fileHadoop = new FileHadoop("/haha/hoo");
 //		fileHadoop.mkdirs();
-		String uri = "maprfs://192.168.0.161/";
 		String dirname = "/my.cluster.com/hoho";
 //		
 //		Configuration conf = new Configuration();
 //		conf.set("dfs.permissions", "false");
-		FileSystem fs = HdfsBase.getFileSystem();
-		//fs.mkdirs(new Path(dirname));
+		FileHadoop fileHadoop = new FileHadoop(PathDetail.getHdfsHeadSymbol() + "/test/fastq/798B_CGATGT_L004_R1_001.fastq.gz");
+		System.out.println(fileHadoop.getName());
+		System.out.println(fileHadoop.getAbsolutePath());
+		System.out.println(fileHadoop.getParent());
+		FileHadoop fileHadoop2 = new FileHadoop(fileHadoop.getParent());
+		
+		TxtReadandWrite txtRead = new TxtReadandWrite(PathDetail.getHdfsHeadSymbol("/test/fastq/798B_CGATGT_L004_R1_001.fastq.gz"));
+		int i = 0;
+		for (String content : txtRead.readlines()) {
+			if (i > 10) {
+				break;
+			}
+			i++;
+			System.out.println(content);
+		}
+		
+//		FileSystem fs = HdfsBase.getFileSystem();
+//		fs.mkdirs(new Path(dirname));
 		//FileSystem fs = FileSystem.get(URI.create(uri), conf); // if wanting
 //		// to use a different cluster
 //		//FileSystem fs = FileSystem.get(conf);

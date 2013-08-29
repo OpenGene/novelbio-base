@@ -71,7 +71,6 @@ class TxtWrite implements Closeable {
 	}
 	
 	protected void createFile() throws Exception {
-		String fileName = "";
 		OutputStream outputStreamRaw = null;
 		if (platform == PlatForm.pc) {
 			outputStreamRaw = new FileOutputStream(txtfile, append);
@@ -83,17 +82,17 @@ class TxtWrite implements Closeable {
 				outputStreamRaw = fileHadoop.getOutputStreamNew(true);
 			}
 		}
-		TXTtype txtTtype = TXTtype.getTxtType(fileName);
+		TXTtype txtTtype = TXTtype.getTxtType(txtfile);
 
 		if (txtTtype == TXTtype.Txt) {
 			outputStream = new BufferedOutputStream(outputStreamRaw, TxtReadandWrite.bufferLen);
 		} else if (txtTtype == TXTtype.Gzip) {
-			outputStream = new BufferedOutputStream(new GZIPOutputStream(outputStream, TxtReadandWrite.bufferLen), TxtReadandWrite.bufferLen);
+			outputStream = new BufferedOutputStream(new GZIPOutputStream(outputStreamRaw, TxtReadandWrite.bufferLen), TxtReadandWrite.bufferLen);
 		} else if (txtTtype == TXTtype.Bzip2) {
-			outputStream = new BufferedOutputStream(new BZip2CompressorOutputStream(outputStream, TxtReadandWrite.bufferLen), TxtReadandWrite.bufferLen);
+			outputStream = new BufferedOutputStream(new BZip2CompressorOutputStream(outputStreamRaw, TxtReadandWrite.bufferLen), TxtReadandWrite.bufferLen);
 		} else if (txtTtype == TXTtype.Zip) {
-			zipOutputStream = new ZipArchiveOutputStream(outputStream);
-			ZipArchiveEntry entry = new ZipArchiveEntry(FileOperate.getFileNameSep(fileName)[0]);
+			zipOutputStream = new ZipArchiveOutputStream(outputStreamRaw);
+			ZipArchiveEntry entry = new ZipArchiveEntry(FileOperate.getFileNameSep(txtfile)[0]);
 			zipOutputStream.putArchiveEntry(entry);
 			outputStream = new BufferedOutputStream(zipOutputStream, TxtReadandWrite.bufferLen);
 		}

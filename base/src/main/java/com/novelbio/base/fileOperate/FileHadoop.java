@@ -18,10 +18,11 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
+import com.novelbio.base.PathDetail;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.HdfsBase;
 
-public class FileHadoop extends File{
+public class FileHadoop extends File {
 	private static final long serialVersionUID = 1L;
 	
 	FileSystem fsHDFS;
@@ -34,8 +35,9 @@ public class FileHadoop extends File{
 	 * @throws IOException 
 	 */
 	public FileHadoop(String hdfsFilePath) throws IOException {
-		super(hdfsFilePath);
+		super(hdfsFilePath.replace(PathDetail.getHdfsHeadPath(), PathDetail.getHdfsHeadSymbol()));
 		this.fsHDFS = HdfsBase.getFileSystem();
+		hdfsFilePath = hdfsFilePath.replace(PathDetail.getHdfsHeadSymbol(), PathDetail.getHdfsHeadPath());
 		dst = new Path(hdfsFilePath);
 		if (fsHDFS.exists(dst)) {
 			fileStatus = fsHDFS.getFileStatus(dst);
@@ -134,9 +136,9 @@ public class FileHadoop extends File{
 	 * @return
 	 */
 	@Override
-	public String getParent(){
+	public String getParent() {
 		try {
-			return dst.getParent().toString();
+			return super.getParent();
 		} catch (NullPointerException e) {
 			return null;
 		}
@@ -148,7 +150,7 @@ public class FileHadoop extends File{
 	 */
 	@Override
 	public String getName() {
-		return dst.getName();
+		return super.getName();
 	}
 	
 	/**
@@ -195,10 +197,11 @@ public class FileHadoop extends File{
 		}
 		for (int i = 0; i < fileStatus.length; i++) {
 			files[i] = fileStatus[i].getPath().toString();
+			files[i] = files[i].replace(PathDetail.getHdfsHeadPath(), PathDetail.getHdfsHeadSymbol());
 		}
 		return files;
 	}
-	
+
 	@Override
 	public boolean isFile() {
 		return !isDirectory();
@@ -216,7 +219,7 @@ public class FileHadoop extends File{
 
 	@Override
 	public String getPath() {
-		return fileStatus.getPath().toString();
+		return super.getPath();
 	}
 
 	@Override
@@ -227,7 +230,7 @@ public class FileHadoop extends File{
 
 	@Override
 	public String getAbsolutePath() {
-		return dst.toString();
+		return super.getAbsolutePath();
 	}
 
 	@Override
@@ -360,6 +363,9 @@ public class FileHadoop extends File{
 		return false;
 	}
 
+	/**
+	 * 未测试
+	 */
 	@Override
 	public boolean renameTo(File dest) {
 		try {
@@ -466,6 +472,24 @@ public class FileHadoop extends File{
 		return super.toString();
 	}
 
+	/** 文件名前添加的HDFS的头，末尾没有"/" */
+	public static String getHdfsHeadSymbol() {
+		return PathDetail.getHdfsHeadSymbol();
+	}
+	
+	/** 在输入的文件名前添加的HDFS的头<br>
+	 * <b>务必输入绝对路径，也就是要以"/"开头</b>
+	 * @param path
+	 * @return
+	 */
+	public static String getHdfsHeadSymbol(String path) {
+		return PathDetail.getHdfsHeadSymbol(path);
+	}
+	
+	/** hadoop实际的hdfs前缀，末尾没有"/" */
+	public static String getHdfsHeadPath() {
+		return PathDetail.getHdfsHeadPath();
+	}
 }
 
 
