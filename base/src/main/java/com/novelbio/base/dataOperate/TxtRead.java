@@ -143,7 +143,7 @@ class TxtRead implements Closeable {
 	 * @throws IOException
 	 */
 	private Iterable<String> readPerlines() throws Exception {
-		 final BufferedReader bufread =  readfile(); 
+		bufread =  readfile(); 
 		return new Iterable<String>() {
 			public Iterator<String> iterator() {
 				return new Iterator<String>() {
