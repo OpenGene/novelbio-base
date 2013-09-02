@@ -206,8 +206,7 @@ public class FileHadoop extends File {
 			files = new String[fileStatus.length];
 		}
 		for (int i = 0; i < fileStatus.length; i++) {
-			files[i] = fileStatus[i].getPath().toString();
-			files[i] = files[i].replace(PathDetail.getHdfsHeadPath(), PathDetail.getHdfsHeadSymbol());
+			files[i] = fileStatus[i].getPath().getName();
 		}
 		return files;
 	}
