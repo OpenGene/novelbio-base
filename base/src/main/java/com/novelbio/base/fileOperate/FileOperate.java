@@ -10,7 +10,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 
 import org.apache.commons.io.IOUtils;
@@ -144,7 +146,23 @@ public class FileOperate {
 		}
 		return fileName + "." + suffix;
 	}
-
+	
+	/** 返回日期格式的最后修改时间 */
+	public static String getLastModifyTimeStr(String fileName) {
+        File f = getFile(fileName);
+        Calendar cal = Calendar.getInstance();  
+        long time = f.lastModified();  
+        cal.setTimeInMillis(time);    
+        DateFormat formatter = DateFormat.getDateTimeInstance();
+        String data = formatter.format(cal.getTime());
+        return data;
+	}
+	
+	public static long getLastModifyTime(String fileName) {
+        File f = getFile(fileName);
+        return f.lastModified();
+	}
+	
 	/**
 	 * 给定路径名，返回其名字 如给定/home/zong0jie/和/home/zong0jie 都返回zong0jie 可以给定不存在的路径
 	 * 

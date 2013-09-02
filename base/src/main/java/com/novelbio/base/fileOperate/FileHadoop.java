@@ -291,10 +291,17 @@ public class FileHadoop extends File {
 		return super.isHidden();
 	}
 
+	/** 出错返回 -1000 */
 	@Override
 	public long lastModified() {
 		// TODO Auto-generated method stub
-		return super.lastModified();
+		try {
+			return fsHDFS.getFileStatus(dst).getModificationTime();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return -1000;
+		}
 	}
 
 	@Override
@@ -474,7 +481,7 @@ public class FileHadoop extends File {
 		// TODO Auto-generated method stub
 		return super.hashCode();
 	}
-
+	
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub

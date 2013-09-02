@@ -165,6 +165,15 @@ public class TxtReadandWrite implements Closeable {
 		return txtRead.readlines(lines);
 	}
 	
+	/** 获得txtRead.bufread<p>
+	 * 注意调用readlines时会重置该BufferedReader<br>
+	 * 但是先调用 readlines，再获得该bufread，不会重置
+	 * @return
+	 */
+	public BufferedReader getBufferedReader() {
+		return txtRead.bufread;
+	}
+	
 	/**
 	 * @param path输入文件名
 	 * @return 返回List<String>，读完关闭

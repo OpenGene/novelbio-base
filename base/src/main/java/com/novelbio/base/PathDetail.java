@@ -7,6 +7,7 @@ import java.util.Properties;
 
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.HttpFetch;
+import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 
 public class PathDetail {
@@ -88,7 +89,7 @@ public class PathDetail {
 	}
 	
 	public static String getHDFSTmpFold() {
-		String hdfsTmpPath = getHdfsHeadSymbol() + "/nbCloud/public/contract/appendix/";
+		String hdfsTmpPath = FileHadoop.getHdfsHeadSymbol() + "/nbCloud/public/contract/appendix/";
 		return hdfsTmpPath;
 	}
 	
