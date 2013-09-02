@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -44,6 +45,12 @@ public class CmdOperate extends RunProcess<String> {
 	/** 结束标志，0表示正常退出 */
 	int info = -1000;
 	long runTime = 0;
+	/** 标准输出的信息 */
+	List<String> lsOutInfo;
+	/** 出错输出的信息 */
+	List<String> lsErrorInfo;
+	StreamGobbler errorGobbler;
+	  StreamGobbler outputGobbler;
 	/**
 	 * 直接运行，不写入文本
 	 * @param cmd
@@ -52,16 +59,7 @@ public class CmdOperate extends RunProcess<String> {
 		this.cmd = cmd;
 		shPID = false;
 	}
-	/** 
-	 * 是否展示GUI，默认不展示
-	 */
-	public void setDisplayGUI(boolean displayGUI) {
-		if (displayGUI) {
-			guIcmd = new GUIInfo(this);
-		} else {
-			guIcmd = null;
-		}
-	}
+
 	/**
 	 * 初始化后直接开新线程即可
 	 * @param cmd 输入命令
@@ -100,6 +98,47 @@ public class CmdOperate extends RunProcess<String> {
 		txtCmd1.close();
 		cmd = "sh " + cmd1SH;
 	}
+	/** 
+	 * 是否展示GUI，默认不展示
+	 */
+	public void setDisplayGUI(boolean displayGUI) {
+		if (displayGUI) {
+			guIcmd = new GUIInfo(this);
+		} else {
+			guIcmd = null;
+		}
+	}
+	/** 需要获得标准输出流，用getStdOut获得 */
+	public void setGetStdOut() {
+		lsOutInfo = new ArrayList<>();
+	}
+	/** 需要获得标准输出流，用getStdOut获得 */
+	public void setGetStdError() {
+		lsErrorInfo = new ArrayList<>();
+	}
+	/** 程序执行完后可以看错误输出 */
+	public List<String> getLsErrorInfo() {
+		while (true) {
+			if (errorGobbler.isFinished()) {
+				break;
+			}
+			try {
+				Thread.sleep(100);
+			} catch (Exception e) { }
+		}
+		return lsErrorInfo;
+	}
+	public List<String> getLsOutInfo() {
+		while (true) {
+			if (outputGobbler.isFinished()) {
+				break;
+			}
+			try {
+				Thread.sleep(100);
+			} catch (Exception e) { }
+		}
+		return lsOutInfo;
+	}
 	/**
 	 * 直接运行cmd，可能会出错 返回两个arraylist-string 第一个是Info 第二个是error
 	 * @param fileName
@@ -120,9 +159,11 @@ public class CmdOperate extends RunProcess<String> {
 		Runtime runtime = Runtime.getRuntime();
 		process = runtime.exec(cmd);	
         // any error message?
-        StreamGobbler errorGobbler = new StreamGobbler(process.getErrorStream(), "ERROR", guIcmd);            
+		errorGobbler = new StreamGobbler(process.getErrorStream(), "ERROR", guIcmd);
+        errorGobbler.setLsInfo(lsErrorInfo);
         // any output?
-        StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream(), "OUTPUT", guIcmd);
+        outputGobbler = new StreamGobbler(process.getInputStream(), "OUTPUT", guIcmd);
+        outputGobbler.setLsInfo(lsOutInfo);
             
         // kick them off
         errorGobbler.start();
@@ -222,26 +263,42 @@ class StreamGobbler extends Thread {
     InputStream is;
     String type;
     GUIInfo guiCmd;
+    List<String> lsInfo;
+    boolean isFinished = false;
     StreamGobbler(InputStream is, String type, GUIInfo guicmd) {
         this.is = is;
         this.type = type;
         this.guiCmd = guicmd;
     }
     
+    public void setLsInfo(List<String> lsInfo) {
+		this.lsInfo = lsInfo;
+	}
+    
+    public boolean isFinished() {
+    	return isFinished;
+    }
+    
 	public void run() {
+		isFinished = false;
 		try {
 			InputStreamReader isr = new InputStreamReader(is);
 			BufferedReader br = new BufferedReader(isr);
 			String line = null;
 			while ((line = br.readLine()) != null) {
 				logger.info(line);
+				if (lsInfo != null) {
+					lsInfo.add(line);
+				}
 				if (guiCmd != null) {
 					guiCmd.appendTxtInfo(line);
 				}
 			}
+			
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
+		isFinished = true;
 	}
 }
 

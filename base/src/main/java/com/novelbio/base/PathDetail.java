@@ -145,4 +145,12 @@ public class PathDetail {
 	public static String getHdfsHeadPath() {
 		return properties.getProperty("hdfsHead");
 	}
+	
+	/** 
+	 * 用{@link com.novelbio.base.fileOperate.FileHadoop#getHdfsLocalPath()}替换<br>
+	 * hdfs挂载在本地硬盘的路径 */
+	@Deprecated
+	public static String getHdfsLocalPath() {
+		return properties.getProperty("hdfsLocalPath");
+	}
 }
