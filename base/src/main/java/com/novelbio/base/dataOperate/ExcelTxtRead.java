@@ -149,7 +149,7 @@ public class ExcelTxtRead {
 		ArrayList<String[]> ls1=null;
 		if (ExcelOperate.isExcel(excelFile)) {
 			ExcelOperate excel = new ExcelOperate(excelFile);
-			ls1 = excel.ReadLsExcel(sheetNum, firstlinels1, 1, excel.getRowCount(), excel.getColCount());
+			ls1 = excel.ReadLsExcel(sheetNum, firstlinels1, 1, -1,-1);
 			excel.Close();
 			return ls1;
 		}
