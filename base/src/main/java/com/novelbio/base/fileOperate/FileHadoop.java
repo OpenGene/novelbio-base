@@ -506,6 +506,19 @@ public class FileHadoop extends File {
 	public static String getHdfsHeadPath() {
 		return PathDetail.getHdfsHeadPath();
 	}
+	
+	/** 
+	* 把hdfs的路径转换成本地路径，前提是hdfs已经挂载至本地，并且是带有hdfs头的类型
+	*/
+	public static String convertToLocalPath(String hdfsPath) {
+		String parentPath = PathDetail.getHdfsLocalPath();
+		if (hdfsPath.startsWith(getHdfsHeadPath())) {
+			hdfsPath = hdfsPath.replace(getHdfsHeadPath(), parentPath);
+		} else if (hdfsPath.startsWith(getHdfsHeadSymbol())) {
+			hdfsPath = hdfsPath.replace(getHdfsHeadSymbol(), parentPath);
+		}
+		return hdfsPath;
+	}
 }
 
 
