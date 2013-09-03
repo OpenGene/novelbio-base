@@ -220,6 +220,20 @@ public class ExcelTxtRead {
 		txt.close();
 		return ls1;
 	}
+	
+	/**
+	 * 按照sheet名读取excel
+	 * @param excelFile
+	 * @param sheetName
+	 * @param firstLine
+	 * @return
+	 */
+	public static List<List<String>> readLsExcelTxtls(String excelFile, String sheetName,int firstLine){
+		List<List<String>>  lsls =   ExcelTxtRead.readLsExcelTxtls(excelFile, sheetName, firstLine, -1);
+		return lsls;
+	}
+	
+	
 	/**
 	 * 给定文件，xls2003/2007/txt，获得它们的信息，用arraylist-string[]保存
 	 * @param excelFile
@@ -230,6 +244,7 @@ public class ExcelTxtRead {
 	 * @param colEnd 值小于等于0时，读取全部列
 	 * @return
 	 */
+	
 	public static ArrayList<String[]> readLsExcelTxtFile(String excelFile, String sheetName, int rowStart, int colStart, int rowEnd, int colEnd) {
 		ArrayList<String[]> ls1=null;
 		if (ExcelOperate.isExcel(excelFile)) {
