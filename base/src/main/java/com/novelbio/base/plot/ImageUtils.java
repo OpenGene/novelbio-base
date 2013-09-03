@@ -136,11 +136,13 @@ public class ImageUtils {
 	 * @param chart
 	 *            图表
 	 * @param outputFile
-	 *            输出路径带有文件名如：/home/novelbio/aaa.png
+	 *            输出路径带有文件名如：/home/novelbio/aaa.png\
+	 * @return 返回输入的文件名，如果返回null表示没有保存成功
 	 */
-	public static void saveBufferedImage(BufferedImage chart, String outputFile) {
+	public static String saveBufferedImage(BufferedImage chart, String outputFile) {
 		String ext = FileOperate.getFileNameSep(outputFile)[1];
 		OutputStream out = null;
+		String outName = null;
 		try {
 			if (HdfsBase.isHdfs(outputFile)) {
 				FileHadoop fileHadoop = new FileHadoop(outputFile);
@@ -152,12 +154,14 @@ public class ImageUtils {
 			if (ext.toLowerCase().equals("jpg") || ext.toLowerCase().equals("jpeg")) {
 				try {
 					ImageIO.write(chart,  "jpg", out);
+					outName = outputFile;
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			} else {
 				try {
 					ImageIO.write(chart, "png", out);
+					outName = outputFile;
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -171,7 +175,7 @@ public class ImageUtils {
 				e.printStackTrace();
 			}
 		}
-	
+		return outName;
 	}
 
 	/**
