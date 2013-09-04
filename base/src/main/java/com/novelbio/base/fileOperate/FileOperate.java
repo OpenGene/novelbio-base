@@ -19,8 +19,10 @@ import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 
+import com.novelbio.base.SerializeKryo;
 import com.novelbio.base.cmd.CmdOperate;
 import com.novelbio.base.dataOperate.HdfsBase;
+import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.dataStructure.PatternOperate;
 //import com.novelbio.analysis.tools.compare.runCompSimple;
 
@@ -92,7 +94,67 @@ public class FileOperate {
 	public static String getSepPath() {
 		return File.separator;
 	}
-
+	
+	/**
+	 * 将对象写成文件
+	 * @param object 对象
+	 * @param pathAndName 文件路径及名称
+	 * @return
+	 */
+	public static boolean writeObjectToFile(Object object,String fileName){
+		OutputStream fs = null;
+		try {
+			File file = getFile(fileName);
+			file.createNewFile();
+			if (file instanceof FileHadoop) {
+				FileHadoop fileHadoop = (FileHadoop) file;
+				fs = fileHadoop.getOutputStreamNew(true);
+			}else {
+				fs = new FileOutputStream(file,false);
+			}
+			SerializeKryo kryo =new SerializeKryo();
+			fs.write(kryo.write(object));
+			fs.flush();
+			return true;
+		} catch (Exception e) {
+			return false;// TODO: handle exception
+		} finally{
+			try {
+				fs.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static Object readFileAsObject(String fileName){
+		InputStream fs = null;
+		try {
+			File file = getFile(fileName);
+			if (!file.exists()) {
+				return null;
+			}
+			if (file instanceof FileHadoop) {
+				FileHadoop fileHadoop = (FileHadoop) file;
+				fs = fileHadoop.getInputStream();
+			}else {
+				fs = new FileInputStream(file);
+			}
+			SerializeKryo kryo =new SerializeKryo();
+			return kryo.read(IOUtils.toByteArray(fs));
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;// TODO: handle exception
+		} finally{
+			try {
+				fs.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+	}
+	
 	/**
 	 * 给定路径名，返回其上一层路径，带"/" 如给定 /wer/fw4e/sr/frw/s3er.txt 返回 /wer/fw4e/sr/frw/<br>
 	 * 如果为相对路径的最上层，譬如给定的是soap 则返回“” 可以给定不存在的路径
@@ -375,7 +437,7 @@ public class FileOperate {
 		String[] filenameraw = null;
 		File file = getFile(filePath);
 		if (!file.exists()) {// 没有文件，则返回空
-			return null;
+			return lsFilenames;
 		}
 		// 如果只是文件则返回文件名
 		if (!file.isDirectory()) { // 获取文件名与后缀名
@@ -508,13 +570,17 @@ public class FileOperate {
 			}
 			if (myFilePath instanceof FileHadoop) {
 				FileHadoop fileHadoop = (FileHadoop)myFilePath;
-				fileHadoop.writeln(fileContent,false);
+				if (fileContent != null) {
+					fileHadoop.writeln(fileContent,false);
+				}
 			}else {
 				FileWriter resultFile = new FileWriter(myFilePath);
-				PrintWriter myFile = new PrintWriter(resultFile);
-				myFile.println(fileContent);
-				myFile.close();
-				resultFile.close();
+				if (fileContent != null) {
+					PrintWriter myFile = new PrintWriter(resultFile);
+					myFile.println(fileContent);
+					myFile.close();
+					resultFile.close();
+				}
 			}
 		} catch (Exception e) {
 			logger.error("创建文件操作出错");

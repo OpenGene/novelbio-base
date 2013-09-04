@@ -3,6 +3,7 @@ package com.novelbio.base;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.novelbio.base.fileOperate.FileOperate;
 
 public class SerializeKryo {
 	Kryo kryo = new Kryo();
@@ -18,4 +19,5 @@ public class SerializeKryo {
  		input.setBuffer(data);
  		return kryo.readClassAndObject(input);
 	}
+	
 }
