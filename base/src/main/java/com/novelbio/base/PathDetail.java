@@ -98,9 +98,16 @@ public class PathDetail {
 		FileOperate.createFolders(rworkspace);
 		return rworkspace;
 	}
-
+	
+	/** 
+	 * 文件最后带"/"<br>
+	 * 如果没有该文件夹就会自动创建一个
+	 * @return
+	 */
 	public static String getRworkspaceTmp() {
-		return getRworkspace() + "tmp"  + FileOperate.getSepPath();
+		String file = getRworkspace() + "tmp"  + FileOperate.getSepPath();
+		FileOperate.createFolders(file);
+		return file;
 	}
 	/** 内部自动加空格 */
 	public static String getRscript() {
