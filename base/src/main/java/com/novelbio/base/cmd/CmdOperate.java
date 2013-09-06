@@ -1,11 +1,7 @@
 package com.novelbio.base.cmd;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -28,29 +24,10 @@ import com.novelbio.base.multithread.RunProcess;
  */
 public class CmdOperate extends RunProcess<String> {
 	public static void main(String[] args) {
-		// CmdOperate cmdOperate = new CmdOperate("bwa ", "/aswerfer");
-		// cmdOperate.run();
-		// System.out.println("aaaaaaaaaaaaaaaaaa");
-		// System.out.println(cmdOperate.isFinishedNormal());
-		String cmd = "bwa aln -n 5 -o 1 -e 30 -t 2 -l 25 -O 10 aa /media/hdfs/nbCloud/public/nbcplatform/genome/mouse/mm10_GRCm38/index/bwa_Chr_Index/chrAll.fa /media/hdfs/nbCloud/public/test/DNASeqMap/test_filtered_1.fq.gz";
-		try {
-			for (String string : cmd.split(" ")) {
-				System.out.println(string);
-			}
-			Process process = Runtime.getRuntime().exec(cmd.split(" "));
-			System.out.println(CmdOperate.getUnixPID(process));
-			BufferedReader ins1 = new BufferedReader(new InputStreamReader(process.getInputStream()));
-			FileOutputStream fos  =  new FileOutputStream(new File("/home/novelbio/桌面/aaa.fai"));
-			IOUtils.copy(process.getInputStream(), fos);
-			String c1 = null;
-			while ((c1 = ins1.readLine()) != null) {
-				System.out.println(c1);
-			}
-			ins1.close();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		String cmd = "bwa aln -n 5 -o 1 -e 30 -t 2 -l 25 -O 10 /media/hdfs/nbCloud/public/nbcplatform/genome/mouse/mm10_GRCm38/index/bwa_Chr_Index/chrAll.fa /media/hdfs/nbCloud/public/test/DNASeqMap/test_filtered_1.fq.gz > /home/novelbio/桌面/zzzz3.fai";
+		CmdOperate cmdOperate = new CmdOperate(cmd);
+		cmdOperate.run();
+		System.out.println(cmdOperate.isFinishedNormal());
 	}
 
 	private static Logger logger = Logger.getLogger(CmdOperate.class);
@@ -86,7 +63,7 @@ public class CmdOperate extends RunProcess<String> {
 	}
 
 	/**
-	 * 初始化后直接开新线程即可
+	 * 初始化后直接开新线程即可 先写入Shell脚本，再运行
 	 * 
 	 * @param cmd
 	 *            输入命令
@@ -94,28 +71,26 @@ public class CmdOperate extends RunProcess<String> {
 	 *            将命令写入的文本
 	 */
 	public CmdOperate(String cmd, String cmdWriteInFileName) {
-		setCmdFile(cmd,cmdWriteInFileName);
+		setCmdFile(cmd, cmdWriteInFileName);
 	}
-
 
 	public CmdOperate(ArrayList<String> lsCmd) {
-		String [] cmds = new String[lsCmd.size()-1];
+		String[] cmds = new String[lsCmd.size() - 1];
 		setRealCmd(cmds);
 	}
-	
+
 	public CmdOperate(String[] cmds) {
 		setRealCmd(cmds);
 	}
-	
 
-	public void setRealCmd(String[] cmds){
-		if (cmds[cmds.length -2].equals(">")) {
-			this.saveFilePath = cmds[cmds.length-1];
-			realCmd = new String[cmds.length-3];
+	public void setRealCmd(String[] cmds) {
+		if (cmds[cmds.length - 2].equals(">")) {
+			this.saveFilePath = cmds[cmds.length - 1];
+			realCmd = new String[cmds.length - 2];
 			for (int i = 0; i < realCmd.length; i++) {
 				realCmd[i] = cmds[i];
 			}
-		}else {
+		} else {
 			this.realCmd = cmds;
 		}
 		shPID = false;
@@ -126,16 +101,15 @@ public class CmdOperate extends RunProcess<String> {
 	 * 
 	 * @param cmd
 	 */
-	public void setCmdFile(String cmd ,String cmdWriteInFileName) {
+	public void setCmdFile(String cmd, String cmdWriteInFileName) {
 		shPID = true;
 		logger.info(cmd);
 		String cmd1SH = PathDetail.getTmpConfFold() + cmdWriteInFileName.replace("\\", "/") + DateUtil.getDateAndRandom() + ".sh";
 		TxtReadandWrite txtCmd1 = new TxtReadandWrite(cmd1SH, true);
 		txtCmd1.writefile(cmd);
 		txtCmd1.close();
-		realCmd = new String[]{"sh",cmd1SH};
+		realCmd = new String[] { "sh", cmd1SH };
 	}
-
 
 	/** 需要获得标准输出流，用getStdOut获得 */
 	public void setGetStdOut() {
@@ -184,21 +158,20 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	private void doInBackgroundB() throws Exception {
 		info = -1000;
-//		try {
-//			Thread thread = new Thread(guIcmd);
-//			thread.start();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-
+		// try {
+		// Thread thread = new Thread(guIcmd);
+		// thread.start();
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// }
 		Runtime runtime = Runtime.getRuntime();
 		process = runtime.exec(realCmd);
-		System.out.println(CmdOperate.getUnixPID(process) + "###################################");
+		logger.info("process id : " + CmdOperate.getUnixPID(process));
 		// any error message?
-		errorGobbler = new StreamGobbler(process.getErrorStream(),System.out);
+		errorGobbler = new StreamGobbler(process.getErrorStream(), System.out);
 		errorGobbler.setLsInfo(lsErrorInfo);
 		// any output?
-		outputGobbler = new StreamGobbler(process.getInputStream(),FileOperate.getOutputStream(saveFilePath, true));
+		outputGobbler = new StreamGobbler(process.getInputStream(), FileOperate.getOutputStream(saveFilePath, true));
 		outputGobbler.setLsInfo(lsOutInfo);
 
 		// kick them off
@@ -211,18 +184,22 @@ public class CmdOperate extends RunProcess<String> {
 
 	@Deprecated
 	private void finishAndCloseCmd(int info) {
-//		if (guIcmd != null) {
-//			if (info == 0) {
-//				guIcmd.closeWindow();
-//			} else {
-//				guIcmd.appendTxtInfo("error");
-//			}
-//		}
+		// if (guIcmd != null) {
+		// if (info == 0) {
+		// guIcmd.closeWindow();
+		// } else {
+		// guIcmd.appendTxtInfo("error");
+		// }
+		// }
 	}
 
 	@Override
 	protected void running() {
-		logger.info(realCmd);
+		String cmd = "";
+		for (String cmd1 : realCmd) {
+			cmd += " " + cmd1;
+		}
+		logger.info("实际运行命令: " + cmd);
 		DateUtil dateTime = new DateUtil();
 		dateTime.setStartTime();
 		try {
@@ -309,7 +286,7 @@ class StreamGobbler extends Thread {
 	List<String> lsInfo;
 	boolean isFinished = false;
 
-	StreamGobbler(InputStream is,OutputStream outputStream) {
+	StreamGobbler(InputStream is, OutputStream outputStream) {
 		this.is = is;
 		this.os = outputStream;
 	}
@@ -323,6 +300,10 @@ class StreamGobbler extends Thread {
 	}
 
 	public void run() {
+		if (os == null) {
+			isFinished = true;
+			return;
+		}
 		isFinished = false;
 		try {
 			IOUtils.copy(is, os);
