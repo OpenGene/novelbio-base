@@ -1,47 +1,70 @@
 package com.novelbio.base.cmd;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 import com.novelbio.base.PathDetail;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
-import com.novelbio.base.gui.GUIInfo;
+import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.base.multithread.RunProcess;
+
 /**
  * 输入cmd，执行完毕后可以将结果输出到界面，目前cmd只支持英文，否则会出错 只要继承后重写process方法即可
  * 如果只是随便用用，那么调用doInBackground方法就好
+ * 
  * @author zong0jie
  */
 public class CmdOperate extends RunProcess<String> {
 	public static void main(String[] args) {
-		CmdOperate cmdOperate = new CmdOperate("bwa ", "/aswerfer");
-		cmdOperate.run();
-		System.out.println("aaaaaaaaaaaaaaaaaa");
-		System.out.println(cmdOperate.isFinishedNormal());
+		// CmdOperate cmdOperate = new CmdOperate("bwa ", "/aswerfer");
+		// cmdOperate.run();
+		// System.out.println("aaaaaaaaaaaaaaaaaa");
+		// System.out.println(cmdOperate.isFinishedNormal());
+		String cmd = "bwa aln -n 5 -o 1 -e 30 -t 2 -l 25 -O 10 aa /media/hdfs/nbCloud/public/nbcplatform/genome/mouse/mm10_GRCm38/index/bwa_Chr_Index/chrAll.fa /media/hdfs/nbCloud/public/test/DNASeqMap/test_filtered_1.fq.gz";
+		try {
+			for (String string : cmd.split(" ")) {
+				System.out.println(string);
+			}
+			Process process = Runtime.getRuntime().exec(cmd.split(" "));
+			System.out.println(CmdOperate.getUnixPID(process));
+			BufferedReader ins1 = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			FileOutputStream fos  =  new FileOutputStream(new File("/home/novelbio/桌面/aaa.fai"));
+			IOUtils.copy(process.getInputStream(), fos);
+			String c1 = null;
+			while ((c1 = ins1.readLine()) != null) {
+				System.out.println(c1);
+			}
+			ins1.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
- 
+
 	private static Logger logger = Logger.getLogger(CmdOperate.class);
 
 	/** 是否将pid加2，如果是写入文本然后sh执行，则需要加上2 */
 	boolean shPID = false;
-	
+
 	/** 进程 */
 	Process process = null;
 	/** 待运行的命令 */
-	String cmd = "";
+	String[] realCmd = null;
 	/** 临时文件在文件夹 */
 	String scriptFold = "";
-	
-	GUIInfo guIcmd;
-	
+	String saveFilePath = null;
 	/** 结束标志，0表示正常退出 */
 	int info = -1000;
 	long runTime = 0;
@@ -50,72 +73,80 @@ public class CmdOperate extends RunProcess<String> {
 	/** 出错输出的信息 */
 	List<String> lsErrorInfo;
 	StreamGobbler errorGobbler;
-	  StreamGobbler outputGobbler;
+	StreamGobbler outputGobbler;
+
 	/**
 	 * 直接运行，不写入文本
+	 * 
 	 * @param cmd
 	 */
 	public CmdOperate(String cmd) {
-		this.cmd = cmd;
-		shPID = false;
+		String[] cmds = cmd.trim().split(" ");
+		setRealCmd(cmds);
 	}
 
 	/**
 	 * 初始化后直接开新线程即可
-	 * @param cmd 输入命令
-	 * @param cmdWriteInFileName 将命令写入的文本
+	 * 
+	 * @param cmd
+	 *            输入命令
+	 * @param cmdWriteInFileName
+	 *            将命令写入的文本
 	 */
 	public CmdOperate(String cmd, String cmdWriteInFileName) {
-		this.cmd = cmd;
-		setCmdFile(cmdWriteInFileName);
+		setCmdFile(cmd,cmdWriteInFileName);
 	}
-	/**
-	 * 多行的命令行
-	 * @param lsCmd
-	 */
+
+
 	public CmdOperate(ArrayList<String> lsCmd) {
-		for (String string : lsCmd) {
-			cmd = cmd + string + "\n";
+		String [] cmds = new String[lsCmd.size()-1];
+		setRealCmd(cmds);
+	}
+	
+	public CmdOperate(String[] cmds) {
+		setRealCmd(cmds);
+	}
+	
+
+	public void setRealCmd(String[] cmds){
+		if (cmds[cmds.length -2].equals(">")) {
+			this.saveFilePath = cmds[cmds.length-1];
+			realCmd = new String[cmds.length-3];
+			for (int i = 0; i < realCmd.length; i++) {
+				realCmd[i] = cmds[i];
+			}
+		}else {
+			this.realCmd = cmds;
 		}
 		shPID = false;
 	}
 
-	/** 设定需要运行的命令 */
-	public void setCmd(String cmd) {
-		this.cmd = cmd;
-		shPID = false;
-	}
 	/**
 	 * 将cmd写入哪个文本，然后执行，如果初始化输入了cmdWriteInFileName, 就不需要这个了
+	 * 
 	 * @param cmd
 	 */
-	public void setCmdFile(String cmdWriteInFileName) {
+	public void setCmdFile(String cmd ,String cmdWriteInFileName) {
 		shPID = true;
 		logger.info(cmd);
 		String cmd1SH = PathDetail.getTmpConfFold() + cmdWriteInFileName.replace("\\", "/") + DateUtil.getDateAndRandom() + ".sh";
 		TxtReadandWrite txtCmd1 = new TxtReadandWrite(cmd1SH, true);
 		txtCmd1.writefile(cmd);
 		txtCmd1.close();
-		cmd = "sh " + cmd1SH;
+		realCmd = new String[]{"sh",cmd1SH};
 	}
-	/** 
-	 * 是否展示GUI，默认不展示
-	 */
-	public void setDisplayGUI(boolean displayGUI) {
-		if (displayGUI) {
-			guIcmd = new GUIInfo(this);
-		} else {
-			guIcmd = null;
-		}
-	}
+
+
 	/** 需要获得标准输出流，用getStdOut获得 */
 	public void setGetStdOut() {
 		lsOutInfo = new ArrayList<>();
 	}
+
 	/** 需要获得标准输出流，用getStdOut获得 */
 	public void setGetStdError() {
 		lsErrorInfo = new ArrayList<>();
 	}
+
 	/** 程序执行完后可以看错误输出 */
 	public List<String> getLsErrorInfo() {
 		while (true) {
@@ -124,10 +155,12 @@ public class CmdOperate extends RunProcess<String> {
 			}
 			try {
 				Thread.sleep(100);
-			} catch (Exception e) { }
+			} catch (Exception e) {
+			}
 		}
 		return lsErrorInfo;
 	}
+
 	public List<String> getLsOutInfo() {
 		while (true) {
 			if (outputGobbler.isFinished()) {
@@ -135,12 +168,15 @@ public class CmdOperate extends RunProcess<String> {
 			}
 			try {
 				Thread.sleep(100);
-			} catch (Exception e) { }
+			} catch (Exception e) {
+			}
 		}
 		return lsOutInfo;
 	}
+
 	/**
 	 * 直接运行cmd，可能会出错 返回两个arraylist-string 第一个是Info 第二个是error
+	 * 
 	 * @param fileName
 	 * @return
 	 * @throws Exception
@@ -148,55 +184,56 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	private void doInBackgroundB() throws Exception {
 		info = -1000;
-		try {
-			Thread thread = new Thread(guIcmd);
-			thread.start();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
+//		try {
+//			Thread thread = new Thread(guIcmd);
+//			thread.start();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 
 		Runtime runtime = Runtime.getRuntime();
-		process = runtime.exec(cmd);	
-        // any error message?
-		errorGobbler = new StreamGobbler(process.getErrorStream(), "ERROR", guIcmd);
-        errorGobbler.setLsInfo(lsErrorInfo);
-        // any output?
-        outputGobbler = new StreamGobbler(process.getInputStream(), "OUTPUT", guIcmd);
-        outputGobbler.setLsInfo(lsOutInfo);
-            
-        // kick them off
-        errorGobbler.start();
-        outputGobbler.start();
-        
-        info = process.waitFor();
+		process = runtime.exec(realCmd);
+		System.out.println(CmdOperate.getUnixPID(process) + "###################################");
+		// any error message?
+		errorGobbler = new StreamGobbler(process.getErrorStream(),System.out);
+		errorGobbler.setLsInfo(lsErrorInfo);
+		// any output?
+		outputGobbler = new StreamGobbler(process.getInputStream(),FileOperate.getOutputStream(saveFilePath, true));
+		outputGobbler.setLsInfo(lsOutInfo);
+
+		// kick them off
+		errorGobbler.start();
+		outputGobbler.start();
+
+		info = process.waitFor();
 		finishAndCloseCmd(info);
 	}
+
+	@Deprecated
 	private void finishAndCloseCmd(int info) {
-		if (guIcmd != null) {
-			if (info == 0) {
-				guIcmd.closeWindow();
-			}
-			else {
-				guIcmd.appendTxtInfo("error");
-			}
-		}
+//		if (guIcmd != null) {
+//			if (info == 0) {
+//				guIcmd.closeWindow();
+//			} else {
+//				guIcmd.appendTxtInfo("error");
+//			}
+//		}
 	}
 
 	@Override
 	protected void running() {
-		logger.info(cmd);
+		logger.info(realCmd);
 		DateUtil dateTime = new DateUtil();
 		dateTime.setStartTime();
 		try {
 			doInBackgroundB();
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("cmd cannot executed correctly: " + cmd);
+			logger.error("cmd cannot executed correctly: " + realCmd);
 		}
 		runTime = dateTime.getEclipseTime();
 	}
-	
+
 	/** 是否正常结束 */
 	public boolean isFinishedNormal() {
 		if (info == 0) {
@@ -204,24 +241,28 @@ public class CmdOperate extends RunProcess<String> {
 		}
 		return false;
 	}
+
 	/**
 	 * 返回运行所耗时间，单位ms
+	 * 
 	 * @return
 	 */
 	public long getRunTime() {
 		return runTime;
 	}
-	
+
 	/** 不能实现 */
 	@Deprecated
 	public void threadSuspend() {
 	}
-	/** 
-	 * 不能实现 
+
+	/**
+	 * 不能实现
 	 * */
 	@Deprecated
 	public synchronized void threadResume() {
 	}
+
 	/** 终止线程，在循环中添加 */
 	public void threadStop() {
 		int pid = -10;
@@ -236,22 +277,25 @@ public class CmdOperate extends RunProcess<String> {
 				process.destroy();// 无法杀死线程
 				process = null;
 			}
-		} catch (Exception e) { e.printStackTrace(); }
-		
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
-	
+
 	private static int getUnixPID(Process process) throws Exception {
-//	    System.out.println(process.getClass().getName());
-	    if (process.getClass().getName().equals("java.lang.UNIXProcess")) {
-	        Class cl = process.getClass();
-	        Field field = cl.getDeclaredField("pid");
-	        field.setAccessible(true);
-	        Object pidObject = field.get(process);
-	        return (Integer) pidObject;
-	    } else {
-	        throw new IllegalArgumentException("Needs to be a UNIXProcess");
-	    }
+		// System.out.println(process.getClass().getName());
+		if (process.getClass().getName().equals("java.lang.UNIXProcess")) {
+			Class cl = process.getClass();
+			Field field = cl.getDeclaredField("pid");
+			field.setAccessible(true);
+			Object pidObject = field.get(process);
+			return (Integer) pidObject;
+		} else {
+			throw new IllegalArgumentException("Needs to be a UNIXProcess");
+		}
 	}
+
 	/** 添加引号，一般是文件路径需要添加引号 **/
 	public static String addQuot(String pathName) {
 		return "\"" + pathName + "\"";
@@ -260,41 +304,28 @@ public class CmdOperate extends RunProcess<String> {
 
 class StreamGobbler extends Thread {
 	Logger logger = Logger.getLogger(StreamGobbler.class);
-    InputStream is;
-    String type;
-    GUIInfo guiCmd;
-    List<String> lsInfo;
-    boolean isFinished = false;
-    StreamGobbler(InputStream is, String type, GUIInfo guicmd) {
-        this.is = is;
-        this.type = type;
-        this.guiCmd = guicmd;
-    }
-    
-    public void setLsInfo(List<String> lsInfo) {
+	InputStream is;
+	OutputStream os;
+	List<String> lsInfo;
+	boolean isFinished = false;
+
+	StreamGobbler(InputStream is,OutputStream outputStream) {
+		this.is = is;
+		this.os = outputStream;
+	}
+
+	public void setLsInfo(List<String> lsInfo) {
 		this.lsInfo = lsInfo;
 	}
-    
-    public boolean isFinished() {
-    	return isFinished;
-    }
-    
+
+	public boolean isFinished() {
+		return isFinished;
+	}
+
 	public void run() {
 		isFinished = false;
 		try {
-			InputStreamReader isr = new InputStreamReader(is);
-			BufferedReader br = new BufferedReader(isr);
-			String line = null;
-			while ((line = br.readLine()) != null) {
-				logger.info(line);
-				if (lsInfo != null) {
-					lsInfo.add(line);
-				}
-				if (guiCmd != null) {
-					guiCmd.appendTxtInfo(line);
-				}
-			}
-			
+			IOUtils.copy(is, os);
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
@@ -302,12 +333,10 @@ class StreamGobbler extends Thread {
 	}
 }
 
-
 class ProgressData {
 	public String strcmdInfo;
 	/**
-	 * true : info
-	 * false : error
+	 * true : info false : error
 	 */
 	public boolean info;
 }

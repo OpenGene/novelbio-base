@@ -701,7 +701,24 @@ public class FileOperate {
 		try { Thread.sleep(500); } catch (InterruptedException e) { }
 		return bea;
 	}
-
+	
+	
+	public static OutputStream getOutputStream(String fileName,boolean cover){
+		try {
+			File file =  getFile(fileName);
+			OutputStream fs = null;
+			if (file instanceof FileHadoop) {
+				FileHadoop fileHadoop = (FileHadoop) file;
+				fs = fileHadoop.getOutputStreamNew(cover);
+			}else {
+				fs = new FileOutputStream(file, !cover);
+			}
+			return fs;
+		}catch(Exception e){
+			return null;
+		}
+	}
+	
 	/**
 	 * 复制单个文件
 	 * 
@@ -739,7 +756,7 @@ public class FileOperate {
 					FileHadoop fileHadoop = (FileHadoop) newfile;
 					fs = fileHadoop.getOutputStreamNew(cover);
 				}else {
-					fs = new FileOutputStream(newfile);
+					fs = new FileOutputStream(newfile, !cover);
 				}
 				IOUtils.copy(inStream, fs);
 				inStream.close();
@@ -795,7 +812,7 @@ public class FileOperate {
 						FileHadoop fileHadoop = (FileHadoop) targetfile;
 						output = fileHadoop.getOutputStreamNew(cover);
 					}else {
-						output = new FileOutputStream(targetfile);
+						output = new FileOutputStream(targetfile, !cover);
 					}
 					byte[] b = new byte[1024 * 5];
 					int len;
