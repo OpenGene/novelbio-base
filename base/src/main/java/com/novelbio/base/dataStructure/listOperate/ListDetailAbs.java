@@ -97,8 +97,13 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 		}
 		this.cis5to3 = cis5to3;
 	}
+	/**
+	 * 设定parentList和ParentName
+	 * @param listAbs
+	 */
 	public void setParentListAbs(ListAbs<? extends ListDetailAbs> listAbs) {
 		this.listAbs = listAbs;
+		this.parentName = listAbs.getName();
 	}
 	public ListAbs<? extends ListDetailAbs> getParent() {
 		return listAbs;
