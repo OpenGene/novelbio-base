@@ -249,14 +249,15 @@ public abstract class ListHashSearch < T extends ListDetailAbs, E extends ListCo
 	 * 需要覆盖
 	 * 查找某个特定LOC的信息
 	 * {return locHashtable.get(LOCID);}
-	 * @param LOCID 给定某LOC的名称，注意名称是一个短的名字，譬如在UCSC基因中，不是locstring那种好几个基因连在一起的名字，而是单个的短的名字
+	 * @param LOCID 内部会自动变成小写，给定某LOC的名称，注意名称是一个短的名字，譬如在UCSC基因中，不是locstring那种好几个基因连在一起的名字，而是单个的短的名字
 	 * @return 返回该LOCID的具体GffDetail信息，用相应的GffDetail类接收
 	 */
 	public T searchLOC(String LOCID) {
-		T t = getMapName2Detail().get(LOCID.toLowerCase());
+		LOCID = LOCID.toLowerCase();
+		T t = getMapName2Detail().get(LOCID);
 		if (t == null) {
 			LOCID = removeDot(LOCID);
-			t = getMapName2Detail().get(LOCID.toLowerCase());
+			t = getMapName2Detail().get(LOCID);
 		}
 		return t;
 	}
