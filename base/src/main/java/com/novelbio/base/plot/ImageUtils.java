@@ -63,6 +63,7 @@ public class ImageUtils {
 	}
 	public static BufferedImage read(String fileName) {
 		InputStream input = null;
+		BufferedImage bufferedImage = null;
 		try {
 			if (HdfsBase.isHdfs(fileName)) {
 				FileHadoop fileHadoop = new FileHadoop(fileName);
@@ -75,12 +76,16 @@ public class ImageUtils {
 		}
 		if (input != null) {
 			try {
-				return ImageIO.read(input);
+				bufferedImage = ImageIO.read(input);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			try {
+				input.close();
+			} catch (Exception e) {
+			}
 		}
-		return null;
+		return bufferedImage;
 	}
 	/**
 	 * 将svg转化为BufferedImage，方便后期处理

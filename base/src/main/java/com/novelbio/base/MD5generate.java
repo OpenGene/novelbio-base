@@ -62,7 +62,7 @@ public class MD5generate {
 		long step=file.length()/maxSize;  
 		
 		if(step == 0) {  
-			MappedByteBuffer byteBuffer = ch.map(FileChannel.MapMode.READ_ONLY, 0,file.length());  
+			MappedByteBuffer byteBuffer = ch.map(FileChannel.MapMode.READ_ONLY, 0,file.length());
 			messageDigest.update(byteBuffer);  
 			return bufferToHex(messageDigest.digest());  
 		}
