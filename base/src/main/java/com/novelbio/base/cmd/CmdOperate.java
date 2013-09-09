@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import com.novelbio.base.PathDetail;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
+import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.base.multithread.RunProcess;
 
@@ -84,6 +85,9 @@ public class CmdOperate extends RunProcess<String> {
 	}
 
 	public void setRealCmd(String[] cmds) {
+		for (int i = 0;i<cmds.length;i++) {
+			cmds[i] = FileHadoop.convertToLocalPath(cmds[i]);
+		}
 		if (cmds[cmds.length - 2].equals(">")) {
 			this.saveFilePath = cmds[cmds.length - 1];
 			realCmd = new String[cmds.length - 2];
@@ -102,11 +106,19 @@ public class CmdOperate extends RunProcess<String> {
 	 * @param cmd
 	 */
 	public void setCmdFile(String cmd, String cmdWriteInFileName) {
+		String newCmd = null;
+		for(String text : cmd.trim().split(" ")){
+			if (newCmd == null) {
+				newCmd = FileHadoop.convertToLocalPath(text);
+			}else {
+				newCmd += " " + FileHadoop.convertToLocalPath(text);
+			}
+		}
 		shPID = true;
-		logger.info(cmd);
+		logger.info(newCmd);
 		String cmd1SH = PathDetail.getTmpConfFold() + cmdWriteInFileName.replace("\\", "/") + DateUtil.getDateAndRandom() + ".sh";
 		TxtReadandWrite txtCmd1 = new TxtReadandWrite(cmd1SH, true);
-		txtCmd1.writefile(cmd);
+		txtCmd1.writefile(newCmd);
 		txtCmd1.close();
 		realCmd = new String[] { "sh", cmd1SH };
 	}
