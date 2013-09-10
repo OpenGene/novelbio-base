@@ -1241,8 +1241,16 @@ public class FileOperate {
 	 * @return
 	 */
 	public static boolean isFileExistAndBigThanSize(String fileName, double size) {
-		if (isFileExist(fileName) && getFileSizeLong(fileName) > size) {
-			return true;
+		if (fileName == null) {
+			return false;
+		}
+		File file = getFile(fileName);
+		if (file.exists() && !file.isDirectory()) {// 没有文件，则返回空
+			if(file.length() > size) {
+				return true;
+			}
+		} else {
+			return false;
 		}
 		return false;
 	}
