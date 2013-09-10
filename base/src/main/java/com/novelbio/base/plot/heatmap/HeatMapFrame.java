@@ -1,21 +1,17 @@
 package com.novelbio.base.plot.heatmap;
 
-import javax.imageio.IIOImage;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageWriteParam;
-import javax.imageio.ImageWriter;
-import javax.imageio.stream.FileImageOutputStream;
-import javax.swing.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.base.plot.ImageUtils;
-
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Iterator;
 
 /**
  * <p>This class is a very simple example of how to use the HeatMap class.</p>
