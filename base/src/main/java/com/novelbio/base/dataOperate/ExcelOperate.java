@@ -674,6 +674,19 @@ public class ExcelOperate {
 	}
 
 	/**
+	 * 直接写一个表格
+	 * @param content
+	 * @return
+	 */
+	public boolean WriteExcel(List<List<String>> content) {
+		List<String[]> lsStrings = new ArrayList<String[]>();
+		for (List<String> lsList : content) {
+			lsStrings.add(lsList.toArray(new String[0]));
+		}
+		return  WriteExcel(1, 1, lsStrings);
+	}
+	
+	/**
 	 * 块文件写入excel文件
 	 * 设置写入的sheet数，行数，列数和内容，写入的内容默认为List<String[]>,其中String[]为行，list.get(i)为列
 	 * String[]中的null会自动跳过 其中sheet数，行数，列数，都为实际数目，不用减去1
@@ -1052,6 +1065,7 @@ public class ExcelOperate {
 			return false;
 		}
 	}
+	
 	
 	/**
 	 * 改变excel多单元格的背景颜色
