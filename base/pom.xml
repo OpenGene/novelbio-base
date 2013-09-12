@@ -444,6 +444,11 @@
 			<version>2.21</version>
 			<classifier>shaded</classifier>
 		</dependency>
+		<dependency>
+  			<groupId>com.novelbio</groupId>
+  			<artifactId>sigar</artifactId>
+  			<version>1.0</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<sourceDirectory>src/main/java</sourceDirectory>

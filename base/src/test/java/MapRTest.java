@@ -1,13 +1,7 @@
 
-import java.net.*;
-import org.apache.hadoop.fs.*;
-import org.apache.hadoop.conf.*;
-
 import com.novelbio.base.PathDetail;
-import com.novelbio.base.dataOperate.HdfsBase;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.fileOperate.FileHadoop;
-import com.novelbio.base.fileOperate.FileOperate;
 
 /**
  * Assumes mapr installed in /opt/mapr

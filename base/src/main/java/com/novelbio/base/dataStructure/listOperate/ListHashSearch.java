@@ -149,6 +149,7 @@ public abstract class ListHashSearch < T extends ListDetailAbs, E extends ListCo
 		chrID = chrID.toLowerCase();
 		M Loclist =  getMapChrID2LsGff().get(chrID);// 某一条染色体的信息
 		if (Loclist == null) {
+			logger.error("Find UnKnown chrID: " + chrID);
 			return null;
 		}
 		E gffCod1 = Loclist.searchLocation(cod1);//(chrID, Math.min(cod1, cod2));
