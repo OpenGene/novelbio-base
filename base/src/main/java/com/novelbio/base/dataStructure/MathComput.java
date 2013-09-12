@@ -1047,11 +1047,18 @@ public class MathComput {
 		return lsResult;
 	}
 	
+	
 	private static HashMap<Integer, Double> getFDR(ArrayList<Double[]> lsPvalue) {
 		// ordening the pvalues.
 		Collections.sort(lsPvalue, new Comparator<Double[]>() {
 			@Override
 			public int compare(Double[] o1, Double[] o2) {
+				if (o1 == null && o2 == null) {
+					return 0;
+				}
+				 if (o1== null)return 1;
+			 	 if (o2 == null)return -1;
+	
 				if (o1[1] < o2[1])
 					return -1;
 				else if (o1[1] == o2[1])
