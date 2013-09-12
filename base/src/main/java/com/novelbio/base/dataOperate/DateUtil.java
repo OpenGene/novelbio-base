@@ -89,14 +89,30 @@ public class DateUtil {
 	 * @param pattern
 	 * @return
 	 */
-	public static Date string2Date(String date,String pattern) throws ParseException
-	{
-		SimpleDateFormat sf = new SimpleDateFormat(pattern);
-		Date newdate;
-		newdate = sf.parse(date);
-		return newdate;
+	public static Date string2Date(String date,String pattern)
+	{	try {
+			SimpleDateFormat sf = new SimpleDateFormat(pattern);
+			Date newdate;
+			newdate = sf.parse(date);
+			return newdate;
+		} catch (Exception e) {
+			return null;
+		}
 		
-		
+	}
+	
+	/**
+	 * String转Long
+	 * @param date
+	 * @param pattern
+	 * @return
+	 */
+	public static Long string2DateLong(String date,String pattern){
+		Date newDate = string2Date(date,pattern);
+		if (newDate != null) {
+			return newDate.getTime();
+		}
+		return null;
 	}
 	
 	public static boolean isWeek(String week){
