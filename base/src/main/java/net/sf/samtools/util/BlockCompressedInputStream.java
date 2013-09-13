@@ -21,22 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package net.sf.samtools;
+package net.sf.samtools.util;
 
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.RandomAccessFile;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 
+import net.sf.samtools.FileTruncatedException;
 import net.sf.samtools.seekablestream.SeekableBufferedStream;
 import net.sf.samtools.seekablestream.SeekableFileStream;
 import net.sf.samtools.seekablestream.SeekableHTTPStream;
 import net.sf.samtools.seekablestream.SeekableStream;
+import net.sf.samtools.util.BlockCompressedFilePointerUtil;
 import net.sf.samtools.util.BlockCompressedStreamConstants;
 import net.sf.samtools.util.IOUtil;
 
@@ -435,6 +438,46 @@ public class BlockCompressedInputStream extends InputStream {
 
     public enum FileTermination {HAS_TERMINATOR_BLOCK, HAS_HEALTHY_LAST_BLOCK, DEFECTIVE}
 
+    public static FileTermination checkTermination(final File file)
+            throws IOException {
+            final long fileSize = file.length();
+            if (fileSize < BlockCompressedStreamConstants.EMPTY_GZIP_BLOCK.length) {
+                return FileTermination.DEFECTIVE;
+            }
+            final RandomAccessFile raFile = new RandomAccessFile(file, "r");
+            try {
+                raFile.seek(fileSize - BlockCompressedStreamConstants.EMPTY_GZIP_BLOCK.length);
+                byte[] buf = new byte[BlockCompressedStreamConstants.EMPTY_GZIP_BLOCK.length];
+                raFile.readFully(buf);
+                if (Arrays.equals(buf, BlockCompressedStreamConstants.EMPTY_GZIP_BLOCK)) {
+                    return FileTermination.HAS_TERMINATOR_BLOCK;
+                }
+                final int bufsize = (int)Math.min(fileSize, BlockCompressedStreamConstants.MAX_COMPRESSED_BLOCK_SIZE);
+                buf = new byte[bufsize];
+                raFile.seek(fileSize - bufsize);
+                raFile.read(buf);
+                for (int i = buf.length - BlockCompressedStreamConstants.EMPTY_GZIP_BLOCK.length;
+                        i >= 0; --i) {
+                    if (!preambleEqual(BlockCompressedStreamConstants.GZIP_BLOCK_PREAMBLE,
+                            buf, i, BlockCompressedStreamConstants.GZIP_BLOCK_PREAMBLE.length)) {
+                        continue;
+                    }
+                    final ByteBuffer byteBuffer = ByteBuffer.wrap(buf, i + BlockCompressedStreamConstants.GZIP_BLOCK_PREAMBLE.length, 4);
+                    byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+                    final int totalBlockSizeMinusOne =  byteBuffer.getShort() & 0xFFFF;
+                    if (buf.length - i == totalBlockSizeMinusOne + 1) {
+                        return FileTermination.HAS_HEALTHY_LAST_BLOCK;
+                    } else {
+                        return FileTermination.DEFECTIVE;
+                    }
+                }
+                return FileTermination.DEFECTIVE;
+            } finally {
+                raFile.close();
+            }
+        }
+    
+    //  以下是新加的方法
     public static FileTermination checkTermination(long fileSize, SeekableStream raFile)
         throws IOException {
         if (fileSize < BlockCompressedStreamConstants.EMPTY_GZIP_BLOCK.length) {

@@ -24,6 +24,7 @@
 package net.sf.samtools;
 
 import net.sf.samtools.util.BinaryCodec;
+import net.sf.samtools.util.BlockCompressedOutputStream;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -51,18 +52,30 @@ public class BAMFileWriter extends SAMFileWriterImpl {
         outputBinaryCodec.setOutputFileName(path.getAbsolutePath());
     }
 
+    public BAMFileWriter(final OutputStream os, final File file) {
+        blockCompressedOutputStream = new BlockCompressedOutputStream(os, file);
+        outputBinaryCodec = new BinaryCodec(new DataOutputStream(blockCompressedOutputStream));
+        outputBinaryCodec.setOutputFileName(getPathString(file));
+    }
+
+    public BAMFileWriter(final OutputStream os, final File file, final int compressionLevel) {
+        blockCompressedOutputStream = new BlockCompressedOutputStream(os, file, compressionLevel);
+        outputBinaryCodec = new BinaryCodec(new DataOutputStream(blockCompressedOutputStream));
+        outputBinaryCodec.setOutputFileName(getPathString(file));
+    }
+    //新添加的方法
     public BAMFileWriter(final OutputStream os, final String fileName) {
         blockCompressedOutputStream = new BlockCompressedOutputStream(os, fileName);
         outputBinaryCodec = new BinaryCodec(new DataOutputStream(blockCompressedOutputStream));
         outputBinaryCodec.setOutputFileName(fileName);
     }
-
+    //新添加的方法
     public BAMFileWriter(final OutputStream os, final String fileName, final int compressionLevel) {
         blockCompressedOutputStream = new BlockCompressedOutputStream(os, fileName, compressionLevel);
         outputBinaryCodec = new BinaryCodec(new DataOutputStream(blockCompressedOutputStream));
         outputBinaryCodec.setOutputFileName(fileName);
     }
-
+    
     private void prepareToWriteAlignments() {
         if (bamRecordCodec == null) {
             bamRecordCodec = new BAMRecordCodec(getFileHeader());

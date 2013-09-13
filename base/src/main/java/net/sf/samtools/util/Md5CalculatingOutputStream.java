@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package net.sf.samtools;
+package net.sf.samtools.util;
 
 import net.sf.samtools.SAMException;
 
@@ -41,6 +41,7 @@ public class Md5CalculatingOutputStream extends OutputStream {
 
     private final OutputStream os;
     private final MessageDigest md5;
+    //将File digestFile 修改为 String digestFile
     private final String digestFile;
     private String hash;
 
@@ -53,6 +54,24 @@ public class Md5CalculatingOutputStream extends OutputStream {
         this.hash = null;
         this.os = os;
         this.digestFile = digestFile;
+
+        try {
+            md5 = MessageDigest.getInstance("MD5");
+            md5.reset();
+        }
+        catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("MD5 algorithm not found", e);
+        }
+    }
+    /**
+     * Constructor that takes in the OutputStream that we are wrapping
+     * and creates the MD5 MessageDigest
+     */
+    public Md5CalculatingOutputStream(OutputStream os, File digestFile) {
+        super();
+        this.hash = null;
+        this.os = os;
+        this.digestFile = digestFile.getAbsolutePath();
 
         try {
             md5 = MessageDigest.getInstance("MD5");
@@ -103,7 +122,7 @@ public class Md5CalculatingOutputStream extends OutputStream {
     public void close() throws IOException {
         os.close();
         makeHash();
-
+        //修改md5的写入方式
         if(digestFile != null) {
         	TxtReadandWrite txtWrite = new TxtReadandWrite(digestFile, true);
         	txtWrite.writefileln(hash);

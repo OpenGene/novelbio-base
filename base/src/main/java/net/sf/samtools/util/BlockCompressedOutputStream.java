@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package net.sf.samtools;
+package net.sf.samtools.util;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,10 +29,12 @@ import java.io.OutputStream;
 import java.util.zip.CRC32;
 import java.util.zip.Deflater;
 
+import net.sf.samtools.SeekableHDFSstream;
 import net.sf.samtools.seekablestream.SeekableFileStream;
 import net.sf.samtools.seekablestream.SeekableStream;
 import net.sf.samtools.util.BinaryCodec;
 import net.sf.samtools.util.BlockCompressedStreamConstants;
+import net.sf.samtools.util.BlockCompressedInputStream.FileTermination;
 
 import com.novelbio.base.dataOperate.HdfsBase;
 import com.novelbio.base.fileOperate.FileHadoop;
@@ -56,6 +58,7 @@ public class BlockCompressedOutputStream
         extends OutputStream
 {
     private static int defaultCompressionLevel = BlockCompressedStreamConstants.DEFAULT_COMPRESSION_LEVEL;
+    //将File file 改成了 String fileName
     String fileName;
     /**
      * Sets the GZip compression level for subsequent BlockCompressedOutputStream object creation
@@ -135,10 +138,28 @@ public class BlockCompressedOutputStream
      * Constructors that take output streams
      * file may be null
      */
+    public BlockCompressedOutputStream(final OutputStream os, File file) {
+        this(os, file, defaultCompressionLevel);
+    }
+
+    public BlockCompressedOutputStream(final OutputStream os, final File file, final int compressionLevel) {
+        this.fileName = file.getAbsolutePath();
+        codec = new BinaryCodec(os);
+        if (file != null) {
+            codec.setOutputFileName(file.getAbsolutePath());
+        }
+        deflater = new Deflater(compressionLevel, true);
+    }
+
+    //新加方法
+    /**
+     * Constructors that take output streams
+     * file may be null
+     */
     public BlockCompressedOutputStream(final OutputStream os, String fileName) {
         this(os, fileName, defaultCompressionLevel);
     }
-
+    //新加方法
     public BlockCompressedOutputStream(final OutputStream os, String fileName, final int compressionLevel) {
         codec = new BinaryCodec(os);
         if (fileName != null) {
@@ -147,7 +168,6 @@ public class BlockCompressedOutputStream
         }
         deflater = new Deflater(compressionLevel, true);
     }
-
     /**
      * Writes b.length bytes from the specified byte array to this output stream. The general contract for write(b)
      * is that it should have exactly the same effect as the call write(b, 0, b.length).

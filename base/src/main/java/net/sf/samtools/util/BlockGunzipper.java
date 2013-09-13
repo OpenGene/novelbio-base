@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package net.sf.samtools;
+package net.sf.samtools.util;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -29,8 +29,9 @@ import java.util.zip.CRC32;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
+import net.sf.samtools.SAMFormatException;
 import net.sf.samtools.util.BlockCompressedStreamConstants;
-
+// 没有改动
 /**
  * Alternative to GZIPInputStream, for decompressing GZIP blocks that are already loaded into a byte[].
  * The main advantage is that this object can be used over and over again to decompress many blocks,
