@@ -449,6 +449,16 @@
   			<artifactId>sigar</artifactId>
   			<version>1.0</version>
 		</dependency>
+		<dependency>
+			<groupId>net.sf</groupId>
+			<artifactId>picard</artifactId>
+			<version>1.63</version>
+		</dependency>
+		<dependency>
+			<groupId>nt.sf</groupId>
+			<artifactId>sam</artifactId>
+			<version>1.98</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<sourceDirectory>src/main/java</sourceDirectory>
