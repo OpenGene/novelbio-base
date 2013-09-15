@@ -6,10 +6,17 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
+import java.awt.Toolkit;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferInt;
+import java.awt.image.DirectColorModel;
+import java.awt.image.PixelGrabber;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -17,17 +24,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
-import javax.imageio.ImageWriter;
-import javax.imageio.stream.ImageOutputStream;
 
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
@@ -51,6 +52,9 @@ import com.novelbio.base.fileOperate.FileOperate;
  * 
  */
 public class ImageUtils {
+	private static final int[] RGB_MASKS = {0xFF0000, 0xFF00, 0xFF};
+	private static final ColorModel RGB_OPAQUE = new DirectColorModel(32, RGB_MASKS[0], RGB_MASKS[1], RGB_MASKS[2]);
+	
 	public static void main(String[] args) throws Exception {
 //		BufferedImage bufferedImage = convertSvg2BfImg("/home/zong0jie/desktop/IdegramSsSc0707031_v3.svg", 1.0);
 //		try {
@@ -137,7 +141,7 @@ public class ImageUtils {
 
 	/**
 	 * 保存bufferImage为图片文件
-	 * 
+	 * <b>目前只支持jpg和bmp</b>
 	 * @param chart
 	 *            图表
 	 * @param outputFile
@@ -158,7 +162,7 @@ public class ImageUtils {
 			// Handle jpg without transparency.
 			if (ext.toLowerCase().equals("jpg") || ext.toLowerCase().equals("jpeg")) {
 				try {
-					ImageIO.write(chart,  "jpg", out);
+					saveJpg(chart, out);
 					outName = outputFile;
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -182,7 +186,19 @@ public class ImageUtils {
 		}
 		return outName;
 	}
+	
+	private static void saveJpg(BufferedImage img, OutputStream outStream) throws InterruptedException, IOException {
+		PixelGrabber pg = new PixelGrabber(img, 0, 0, -1, -1, true);
+		pg.grabPixels();
+		int width = pg.getWidth(), height = pg.getHeight();
 
+		DataBuffer buffer = new DataBufferInt((int[]) pg.getPixels(), pg.getWidth() * pg.getHeight());
+		WritableRaster raster = Raster.createPackedRaster(buffer, width, height, width, RGB_MASKS, null);
+		BufferedImage bi = new BufferedImage(RGB_OPAQUE, raster, false, null);
+		ImageIO.write(bi, "jpg", outStream);
+	}
+	
+	
 	/**
 	 * 将svg转化为BufferedImage，方便后期处理
 	 * 
