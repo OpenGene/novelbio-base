@@ -27,7 +27,23 @@ public class CmdOperate extends RunProcess<String> {
 	public static void main(String[] args) {
 		String cmd = "bwa aln -n 5 -o 1 -e 30 -t 2 -l 25 -O 10 /media/hdfs/nbCloud/public/nbcplatform/genome/mouse/mm10_GRCm38/index/bwa_Chr_Index/chrAll.fa /media/hdfs/nbCloud/public/test/DNASeqMap/test_filtered_1.fq.gz > /home/novelbio/桌面/zzzz3.fai";
 		CmdOperate cmdOperate = new CmdOperate(cmd);
-		cmdOperate.run();
+		Thread thread = new Thread(cmdOperate);
+		thread.start();
+//		try {
+//			Thread.sleep(20000);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		while (cmdOperate.isRunning()) {
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			System.out.println("还在运行");
+		}
+		//cmdOperate.threadStop();
 		System.out.println(cmdOperate.isFinishedNormal());
 	}
 
@@ -222,6 +238,13 @@ public class CmdOperate extends RunProcess<String> {
 		}
 		runTime = dateTime.getEclipseTime();
 	}
+	
+	@Override
+	public boolean isRunning() {
+		if(info < 0)
+			return true;
+		return false;
+	}
 
 	/** 是否正常结束 */
 	public boolean isFinishedNormal() {
@@ -258,14 +281,11 @@ public class CmdOperate extends RunProcess<String> {
 		try {
 			pid = getUnixPID(process);
 			if (pid > 0) {
-				if (shPID) {
-					pid = pid + 2;
-				}
-				System.out.println(pid);
 				Runtime.getRuntime().exec("kill -9 " + pid).waitFor();
-				process.destroy();// 无法杀死线程
-				process = null;
+			//	process.destroy();// 无法杀死线程
+			//	process = null;
 			}
+			info = 1000;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
