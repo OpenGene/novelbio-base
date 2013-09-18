@@ -28,7 +28,7 @@ public class SepSign {
 	 * 如NCBI@@protein coding
 	 * "(+)"
 	 */
-	public static final String SEP_INFO2 = "(+-)";
+	public static final String SEP_INFO2 = "~`~";
 	
 	
 	/**
