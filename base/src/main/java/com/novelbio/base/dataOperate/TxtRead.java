@@ -32,9 +32,7 @@ class TxtRead implements Closeable {
 	
 	/** 读取本地文件时设定 */
 	String txtfile;
-	/** 读取hadoop文件时设定 */
-	FileHadoop fileHadoop;
-	
+
 	InputStream inputStreamRaw;
 	InputStream inputStream;
 	BufferedReader bufread;
@@ -48,25 +46,17 @@ class TxtRead implements Closeable {
 
 	public TxtRead(String fileName) {
 		if (HdfsBase.isHdfs(fileName)) {
-			try {
-				fileHadoop = new FileHadoop(fileName);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 			platform = PlatForm.hadoop;
-		}else {
-			this.txtfile = fileName;
 		}
+		this.txtfile = fileName;
 	}
 	@Deprecated
 	public TxtRead(FileHadoop fileHadoop) {
-		this.fileHadoop = fileHadoop;
+		this.platform = PlatForm.hadoop;
+		this.txtfile = fileHadoop.getAbsolutePath();
 	}
 	
 	public String getFileName() {
-		if (platform == PlatForm.hadoop) {
-			return fileHadoop.getName();
-		}
 		return txtfile;
 	}
 	
@@ -552,6 +542,7 @@ class TxtRead implements Closeable {
 			inputStreamRaw = new FileInputStream(txtfile);
 			txtType = TXTtype.getTxtType(txtfile);
 		} else if (platform == PlatForm.hadoop) {
+			FileHadoop fileHadoop = new FileHadoop(txtfile);
 			filesize = fileHadoop.getFileSize();
 			inputStreamRaw = fileHadoop.getInputStream();
 			txtType = TXTtype.getTxtType(fileHadoop.getName());
