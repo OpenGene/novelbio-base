@@ -143,7 +143,7 @@ public class Rplot {
 	 */
 	private static int rscript(String scriptPath) throws IOException, InterruptedException {
 		//这个就是相对路径，必须在当前文件夹下运行
-		String command= PathDetail.getRscript() + scriptPath;
+		String command= PathDetail.getRscriptWithSpace() + scriptPath;
 		Runtime   r=Runtime.getRuntime();
 		Process p = r.exec(command);
 		p.waitFor();

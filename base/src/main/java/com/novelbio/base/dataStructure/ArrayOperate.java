@@ -230,6 +230,21 @@ public class ArrayOperate {
 		}
 		return result;
 	}
+	
+	/**
+	 * 将array中的元素添加到list中
+	 * @param ls 如果为null则新建一个list
+	 * @param array 如果为null则返回
+	 */
+	public static<T> void addArrayToList(List<T> ls, T[] array) {
+		if (array == null) return;
+		if (ls == null) ls = new ArrayList<>();
+		
+		for (T t : array) {
+			ls.add(t);
+		}
+	}
+	
 	/**
 	 * <b>没有添加范围检测功能</b>
 	 * <b>同一列最多只能添加删除各一次</b><br>

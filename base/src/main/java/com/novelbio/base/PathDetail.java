@@ -110,8 +110,12 @@ public class PathDetail {
 		return file;
 	}
 	/** 内部自动加空格 */
-	public static String getRscript() {
+	public static String getRscriptWithSpace() {
 		return properties.getProperty("R_SCRIPT") + " ";
+	}
+	/** 内部自动加空格 */
+	public static String getRscript() {
+		return properties.getProperty("R_SCRIPT");
 	}
 	/** 一个大的能容纳一些中间过程的文件夹 */
 	public static String getTmpPath() {

@@ -91,8 +91,8 @@ public class CmdOperate extends RunProcess<String> {
 		setCmdFile(cmd, cmdWriteInFileName);
 	}
 
-	public CmdOperate(ArrayList<String> lsCmd) {
-		String[] cmds = new String[lsCmd.size() - 1];
+	public CmdOperate(List<String> lsCmd) {
+		String[] cmds = lsCmd.toArray(new String[0]);
 		setRealCmd(cmds);
 	}
 
@@ -115,7 +115,16 @@ public class CmdOperate extends RunProcess<String> {
 		}
 		shPID = false;
 	}
-
+	
+	/** 返回执行的具体cmd命令 */
+	public String getCmdExeStr() {
+		String cmd = "";
+		for (String cmdTmp : realCmd) {
+			cmd += cmdTmp.replace(" ", "\\ ");
+		}
+		return cmd;
+	}
+	
 	/**
 	 * 将cmd写入哪个文本，然后执行，如果初始化输入了cmdWriteInFileName, 就不需要这个了
 	 * 
@@ -225,7 +234,7 @@ public class CmdOperate extends RunProcess<String> {
 	protected void running() {
 		String cmd = "";
 		for (String cmd1 : realCmd) {
-			cmd += " " + cmd1;
+			cmd += " " + cmd1.replace(" ", "\\ ");
 		}
 		logger.info("实际运行命令: " + cmd);
 		DateUtil dateTime = new DateUtil();
