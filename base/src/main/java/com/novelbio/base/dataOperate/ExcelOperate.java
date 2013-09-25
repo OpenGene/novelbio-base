@@ -448,6 +448,10 @@ public class ExcelOperate {
 	// 读取一块excel，每次读一行,循环读
 	public ArrayList<String[]> ReadLsExcel(int sheetNum, int rowStartNum, int columnStartNum, int rowEndNum, int columnEndNum) {
 		// 修正输入的行数和列数的问题
+		if (sheetNum <= 0) {
+			sheetNum = 1;
+		}
+		
 		if (rowEndNum <= 0)
 			rowEndNum = getRowCount(sheetNum);
 		if (columnEndNum <= 0)
