@@ -19,8 +19,10 @@ import com.novelbio.base.multithread.RunProcess;
 
 /**
  * 输入cmd，执行完毕后可以将结果输出到界面，目前cmd只支持英文，否则会出错 只要继承后重写process方法即可
- * 如果只是随便用用，那么调用doInBackground方法就好
- * 
+ * 如果只是随便用用，那么调用doInBackground方法就好<p>
+ * <b>管道只支持最后的一个 > </b>
+ * 例如 "bwa aaa bbb > ccc"<br>
+ * <b>不支持这种</b> "bwa aaa bbb | grep sd > ccc"
  * @author zong0jie
  */
 public class CmdOperate extends RunProcess<String> {
@@ -68,13 +70,7 @@ public class CmdOperate extends RunProcess<String> {
 	List<String> lsErrorInfo;
 	StreamGobbler errorGobbler;
 	StreamGobbler outputGobbler;
-	
-	/**
-	 * false表示遇到">" 使用java的输出流，也就是截取">"后面的流自己写入文本
-	 * true表示遇到">"使用标准输出流
-	 */
-	boolean useStd = false;
-	
+
 	/**
 	 * 直接运行，不写入文本
 	 * 
@@ -211,18 +207,27 @@ public class CmdOperate extends RunProcess<String> {
 		process = runtime.exec(realCmd);
 		logger.info("process id : " + CmdOperate.getUnixPID(process));
 		// any error message?
-		errorGobbler = new StreamGobbler(process.getErrorStream(), System.out);
+		errorGobbler = new StreamGobbler(process.getErrorStream(), System.err);
 		errorGobbler.setLsInfo(lsErrorInfo);
 		// any output?
-		TxtReadandWrite txtReadandWrite = new TxtReadandWrite(saveFilePath, true);
-		outputGobbler = new StreamGobbler(process.getInputStream(), txtReadandWrite.getOutputStream());
+		if (saveFilePath != null) {
+			TxtReadandWrite txtWrite = new TxtReadandWrite(saveFilePath, true);
+			outputGobbler = new StreamGobbler(process.getInputStream(), txtWrite.getOutputStream());
+		} else {
+			outputGobbler = new StreamGobbler(process.getInputStream(), System.out);
+		}
 		outputGobbler.setLsInfo(lsOutInfo);
 
 		// kick them off
 		errorGobbler.start();
 		outputGobbler.start();
-
+		
 		info = process.waitFor();
+		outputGobbler.join();
+		errorGobbler.join();
+		if (saveFilePath != null) {
+			outputGobbler.close();
+		}
 		finishAndCloseCmd(info);
 	}
 
@@ -333,7 +338,7 @@ class StreamGobbler extends Thread {
 	OutputStream os;
 	List<String> lsInfo;
 	boolean isFinished = false;
-
+	
 	StreamGobbler(InputStream is, OutputStream outputStream) {
 		this.is = is;
 		this.os = outputStream;
@@ -355,13 +360,25 @@ class StreamGobbler extends Thread {
 		isFinished = false;
 		try {
 			IOUtils.copy(is, os);
-			os.close();
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
 		isFinished = true;
 	}
+	
+	/** 关闭流 */
+	public void close() {
+		try {
+			os.flush();
+			os.close();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
 }
+
+
+
 
 class ProgressData {
 	public String strcmdInfo;
