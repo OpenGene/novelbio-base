@@ -58,6 +58,18 @@ class TxtWrite implements Closeable {
 		this.append = append;
 	}
 	
+	public BufferedOutputStream getOutputStream() {
+		if (outputStream == null) {
+			try {
+				createFile();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return outputStream;
+	}
+	
 	/**
 	 * 设定缓冲长度，默认为10000
 	 * @param bufferLen

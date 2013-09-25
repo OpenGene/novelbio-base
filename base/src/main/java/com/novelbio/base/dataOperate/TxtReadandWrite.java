@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
@@ -156,6 +157,14 @@ public class TxtReadandWrite implements Closeable {
 	public Iterable<String> readlines() {
 		return txtRead.readlines();
 	}
+	
+	/** 只有当为true的时候才会返回<br>
+	 * 可以用{@link #close()} 关闭该流
+	 *  */
+	public OutputStream getOutputStream() {
+		return txtWrite.getOutputStream();
+	}
+	
 	/**
 	 * 从第几行开始读，是实际行
 	 * @param lines 如果lines小于1，则从头开始读取

@@ -916,12 +916,46 @@ public class FileOperate {
 		} else {
 			result = fileName;
 		}
-		
-
-
 		return result + append + suffix;
 	}
-	
+	/**
+	 * 
+	 * 只修输入的文件名，并不直接操作文件 文件添加<b>后缀</b>并改后缀名，如果一样则不修改<br>
+	 * 可以修改输入的uri
+	 * @param fileName
+	 *            原来文件的全名
+	 * @param append 要添加的后缀，譬如_1，_new，如果为null，则不添加
+	 * @param suffixOld 以前的后缀名，可以是txt，txt.gz，fq.gz等多个连在一起的名字，也可以实际上是bed.gz，但是只写bed
+	 * <b>无所谓大小写</b>
+	 * @param suffixNew 新的后缀全名， suffix == null则不改变后缀名，suffix = ""表示删除后缀
+	 * @return
+	 */
+	public static String changeFileSuffix(String fileName, String append, String suffixOld, String suffixNew) {
+		if (append == null) {
+			append = "";
+		}
+		if (!suffixOld.startsWith(".")) {
+			suffixOld = "." + suffixOld;
+		}
+		
+		int endDot = fileName.toLowerCase().lastIndexOf(suffixOld.toLowerCase());
+		suffixOld = fileName.substring(endDot, fileName.length());
+		
+		if (suffixNew == null) {
+			suffixNew = suffixOld;
+		}
+		if (!suffixNew.startsWith(".")) {
+			suffixNew = "." + suffixNew;
+		}
+		int indexSep = Math.max(fileName.lastIndexOf("/"), fileName.lastIndexOf("\\"));
+		String result;
+		if (endDot > indexSep) {
+			result = fileName.substring(0, endDot);
+		} else {
+			result = fileName;
+		}
+		return result + append + suffixNew;
+	}
 	/**
 	 * 输入文件名和需要修改的后缀，如果后缀为null则返回原来的后缀，否则返回新的后缀
 	 * 后缀加上"."

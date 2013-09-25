@@ -68,7 +68,13 @@ public class CmdOperate extends RunProcess<String> {
 	List<String> lsErrorInfo;
 	StreamGobbler errorGobbler;
 	StreamGobbler outputGobbler;
-
+	
+	/**
+	 * false表示遇到">" 使用java的输出流，也就是截取">"后面的流自己写入文本
+	 * true表示遇到">"使用标准输出流
+	 */
+	boolean useStd = false;
+	
 	/**
 	 * 直接运行，不写入文本
 	 * 
@@ -208,7 +214,8 @@ public class CmdOperate extends RunProcess<String> {
 		errorGobbler = new StreamGobbler(process.getErrorStream(), System.out);
 		errorGobbler.setLsInfo(lsErrorInfo);
 		// any output?
-		outputGobbler = new StreamGobbler(process.getInputStream(), FileOperate.getOutputStream(saveFilePath, true));
+		TxtReadandWrite txtReadandWrite = new TxtReadandWrite(saveFilePath, true);
+		outputGobbler = new StreamGobbler(process.getInputStream(), txtReadandWrite.getOutputStream());
 		outputGobbler.setLsInfo(lsOutInfo);
 
 		// kick them off
@@ -348,6 +355,7 @@ class StreamGobbler extends Thread {
 		isFinished = false;
 		try {
 			IOUtils.copy(is, os);
+			os.close();
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
