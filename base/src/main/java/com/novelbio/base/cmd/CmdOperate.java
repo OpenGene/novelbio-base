@@ -14,14 +14,13 @@ import com.novelbio.base.PathDetail;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.fileOperate.FileHadoop;
-import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.base.multithread.RunProcess;
 
 /**
  * 输入cmd，执行完毕后可以将结果输出到界面，目前cmd只支持英文，否则会出错 只要继承后重写process方法即可
  * 如果只是随便用用，那么调用doInBackground方法就好<p>
  * <b>管道只支持最后的一个 > </b>
- * 例如 "bwa aaa bbb > ccc"<br>
+ * 例如 "bwa aaa bbb > ccc"，此时会根据ccc的后缀，gz还是bz2，自动选择相应的压缩流<br>
  * <b>不支持这种</b> "bwa aaa bbb | grep sd > ccc"
  * @author zong0jie
  */
@@ -366,14 +365,13 @@ class StreamGobbler extends Thread {
 		isFinished = true;
 	}
 	
-	/** 关闭流 */
+	/** 关闭输出流 */
 	public void close() {
+		//不用关闭输入流，因为process会自动关闭该流
 		try {
 			os.flush();
 			os.close();
-		} catch (Exception e) {
-			// TODO: handle exception
-		}
+		} catch (Exception e) { }
 	}
 }
 
