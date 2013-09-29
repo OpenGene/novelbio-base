@@ -2,12 +2,14 @@ package com.novelbio.base;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.apache.commons.validator.Field;
 import org.apache.log4j.Logger;
 
 /**
@@ -34,6 +36,19 @@ public class MD5generate {
 			logger.error("初始化失败，MessageDigest不支持MD5!");  
 			nsaex.printStackTrace();  
 		}
+	}
+	
+	public static void main(String[] args) throws Exception {
+		File file = new File("/home/novelbio/桌面/迅雷7高速通道+离线下载.rar");
+		FileInputStream fs = new FileInputStream(file);
+		System.out.println(fs.available());
+//		int length = 1024*1024*8*20;
+//		int realLength = fs.available();
+//		int byteLength = realLength < length ? realLength : length;
+//		byte[] bytes = new byte[byteLength];
+//		fs.read(bytes, 0 ,bytes.length);
+//		System.out.println(MD5generate.getMD5(bytes));
+//		fs.close();
 	}
 	/**
 	 * 返回""表示出错
@@ -111,7 +126,7 @@ public class MD5generate {
 		stringbuffer.append(c0);  
 		stringbuffer.append(c1);  
 	}  
-       
+    
 	/**
 	 * 只是看看的，这里面有一些注释写的比较清楚，对于如何解析MD5的结果
 	 * @param source

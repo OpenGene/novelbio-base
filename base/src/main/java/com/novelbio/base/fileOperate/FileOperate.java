@@ -702,10 +702,25 @@ public class FileOperate {
 		return bea;
 	}
 	
-	
-	public static OutputStream getOutputStream(String fileName,boolean cover){
+	public static InputStream getInputStream(String filePath){
 		try {
-			File file =  getFile(fileName);
+			File file =  getFile(filePath);
+			InputStream in = null;
+			if (file instanceof FileHadoop) {
+				FileHadoop fileHadoop = (FileHadoop) file;
+				in = fileHadoop.getInputStream();
+			}else {
+				in = new FileInputStream(file);
+			}
+			return in;
+		}catch(Exception e){
+			return null;
+		}
+	}
+	
+	public static OutputStream getOutputStream(String filePath,boolean cover){
+		try {
+			File file =  getFile(filePath);
 			OutputStream fs = null;
 			if (file instanceof FileHadoop) {
 				FileHadoop fileHadoop = (FileHadoop) file;

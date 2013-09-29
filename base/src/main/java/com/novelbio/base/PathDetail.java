@@ -113,6 +113,15 @@ public class PathDetail {
 	public static String getRscriptWithSpace() {
 		return properties.getProperty("R_SCRIPT") + " ";
 	}
+	
+	/**
+	 * NBCFile的文件保存路径
+	 * @return
+	 */
+	public static String getNBCFilePath(){
+		return FileOperate.addSep(properties.getProperty("NBCFilePath"));
+	}
+	
 	/** 内部自动加空格 */
 	public static String getRscript() {
 		return properties.getProperty("R_SCRIPT");
