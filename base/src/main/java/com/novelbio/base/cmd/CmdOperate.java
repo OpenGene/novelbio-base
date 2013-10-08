@@ -203,6 +203,13 @@ public class CmdOperate extends RunProcess<String> {
 	/** 获得命令行的标准输出流， <br>
 	 * 设定了{@link #setGetCmdInStdStream(boolean)} 才有用 */
 	public InputStream getStdStream() {
+		while (outputGobbler == null) {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 		return outputGobbler.getCmdOutStream();
 	}
 	
