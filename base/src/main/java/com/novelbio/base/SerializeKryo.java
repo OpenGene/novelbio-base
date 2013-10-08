@@ -4,7 +4,8 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
-/** 内部有synchronized*/
+/** 内部有synchronized */
+//TODO 何高人说有更好的，回头去问他
 public class SerializeKryo {
 	Kryo kryo = new Kryo();
 	

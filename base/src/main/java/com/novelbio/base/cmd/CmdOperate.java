@@ -1,7 +1,9 @@
 package com.novelbio.base.cmd;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -69,10 +71,14 @@ public class CmdOperate extends RunProcess<String> {
 	List<String> lsErrorInfo;
 	StreamGobbler errorGobbler;
 	StreamGobbler outputGobbler;
-
+	
+	/** 是否需要获取cmd的标准输出流 */
+	boolean getCmdInStdStream = false;
+	/** 是否需要获取cmd的标准错误流 */
+	boolean getCmdInErrStream = false;
+	
 	/**
 	 * 直接运行，不写入文本
-	 * 
 	 * @param cmd
 	 */
 	public CmdOperate(String cmd) {
@@ -88,6 +94,7 @@ public class CmdOperate extends RunProcess<String> {
 	 * @param cmdWriteInFileName
 	 *            将命令写入的文本
 	 */
+	@Deprecated
 	public CmdOperate(String cmd, String cmdWriteInFileName) {
 		setCmdFile(cmd, cmdWriteInFileName);
 	}
@@ -126,6 +133,13 @@ public class CmdOperate extends RunProcess<String> {
 		return cmd;
 	}
 	
+	/** 是否获得cmd的输入流
+	 * <b>优先级高于cmd命令中的重定向</b>
+	 * @param getCmdInStdStream
+	 */
+	public void setGetCmdInStdStream(boolean getCmdInStdStream) {
+		this.getCmdInStdStream = getCmdInStdStream;
+	}
 	/**
 	 * 将cmd写入哪个文本，然后执行，如果初始化输入了cmdWriteInFileName, 就不需要这个了
 	 * 
@@ -150,17 +164,17 @@ public class CmdOperate extends RunProcess<String> {
 	}
 
 	/** 需要获得标准输出流，用getStdOut获得 */
-	public void setGetStdOut() {
+	public void setGetLsStdOut() {
 		lsOutInfo = new ArrayList<>();
 	}
 
-	/** 需要获得标准输出流，用getStdOut获得 */
-	public void setGetStdError() {
+	/** 需要获得标准输出流，用getStdErr获得 */
+	public void setGetLsErrOut() {
 		lsErrorInfo = new ArrayList<>();
 	}
 
 	/** 程序执行完后可以看错误输出 */
-	public List<String> getLsErrorInfo() {
+	public List<String> getLsErrOut() {
 		while (true) {
 			if (errorGobbler.isFinished()) {
 				break;
@@ -173,7 +187,7 @@ public class CmdOperate extends RunProcess<String> {
 		return lsErrorInfo;
 	}
 
-	public List<String> getLsOutInfo() {
+	public List<String> getLsStdOut() {
 		while (true) {
 			if (outputGobbler.isFinished()) {
 				break;
@@ -185,7 +199,13 @@ public class CmdOperate extends RunProcess<String> {
 		}
 		return lsOutInfo;
 	}
-
+	
+	/** 获得命令行的标准输出流， <br>
+	 * 设定了{@link #setGetCmdInStdStream(boolean)} 才有用 */
+	public InputStream getStdStream() {
+		return outputGobbler.getCmdOutStream();
+	}
+	
 	/**
 	 * 直接运行cmd，可能会出错 返回两个arraylist-string 第一个是Info 第二个是error
 	 * 
@@ -196,27 +216,13 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	private void doInBackgroundB() throws Exception {
 		info = -1000;
-		// try {
-		// Thread thread = new Thread(guIcmd);
-		// thread.start();
-		// } catch (Exception e) {
-		// e.printStackTrace();
-		// }
 		Runtime runtime = Runtime.getRuntime();
 		process = runtime.exec(realCmd);
 		logger.info("process id : " + CmdOperate.getUnixPID(process));
-		// any error message?
-		errorGobbler = new StreamGobbler(process.getErrorStream(), System.err);
-		errorGobbler.setLsInfo(lsErrorInfo);
-		// any output?
-		if (saveFilePath != null) {
-			TxtReadandWrite txtWrite = new TxtReadandWrite(saveFilePath, true);
-			outputGobbler = new StreamGobbler(process.getInputStream(), txtWrite.getOutputStream());
-		} else {
-			outputGobbler = new StreamGobbler(process.getInputStream(), System.out);
-		}
-		outputGobbler.setLsInfo(lsOutInfo);
 
+		setErrorStream();
+		setStdStream();
+		
 		// kick them off
 		errorGobbler.start();
 		outputGobbler.start();
@@ -224,23 +230,41 @@ public class CmdOperate extends RunProcess<String> {
 		info = process.waitFor();
 		outputGobbler.join();
 		errorGobbler.join();
-		if (saveFilePath != null) {
+		if (!getCmdInStdStream && saveFilePath != null) {
 			outputGobbler.close();
 		}
-		finishAndCloseCmd(info);
+	}
+	
+	private void setErrorStream() {
+		errorGobbler = new StreamGobbler(process.getErrorStream());
+		if (!getCmdInErrStream) {
+			if (lsErrorInfo != null) {
+				errorGobbler.setLsInfo(lsErrorInfo);
+			} else {
+				errorGobbler.setOutputStream(System.err);
+			}
+		} else {
+			errorGobbler.setGetInputStream(true);
+		}
 	}
 
-	@Deprecated
-	private void finishAndCloseCmd(int info) {
-		// if (guIcmd != null) {
-		// if (info == 0) {
-		// guIcmd.closeWindow();
-		// } else {
-		// guIcmd.appendTxtInfo("error");
-		// }
-		// }
+	private void setStdStream() {
+		outputGobbler = new StreamGobbler(process.getInputStream());
+		if (!getCmdInStdStream) {
+			if (saveFilePath != null) {
+				TxtReadandWrite txtWrite = new TxtReadandWrite(saveFilePath, true);
+				outputGobbler.setOutputStream(txtWrite.getOutputStream());
+			} else if (lsOutInfo != null) {
+				outputGobbler.setLsInfo(lsOutInfo);
+			} else {
+				outputGobbler.setOutputStream(System.out);
+			}			
+		} else {
+			outputGobbler.setGetInputStream(true);
+		}
 	}
-
+	
+	
 	@Override
 	protected void running() {
 		String cmd = "";
@@ -337,12 +361,23 @@ class StreamGobbler extends Thread {
 	OutputStream os;
 	List<String> lsInfo;
 	boolean isFinished = false;
+	boolean getInputStream = false;
 	
-	StreamGobbler(InputStream is, OutputStream outputStream) {
+	StreamGobbler(InputStream is) {
 		this.is = is;
-		this.os = outputStream;
 	}
-
+	/** 制定一个out流，cmd的输出流就会定向到该流中<br>
+	 * 该方法和{@link #setGetInputStream(boolean)} 冲突
+	 */
+	public void setOutputStream(OutputStream os) {
+		this.os = os;
+	}
+	/** 是否要获取输入流，默认为false<br>
+	 * 该方法和{@link #setOutputStream(OutputStream)} 冲突
+	 *  */
+	public void setGetInputStream(boolean getInputStream) {
+		this.getInputStream = getInputStream;
+	}
 	public void setLsInfo(List<String> lsInfo) {
 		this.lsInfo = lsInfo;
 	}
@@ -350,20 +385,40 @@ class StreamGobbler extends Thread {
 	public boolean isFinished() {
 		return isFinished;
 	}
-
+	public InputStream getCmdOutStream() {
+		return is;
+	}
 	public void run() {
-		if (os == null) {
-			isFinished = true;
-			return;
-		}
 		isFinished = false;
+		if (!getInputStream) {
+			if (os == null) {
+				exhaustInStream(is);
+			} else {
+				try {
+					IOUtils.copy(is, os);
+				} catch (IOException ioe) {
+					ioe.printStackTrace();
+				}
+			}
+			isFinished = true;
+		}
+	}
+	
+	private void exhaustInStream(InputStream inputStream) {
 		try {
-			IOUtils.copy(is, os);
+			InputStreamReader isr = new InputStreamReader(inputStream);
+			BufferedReader br = new BufferedReader(isr);
+			String line = null;
+			while ((line = br.readLine()) != null) {
+				if (lsInfo != null) {
+					lsInfo.add(line);
+				}
+			}
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
-		isFinished = true;
 	}
+	
 	
 	/** 关闭输出流 */
 	public void close() {
