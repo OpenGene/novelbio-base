@@ -3,6 +3,7 @@ package com.novelbio.base.dataStructure.listOperate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -170,6 +171,26 @@ public abstract class ListHashSearch < T extends ListDetailAbs, E extends ListCo
 			return null;
 		}
 		return Loclist.searchLocationDu(cod1, cod2);
+	}
+	
+	/**
+	 * 如果cod1和cod2特别接近，就可以直接返回这两个cod所在的Element
+	 * @param chrID
+	 * @param cod1
+	 * @param cod2
+	 * @return
+	 */
+	public T searchElement(String chrID, int cod1, int cod2) {
+		K lsDu = searchLocation(chrID, cod1, cod2);
+		if (lsDu == null) {
+			logger.error("出现未知chrID" + chrID);
+			return null;
+		}
+		List<T> lsResult = lsDu.getAllGffDetail();
+		if (lsResult.size() == 0) {
+			return null;
+		}
+		return lsResult.get(0);
 	}
 	/**
 	 * 给定ID，在其所对应的信息上加一

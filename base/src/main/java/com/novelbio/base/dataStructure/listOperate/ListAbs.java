@@ -1,6 +1,7 @@
 package com.novelbio.base.dataStructure.listOperate;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -120,6 +121,29 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 			return false;
 		}
 		return true;
+	}
+	public boolean add(E element) {
+		element.setParentListAbs(this);
+		return super.add(element);
+	}
+	public void add(int index, E element) {
+		element.setParentListAbs(this);
+		super.add(index, element);
+	}
+	public boolean addAll(Collection<? extends E> colElement) {
+		for (E element : colElement) {
+			element.setParentListAbs(this);
+		}
+		return super.addAll(colElement);
+	}
+	public boolean addAll(int index, Collection<? extends E> colElement) {
+		for (E element : colElement) {
+			element.setParentListAbs(this);
+		}
+		return super.addAll(index, colElement);
+	}
+	public E set(int index, E element) {
+		return super.set(index, element);
 	}
 	/**
 	 * 输入的loc是否在Start的下游
