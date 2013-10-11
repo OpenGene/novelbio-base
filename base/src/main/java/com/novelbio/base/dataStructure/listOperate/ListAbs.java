@@ -48,7 +48,7 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 	public Boolean isCis5to3() {
 		return cis5to3;
 	}
-	public void setCis5to3(boolean cis5to3) {
+	public void setCis5to3(Boolean cis5to3) {
 		this.cis5to3 = cis5to3;
  	}
 	/**
@@ -122,6 +122,7 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 		}
 		return true;
 	}
+	/** 会将该element的parent设置为本list */
 	public boolean add(E element) {
 		element.setParentListAbs(this);
 		return super.add(element);

@@ -45,7 +45,7 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 	 */
 	protected Set<String> setItemName = new LinkedHashSet<String>(); //loc name
 	/**  染色体编号，都小写 */
-	protected String parentName="";
+	protected String parentName;
 	/** 转录方向，假设同一基因不管多少转录本都同一转录方向 */
 	protected Boolean cis5to3 = null;
 	/** 本区域内有多少条reads */
@@ -103,7 +103,9 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 	 */
 	public void setParentListAbs(ListAbs<? extends ListDetailAbs> listAbs) {
 		this.listAbs = listAbs;
-		this.parentName = listAbs.getName();
+		if (this.parentName == null) {
+			this.parentName = listAbs.getName();
+		}
 	}
 	public ListAbs<? extends ListDetailAbs> getParent() {
 		return listAbs;
