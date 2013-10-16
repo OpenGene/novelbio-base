@@ -114,13 +114,6 @@ public class PathDetail {
 		return properties.getProperty("R_SCRIPT") + " ";
 	}
 	
-	/**
-	 * NBCFile的文件保存路径
-	 * @return
-	 */
-	public static String getNBCFilePath(){
-		return FileOperate.addSep(properties.getProperty("NBCFilePath"));
-	}
 	
 	/** 内部自动加空格 */
 	public static String getRscript() {
@@ -138,6 +131,15 @@ public class PathDetail {
 		FileOperate.createFolders(tmpPathRandom);
 		return tmpPathRandom;
 	}
+	
+	/**
+	 * 得到hdfs上所有project保存的路径
+	 * @return
+	 */
+	public static String getProjectSavePath() {
+		return properties.getProperty("allProjectSavePath");
+	}
+	
 	/** 
 	 * 用{@link com.novelbio.base.fileOperate.FileHadoop#getHdfsHeadSymbol()}替换<br>
 	 * 文件名前添加的HDFS的头，末尾没有"/" */
