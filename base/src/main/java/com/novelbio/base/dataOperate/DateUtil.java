@@ -48,6 +48,16 @@ public class DateUtil {
 		start = System.currentTimeMillis(); //获取最初时间
 	}
 	
+	public static long getNowTimeLong() {
+		return new Date().getTime();
+	}
+	
+	public static String getNowTimeStr() {
+		return DateUtil.date2String(new Date(), DateUtil.PATTERN_DATETIME);
+	}
+	
+
+	
 	/**
 	 * 从设定starttime开始返回运行时间，单位ms
 	 * @return

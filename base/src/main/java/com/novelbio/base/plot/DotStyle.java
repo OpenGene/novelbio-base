@@ -37,6 +37,7 @@ public class DotStyle implements Cloneable {
 	public static final int SIZE_M = 512;
 	public static final int SIZE_MB = 1024;
 	public static final int SIZE_B = 2048;
+	public static final int SIZE_SB = 4096;
 	
 	Ellipse2D.Double circle = null;
 	Rectangle2D.Double rectangele = null;
@@ -149,6 +150,9 @@ public class DotStyle implements Cloneable {
 			else if (size == SIZE_B) {
 				w = 4.0; h = 4.0;
 			}
+			else if (size == SIZE_SB) {
+				w = 6.0; h = 6.0;
+			}
 			circle = new Ellipse2D.Double(x, y, w, h);
 			return circle;
 		}
@@ -170,6 +174,9 @@ public class DotStyle implements Cloneable {
 				
 			else if (size == SIZE_B) {
 				w = 4.0; h = 4.0;
+			}
+			else if (size == SIZE_SB) {
+				w = 6.0; h = 6.0;
 			}
 			rectangele = new Rectangle2D.Double(x, y, w, h);
 			return rectangele;
@@ -193,6 +200,10 @@ public class DotStyle implements Cloneable {
 			else if (size == SIZE_B) {
 				w = 4.0; h = 4.0;
 			}
+			else if (size == SIZE_SB) {
+				w = 6.0; h = 6.0;
+			}
+			
 			rectangele = new Rectangle2D.Double(x, y, w, h);
 			return rectangele;
 		}
@@ -223,6 +234,9 @@ public class DotStyle implements Cloneable {
 				
 			else if (size == SIZE_B) {
 				w = 4.0; h = 4.0;
+			}
+			else if (size == SIZE_SB) {
+				w = 6.0; h = 6.0;
 			}
 			return new BasicStroke((float)w);
 		}

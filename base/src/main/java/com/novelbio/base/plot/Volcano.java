@@ -54,14 +54,16 @@ public class Volcano {
 	 */
 
 	public void test() {
-		List<List<String>> lsls = ExcelTxtRead.readLsExcelTxtls("/home/novelbio/桌面/project/difGene/1、Difference Expression/1、Difference Expression_result/1.xls", 1);
+		List<List<String>> lsls = ExcelTxtRead.readLsExcelTxtls("/home/novelbio/桌面/test/DIFG56VSWT.txt", 1);
 		Volcano volcano = new Volcano();
 		volcano.setMaxX(2);
 		volcano.setMinX(-2);
 		volcano.setMaxY(3.5);
-		volcano.setLogFC2Pvalue(lsls, 4, 5);
-		PlotScatter plotScatter = volcano.drawVolimage("FDR");
-		plotScatter.saveToFile("/home/novelbio/桌面/1.png", 1000, 1000);	
+		volcano.setLogFC2Pvalue(lsls, 1, 2);
+		volcano.setLogPvalueBorder(2);
+		volcano.setLogFCBorder(0.5);
+		PlotScatter plotScatter = volcano.drawVolimage("P-Value");
+		plotScatter.saveToFile("/home/novelbio/桌面/test/DIFG56VSWT.png", 1000, 1000);	
 	}
 
 	public void setLogFC2Pvalue(List<List<String>> lslsExcel, int colLogFC, int colPvalue) {
@@ -129,31 +131,31 @@ public class Volcano {
 		plotScatter.setAxisY(0, maxY);
 		/* 定义红的的半透明的点 */
 		DotStyle dotStyleHalfRed = new DotStyle();
-		Color halfRed = new Color(255, 0, 0, 100);
+		Color halfRed = new Color(255, 0, 0, 255);
 		dotStyleHalfRed.setColor(halfRed);
 		dotStyleHalfRed.setStyle(DotStyle.STYLE_CYCLE);
-		dotStyleHalfRed.setSize(DotStyle.SIZE_B);
+		dotStyleHalfRed.setSize(DotStyle.SIZE_SB);
 
 		/* 定义深绿的的半透明的点 */
 		DotStyle dotStyleHalfGreen = new DotStyle();
-		Color halfGreen = new Color(34, 139, 34, 100);
+		Color halfGreen = new Color(34, 139, 34, 255);
 		dotStyleHalfGreen.setColor(halfGreen);
 		dotStyleHalfGreen.setStyle(DotStyle.STYLE_CYCLE);
-		dotStyleHalfGreen.setSize(DotStyle.SIZE_MB);
+		dotStyleHalfGreen.setSize(DotStyle.SIZE_SB);
 
 		/* 定义深灰的的半透明的点 */
 		DotStyle dotStyleHalfGrey = new DotStyle();
-		Color halfGrey = new Color(77, 77, 77, 190);
+		Color halfGrey = new Color(77, 77, 77, 255);
 		dotStyleHalfGrey.setColor(halfGrey);
 		dotStyleHalfGrey.setStyle(DotStyle.STYLE_CYCLE);
-		dotStyleHalfGrey.setSize(DotStyle.SIZE_MB);
+		dotStyleHalfGrey.setSize(DotStyle.SIZE_SB);
 
 		/* 定义深蓝的的半透明的点 */
 		DotStyle dotStyleHalfBlue = new DotStyle();
-		Color halfBlue = new Color(16, 78, 139, 100);
+		Color halfBlue = new Color(16, 78, 139, 255);
 		dotStyleHalfBlue.setColor(halfBlue);
 		dotStyleHalfBlue.setStyle(DotStyle.STYLE_CYCLE);
-		dotStyleHalfBlue.setSize(DotStyle.SIZE_MB);
+		dotStyleHalfBlue.setSize(DotStyle.SIZE_SB);
 
 		/* 画出分界线 */
 		DotStyle dotStyleBorder = new DotStyle();
