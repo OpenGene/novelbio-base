@@ -175,4 +175,12 @@ public class PathDetail {
 	public static String getHdfsLocalPath() {
 		return properties.getProperty("hdfsLocalPath");
 	}
+	
+	/**
+	 * 取得公共文件保存文件夹
+	 * @return
+	 */
+	public static String getPublicFileSavePath() {
+		return properties.getProperty("publicFileSavePath");
+	}
 }
