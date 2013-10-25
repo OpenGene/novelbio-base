@@ -183,4 +183,12 @@ public class PathDetail {
 	public static String getPublicFileSavePath() {
 		return properties.getProperty("publicFileSavePath");
 	}
+	
+	/**
+	 * 取得无项目的任务保存文件夹
+	 * @return
+	 */
+	public static String getTestTasksSavePath(){
+		return properties.getProperty("testTasksSavePath");
+	}
 }

@@ -9,7 +9,13 @@ public class JsonNBC {
 	 * @return
 	 */
 	public static Object fromObject(Object object){
-		return JSONObject.toJSON(object);
+		Object obj = null;
+		try {
+			obj = JSONObject.toJSON(object);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return obj;
 	}
 	
 }
