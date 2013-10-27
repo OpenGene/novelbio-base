@@ -40,7 +40,7 @@ import com.novelbio.base.fileOperate.FileOperate;
  * 
  */
 public class TxtReadandWrite implements Closeable {
-	private static Logger logger = Logger.getLogger(TxtReadandWrite.class);
+	private static final Logger logger = Logger.getLogger(TxtReadandWrite.class);
 	
 	protected static enum PlatForm {
 		pc, hadoop
@@ -167,7 +167,7 @@ public class TxtReadandWrite implements Closeable {
 	
 	/**
 	 * 从第几行开始读，是实际行
-	 * @param lines 如果lines小于1，则从头开始读取
+	 * @param lines 如果lines小于等于1，则从头开始读取
 	 * @return
 	 */
 	public Iterable<String> readlines(int lines) {

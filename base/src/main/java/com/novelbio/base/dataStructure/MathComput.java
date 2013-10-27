@@ -222,16 +222,11 @@ public class MathComput {
 	 * @return
 	 */
 	public static int median(int[] unsortNum) {
-		int med=-100;
-		int length=unsortNum.length;
-		int[] unsortNew = copyArray(unsortNum);
-		sort(unsortNew, true);
- 
-		if (length%2==0) 
-			med=(unsortNew[length/2-1]+unsortNew[length/2])/2;
-		else 
-			med=unsortNew[length/2];
-		return med;
+		double[] value = new double[unsortNum.length];
+		for (int i = 0; i < value.length; i++) {
+			value[i] = unsortNum[i];
+		}
+		return (int)median(value);
 	}
 	/**
 	 * 输入数据，获得中位数, 用于10
@@ -257,6 +252,8 @@ public class MathComput {
 		for (int i = 0; i < mydouble.length; i++) {
 			mydouble[i] = lsNumbers.get(i).doubleValue();
 		}
+//		return StatUtils.percentile(mydouble, percentage);
+
 		return median(mydouble, percentage);
 	}
 	
@@ -277,17 +274,9 @@ public class MathComput {
 	 * @param percentage 乘以100的值
 	 * @return
 	 */
-	public static double median(double[] unsortNum, int percentage)
-	{
-		double med = -100;
-		int length = unsortNum.length;
-		double[] unsortNew = copyArray(unsortNum);
-		sort(unsortNew, true);
-		if (length*percentage%100==0) 
-			med = (unsortNew[length*percentage/100-1] + unsortNew[length*percentage/100])/2;
-		else 
-			med = unsortNew[length*percentage/100];
-		return med;
+	public static double median(double[] unsortNum, int percentage) {
+		double result = StatUtils.percentile(unsortNum, percentage);
+		return result;
 	}
 	/**
 	 * copy an array
