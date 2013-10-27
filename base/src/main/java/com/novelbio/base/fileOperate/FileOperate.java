@@ -210,7 +210,7 @@ public class FileOperate {
 	}
 	
 	/** 返回日期格式的最后修改时间 */
-	public static String getLastModifyTimeStr(String fileName) {
+	public static String getTimeLastModifyStr(String fileName) {
         File f = getFile(fileName);
         Calendar cal = Calendar.getInstance();  
         long time = f.lastModified();  
@@ -220,7 +220,7 @@ public class FileOperate {
         return data;
 	}
 	
-	public static long getLastModifyTime(String fileName) {
+	public static long getTimeLastModify(String fileName) {
         File f = getFile(fileName);
         return f.lastModified();
 	}

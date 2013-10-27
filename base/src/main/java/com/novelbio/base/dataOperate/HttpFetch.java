@@ -105,12 +105,17 @@ public class HttpFetch implements Closeable {
 	int methodType = HTTPTYPE_GET;
 	private Charset charset;
 	
+	/**
+	 * 不是单例，实际使用的时候get一次就可<br>
+	 * 实际使用的时候如果get多个实例，可能会耗尽连接池
+	 * @return
+	 */
 	public static HttpFetch getInstance() {
 		return new HttpFetch();
 	}
 	/** 返回共用一个连接池的webFetch
 	 * @param num 值必须大于等于1
-	 *  */
+	 */
 	public static ArrayList<HttpFetch> getInstanceLs(int num) {
 		ArrayList<HttpFetch> lsResult = new ArrayList<HttpFetch>();
 		HttpFetch webFetch = new HttpFetch();
