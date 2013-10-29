@@ -10,29 +10,32 @@ import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
 
 import com.novelbio.base.PathDetail;
+import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 
 public class HdfsBase {
-	public static String HEAD = "";
-	private static Configuration conf;
-	
+	public static String HEAD = "";	
 	static{
 		HEAD = PathDetail.getHdfsHeadPath();
-		conf = new Configuration();
-		conf.set("dfs.permissions", "false");
-	} 
-	
-	public static boolean isHdfs(String fileName){
-		if(fileName.toLowerCase().startsWith(PathDetail.getHdfsHeadSymbol())){
-			return true;
+		
+	}
+	static class HdfsBaseHolder {
+		static Configuration conf;
+		static {
+			conf = new Configuration();
+			conf.set("dfs.permissions", "false");
 		}
-		return false;
+	}
+	public static boolean isHdfs(String fileName){
+		String symbol = FileHadoop.getHdfsHeadSymbol();
+		fileName = fileName.toLowerCase();
+		return fileName.startsWith(symbol) ? true : false;
 	}
 	
 	public static FileSystem getFileSystem(){
 		FileSystem hdfs = null;
 		try {
-			hdfs = FileSystem.get(URI.create(HEAD), conf);
+			hdfs = FileSystem.get(URI.create(HEAD), HdfsBaseHolder.conf);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
