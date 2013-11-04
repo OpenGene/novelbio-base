@@ -104,28 +104,25 @@ public class ListCodAbsDu<T extends ListDetailAbs, K extends ListCodAbs<T>>  {
 	 * 返回左端的GffCod，覆盖成相应的GffCod类
 	 * @return
 	 */
-	public K getGffCodLeft()
-	{
+	public K getGffCodLeft() {
 		return gffCod1;
 	}
 	/**
 	 * 返回右端的GffCod，覆盖成相应的GffCod类
 	 * @return
 	 */
-	public K getGffCodRight()
-	{
+	public K getGffCodRight() {
 		return gffCod2;
 	}
 	/**
 	 * 返回两个坐标中间夹着的的GffDetail，覆盖成相应的GffDetail类
 	 * @return
 	 */
-	public ArrayList<T> getLsGffDetailMid()
-	{
+	public ArrayList<T> getLsGffDetailMid() {
 		return lsgffDetailsMid;
 	}
 	/**
-	 * 返回全部包含的gffDetail信息
+	 * 返回与这两个坐标点有交集的gffDetail信息
 	 * @return
 	 * 空的则返回一个size为0的list
 	 */
@@ -149,6 +146,56 @@ public class ListCodAbsDu<T extends ListDetailAbs, K extends ListCodAbs<T>>  {
 		List<T> lsResult = new ArrayList<T>(lsGffDetailAll);
 		return lsResult;
 	}
+	/**
+	 * 返回被这两个坐标点覆盖的gffDetail信息，并按照cis5to3排序
+	 * @return
+	 * 空的则返回一个size为0的list
+	 */
+	public List<T> getCoveredElement() {
+		int start = getGffCodLeft().getCoord();
+		int end = getGffCodRight().getCoord();
+		Set<T> lsGffDetailAll = new LinkedHashSet<T>();
+		if (getGffCodLeft() != null && getGffCodLeft().isInsideLoc()) {
+			if (isBeCovered(start, end, getGffCodLeft().gffDetailUp)) {
+				lsGffDetailAll.add(getGffCodLeft().gffDetailUp);
+			}
+			if (isBeCovered(start, end, getGffCodLeft().gffDetailThis)) {
+				lsGffDetailAll.add(getGffCodLeft().gffDetailThis);
+			}
+			if (isBeCovered(start, end, getGffCodLeft().gffDetailDown)) {
+				lsGffDetailAll.add(getGffCodLeft().gffDetailDown);
+			}
+		}
+		if (lsgffDetailsMid != null) {
+			for (T t : lsgffDetailsMid) {
+				lsGffDetailAll.add(t);
+			}
+		}
+		if (getGffCodRight() != null && getGffCodRight().isInsideLoc()) {
+			if (isBeCovered(start, end, getGffCodRight().gffDetailUp)) {
+				lsGffDetailAll.add(getGffCodRight().gffDetailUp);
+			}
+			if (isBeCovered(start, end, getGffCodRight().gffDetailThis)) {
+				lsGffDetailAll.add(getGffCodRight().gffDetailThis);
+			}
+			if (isBeCovered(start, end, getGffCodRight().gffDetailDown)) {
+				lsGffDetailAll.add(getGffCodRight().gffDetailDown);
+			}
+		}
+		List<T> lsResult = new ArrayList<T>(lsGffDetailAll);
+		return lsResult;
+	}
+	
+	private boolean isBeCovered(int start, int end, T element) {
+		if (element == null) {
+			return false;
+		}
+		if (element.getStartAbs() >= start && element.getEndAbs() <= end) {
+			return true;
+		}
+		return false;
+	}
+	
 	/**
 	 * 双坐标查找 输入相关的GffHash类，然后填充相关信息<br>
 	 */
