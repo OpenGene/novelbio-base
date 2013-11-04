@@ -385,7 +385,7 @@ public class FileHadoop extends File {
 	@Override
 	public boolean renameTo(File dest) {
 		try {
-			return fsHDFS.rename(dst, new Path(dest.getPath()));
+			return fsHDFS.rename(dst, new Path(convertToMaprPath(dest.getPath())));
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;
@@ -506,7 +506,14 @@ public class FileHadoop extends File {
 	public static String getHdfsHeadPath() {
 		return PathDetail.getHdfsHeadPath();
 	}
-	
+	public static String convertToMaprPath(String hdfsPath){
+		if (hdfsPath.length() < 6) {
+			
+		}else if (HdfsBase.isHdfs(hdfsPath) || HdfsBase.isHdfs(hdfsPath.substring(1, hdfsPath.length()-2))) {
+			hdfsPath = hdfsPath.replace(getHdfsHeadSymbol(), getHdfsHeadPath());
+		}
+		return hdfsPath;
+	}
 	/** 
 	* 把hdfs的路径转换成本地路径，前提是hdfs已经挂载至本地，并且是带有hdfs头的类型
 	*/
