@@ -620,7 +620,11 @@ public class ExcelOperate {
 		if (cellExcel != null) { // add this condition
 			switch (cellExcel.getCellType()) {
 			case Cell.CELL_TYPE_FORMULA:
-				result = getExcelNumeric(cellExcel.getNumericCellValue());
+				try {
+					result = getExcelNumeric(cellExcel.getNumericCellValue());
+				} catch (Exception e) {
+					result = cellExcel.getCellFormula();
+				}
 				break;
 			case Cell.CELL_TYPE_NUMERIC: // 如果单元格里的数据类型为数据
 				result = getExcelNumeric(cellExcel.getNumericCellValue());
@@ -650,7 +654,7 @@ public class ExcelOperate {
 		}
 		return value + "";
 	}
-
+ 
 	/**
 	 * 默认保存 单个数值写入单个excel文件,默认写入sheet1,写入其他sheet不改变exceloperate焦点
 	 * 设置写入行数，列数和内容，写入的内容默认为String 其中行数，列数，都为实际数目，不用减去1

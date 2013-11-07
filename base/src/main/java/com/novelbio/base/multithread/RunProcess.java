@@ -11,9 +11,10 @@ package com.novelbio.base.multithread;
  */
 public abstract class RunProcess<T> implements Runnable {
 	protected RunGetInfo runGetInfo;
-	
+	byte[] lock = new byte[0];
+
 	/** 是否要停止本线程 */
-	protected boolean flagStop = true;
+	protected volatile boolean flagStop = true;
 	protected boolean suspendFlag = false;
 	/** 是否正常结束 */
 	protected boolean flagFinish = false;
@@ -35,29 +36,28 @@ public abstract class RunProcess<T> implements Runnable {
 		if (runGetInfo != null) {
 			runGetInfo.threadResumed(this);
 		}
-		notify();
+		lock.notify();
 	}
 	/** 终止线程，需要在循环中添加<br>
 	 * if (!flagRun)<br>
 	*			break; */
-	public void threadStop() {
-		threadResume();
+	public synchronized void threadStop() {
 		flagStop = true;		
 		if (runGetInfo != null) {
 			runGetInfo.threadStop(this);
 		}
+		threadResume();
 	}
 	/**
 	 * 放在循环中，检查是否终止线程
 	 */
 	protected void suspendCheck() {
-		byte[] lock = new byte[0];
 		synchronized (lock) {
-			while (suspendFlag){
+			while (suspendFlag && !flagStop){
 				if (runGetInfo != null) {
 					runGetInfo.threadSuspended(this);
 				}
-				try {wait();} catch (InterruptedException e) {}
+				try {lock.wait();} catch (InterruptedException e) {}
 			}
 		}
 	}

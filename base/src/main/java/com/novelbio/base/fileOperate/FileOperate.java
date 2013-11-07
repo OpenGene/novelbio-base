@@ -425,7 +425,7 @@ public class FileOperate {
 		if (filename == null || filename.equals("*")) {
 			filename = ".*";
 		}
-		if (suffix.equals("*")) {
+		if (suffix == null || suffix.equals("*")) {
 			suffix = ".*";
 		}
 		// ================================================================//
@@ -436,14 +436,18 @@ public class FileOperate {
 		PatternOperate patSuffix = new PatternOperate(suffix, false);
 		String[] filenameraw = null;
 		File file = getFile(filePath);
+		if (filePath.equals("")) {
+			filePath = file.getAbsolutePath();
+			file = getFile(filePath);
+		}
 		if (!file.exists()) {// 没有文件，则返回空
 			return lsFilenames;
 		}
+		filePath = file.getAbsolutePath();
 		// 如果只是文件则返回文件名
 		if (!file.isDirectory()) { // 获取文件名与后缀名
-			String fileName = file.getName();
-			if (isNeedFile(patName, patSuffix, fileName, filename, suffix)) {
-				lsFilenames.add(fileName);
+			if (isNeedFile(patName, patSuffix, filePath, filename, suffix)) {
+				lsFilenames.add(filePath);
 				return lsFilenames;
 			}
 		}
