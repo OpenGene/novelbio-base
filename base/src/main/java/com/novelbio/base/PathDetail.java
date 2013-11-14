@@ -191,4 +191,12 @@ public class PathDetail {
 	public static String getTestTasksSavePath(){
 		return properties.getProperty("testTasksSavePath");
 	}
+	
+	/**
+	 * 得到项目附件存放文件夹的名称
+	 * @return
+	 */
+	public static String getProjectAttachFolderName() {
+		return properties.getProperty("projectAttachFolderName");
+	}
 }
