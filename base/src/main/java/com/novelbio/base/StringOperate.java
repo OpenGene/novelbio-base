@@ -62,6 +62,8 @@ public class StringOperate {
 	 */
 
 	public static float getSimilarityRatio(String str, String target) {
+		if(str == null || target == null)
+			return 0;
 		return 1 - (float) compare(str, target) / Math.max(str.length(), target.length());
 	}
 

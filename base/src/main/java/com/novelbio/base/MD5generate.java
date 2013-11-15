@@ -4,13 +4,25 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.validator.Field;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.log4j.Logger;
+import org.jboss.netty.handler.codec.base64.Base64Encoder;
+import org.springframework.jdbc.support.lob.LobCreator;
+import org.springframework.jdbc.support.lob.LobCreatorUtils;
+import org.springframework.jdbc.support.lob.LobHandler;
+import org.springframework.orm.hibernate3.HibernateAccessor;
+
+import com.novelbio.base.fileOperate.FileHadoop;
+import com.novelbio.base.fileOperate.FileOperate;
 
 /**
  * MD5的算法在RFC1321 中定义 在RFC 1321中，给出了Test suite用来检验你的实现是否正确： MD5 ("") =
@@ -98,8 +110,36 @@ public class MD5generate {
 		return bufferToHex(messageDigest.digest());  
 	}
 	
+	/**
+	 * 根据文件全路径得到指定最大流的1024*1024*5即为5M 值
+	 * @param fileName
+	 * @return
+	 * @throws IOException
+	 */
+	public static String getNBCFileMD5(String fileName) throws IOException {
+		InputStream in = FileOperate.getInputStream(fileName);
+		int maxSize = 1024*1024*5;//100;
+		int fileLength = 0;
+		if(in instanceof FSDataInputStream){
+			fileLength = (int) ((FSDataInputStream) in).getFileLength();
+		}else{
+			fileLength = in.available();
+		}
+		maxSize = (maxSize > fileLength ? fileLength : maxSize);
+		System.out.println(maxSize);
+		byte[] b = new byte[maxSize];
+		in.read(b);
+		in.close();
+		String str = Base64.encodeBase64String(b);
+		return getMD5String("data:;base64," + str);  
+	}
+	
 	public static String getMD5String(String s) {
-		return getMD5String(s.getBytes());  
+		try {
+			return getMD5String(s.getBytes("utf-8"));
+		} catch (UnsupportedEncodingException e) {
+			return getMD5(s.getBytes());
+		}
 	}  
    
 	public static String getMD5String(byte[] bytes) {  
