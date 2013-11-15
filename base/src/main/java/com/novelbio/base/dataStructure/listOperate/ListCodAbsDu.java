@@ -154,15 +154,17 @@ public class ListCodAbsDu<T extends ListDetailAbs, K extends ListCodAbs<T>>  {
 	public List<T> getCoveredElement() {
 		int start = getGffCodLeft().getCoord();
 		int end = getGffCodRight().getCoord();
+		int startAbs = Math.min(start, end);
+		int endAbs = Math.max(start, end);
 		Set<T> lsGffDetailAll = new LinkedHashSet<T>();
 		if (getGffCodLeft() != null && getGffCodLeft().isInsideLoc()) {
-			if (isBeCovered(start, end, getGffCodLeft().gffDetailUp)) {
+			if (isBeCovered(startAbs, endAbs, getGffCodLeft().gffDetailUp)) {
 				lsGffDetailAll.add(getGffCodLeft().gffDetailUp);
 			}
-			if (isBeCovered(start, end, getGffCodLeft().gffDetailThis)) {
+			if (isBeCovered(startAbs, endAbs, getGffCodLeft().gffDetailThis)) {
 				lsGffDetailAll.add(getGffCodLeft().gffDetailThis);
 			}
-			if (isBeCovered(start, end, getGffCodLeft().gffDetailDown)) {
+			if (isBeCovered(startAbs, endAbs, getGffCodLeft().gffDetailDown)) {
 				lsGffDetailAll.add(getGffCodLeft().gffDetailDown);
 			}
 		}
@@ -172,13 +174,13 @@ public class ListCodAbsDu<T extends ListDetailAbs, K extends ListCodAbs<T>>  {
 			}
 		}
 		if (getGffCodRight() != null && getGffCodRight().isInsideLoc()) {
-			if (isBeCovered(start, end, getGffCodRight().gffDetailUp)) {
+			if (isBeCovered(startAbs, endAbs, getGffCodRight().gffDetailUp)) {
 				lsGffDetailAll.add(getGffCodRight().gffDetailUp);
 			}
-			if (isBeCovered(start, end, getGffCodRight().gffDetailThis)) {
+			if (isBeCovered(startAbs, endAbs, getGffCodRight().gffDetailThis)) {
 				lsGffDetailAll.add(getGffCodRight().gffDetailThis);
 			}
-			if (isBeCovered(start, end, getGffCodRight().gffDetailDown)) {
+			if (isBeCovered(startAbs, endAbs, getGffCodRight().gffDetailDown)) {
 				lsGffDetailAll.add(getGffCodRight().gffDetailDown);
 			}
 		}
@@ -186,11 +188,11 @@ public class ListCodAbsDu<T extends ListDetailAbs, K extends ListCodAbs<T>>  {
 		return lsResult;
 	}
 	
-	private boolean isBeCovered(int start, int end, T element) {
+	private boolean isBeCovered(int startAbs, int endAbs, T element) {
 		if (element == null) {
 			return false;
 		}
-		if (element.getStartAbs() >= start && element.getEndAbs() <= end) {
+		if (element.getStartAbs() >= startAbs && element.getEndAbs() <= endAbs) {
 			return true;
 		}
 		return false;

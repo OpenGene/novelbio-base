@@ -27,6 +27,7 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 	/** List的方向 */
 	Boolean cis5to3 = null;
 	
+	/** 本list的名字，不需要转变为小写 */
 	public void setName(String listName) {
 		this.listName = listName;
 	}

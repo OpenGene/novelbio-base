@@ -51,7 +51,10 @@ public class DateUtil {
 	public static long getNowTimeLong() {
 		return new Date().getTime();
 	}
-	
+	public static String getNowTimeLongRandom() {
+	     Random random = new Random(System.currentTimeMillis());
+		return new Date().getTime() + "_" + random.nextInt();
+	}
 	public static String getNowTimeStr() {
 		return DateUtil.date2String(new Date(), DateUtil.PATTERN_DATETIME);
 	}
@@ -148,7 +151,7 @@ public class DateUtil {
 	 * @return
 	 */
 	public static String getDateAndRandom() {
-	     SimpleDateFormat formatDate= new SimpleDateFormat( "yyyy-MM-ddhhss");
+	     SimpleDateFormat formatDate= new SimpleDateFormat( "yyyy-MM-dd-hh-mm-ss");
 	     Date currentDate = new Date(); //得到当前系统时间
 	     String date = formatDate.format(currentDate); //将日期时间格式化
 	     Random random = new Random(System.currentTimeMillis());
