@@ -692,7 +692,7 @@ public class FileOperate {
 		String[] tempList = file.list();
 		File temp = null;
 		for (int i = 0; i < tempList.length; i++) {
-			temp = new File(path + tempList[i]);
+			temp = getFile(path + tempList[i]);
 			if (temp.isFile()) {
 				temp.delete();
 			}
