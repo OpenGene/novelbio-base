@@ -186,7 +186,22 @@ public class CmdOperate extends RunProcess<String> {
 		}
 		return lsErrorInfo;
 	}
-
+	/** 和{@link #getLsErrOut()}一样，只不过返回用\n分割的错误流信息
+	 * 没有则返回"";
+	 *  */
+	public String getErrOut() {
+		StringBuilder errInfo = new StringBuilder();
+		List<String> lsErr = getLsErrOut();
+		if (lsErr == null) {
+			return "";
+		}
+		for (String string : lsErr) {
+			errInfo.append(string);
+			errInfo.append('\n');
+		}
+		return errInfo.toString();
+	}
+	
 	public List<String> getLsStdOut() {
 		while (true) {
 			if (outputGobbler.isFinished()) {
