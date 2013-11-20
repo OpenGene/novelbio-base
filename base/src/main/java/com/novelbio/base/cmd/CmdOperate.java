@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -27,6 +28,7 @@ import com.novelbio.base.multithread.RunProcess;
  * @author zong0jie
  */
 public class CmdOperate extends RunProcess<String> {
+	static int lineNum = 500;//最多保存500行的输出信息
 	public static void main(String[] args) {
 		String cmd = "bwa aln -n 5 -o 1 -e 30 -t 2 -l 25 -O 10 /media/hdfs/nbCloud/public/nbcplatform/genome/mouse/mm10_GRCm38/index/bwa_Chr_Index/chrAll.fa /media/hdfs/nbCloud/public/test/DNASeqMap/test_filtered_1.fq.gz > /home/novelbio/桌面/zzzz3.fai";
 		CmdOperate cmdOperate = new CmdOperate(cmd);
@@ -66,9 +68,9 @@ public class CmdOperate extends RunProcess<String> {
 	int info = -1000;
 	long runTime = 0;
 	/** 标准输出的信息 */
-	List<String> lsOutInfo;
+	LinkedList<String> lsOutInfo;
 	/** 出错输出的信息 */
-	List<String> lsErrorInfo;
+	LinkedList<String> lsErrorInfo;
 	StreamGobbler errorGobbler;
 	StreamGobbler outputGobbler;
 	
@@ -165,15 +167,18 @@ public class CmdOperate extends RunProcess<String> {
 
 	/** 需要获得标准输出流，用getStdOut获得 */
 	public void setGetLsStdOut() {
-		lsOutInfo = new ArrayList<>();
+		lsOutInfo = new LinkedList<>();
 	}
 
 	/** 需要获得标准输出流，用getStdErr获得 */
 	public void setGetLsErrOut() {
-		lsErrorInfo = new ArrayList<>();
+		lsErrorInfo = new LinkedList<>();
 	}
 
-	/** 程序执行完后可以看错误输出 */
+	/** 程序执行完后可以看错误输出<br>
+	 * 仅返回最多{@link #lineNum}行的信息
+	 * 内部实现为linkedlist
+	 */
 	public List<String> getLsErrOut() {
 		while (true) {
 			if (errorGobbler.isFinished()) {
@@ -201,7 +206,10 @@ public class CmdOperate extends RunProcess<String> {
 		}
 		return errInfo.toString();
 	}
-	
+	/** 程序执行完后可以看标准输出<br>
+	 * 仅返回最多{@link #lineNum}行的信息
+	 * 内部实现为linkedlist
+	 */
 	public List<String> getLsStdOut() {
 		while (true) {
 			if (outputGobbler.isFinished()) {
@@ -274,6 +282,7 @@ public class CmdOperate extends RunProcess<String> {
 		outputGobbler = new StreamGobbler(process.getInputStream());
 		if (!getCmdInStdStream) {
 			if (saveFilePath != null) {
+				//标准输出流不能被关闭
 				TxtReadandWrite txtWrite = new TxtReadandWrite(saveFilePath, true);
 				outputGobbler.setOutputStream(txtWrite.getOutputStream());
 			} else if (lsOutInfo != null) {
@@ -300,7 +309,7 @@ public class CmdOperate extends RunProcess<String> {
 			doInBackgroundB();
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("cmd cannot executed correctly: " + realCmd);
+			logger.error("cmd cannot executed correctly: " + cmd);
 		}
 		runTime = dateTime.getEclipseTime();
 	}
@@ -381,7 +390,7 @@ class StreamGobbler extends Thread {
 	Logger logger = Logger.getLogger(StreamGobbler.class);
 	InputStream is;
 	OutputStream os;
-	List<String> lsInfo;
+	LinkedList<String> lsInfo;
 	boolean isFinished = false;
 	boolean getInputStream = false;
 	
@@ -400,7 +409,7 @@ class StreamGobbler extends Thread {
 	public void setGetInputStream(boolean getInputStream) {
 		this.getInputStream = getInputStream;
 	}
-	public void setLsInfo(List<String> lsInfo) {
+	public void setLsInfo(LinkedList<String> lsInfo) {
 		this.lsInfo = lsInfo;
 	}
 
@@ -431,9 +440,14 @@ class StreamGobbler extends Thread {
 			InputStreamReader isr = new InputStreamReader(inputStream);
 			BufferedReader br = new BufferedReader(isr);
 			String line = null;
+			int i = 0;
 			while ((line = br.readLine()) != null) {
 				if (lsInfo != null) {
 					lsInfo.add(line);
+					i++;
+					if (i > 500) {
+						lsInfo.poll();
+					}
 				}
 			}
 		} catch (IOException ioe) {
