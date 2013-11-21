@@ -35,4 +35,29 @@ public class FoldeCreate {
 		FileOperate.createFolders(pathFold);
 		return pathFold + prefix;
 	}
+	/**
+	 * 同{@link #createAndInFold(String, String)}，但是不创建文件夹
+	 * @param pathPrefix
+	 * @param foldName
+	 * @return
+	 */
+	public static String getInFold(String pathPrefix, String foldName) {
+		String lastParentFoldName = "";
+		String lastParentFoldPath = "";
+		String prefix = "";
+		if (pathPrefix.endsWith("\\")|| pathPrefix.endsWith("/")) {
+			lastParentFoldPath = pathPrefix;
+		} else {
+			lastParentFoldPath = FileOperate.getParentPathName(pathPrefix);
+			prefix = FileOperate.getFileName(pathPrefix);
+		}
+		lastParentFoldName = FileOperate.getFileName(lastParentFoldPath);
+
+		if (lastParentFoldName.contains(foldName)) {
+			return pathPrefix;
+		}
+		String pathFold = FileOperate.addSep(lastParentFoldPath) + foldName + FileOperate.getSepPath();
+		return pathFold + prefix;
+	}
+	
 }

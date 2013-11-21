@@ -48,11 +48,18 @@ public abstract class ListAbsSearch <E extends ListDetailAbs, T extends ListCodA
 	 * @return
 	 */
 	public K searchLocationDu(int cod1, int cod2) {
-		if (cod1 < 0 && cod2 < 0) {
-			return null;
+		if (cod1 < 0 && cod2 < 0) return null;
+		
+		int codStart = cod1;
+		int codEnd = cod2;
+		if (cis5to3 != null && !cis5to3) {
+			codStart = Math.max(cod1, cod2);
+			codEnd = Math.min(cod1, cod2);
 		}
-		T gffCod1 = searchLocation(cod1);
-		T gffCod2 = searchLocation(cod2);
+		
+
+		T gffCod1 = searchLocation(codStart);
+		T gffCod2 = searchLocation(codEnd);
 		if (gffCod1 == null) {
 			logger.error("error");
 		}
