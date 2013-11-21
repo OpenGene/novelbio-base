@@ -39,8 +39,21 @@ public class FileHadoop extends File {
 		this.fsHDFS = HdfsBase.getFileSystem();
 		hdfsFilePath = hdfsFilePath.replace(FileHadoop.getHdfsHeadSymbol(), FileHadoop.getHdfsHeadPath());
 		dst = new Path(hdfsFilePath);
-		if (fsHDFS.exists(dst)) {
-			fileStatus = fsHDFS.getFileStatus(dst);
+		
+	}
+	
+	/**
+	 * 初始化
+	 * @return
+	 */
+	private void init(){
+		try{
+			if(fileStatus != null)
+				return;
+			if (fsHDFS.exists(dst)) {
+				fileStatus = fsHDFS.getFileStatus(dst);
+			}
+		}catch(Exception e){
 		}
 	}
 	
@@ -137,6 +150,7 @@ public class FileHadoop extends File {
 	}
 	
 	public String getModificationTime(){
+		init();
 		return DateUtil.date2String(new Date(fileStatus.getModificationTime()), DateUtil.PATTERN_DATETIME);
 	}
 	
@@ -168,10 +182,14 @@ public class FileHadoop extends File {
 	 */
 	@Override
 	public boolean isDirectory() {
-		if (!exists()) {
-			return false; 
-		}
-		return fileStatus.isDir();
+		if(fileStatus == null){
+			try {
+				return fsHDFS.isDirectory(dst);
+			} catch (IOException e) {
+				return false;
+			}
+		}else
+			return fileStatus.isDir();
 	}
 	/**
 	 * 存不存在此文件
@@ -180,12 +198,15 @@ public class FileHadoop extends File {
 	
 	@Override
 	public boolean exists() {
-		try {
-			return fsHDFS.exists(dst);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return false;
+		if(fileStatus == null){
+			try {
+				return fsHDFS.exists(dst);
+			} catch (IOException e) {
+				return false;
+			}
+		}else
+			return true;
+		
 	}
 	
 	/**
@@ -194,19 +215,19 @@ public class FileHadoop extends File {
 	 */
 	@Override
 	public String[] list() {
-		FileStatus[] fileStatus;
+		FileStatus[] childrenFileStatus;
 		try {
-			fileStatus = fsHDFS.listStatus(dst);
+			childrenFileStatus = fsHDFS.listStatus(dst);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
 		}
 		String[] files = {};
-		if (fileStatus.length != 0) {
-			files = new String[fileStatus.length];
+		if (childrenFileStatus.length != 0) {
+			files = new String[childrenFileStatus.length];
 		}
-		for (int i = 0; i < fileStatus.length; i++) {
-			files[i] = fileStatus[i].getPath().getName();
+		for (int i = 0; i < childrenFileStatus.length; i++) {
+			files[i] = childrenFileStatus[i].getPath().getName();
 		}
 		return files;
 	}
@@ -218,6 +239,9 @@ public class FileHadoop extends File {
 	
 	@Override
 	public long length() {
+		init();
+		if(fileStatus == null)
+			return 0;
 		return fileStatus.getLen();
 	}
 
@@ -295,9 +319,10 @@ public class FileHadoop extends File {
 	@Override
 	public long lastModified() {
 		// TODO Auto-generated method stub
+		init();
 		try {
-			return fsHDFS.getFileStatus(dst).getModificationTime();
-		} catch (IOException e) {
+			return fileStatus.getModificationTime();
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return -1000;
@@ -338,7 +363,7 @@ public class FileHadoop extends File {
 		for (int i = 0; i < files.length; i++) {
 			FileHadoop fileHadoop = null;
 			try {
-				fileHadoop = new FileHadoop(files[i]);
+				fileHadoop = new FileHadoop(FileOperate.addSep(getPath()) + files[i]);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

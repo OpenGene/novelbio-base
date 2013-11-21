@@ -199,4 +199,12 @@ public class PathDetail {
 	public static String getProjectAttachFolderName() {
 		return properties.getProperty("projectAttachFolderName");
 	}
+	
+	/**
+	 * 取得nbcFile的开头形式
+	 * @return
+	 */
+	public static String getNBCFileHead() {
+		return properties.getProperty("nbcFileHead");
+	}
 }
