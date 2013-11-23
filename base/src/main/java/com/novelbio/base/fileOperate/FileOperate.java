@@ -1406,6 +1406,9 @@ public class FileOperate {
 	 * @return 删除成功返回 true，否则返回 false。
 	 */
 	public static boolean DeleteFileFolder(String sPath) {
+		if (sPath == null || sPath.trim().equals("")) {
+			return true;
+		}
 		boolean flag = false;
 		File file = getFile(sPath);
 		// 判断目录或文件是否存在
