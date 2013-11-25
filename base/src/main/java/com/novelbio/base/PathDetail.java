@@ -210,4 +210,19 @@ public class PathDetail {
 	public static String getNBCFileHead() {
 		return properties.getProperty("nbcFileHead");
 	}
+	
+	/**
+	 * 取得project的rawData的存放路径
+	 * @return
+	 */
+	public static String getRawDataFolderPath() {
+		return properties.getProperty("rawDataFolderPath");
+	}
+	/**
+	 * 取得task的rawData的存放文件名称
+	 * @return
+	 */
+	public static String getTaskRawDataFolderName() {
+		return properties.getProperty("taskRawDataFolderName");
+	}
 }
