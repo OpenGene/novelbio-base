@@ -232,7 +232,7 @@ public class FileOperate {
 	 * @return
 	 */
 	public static String getFileName(String fileName) {
-		File file = getFile(fileName);
+		File file = new File(fileName);
 		return file.getName();
 	}
 
