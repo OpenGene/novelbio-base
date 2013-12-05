@@ -16,6 +16,7 @@ import com.novelbio.base.PathDetail;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.fileOperate.FileHadoop;
+import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.base.multithread.RunProcess;
 
 /**
@@ -125,13 +126,29 @@ public class CmdOperate extends RunProcess<String> {
 		shPID = false;
 	}
 	
-	/** 返回执行的具体cmd命令 */
+	/** 返回执行的具体cmd命令，会将文件路径删除，仅给相对路径 */
 	public String getCmdExeStr() {
-		String cmd = "";
+		StringBuilder strBuilder = new StringBuilder();
 		for (String cmdTmp : realCmd) {
-			cmd += cmdTmp.replace(" ", "\\ ");
+			String[] subcmd = cmdTmp.split("=");
+			strBuilder.append(" ");
+			strBuilder.append(FileOperate.getFileName(subcmd[0]));
+			for (int i = 1; i < subcmd.length; i++) {
+				strBuilder.append("=");
+				strBuilder.append(FileOperate.getFileName(subcmd[i]));
+			}
 		}
-		return cmd;
+		return strBuilder.toString().trim();
+	}
+	
+	/** 返回执行的具体cmd命令，实际cmd命令 */
+	public String getCmdExeStrReal() {
+		StringBuilder strBuilder = new StringBuilder();
+		for (String cmdTmp : realCmd) {
+			strBuilder.append(" ");
+			strBuilder.append(cmdTmp.replace(" ", "\\ "));
+		}
+		return strBuilder.toString().trim();
 	}
 	
 	/** 是否获得cmd的输入流
@@ -298,10 +315,7 @@ public class CmdOperate extends RunProcess<String> {
 	@Override
 	protected void running() {
 		String cmd = "";
-		for (String cmd1 : realCmd) {
-			cmd += " " + cmd1.replace(" ", "\\ ");
-		}
-		logger.info("实际运行命令: " + cmd);
+		logger.info("实际运行命令: " + getCmdExeStr());
 		DateUtil dateTime = new DateUtil();
 		dateTime.setStartTime();
 		try {
