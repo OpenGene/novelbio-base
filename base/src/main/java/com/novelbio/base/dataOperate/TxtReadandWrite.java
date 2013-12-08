@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -43,7 +44,7 @@ public class TxtReadandWrite implements Closeable {
 	private static final Logger logger = Logger.getLogger(TxtReadandWrite.class);
 	
 	protected static enum PlatForm {
-		pc, hadoop
+		pc, hadoop, stream
 	}
 	
 	public static enum TXTtype{
@@ -79,10 +80,6 @@ public class TxtReadandWrite implements Closeable {
 	TxtWrite txtWrite;
 	
 	boolean read = true;
-	@Deprecated
-	public TxtReadandWrite(FileHadoop fileHadoop) {
-		this(fileHadoop, false);
-	}
 	
 	public TxtReadandWrite(String fileName) {
 		this(fileName, false);
@@ -90,10 +87,6 @@ public class TxtReadandWrite implements Closeable {
 	
 	public TxtReadandWrite(String fileName, boolean creatFile) {
 		this(fileName, creatFile, false);
-	}
-	@Deprecated
-	public TxtReadandWrite(FileHadoop fileHadoop, boolean creatFile) {
-		this(fileHadoop, creatFile, false);
 	}
 	
 	public TxtReadandWrite(String fileName, boolean writeFile, boolean append) {
@@ -107,17 +100,19 @@ public class TxtReadandWrite implements Closeable {
 			read = true;
 		}
 	}
-	@Deprecated
-	public TxtReadandWrite(FileHadoop fileHadoop, boolean writeFile, boolean append) {
-		if (writeFile) {
-			txtWrite = new TxtWrite(fileHadoop);
-			txtWrite.setAppend(append);
-			try { txtWrite.createFile(); } catch (Exception e) { e.printStackTrace(); }
-			read = false;
-		} else {
-			txtRead = new TxtRead(fileHadoop);
-			read = true;
-		}
+	
+	public TxtReadandWrite(OutputStream outputStream) {
+		txtWrite = new TxtWrite(outputStream);
+		read = false;
+	}
+	
+	public TxtReadandWrite(InputStream inputStream) {
+		txtRead = new TxtRead(inputStream);
+		read = false;
+	}
+	public TxtReadandWrite(InputStream inputStream, TXTtype txtTtype) {
+		txtRead = new TxtRead(inputStream, txtTtype);
+		read = false;
 	}
 
 	public String getFileName() {
@@ -420,9 +415,9 @@ public class TxtReadandWrite implements Closeable {
 	 *            ，要写入文件内容
 	 * @throws Exception
 	 */
-	public void flash() {
+	public void flush() {
 		if (txtWrite != null) {
-			txtWrite.flash();
+			txtWrite.flush();
 		}
 	}
 	
@@ -452,6 +447,15 @@ public class TxtReadandWrite implements Closeable {
 	 */
 	public void writefileln(String content) {
 		txtWrite.writefileln(content);
+	}
+	/**
+	 * 写入并换行，没有flush
+	 * @param content
+	 *            ，要写入文件内容
+	 * @throws Exception
+	 */
+	public void writefileln(String content, boolean flash) {
+		txtWrite.writefileln(content, flash);
 	}
 	/**
 	 * 写入一行数组并换行，用sep隔开
@@ -488,6 +492,9 @@ public class TxtReadandWrite implements Closeable {
 		for (List<String> list : lsls) {
 			txtWrite.writefileln(list);
 		}
+	}
+	public void writefile(byte[] content, boolean flush) {
+		txtWrite.writefile(content, flush);
 	}
 	/**
 	 * 写入并换行

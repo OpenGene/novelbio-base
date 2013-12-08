@@ -28,30 +28,6 @@ import com.novelbio.base.multithread.RunProcess;
  * @author zong0jie
  */
 public class CmdOperate extends RunProcess<String> {
-	static int lineNum = 500;//最多保存500行的输出信息
-	public static void main(String[] args) {
-		String cmd = "bwa aln -n 5 -o 1 -e 30 -t 2 -l 25 -O 10 /media/hdfs/nbCloud/public/nbcplatform/genome/mouse/mm10_GRCm38/index/bwa_Chr_Index3/chrAll.fa /media/hdfs/nbCloud/public/test/DNASeqMap/test_filtered_1.fq.gz > /home/novelbio/桌面/zzzz3.fai";
-		CmdOperate cmdOperate = new CmdOperate(cmd);
-		Thread thread = new Thread(cmdOperate);
-		thread.start();
-//		try {
-//			Thread.sleep(20000);
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-		while (cmdOperate.isRunning()) {
-			try {
-				Thread.sleep(10000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			System.out.println("还在运行");
-		}
-		//cmdOperate.threadStop();
-		System.out.println(cmdOperate.isFinishedNormal());
-	}
-
 	private static Logger logger = Logger.getLogger(CmdOperate.class);
 
 	/** 是否将pid加2，如果是写入文本然后sh执行，则需要加上2 */
@@ -79,6 +55,12 @@ public class CmdOperate extends RunProcess<String> {
 	/** 是否需要获取cmd的标准错误流 */
 	boolean getCmdInErrStream = false;
 	
+	
+	/** 如果选择用list来保存结果输出，最多保存500行的输出信息 */
+	int lineNumStd = 500;
+	/** 如果选择用list来保存错误输出，最多保存500行的输出信息 */
+	int lineNumErr = 500;//最多保存500行的输出信息
+
 	/**
 	 * 直接运行，不写入文本
 	 * @param cmd
@@ -109,12 +91,12 @@ public class CmdOperate extends RunProcess<String> {
 	public CmdOperate(String[] cmds) {
 		setRealCmd(cmds);
 	}
-
+	
 	public void setRealCmd(String[] cmds) {
 		for (int i = 0;i<cmds.length;i++) {
 			cmds[i] = FileHadoop.convertToLocalPath(cmds[i]);
 		}
-		if (cmds[cmds.length - 2].equals(">")) {
+		if (cmds.length > 2 && cmds[cmds.length - 2].equals(">")) {
 			this.saveFilePath = cmds[cmds.length - 1];
 			realCmd = new String[cmds.length - 2];
 			for (int i = 0; i < realCmd.length; i++) {
@@ -151,12 +133,19 @@ public class CmdOperate extends RunProcess<String> {
 		return strBuilder.toString().trim();
 	}
 	
-	/** 是否获得cmd的输入流
+	/** 是否获得cmd的标准输出流
 	 * <b>优先级高于cmd命令中的重定向</b>
 	 * @param getCmdInStdStream
 	 */
 	public void setGetCmdInStdStream(boolean getCmdInStdStream) {
 		this.getCmdInStdStream = getCmdInStdStream;
+	}
+	/** 是否获得cmd的错误输出流
+	 * <b>优先级高于cmd命令中的重定向</b>
+	 * @param getCmdInStdStream
+	 */
+	public void setGetCmdInErrStream(boolean getCmdInErrStream) {
+		this.getCmdInErrStream = getCmdInErrStream;
 	}
 	/**
 	 * 将cmd写入哪个文本，然后执行，如果初始化输入了cmdWriteInFileName, 就不需要这个了
@@ -181,16 +170,21 @@ public class CmdOperate extends RunProcess<String> {
 		realCmd = new String[] { "sh", cmd1SH };
 	}
 
-	/** 需要获得标准输出流，用getStdOut获得 */
+	/** 只有当{@link #setGetCmdInErrStream(boolean)} 为false时才有用 <br>
+	 * 用getStdOut获得标准输出的结果， */
 	public void setGetLsStdOut() {
 		lsOutInfo = new LinkedList<>();
 	}
 
-	/** 需要获得标准输出流，用getStdErr获得 */
+	/** 需要获得错误输出流，用getStdErr获得 */
 	public void setGetLsErrOut() {
 		lsErrorInfo = new LinkedList<>();
 	}
-
+	/** 需要获得错误输出流，用getStdErr获得 */
+	public void setGetLsErrOut(int lineNum) {
+		lsErrorInfo = new LinkedList<>();
+	}
+	
 	/** 程序执行完后可以看错误输出<br>
 	 * 仅返回最多{@link #lineNum}行的信息
 	 * 内部实现为linkedlist
@@ -241,7 +235,7 @@ public class CmdOperate extends RunProcess<String> {
 	
 	/** 获得命令行的标准输出流， <br>
 	 * 设定了{@link #setGetCmdInStdStream(boolean)} 才有用 */
-	public InputStream getStdStream() {
+	public InputStream getStreamStd() {
 		while (outputGobbler == null) {
 			try {
 				Thread.sleep(100);
@@ -251,7 +245,18 @@ public class CmdOperate extends RunProcess<String> {
 		}
 		return outputGobbler.getCmdOutStream();
 	}
-	
+	/** 获得命令行的标准输出流， <br>
+	 * 设定了{@link #setGetCmdInStdStream(boolean)} 才有用 */
+	public InputStream getStreamErr() {
+		while (errorGobbler == null) {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		return errorGobbler.getCmdOutStream();
+	}
 	/**
 	 * 直接运行cmd，可能会出错 返回两个arraylist-string 第一个是Info 第二个是error
 	 * 
@@ -281,11 +286,21 @@ public class CmdOperate extends RunProcess<String> {
 		}
 	}
 	
+	/** 必须等程序启动后才能获得
+	 * 得到 输入给cmd 的 output流，可以往里面写东西
+	 */
+	public OutputStream getInStream() {
+		while (process == null) {
+			try { Thread.sleep(1); } catch (InterruptedException e) { }
+		}
+		return process.getOutputStream();
+	}
+	
 	private void setErrorStream() {
 		errorGobbler = new StreamGobbler(process.getErrorStream());
 		if (!getCmdInErrStream) {
 			if (lsErrorInfo != null) {
-				errorGobbler.setLsInfo(lsErrorInfo);
+				errorGobbler.setLsInfo(lsErrorInfo, lineNumErr);
 			} else {
 				errorGobbler.setOutputStream(System.err);
 			}
@@ -302,7 +317,7 @@ public class CmdOperate extends RunProcess<String> {
 				TxtReadandWrite txtWrite = new TxtReadandWrite(saveFilePath, true);
 				outputGobbler.setOutputStream(txtWrite.getOutputStream());
 			} else if (lsOutInfo != null) {
-				outputGobbler.setLsInfo(lsOutInfo);
+				outputGobbler.setLsInfo(lsOutInfo, lineNumStd);
 			} else {
 				outputGobbler.setOutputStream(System.out);
 			}			
@@ -406,7 +421,7 @@ class StreamGobbler extends Thread {
 	LinkedList<String> lsInfo;
 	boolean isFinished = false;
 	boolean getInputStream = false;
-	
+	int lineNum = 500;
 	StreamGobbler(InputStream is) {
 		this.is = is;
 	}
@@ -422,10 +437,10 @@ class StreamGobbler extends Thread {
 	public void setGetInputStream(boolean getInputStream) {
 		this.getInputStream = getInputStream;
 	}
-	public void setLsInfo(LinkedList<String> lsInfo) {
+	public void setLsInfo(LinkedList<String> lsInfo, int linNum) {
 		this.lsInfo = lsInfo;
+		this.lineNum = linNum;
 	}
-
 	public boolean isFinished() {
 		return isFinished;
 	}
@@ -458,7 +473,7 @@ class StreamGobbler extends Thread {
 				if (lsInfo != null) {
 					lsInfo.add(line);
 					i++;
-					if (i > 500) {
+					if (i > lineNum) {
 						lsInfo.poll();
 					}
 				}

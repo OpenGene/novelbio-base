@@ -48,10 +48,12 @@ class TxtWrite implements Closeable {
 		this.txtfile = fileName;
 	}
 	
-	@Deprecated
-	public TxtWrite(FileHadoop fileHadoop) {
-		this.fileHadoop = fileHadoop;
-		platform = PlatForm.hadoop;
+	public TxtWrite(OutputStream outputStream) {
+		if (outputStream instanceof BufferedOutputStream) {
+			this.outputStream = (BufferedOutputStream)outputStream;
+		} else {
+			this.outputStream = new BufferedOutputStream(outputStream);
+		}
 	}
 	
 	public void setAppend(boolean append) {
@@ -116,10 +118,10 @@ class TxtWrite implements Closeable {
 	 *            ，要写入文件内容
 	 * @throws Exception
 	 */
-	public void flash() {
+	public void flush() {
 		try {
 			outputStream.flush();
-		} catch (Exception e) { }
+		} catch (Exception e) {e.printStackTrace(); }
 	}
 	
 	/**
@@ -130,7 +132,22 @@ class TxtWrite implements Closeable {
 	public void writefile(String content) {
 		writefile(content, true);
 	}
-	
+	/**
+	 * 写完自动flush
+	 * @param content 要写入文件内容
+	 * @throws Exception
+	 */
+	public void writefile(byte[] content, boolean flush) {
+		try {
+			outputStream.write(content);
+			if (flush) {
+				outputStream.flush();
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	/**
 	 * @param content
 	 *            ，要写入文件内容,并考虑是否刷新--也就是直接写入文件而不是进入缓存
@@ -157,6 +174,32 @@ class TxtWrite implements Closeable {
 	public void writefileln(String content) {
 		try {
 			outputStream.write((content + TxtReadandWrite.ENTER_LINUX).getBytes());
+		} catch (Exception e) { e.printStackTrace();}
+	}
+	/**
+	 * 写入并换行，没有flush
+	 * @param content
+	 *            ，要写入文件内容
+	 * @throws Exception
+	 */
+	public void writefileln(byte[] content) {
+		try {
+			outputStream.write(content);
+			outputStream.write((byte)'\n');
+		} catch (Exception e) { e.printStackTrace();}
+	}
+	/**
+	 * 写入并换行，没有flush
+	 * @param content
+	 *            ，要写入文件内容
+	 * @throws Exception
+	 */
+	public void writefileln(String content, boolean flash) {
+		try {
+			outputStream.write((content + TxtReadandWrite.ENTER_LINUX).getBytes());
+			if (flash) {
+				outputStream.flush();
+			}
 		} catch (Exception e) { }
 	}
 	/**

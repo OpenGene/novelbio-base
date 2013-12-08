@@ -41,6 +41,8 @@ class TxtRead implements Closeable {
 	String grepContent = "";
 	
 	PlatForm platform = PlatForm.pc;
+	TXTtype txTtype = null;
+	
 	
 	long filesize = 0;
 
@@ -49,11 +51,26 @@ class TxtRead implements Closeable {
 			platform = PlatForm.hadoop;
 		}
 		this.txtfile = fileName;
+		txTtype = TXTtype.getTxtType(fileName);
 	}
+	
+	public TxtRead(InputStream inputStream) {
+		this.inputStreamRaw = inputStream;
+		platform = PlatForm.stream;
+		txTtype = TXTtype.Txt;
+	}
+	
+	public TxtRead(InputStream inputStream, TXTtype txtTtype) {
+		this.inputStreamRaw = inputStream;
+		platform = PlatForm.stream;
+		txTtype = txtTtype;
+	}
+	
 	@Deprecated
 	public TxtRead(FileHadoop fileHadoop) {
 		this.platform = PlatForm.hadoop;
 		this.txtfile = fileHadoop.getAbsolutePath();
+		txTtype = TXTtype.getTxtType(fileHadoop.getName());
 	}
 	
 	public String getFileName() {
@@ -528,28 +545,32 @@ class TxtRead implements Closeable {
 			inputStream.close();
 			inputStream = null;
 		}
-		if (inputStreamRaw != null) {
-			inputStreamRaw.close();
-			inputStreamRaw = null;
+		if (platform != PlatForm.stream) {
+			if (inputStreamRaw != null) {
+				inputStreamRaw.close();
+				inputStreamRaw = null;
+			}
 		}
-		setInStreamExp();
+		
+		setInStreamExp(txTtype);
 	}
 	
-	private void setInStreamExp() throws IOException {
-		TXTtype txtType = null;
+	private void setInStreamExp(TXTtype txtType) throws IOException {
 		if (platform == PlatForm.pc) {
 			filesize = FileOperate.getFileSizeLong(txtfile);
 			inputStreamRaw = new FileInputStream(txtfile);
-			txtType = TXTtype.getTxtType(txtfile);
 		} else if (platform == PlatForm.hadoop) {
 			FileHadoop fileHadoop = new FileHadoop(txtfile);
 			filesize = fileHadoop.getFileSize();
 			inputStreamRaw = fileHadoop.getInputStream();
-			txtType = TXTtype.getTxtType(fileHadoop.getName());
 		}
 		
 		if (txtType == TXTtype.Txt) {
-			inputStream = new BufferedInputStream(inputStreamRaw, TxtReadandWrite.bufferLen);
+			if (inputStreamRaw instanceof BufferedInputStream) {
+				inputStream = (BufferedInputStream)inputStreamRaw;
+			} else {
+				inputStream = new BufferedInputStream(inputStreamRaw, TxtReadandWrite.bufferLen);
+			}			
 		} else if (txtType == TXTtype.Zip) {
 			ZipArchiveInputStream zipArchiveInputStream = new ZipArchiveInputStream(inputStreamRaw);
 			ArchiveEntry zipEntry = null;
