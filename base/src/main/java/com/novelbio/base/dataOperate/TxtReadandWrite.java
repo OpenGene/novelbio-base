@@ -72,7 +72,7 @@ public class TxtReadandWrite implements Closeable {
 	public final static String ENTER_LINUX = "\n";
 	public final static String ENTER_WINDOWS = "\r\n";
 	
-	static int bufferLen = 100000;
+	public static int bufferLen = 100000;
 
 	static String sep = "\t";
 
