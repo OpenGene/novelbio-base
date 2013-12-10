@@ -94,7 +94,16 @@ public class CmdOperate extends RunProcess<String> {
 	
 	public void setRealCmd(String[] cmds) {
 		for (int i = 0;i<cmds.length;i++) {
-			cmds[i] = FileHadoop.convertToLocalPath(cmds[i]);
+			String[] subcmd = cmds[i].split("=");
+			subcmd[0] = FileHadoop.convertToLocalPath(subcmd[0]);
+			for (int j = 1; j < subcmd.length; j++) {
+				subcmd[j] = FileHadoop.convertToLocalPath(subcmd[j]);
+			}
+			String result = subcmd[0];
+			for (int j = 1; j < subcmd.length; j++) {
+				result = result + "=" + subcmd[j];
+			}
+			cmds[i] = result;
 		}
 		if (cmds.length > 2 && cmds[cmds.length - 2].equals(">")) {
 			this.saveFilePath = cmds[cmds.length - 1];
