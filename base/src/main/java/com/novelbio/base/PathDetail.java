@@ -34,8 +34,6 @@ public class PathDetail {
 			System.setProperty("java.io.tmpdir", tmp);
 			setTmpDir(tmp);
 		}
-	
-
 	}
 	
 	/** 设定java的临时文件夹(本地) */
@@ -97,7 +95,13 @@ public class PathDetail {
 	}
 	
 	public static String getRworkspace() {
-		String rworkspace = getProjectPath() + "rscript"  + FileOperate.getSepPath();
+		String rworkspace = null;
+		String path = properties.getProperty("Rworkspace");
+		if (path != null && !path.equals("")) {
+			rworkspace = path + FileOperate.getSepPath();
+		} else {
+			rworkspace = getProjectPath() + "rscript"  + FileOperate.getSepPath();
+		}
 		FileOperate.createFolders(rworkspace);
 		return rworkspace;
 	}
