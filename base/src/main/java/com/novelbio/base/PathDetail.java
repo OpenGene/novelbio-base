@@ -156,14 +156,14 @@ public class PathDetail {
 	}
 	
 	/** 
-	 * 用{@link com.novelbio.base.fileOperate.FileHadoop#getHdfsHeadSymbol(path)}替换<br>
+	 * 用{@link com.novelbio.base.fileOperate.FileHadoop#addHdfsHeadSymbol(path)}替换<br>
 	 * 在输入的文件名前添加的HDFS的头<br>
 	 * <b>务必输入绝对路径，也就是要以"/"开头</b>
 	 * @param path
 	 * @return
 	 */
 	@Deprecated
-	public static String getHdfsHeadSymbol(String path) {
+	public static String addHdfsHeadSymbol(String path) {
 		return properties.getProperty("hdfsHeadSymbol") + path;
 	}
 	

@@ -39,7 +39,7 @@ public class MapRTest {
 		System.out.println(fileHadoop.getParent());
 		FileHadoop fileHadoop2 = new FileHadoop(fileHadoop.getParent());
 		
-		TxtReadandWrite txtRead = new TxtReadandWrite(PathDetail.getHdfsHeadSymbol("/test/fastq/798B_CGATGT_L004_R1_001.fastq.gz"));
+		TxtReadandWrite txtRead = new TxtReadandWrite(PathDetail.addHdfsHeadSymbol("/test/fastq/798B_CGATGT_L004_R1_001.fastq.gz"));
 		int i = 0;
 		for (String content : txtRead.readlines()) {
 			if (i > 10) {

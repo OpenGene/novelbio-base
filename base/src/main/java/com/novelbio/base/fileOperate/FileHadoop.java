@@ -62,7 +62,7 @@ public class FileHadoop extends File {
 			hdfsFilePath = hdfsFilePath.replace(FileHadoop.getHdfsHeadPath(), FileHadoop.getHdfsHeadSymbol());
 		}
 		if (!hdfsFilePath.startsWith(FileHadoop.getHdfsHeadSymbol())) {
-			hdfsFilePath = FileHadoop.getHdfsHeadSymbol(hdfsFilePath);
+			hdfsFilePath = FileHadoop.addHdfsHeadSymbol(hdfsFilePath);
 		}
 		return hdfsFilePath;
 	}
@@ -523,8 +523,8 @@ public class FileHadoop extends File {
 	 * @param path
 	 * @return
 	 */
-	public static String getHdfsHeadSymbol(String path) {
-		return PathDetail.getHdfsHeadSymbol(path);
+	public static String addHdfsHeadSymbol(String path) {
+		return PathDetail.addHdfsHeadSymbol(path);
 	}
 	
 	/** hadoop实际的hdfs前缀，末尾没有"/" */

@@ -1,8 +1,7 @@
-package net.sf.samtools;
+package net.sf.samtools.seekablestream;
 
 import java.io.IOException;
 
-import net.sf.samtools.seekablestream.SeekableStream;
 
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.log4j.Logger;
