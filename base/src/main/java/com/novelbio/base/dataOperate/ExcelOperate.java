@@ -49,6 +49,10 @@ public class ExcelOperate {
 	public ExcelOperate() {
 	}
 
+	CellStyle styleSingle = null;
+	CellStyle styleDouble = null;
+	CellStyle styleTitle = null;
+	
 	/**
 	 * 打开excel，没有就新建excel2003
 	 * 
@@ -249,11 +253,15 @@ public class ExcelOperate {
 		filename = filenameinput;
 		if (!excel2007) {
 			wb = new HSSFWorkbook();
+			
 			versionXls = EXCEL2003;
 		} else {
 			wb = new XSSFWorkbook();
 			versionXls = EXCEL2007;
 		}
+		styleSingle = wb.createCellStyle();
+		styleDouble =  wb.createCellStyle();
+		styleTitle =  wb.createCellStyle();
 		return true;
 	}
 
@@ -505,6 +513,15 @@ public class ExcelOperate {
 		return ReadLsExcel(sheetNum + 1, rowStartNum, columnStartNum, rowEndNum, columnEndNum);
 	}
 
+	/**
+	 * 指定sheet请
+	 * @param sheetNum
+	 * @return
+	 */
+	public ArrayList<String[]> readLsExcelSheet(int sheetNum) {
+		return ReadLsExcel( sheetNum, 1,  1,  -1, -1);
+	}
+		
 	/**
 	 * 读取指定块内容,返回arrayList,如果中间有空行，则一并读取<br/>
 	 * 指定工作表，起始的行数，列数，终止行数，列数<br/>
@@ -865,15 +882,13 @@ public class ExcelOperate {
 		cellNum--;// 将sheet和行列都还原为零状态
 		if (rowNum < 0)
 			return false;
-		CellStyle styleSingle = null;
-		CellStyle styleDouble = null;
-		CellStyle styleTitle = null;
+		
 		if (isNBCExcel) {
-			styleSingle = wb.createCellStyle();
+//			styleSingle = wb.createCellStyle();
 			setNBCCellStyle(IndexedColors.LIGHT_TURQUOISE.getIndex(),styleSingle);
-			styleDouble = wb.createCellStyle();
+//			styleDouble = wb.createCellStyle();
 			setNBCCellStyle(IndexedColors.WHITE.getIndex(),styleDouble);
-			styleTitle = wb.createCellStyle();
+//			styleTitle = wb.createCellStyle();
 			setNBCCellStyle(IndexedColors.AQUA.getIndex(),styleTitle);
 		}
 		try {
@@ -901,9 +916,9 @@ public class ExcelOperate {
 					if (isNBCExcel && writerow == rowNum) {
 						cell.setCellStyle(styleTitle);
 					}else if(isNBCExcel && i%2 == 0) {
-						cell.setCellStyle(styleSingle);
-					}else if (isNBCExcel) {
 						cell.setCellStyle(styleDouble);
+					}else if (isNBCExcel) {
+						cell.setCellStyle(styleSingle);
 					}
 				}
 				i++;
