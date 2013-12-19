@@ -29,8 +29,8 @@ import java.io.OutputStream;
 import java.util.zip.CRC32;
 import java.util.zip.Deflater;
 
-import net.sf.samtools.SeekableHDFSstream;
 import net.sf.samtools.seekablestream.SeekableFileStream;
+import net.sf.samtools.seekablestream.SeekableHDFSstream;
 import net.sf.samtools.seekablestream.SeekableStream;
 import net.sf.samtools.util.BinaryCodec;
 import net.sf.samtools.util.BlockCompressedStreamConstants;

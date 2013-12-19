@@ -26,7 +26,10 @@ public class HdfsBase {
 			conf.set("dfs.permissions", "false");
 		}
 	}
-	public static boolean isHdfs(String fileName){
+	public static boolean isHdfs(String fileName) {
+		if (fileName == null || fileName.equals("")) {
+			return false;
+		}
 		String symbol = FileHadoop.getHdfsHeadSymbol();
 		fileName = fileName.toLowerCase();
 		return fileName.startsWith(symbol) ? true : false;

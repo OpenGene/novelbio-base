@@ -15,6 +15,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 
+import net.sf.samtools.seekablestream.ISeekableStreamFactory;
+import net.sf.samtools.seekablestream.SeekableStream;
+import net.sf.samtools.seekablestream.SeekableStreamFactory;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
@@ -706,20 +710,9 @@ public class FileOperate {
 		return bea;
 	}
 	
-	public static InputStream getInputStream(String filePath){
-		try {
-			File file =  getFile(filePath);
-			InputStream in = null;
-			if (file instanceof FileHadoop) {
-				FileHadoop fileHadoop = (FileHadoop) file;
-				in = fileHadoop.getInputStream();
-			}else {
-				in = new FileInputStream(file);
-			}
-			return in;
-		}catch(Exception e){
-			return null;
-		}
+	public static SeekableStream getInputStream(String filePath) throws IOException{
+		ISeekableStreamFactory seekableStreamFactory = SeekableStreamFactory.getInstance();
+		return seekableStreamFactory.getStreamFor(filePath);
 	}
 	
 	public static OutputStream getOutputStream(String filePath,boolean cover){
@@ -1451,4 +1444,5 @@ public class FileOperate {
 		}
 		return path;
 	}
+
 }
