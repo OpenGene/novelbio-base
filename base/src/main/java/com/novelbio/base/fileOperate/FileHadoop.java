@@ -21,6 +21,7 @@ import org.apache.hadoop.fs.Path;
 import com.novelbio.base.PathDetail;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.HdfsBase;
+import com.novelbio.base.dataStructure.ArrayOperate;
 
 public class FileHadoop extends File {
 	private static final long serialVersionUID = 1L;
@@ -369,7 +370,10 @@ public class FileHadoop extends File {
 			}
 			lsFiles.add(fileHadoop);
 		}
-		return lsFiles.toArray(new File[lsFiles.size()-1]);
+		File[] children = ArrayOperate.converList2Array(lsFiles);
+		if(children == null)
+			return new File[]{};
+		return ArrayOperate.converList2Array(lsFiles);
 	}
 
 	@Override

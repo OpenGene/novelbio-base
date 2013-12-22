@@ -44,6 +44,8 @@ public class ArrayOperate {
 		return lsResult;
 	}
 	public static<T> T[] converList2Array(List<T> ls) {
+		if(ls.size() == 0)
+			return null;
 		@SuppressWarnings("unchecked")
 		T[]  result = (T[]) Array.newInstance(ls.get(0).getClass(),ls.size());
 		int index = 0;
