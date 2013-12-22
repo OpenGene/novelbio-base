@@ -48,6 +48,7 @@ public class ExcelTxtRead {
 		else {
 			TxtReadandWrite txtRead = new TxtReadandWrite(excelFile, false);
 			lsResultTmp = txtRead.ExcelRead(rowStart, rowEnd, columnID, -1);
+			txtRead.close();
 		}
 		ArrayList<String[]> lsResult = new ArrayList<String[]>();
 		for (String[] strings : lsResultTmp) {
