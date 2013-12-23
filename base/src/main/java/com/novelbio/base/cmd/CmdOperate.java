@@ -29,15 +29,16 @@ import com.novelbio.base.multithread.RunProcess;
  * @author zong0jie
  */
 public class CmdOperate extends RunProcess<String> {
-	private static Logger logger = Logger.getLogger(CmdOperate.class);
+	private static final Logger logger = Logger.getLogger(CmdOperate.class);
 
 	/** 是否将pid加2，如果是写入文本然后sh执行，则需要加上2 */
 	boolean shPID = false;
 
 	/** 进程 */
-	Process process = null;
+	Process process;
 	/** 待运行的命令 */
-	String[] realCmd = null;
+	String[] realCmd;
+	
 	/** 临时文件在文件夹 */
 	String scriptFold = "";
 	
@@ -154,6 +155,14 @@ public class CmdOperate extends RunProcess<String> {
 				strBuilder.append("=");
 				strBuilder.append(FileOperate.getFileName(subcmd[i]));
 			}
+		}
+		if (saveFilePath != null && !saveFilePath.equals("")) {
+			strBuilder.append(" > ");
+			strBuilder.append(FileOperate.getFileName(saveFilePath));
+		}
+		if (saveErrPath != null && !saveErrPath.equals("")) {
+			strBuilder.append(" 2> ");
+			strBuilder.append(FileOperate.getFileName(saveErrPath));
 		}
 		return strBuilder.toString().trim();
 	}
