@@ -134,7 +134,6 @@ public class MathComput {
 		for (int i = 0; i < colNum.size(); i++) {
 			lsColNum.add(colNum.get(i) - 1);
 		}
-		lsResult.add(lsIn.remove(0));
 		for (String[] strings : lsIn) {
 			mapAccID2Info.put(strings[colAccID].trim(), strings);
 		}

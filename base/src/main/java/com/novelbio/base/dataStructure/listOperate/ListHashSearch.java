@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 public abstract class ListHashSearch < T extends ListDetailAbs, E extends ListCodAbs<T>, K extends ListCodAbsDu<T, E>, M extends ListAbsSearch<T, E, K>> {
 	Logger logger = Logger.getLogger(ListHashSearch.class);
 	/**
+	 * <b>key为小写</b><br>
 	 * 哈希表LOC--LOC细节<br>
 	 * 用于快速将LOC编号对应到LOC的细节<br>
 	 * hash（LOCID）--GeneInforlist，其中LOCID代表具体的条目编号 <br>
@@ -26,12 +27,14 @@ public abstract class ListHashSearch < T extends ListDetailAbs, E extends ListCo
 	 */
 	protected LinkedHashMap<String,T> mapName2DetailAbs;
 	/**
+	 * <b>key为小写</b><br>
 	 * 哈希表LOC--在arraylist上的Num<br>
 	 * 用于快速将LOC编号对应到其对应的chr上的位置<br>
 	 */
 	protected LinkedHashMap<String,Integer> mapName2DetailNum;
 	
 	/**
+	 * <b>key为小写</b><br>
 	 * 这个是真正的查找用hash表<br>
 	 * 这个哈希表来存储
 	 * hash（ChrID）--ChrList--GeneInforList(GffDetail类)<br>
@@ -45,6 +48,7 @@ public abstract class ListHashSearch < T extends ListDetailAbs, E extends ListCo
 	/** 顺序存储ChrHash中的ID，这个就是ChrHash中实际存储的ID，如果两个Item是重叠的，就取其中的第一个 */
 	protected ArrayList<String> lsNameAll;
 	/**
+	 * <b>为小写</b><br>
 	 * 这个List顺序存储每个基因号或条目号，这个打算用于提取随机基因号，实际上是所有条目按顺序放入，但是不考虑转录本(UCSC)或是重复(Peak)
 	 * 这个ID与locHash一一对应，但是不能用它来确定某条目的前一个或后一个条目
 	 */
@@ -106,7 +110,7 @@ public abstract class ListHashSearch < T extends ListDetailAbs, E extends ListCo
 			lsNameNoRedundent = new ArrayList<String>();
 			for (M lsGff : mapChrID2ListGff.values()) {
 				for (T gff : lsGff) {
-					lsNameNoRedundent.add(gff.getNameSingle());
+					lsNameNoRedundent.add(gff.getNameSingle().toLowerCase());
 				}
 			}
 		}
