@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -28,18 +29,24 @@ import com.novelbio.base.multithread.RunProcess;
  * @author zong0jie
  */
 public class CmdOperate extends RunProcess<String> {
-	private static Logger logger = Logger.getLogger(CmdOperate.class);
+	private static final Logger logger = Logger.getLogger(CmdOperate.class);
 
 	/** 是否将pid加2，如果是写入文本然后sh执行，则需要加上2 */
 	boolean shPID = false;
 
 	/** 进程 */
-	Process process = null;
+	Process process;
 	/** 待运行的命令 */
-	String[] realCmd = null;
+	String[] realCmd;
+	
 	/** 临时文件在文件夹 */
 	String scriptFold = "";
-	String saveFilePath = null;
+	
+	/** 标准输出流保存的路径 */
+	String saveFilePath;
+	/** 标准错误流保存的路径 */
+	String saveErrPath;
+	
 	/** 结束标志，0表示正常退出 */
 	int info = -1000;
 	long runTime = 0;
@@ -67,7 +74,14 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	public CmdOperate(String cmd) {
 		String[] cmds = cmd.trim().split(" ");
-		setRealCmd(cmds);
+		List<String> lsCmd = new ArrayList<>();
+		for (String string : cmds) {
+			if (string.trim().equals("")) {
+				continue;
+			}
+			lsCmd.add(string);
+		}
+		setRealCmd(lsCmd);
 	}
 
 	/**
@@ -84,37 +98,50 @@ public class CmdOperate extends RunProcess<String> {
 	}
 
 	public CmdOperate(List<String> lsCmd) {
-		String[] cmds = lsCmd.toArray(new String[0]);
-		setRealCmd(cmds);
+		setRealCmd(lsCmd);
 	}
 
-	public CmdOperate(String[] cmds) {
-		setRealCmd(cmds);
+	private void setRealCmd(List<String> lsCmd) {
+		List<String> lsReal = new ArrayList<>();
+		boolean stdOut = false;
+		boolean errOut = false;
+		for (String tmpCmd : lsCmd) {
+			if (tmpCmd.equals(">")) {
+				stdOut = true;
+				continue;
+			} else if (tmpCmd.equals("2>")) {
+				errOut = true;
+				continue;
+			}
+			
+			if (stdOut) {
+				saveFilePath = tmpCmd;
+				stdOut = false;
+				continue;
+			} else if (errOut) {
+				saveErrPath = tmpCmd;
+				errOut = false;
+				continue;
+			}
+			
+			lsReal.add(convertToLocalCmd(tmpCmd));
+		}
+		this.realCmd = lsReal.toArray(new String[0]);
+		shPID = false;
 	}
 	
-	public void setRealCmd(String[] cmds) {
-		for (int i = 0;i<cmds.length;i++) {
-			String[] subcmd = cmds[i].split("=");
-			subcmd[0] = FileHadoop.convertToLocalPath(subcmd[0]);
-			for (int j = 1; j < subcmd.length; j++) {
-				subcmd[j] = FileHadoop.convertToLocalPath(subcmd[j]);
-			}
-			String result = subcmd[0];
-			for (int j = 1; j < subcmd.length; j++) {
-				result = result + "=" + subcmd[j];
-			}
-			cmds[i] = result;
+	/** 将cmd中的hdfs路径改为本地路径 */
+	private String convertToLocalCmd(String tmpCmd) {
+		String[] subcmd = tmpCmd.split("=");
+		subcmd[0] = FileHadoop.convertToLocalPath(subcmd[0]);
+		for (int i = 1; i < subcmd.length; i++) {
+			subcmd[i] = FileHadoop.convertToLocalPath(subcmd[i]);
 		}
-		if (cmds.length > 2 && cmds[cmds.length - 2].equals(">")) {
-			this.saveFilePath = cmds[cmds.length - 1];
-			realCmd = new String[cmds.length - 2];
-			for (int i = 0; i < realCmd.length; i++) {
-				realCmd[i] = cmds[i];
-			}
-		} else {
-			this.realCmd = cmds;
+		String result = subcmd[0];
+		for (int i = 1; i < subcmd.length; i++) {
+			result = result + "=" + subcmd[i];
 		}
-		shPID = false;
+		return result;
 	}
 	
 	/** 返回执行的具体cmd命令，会将文件路径删除，仅给相对路径 */
@@ -128,6 +155,14 @@ public class CmdOperate extends RunProcess<String> {
 				strBuilder.append("=");
 				strBuilder.append(FileOperate.getFileName(subcmd[i]));
 			}
+		}
+		if (saveFilePath != null && !saveFilePath.equals("")) {
+			strBuilder.append(" > ");
+			strBuilder.append(FileOperate.getFileName(saveFilePath));
+		}
+		if (saveErrPath != null && !saveErrPath.equals("")) {
+			strBuilder.append(" 2> ");
+			strBuilder.append(FileOperate.getFileName(saveErrPath));
 		}
 		return strBuilder.toString().trim();
 	}
@@ -161,7 +196,7 @@ public class CmdOperate extends RunProcess<String> {
 	 * 
 	 * @param cmd
 	 */
-	public void setCmdFile(String cmd, String cmdWriteInFileName) {
+	private void setCmdFile(String cmd, String cmdWriteInFileName) {
 		String newCmd = null;
 		for(String text : cmd.trim().split(" ")){
 			if (newCmd == null) {
@@ -254,8 +289,8 @@ public class CmdOperate extends RunProcess<String> {
 		}
 		return outputGobbler.getCmdOutStream();
 	}
-	/** 获得命令行的标准输出流， <br>
-	 * 设定了{@link #setGetCmdInStdStream(boolean)} 才有用 */
+	/** 获得命令行的错误输出流， <br>
+	 * 设定了{@link #setGetCmdInErrStream(boolean)} 才有用 */
 	public InputStream getStreamErr() {
 		while (errorGobbler == null) {
 			try {
@@ -293,6 +328,9 @@ public class CmdOperate extends RunProcess<String> {
 		if (!getCmdInStdStream && saveFilePath != null) {
 			outputGobbler.close();
 		}
+		if (!getCmdInErrStream && saveErrPath != null) {
+			errorGobbler.close();
+		}
 	}
 	
 	/** 必须等程序启动后才能获得
@@ -308,7 +346,11 @@ public class CmdOperate extends RunProcess<String> {
 	private void setErrorStream() {
 		errorGobbler = new StreamGobbler(process.getErrorStream());
 		if (!getCmdInErrStream) {
-			if (lsErrorInfo != null) {
+			if (saveErrPath != null) {
+				//标准输出流不能被关闭
+				TxtReadandWrite txtWrite = new TxtReadandWrite(saveErrPath, true);
+				errorGobbler.setOutputStream(txtWrite.getOutputStream());
+			} else if (lsErrorInfo != null) {
 				errorGobbler.setLsInfo(lsErrorInfo, lineNumErr);
 			} else {
 				errorGobbler.setOutputStream(System.err);
