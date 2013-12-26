@@ -89,6 +89,18 @@ public class PathDetail {
 		return fold;
 	}
 	
+	/**获取订单附件路径
+	 * 
+	 * @return
+	 */
+	public static String  getOrderAppendixPath() {
+		return FileHadoop.getHdfsHeadSymbol() + "/nbCloud/public/order/appendix/";
+	}
+	
+	/**
+	 * 获取当前合同的附件文件路径
+	 * @return
+	 */
 	public static String getHDFSTmpFold() {
 		String hdfsTmpPath = FileHadoop.getHdfsHeadSymbol() + "/nbCloud/public/contract/appendix/";
 		return hdfsTmpPath;
@@ -200,7 +212,7 @@ public class PathDetail {
 	}
 	
 	/**
-	 * 得到项目附件存放文件夹的名称
+	 * 得到项目附件存放文件夹的名称，有(/)
 	 * @return
 	 */
 	public static String getProjectAttachFolderName() {
