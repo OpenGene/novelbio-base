@@ -198,45 +198,7 @@ public class ExcelOperate {
 		}
 		wb = null;
 		sheet = null;
-		return initialExcel();
-	}
-
-	private boolean initialExcel() {
-		try {
-			return resetExcelExp();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
-
-	private boolean resetExcelExp() throws Exception {
-		if (versionXls != EXCEL2003 && versionXls != EXCEL2007)
-			return false;
-		
-		if (wb != null) return true;
-		
-		
-		InputStream fos;
-		
-		if (HdfsBase.isHdfs(filename)) {
-			FileHadoop f = new FileHadoop(filename);
-			fos = f.getInputStream();
-		}else {
-			File file = new File(filename);
-			fos = new FileInputStream(file);
-		}
-		if (!FileOperate.isFileExist(filename)) {
-			return false;
-		}
-		if (versionXls == EXCEL2003)
-			wb = new HSSFWorkbook(fos);
-		else if (versionXls == EXCEL2007)
-			wb = new XSSFWorkbook(fos);
-		sheet = wb.getSheetAt(0);
-		sheetNum = 0;
-		fos.close();
-		return true;
+		return initialExcel(false);
 	}
 
 	/**
@@ -252,18 +214,58 @@ public class ExcelOperate {
 	public boolean newExcelOpen(String filenameinput, boolean excel2007) {
 		filename = filenameinput;
 		if (!excel2007) {
-			wb = new HSSFWorkbook();
-			
 			versionXls = EXCEL2003;
 		} else {
-			wb = new XSSFWorkbook();
 			versionXls = EXCEL2007;
 		}
+		return initialExcel(true);
+	}
+	
+	private boolean initialExcel(boolean isNewFile) {
+		try {
+			return resetExcelExp(isNewFile);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	private boolean resetExcelExp(boolean isNewFile) throws Exception {
+		if (versionXls != EXCEL2003 && versionXls != EXCEL2007)
+			return false;
+		
+		if (wb != null) return true;
+		
+		if (isNewFile) {
+			if (versionXls == EXCEL2003)
+				wb = new HSSFWorkbook();
+			else if (versionXls == EXCEL2007)
+				wb = new XSSFWorkbook();
+		} else {
+			InputStream fos;
+			if (HdfsBase.isHdfs(filename)) {
+				FileHadoop f = new FileHadoop(filename);
+				fos = f.getInputStream();
+			}else {
+				File file = new File(filename);
+				fos = new FileInputStream(file);
+			}
+			if (versionXls == EXCEL2003)
+				wb = new HSSFWorkbook(fos);
+			else if (versionXls == EXCEL2007)
+				wb = new XSSFWorkbook(fos);
+			sheet = wb.getSheetAt(0);
+			fos.close();
+		}
+		
+		sheetNum = 0;
+	
 		styleSingle = wb.createCellStyle();
 		styleDouble =  wb.createCellStyle();
 		styleTitle =  wb.createCellStyle();
 		return true;
 	}
+
 
 	// ///////////////////////excel的各个属性，包括sheet数目，某sheet下的行数///////////////////////
 	/**
@@ -758,7 +760,6 @@ public class ExcelOperate {
 	 * @return
 	 */
 	private boolean WriteExcel(String sheetName, int sheetNum, int rowNum, int cellNum, String content) {
-		initialExcel();
 		if ((sheetNum <= -1 && sheetName == null) || rowNum < 0)
 			return false;
 
@@ -785,7 +786,6 @@ public class ExcelOperate {
 	 * @return
 	 */
 	private boolean WriteExcel(String sheetName, int sheetNum, int rowNum, int cellNum, List<String[]> content) {
-		initialExcel();
 		if ((sheetNum <= -1 && sheetName == null) || rowNum < 0)
 			return false;
 
@@ -954,7 +954,6 @@ public class ExcelOperate {
 	 *            true为写入某一行，设定false为写入某一列
 	 */
 	public boolean WriteExcel(boolean save, int sheetNum, int rowNum, int cellNum, String[] content, boolean raw) {
-		initialExcel();
 		sheetNum--;
 		rowNum--;
 		cellNum--;// 将sheet和行列都还原为零状态
@@ -1027,7 +1026,6 @@ public class ExcelOperate {
 	 *            true为写入某一行，设定false为写入某一列
 	 */
 	public boolean WriteExcel(boolean save, int sheetNum, int rowNum, int cellNum, List<String> content, boolean raw) {
-		initialExcel();
 		sheetNum--;
 		rowNum--;
 		cellNum--;// 将sheet和行列都还原为零状态
@@ -1099,7 +1097,6 @@ public class ExcelOperate {
 		sheetNum--;
 		if (sheetNum < -1)
 			return false;
-		initialExcel();
 		for (int i = 0; i < cellBGColorNBCs.length; i++) {
 			int rowNum = cellBGColorNBCs[i].getRowNum()-1;
 			int colNum = cellBGColorNBCs[i].getColNum()-1;
@@ -1152,7 +1149,6 @@ public class ExcelOperate {
 		sheetNum--;
 		if (sheetNum < -1)
 			return false;
-		initialExcel();
 		for (int j = 0; j < getRowCount(); j++) {
 			short nowColor = 0;
 			if(j == 0){
@@ -1225,7 +1221,6 @@ public class ExcelOperate {
 		sheetNum--;
 		if (sheetNum < -1)
 			return false;
-		initialExcel();
 		for (int j = 0; j < rowBGColorNBCs.length; j++) {
 			int rowNum = rowBGColorNBCs[j].getRowNum() - 1;
 			if (rowNum < 0)
@@ -1285,7 +1280,6 @@ public class ExcelOperate {
 		sheetNum--;
 		if (sheetNum < -1)
 			return false;
-		initialExcel();
 		for (int j = 0; j < colBGColorNBCs.length; j++) {
 			int colNum = colBGColorNBCs[j].getColNum() - 1;
 			if (colNum < 0)
