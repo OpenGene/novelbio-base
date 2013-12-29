@@ -937,7 +937,8 @@ public class FileOperate {
 	 * @param fileName
 	 *            原来文件的全名
 	 * @param append 要添加的后缀，譬如_1，_new，如果为null，则不添加
-	 * @param suffixOld 以前的后缀名，可以是txt，txt.gz，fq.gz等多个连在一起的名字，也可以实际上是bed.gz，但是只写bed
+	 * @param suffixOld 以前的后缀名，可以是txt，txt.gz，fq.gz等多个连在一起的名字，也可以实际上是bed.gz，但只写bed<br>
+	 * 如果可能存在不确定的后缀，可以用竖线隔开，如 fq|fastq
 	 * <b>无所谓大小写</b>
 	 * @param suffixNew 新的后缀全名， suffix == null则不改变后缀名，suffix = ""表示删除后缀
 	 * @return
@@ -946,11 +947,23 @@ public class FileOperate {
 		if (append == null) {
 			append = "";
 		}
-		if (!suffixOld.startsWith(".")) {
-			suffixOld = "." + suffixOld;
+		if (suffixOld == null) {
+			suffixOld = "";
 		}
-		
-		int endDot = fileName.toLowerCase().lastIndexOf(suffixOld.toLowerCase());
+		String[] suffixOlds = suffixOld.split("\\|");
+		for (int i = 0; i < suffixOlds.length; i++) {
+			if (!suffixOlds[i].startsWith(".")) {
+				suffixOlds[i] = "." + suffixOlds[i];
+			}
+		}
+		int endDot = -1;
+		for (String suf : suffixOlds) {
+			endDot = fileName.toLowerCase().lastIndexOf(suf.toLowerCase());
+			if (endDot >= 0) {
+				break;
+			}
+		}
+
 		suffixOld = fileName.substring(endDot, fileName.length());
 		
 		if (suffixNew == null) {
