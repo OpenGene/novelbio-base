@@ -6,11 +6,11 @@ import java.io.OutputStream;
 import java.lang.reflect.Field;
 
 /** 本地版的cmd进程 */
-public class ProcessCmd {
+public class ProcessCmd implements IntProcess {
 	Process process;
 	
 	/** 第一个执行 */
-	public void exec(String[] cmd) throws IOException {
+	public void exec(String[] cmd) throws Exception {
 		Runtime runtime = Runtime.getRuntime();
 		process = runtime.exec(cmd);
 	}
@@ -19,23 +19,33 @@ public class ProcessCmd {
 		return process.waitFor();
 	}
 	
-	public InputStream getErrorStream() {
+	public InputStream getStdErr() {
 		return process.getErrorStream();
 	}
 	
-	public InputStream getInputStream() {
+	public InputStream getStdOut() {
 		return process.getInputStream();
 	}
 	
-	public OutputStream getOutputStream() {
+	public OutputStream getStdIn() {
 		return process.getOutputStream();
 	}
 	
 	public boolean isCmdStarted() {
 		return process != null;
 	}
+
+	/** 关闭本线程 */
+	public void stopProcess() throws Exception {
+		int pid = getUnixPID();
+		if (pid > 0) {
+			Runtime.getRuntime().exec("kill -9 " + pid).waitFor();
+		//	process.destroy();// 无法杀死线程
+		//	process = null;
+		}
+	}
 	
-	public int getUnixPID() throws Exception {
+	private int getUnixPID() throws Exception {
 		// System.out.println(process.getClass().getName());
 		if (process.getClass().getName().equals("java.lang.UNIXProcess")) {
 			Class cl = process.getClass();
@@ -48,13 +58,4 @@ public class ProcessCmd {
 		}
 	}
 	
-	/** 关闭本线程 */
-	public void stopProcess() throws Exception {
-		int pid = getUnixPID();
-		if (pid > 0) {
-			Runtime.getRuntime().exec("kill -9 " + pid).waitFor();
-		//	process.destroy();// 无法杀死线程
-		//	process = null;
-		}
-	}
 }

@@ -35,7 +35,7 @@ public class CmdOperate extends RunProcess<String> {
 	boolean shPID = false;
 
 	/** 进程 */
-	Process process;
+	IntProcess process;
 	/** 待运行的命令 */
 	String[] realCmd;
 	
@@ -73,6 +73,7 @@ public class CmdOperate extends RunProcess<String> {
 	 * @param cmd
 	 */
 	public CmdOperate(String cmd) {
+		process = new ProcessCmd();
 		String[] cmds = cmd.trim().split(" ");
 		List<String> lsCmd = new ArrayList<>();
 		for (String string : cmds) {
@@ -94,13 +95,69 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	@Deprecated
 	public CmdOperate(String cmd, String cmdWriteInFileName) {
+		process = new ProcessCmd();
 		setCmdFile(cmd, cmdWriteInFileName);
 	}
 
 	public CmdOperate(List<String> lsCmd) {
+		process = new ProcessCmd();
 		setRealCmd(lsCmd);
 	}
-
+	
+	/**
+	 * 远程登录的方式运行cmd命令，<b>cmd命令运行完毕后会断开连接</b>
+	 * @param ip
+	 * @param usr
+	 * @param pwd
+	 * @param lsCmd
+	 */
+	public CmdOperate(String ip, String usr, String pwd, List<String> lsCmd) {
+		process = new ProcessRemote(ip, usr, pwd);
+		setRealCmd(lsCmd);
+	}
+	
+	/**
+	 * 远程登录的方式运行cmd命令，<b>cmd命令运行完毕后会断开连接</b>
+	 * @param ip
+	 * @param usr
+	 * @param pwd
+	 * @param keyInfo 私钥内容
+	 * @param lsCmd
+	 */
+	public CmdOperate(String ip, String usr, String pwd, String keyInfo, List<String> lsCmd) {
+		process = new ProcessRemote(ip, usr, pwd);
+		((ProcessRemote)process).setKey(keyInfo);
+		setRealCmd(lsCmd);
+	}
+	
+	/**
+	 * 远程登录的方式运行cmd命令，<b>cmd命令运行完毕后会断开连接</b>
+	 * @param ip
+	 * @param usr
+	 * @param pwd
+	 * @param keyInfo 私钥内容
+	 * @param lsCmd
+	 */
+	public CmdOperate(String ip, String usr, String pwd, char[] keyInfo, List<String> lsCmd) {
+		process = new ProcessRemote(ip, usr, pwd);
+		((ProcessRemote)process).setKey(keyInfo);
+		setRealCmd(lsCmd);
+	}
+	
+	/**
+	 * 远程登录的方式运行cmd命令，<b>cmd命令运行完毕后会断开连接</b>
+	 * @param ip
+	 * @param usr
+	 * @param pwd
+	 * @param lsCmd
+	 * @param keyFile 私钥文件
+	 */
+	public CmdOperate(String ip, String usr, String pwd, List<String> lsCmd, String keyFile) {
+		process = new ProcessRemote(ip, usr, pwd);
+		((ProcessRemote)process).setKeyFile(keyFile);
+		setRealCmd(lsCmd);
+	}
+	
 	private void setRealCmd(List<String> lsCmd) {
 		List<String> lsReal = new ArrayList<>();
 		boolean stdOut = false;
@@ -311,9 +368,8 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	private void doInBackgroundB() throws Exception {
 		info = -1000;
-		Runtime runtime = Runtime.getRuntime();
-		process = runtime.exec(realCmd);
-		logger.info("process id : " + CmdOperate.getUnixPID(process));
+		process.exec(realCmd);
+//		logger.info("process id : " + CmdOperate.getUnixPID(process));
 
 		setErrorStream();
 		setStdStream();
@@ -336,15 +392,15 @@ public class CmdOperate extends RunProcess<String> {
 	/** 必须等程序启动后才能获得
 	 * 得到 输入给cmd 的 output流，可以往里面写东西
 	 */
-	public OutputStream getInStream() {
-		while (process == null) {
+	public OutputStream getStdin() {
+		while (!process.isCmdStarted()) {
 			try { Thread.sleep(1); } catch (InterruptedException e) { }
 		}
-		return process.getOutputStream();
+		return process.getStdIn();
 	}
 	
 	private void setErrorStream() {
-		errorGobbler = new StreamGobbler(process.getErrorStream());
+		errorGobbler = new StreamGobbler(process.getStdErr());
 		if (!getCmdInErrStream) {
 			if (saveErrPath != null) {
 				//标准输出流不能被关闭
@@ -361,7 +417,7 @@ public class CmdOperate extends RunProcess<String> {
 	}
 
 	private void setStdStream() {
-		outputGobbler = new StreamGobbler(process.getInputStream());
+		outputGobbler = new StreamGobbler(process.getStdOut());
 		if (!getCmdInStdStream) {
 			if (saveFilePath != null) {
 				//标准输出流不能被关闭
@@ -391,6 +447,9 @@ public class CmdOperate extends RunProcess<String> {
 			logger.error("cmd cannot executed correctly: " + cmd);
 		}
 		runTime = dateTime.getEclipseTime();
+		if (process instanceof ProcessRemote) {
+			((ProcessRemote)process).close();
+		}
 	}
 	
 	@Override
@@ -431,31 +490,12 @@ public class CmdOperate extends RunProcess<String> {
 
 	/** 终止线程，在循环中添加 */
 	public void threadStop() {
-		int pid = -10;
-		try {
-			pid = getUnixPID(process);
-			if (pid > 0) {
-				Runtime.getRuntime().exec("kill -9 " + pid).waitFor();
-			//	process.destroy();// 无法杀死线程
-			//	process = null;
+		if (process != null && process.isCmdStarted()) {
+			try {
+				process.stopProcess();
+			} catch (Exception e) {
+				logger.error("stop thread error:\n" + getCmdExeStr(), e);
 			}
-			info = 1000;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-	}
-
-	private static int getUnixPID(Process process) throws Exception {
-		// System.out.println(process.getClass().getName());
-		if (process.getClass().getName().equals("java.lang.UNIXProcess")) {
-			Class cl = process.getClass();
-			Field field = cl.getDeclaredField("pid");
-			field.setAccessible(true);
-			Object pidObject = field.get(process);
-			return (Integer) pidObject;
-		} else {
-			throw new IllegalArgumentException("Needs to be a UNIXProcess");
 		}
 	}
 

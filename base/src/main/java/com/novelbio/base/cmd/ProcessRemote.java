@@ -1,107 +1,141 @@
 package com.novelbio.base.cmd;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 
-public class ProcessRemote {
+import com.novelbio.base.dataOperate.TxtReadandWrite;
+import com.novelbio.base.fileOperate.FileOperate;
+
+import ch.ethz.ssh2.ChannelCondition;
+import ch.ethz.ssh2.Connection;
+import ch.ethz.ssh2.Session;
+
+public class ProcessRemote implements IntProcess {
 
 	private Connection conn;
+	Session session;
+	boolean isConnected = false;
 	/** 远程机器IP */
 	private String ip;
-	/** */
 	/** 用户名 */
 	private String usr;
-	/** */
 	/** 密码 */
 	private String psword;
-	private String charset = Charset.defaultCharset().toString();
-
-	private static final int TIME_OUT = 1000 * 5 * 60;
 	
-	public CmdRemoteOperate(String ip, String usr, String pwd) {
+	private char[] key;
+	
+	/** 0表示没有过时时间，一直等下去 */
+	private int timeOut = 0;
+	
+	public ProcessRemote(String ip, String usr, String pwd) {
 		this.ip = ip;
 		this.usr = usr;
 		this.psword = pwd;
 	}
-
+	
+	public void setKey(char[] key) {
+		this.key = key;
+	}
+	public void setKey(String keyInfo) {
+		this.key = keyInfo.toCharArray();
+	}
+	public void setKeyFile(String keyFile) {
+		StringBuilder stringBuilder = new StringBuilder();
+		TxtReadandWrite txtRead = new TxtReadandWrite(keyFile);
+		for (String content : txtRead.readlines()) {
+			stringBuilder.append(content);
+			stringBuilder.append(TxtReadandWrite.ENTER_LINUX);
+		}
+		txtRead.close();
+		key = stringBuilder.toString().toCharArray();
+	}
+	
 	/**
 	 * 登录
 	 * 
+	 * @param keyFile 公钥文件
 	 * @return
 	 * @throws IOException
 	 */
 	private boolean login() throws IOException {
+		if (isConnected) {
+			return true;
+		}
 		conn = new Connection(ip);
 		conn.connect();
-		return conn.authenticateWithPassword(usr, psword);
-	}
-
-	/**
-	 * 执行脚本
-	 * 
-	 * @param cmds
-	 * @return
-	 * @throws Exception
-	 */
-	public int exec(String cmds) throws Exception {
-		InputStream stdOut = null;
-		InputStream stdErr = null;
-		String outStr = "";
-		String outErr = "";
-		int ret = -1;
-		try {
-			if (login()) {
-				// Open a new {@link Session} on this connection
-				Session session = conn.openSession();
-				// Execute a command on the remote machine.
-				session.execCommand(cmds);
-
-				stdOut = new StreamGobbler(session.getStdout());
-				outStr = processStream(stdOut, charset);
-
-				stdErr = new StreamGobbler(session.getStderr());
-				outErr = processStream(stdErr, charset);
-
-				session.waitForCondition(ChannelCondition.EXIT_STATUS, TIME_OUT);
-
-				System.out.println("outStr=" + outStr);
-				System.out.println("outErr=" + outErr);
-
-				ret = session.getExitStatus();
-			} else {
-				throw new AppException("登录远程机器失败" + ip); // 自定义异常类 实现略
-			}
-		} finally {
-			if (conn != null) {
-				conn.close();
-			}
-			IOUtils.closeQuietly(stdOut);
-			IOUtils.closeQuietly(stdErr);
+		if (key != null) {
+			isConnected = conn.authenticateWithPublicKey(usr, key, psword);
+		} else {
+			isConnected = conn.authenticateWithPassword(usr, psword);
 		}
-		return ret;
+		return isConnected;
 	}
-
-	/** */
-	/**
-	 * @param in
-	 * @param charset
-	 * @return
-	 * @throws IOException
-	 * @throws UnsupportedEncodingException
-	 */
-	private String processStream(InputStream in, String charset) throws Exception {
-		byte[] buf = new byte[1024];
-		StringBuilder sb = new StringBuilder();
-		while (in.read(buf) != -1) {
-			sb.append(new String(buf, charset));
+	
+	/** 断开连接 */
+	public void close() {
+		if (session != null) {
+			session.close();
 		}
-		return sb.toString();
+		if (conn != null) {
+			conn.close();
+		}
+		isConnected = false;
 	}
 
-	public static void main(String args[]) throws Exception {
-		RmtShellExecutor exe = new RmtShellExecutor("***.**.**.***", "sshapp", "sshapp");
-		// 执行myTest.sh 参数为java Know dummy
-		System.out.println(exe.exec("sh /webapp/myshell/myTest.sh java Know dummy"));
-		// exe.exec("uname -a && date && uptime && who");
+	@Override
+	public void exec(String[] cmd) throws Exception {
+		session = null;
+		if (!login()) {
+			throw new Exception("connection error: cannot login");
+		}
+		StringBuilder stringBuilder = new StringBuilder();
+		for (String string : cmd) {
+			//考虑是否合适
+			if (string.startsWith("/") && string.contains(" ")) {
+				string = CmdOperate.addQuot(string);
+			}
+			stringBuilder.append(string);
+			stringBuilder.append(" ");
+		}
+		String cmdRun = stringBuilder.toString().trim();
+		
+		session = conn.openSession();
+		session.execCommand(cmdRun);
+	}
+
+	@Override
+	public int waitFor() throws InterruptedException {
+		session.waitForCondition(ChannelCondition.EXIT_STATUS, timeOut);
+		return session.getExitStatus();
+	}
+
+	@Override
+	public InputStream getStdErr() {
+		return session.getStderr();
+	}
+
+	@Override
+	public InputStream getStdOut() {
+		return session.getStdout();
+	}
+
+	@Override
+	public OutputStream getStdIn() {
+		return session.getStdin();
+	}
+
+	@Override
+	public boolean isCmdStarted() {
+		return session != null;
+	}
+
+	@Override
+	public void stopProcess() throws Exception {
+		session.close();
 	}
 
 
