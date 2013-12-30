@@ -52,7 +52,7 @@ public class ExcelOperate {
 	CellStyle styleSingle = null;
 	CellStyle styleDouble = null;
 	CellStyle styleTitle = null;
-	
+	CellStyle nostyle = null;
 	/**
 	 * 打开excel，没有就新建excel2003
 	 * 
@@ -263,6 +263,7 @@ public class ExcelOperate {
 		styleSingle = wb.createCellStyle();
 		styleDouble =  wb.createCellStyle();
 		styleTitle =  wb.createCellStyle();
+		nostyle = wb.createCellStyle();
 		return true;
 	}
 
@@ -730,6 +731,22 @@ public class ExcelOperate {
 	}
 
 	/**
+	 * 从第一行，第一列开始写
+	 */
+	public boolean writeExcel(int sheetNum,List<String[]> content){
+		return WriteExcel(sheetNum, 1, 1, content);
+	}
+	
+	
+	/**
+	 * 从第一个sheet，第一行，第一列开始写
+	 */
+	public boolean writeExcel(List<String[]> content){
+		return WriteExcel(1, 1, 1, content);
+	}
+	
+	
+	/**
 	 * 块文件写入excel文件
 	 * 设置写入的sheet数，行数，列数和内容，写入的内容默认为List<String[]>,其中String[]为行，list.get(i)为列
 	 * String[]中的null会自动跳过 其中sheet数，行数，列数，都为实际数目，不用减去1
@@ -890,7 +907,10 @@ public class ExcelOperate {
 			setNBCCellStyle(IndexedColors.WHITE.getIndex(),styleDouble);
 //			styleTitle = wb.createCellStyle();
 			setNBCCellStyle(IndexedColors.AQUA.getIndex(),styleTitle);
+		}else {
+			setCellNoStyle(IndexedColors.GREEN.getIndex(),nostyle);
 		}
+		
 		try {
 			int i = 0;
 			for (String[] rowcontent : content) {
@@ -919,6 +939,8 @@ public class ExcelOperate {
 						cell.setCellStyle(styleDouble);
 					}else if (isNBCExcel) {
 						cell.setCellStyle(styleSingle);
+					}else {
+						cell.setCellStyle(nostyle);
 					}
 				}
 				i++;
@@ -941,6 +963,20 @@ public class ExcelOperate {
 		style.setRightBorderColor(IndexedColors.WHITE.getIndex());
 		style.setFillPattern(CellStyle.SOLID_FOREGROUND);
 	}
+	
+	private void setCellNoStyle(short color,CellStyle style) {
+		style.setFillForegroundColor(color);//设置前景色
+		style.setBorderBottom(CellStyle.NO_FILL);
+		style.setBorderLeft(CellStyle.NO_FILL);
+		style.setBorderRight(CellStyle.NO_FILL);
+		style.setBorderTop(CellStyle.NO_FILL);
+		style.setBottomBorderColor(CellStyle.NO_FILL);
+		style.setTopBorderColor(CellStyle.NO_FILL);
+		style.setLeftBorderColor(CellStyle.NO_FILL);
+		style.setRightBorderColor(CellStyle.NO_FILL);
+		style.setFillPattern(CellStyle.NO_FILL);
+	}
+	
 	/**
 	 * 条文件写入excel文件， 设置写入的sheet数，行数，列数和内容，写入的内容默认为String[],设定写入行/列
 	 * String[]中的null会自动跳过 其中sheet数，行数，列数，都为实际数目，不用减去1
@@ -957,6 +993,16 @@ public class ExcelOperate {
 		sheetNum--;
 		rowNum--;
 		cellNum--;// 将sheet和行列都还原为零状态
+		if (isNBCExcel) {
+//			styleSingle = wb.createCellStyle();
+			setNBCCellStyle(IndexedColors.LIGHT_TURQUOISE.getIndex(),styleSingle);
+//			styleDouble = wb.createCellStyle();
+			setNBCCellStyle(IndexedColors.WHITE.getIndex(),styleDouble);
+//			styleTitle = wb.createCellStyle();
+			setNBCCellStyle(IndexedColors.AQUA.getIndex(),styleTitle);
+		}else {
+			setCellNoStyle(IndexedColors.AUTOMATIC.getIndex(),nostyle);
+		}
 		int writeNumber = content.length;// 这个就是数组第一维的数量
 		if (sheetNum < -1 || rowNum < 0)
 			return false;
