@@ -46,7 +46,7 @@ extends ListAbs<M>
 		}
 		lsAllID = (E) lsAllListAbs.get(0).clone();
 		for (int i = 1; i < lsAllListAbs.size(); i++) {
-			lsAllID.addAll(lsAllListAbs.get(i));
+			lsAllID.addAll(lsAllListAbs.get(i).getLsElement());
 		}
 		lsAllID.sort();
 		combExon();

@@ -5,6 +5,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.index.Indexed;
 
 import com.novelbio.base.SepSign;
 import com.novelbio.base.dataStructure.Alignment;
@@ -21,19 +23,23 @@ import com.novelbio.base.dataStructure.Alignment;
  * 条目所在染色体编号 ChrID<br>
  * 条目方向 cis5to3
  * @author zong0jie
- *
  */
 public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetailAbs> {
 	/** 父树 */
+	@Transient
 	protected ListAbs<? extends ListDetailAbs> listAbs;
 	
 	/** 根据cis在起点的上游多少bp，在此范围内则认为在tss区域  */
+	@Transient
 	protected int upTss = 0;
 	/** 根据cis在起点的下游多少bp，在此范围内则认为在tss区域 */
+	@Transient
 	protected int downTss = 0;
 	/** 根据cis在终点的上游多少bp，在此范围内则认为在tes区域 */
+	@Transient
 	protected int upGeneEnd3UTR = 0;
 	/** 根据cis在终点的下游多少bp，在此范围内则认为在tes区域 */
+	@Transient
 	protected int downGeneEnd3UTR = 0;
 	/**
 	 * LOCID，<br>
@@ -45,21 +51,28 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 	 */
 	protected Set<String> setItemName = new LinkedHashSet<String>(); //loc name
 	/**  染色体编号，都小写 */
+	@Indexed(unique = false)
 	protected String parentName;
 	/** 转录方向，假设同一基因不管多少转录本都同一转录方向 */
 	protected Boolean cis5to3 = null;
 	/** 本区域内有多少条reads */
+	@Transient
 	int readsInElementNumber = 0;
 	
+	@Indexed(unique = false)
 	/** 本条目起点,起点位置总是小于终点，无视基因方向 */
-	protected int numberstart = ListCodAbs.LOC_ORIGINAL; // loc start number 
+	protected int numberstart = ListCodAbs.LOC_ORIGINAL; // loc start number
+	@Indexed(unique = false)
 	/** 本条目终点，终点位置总是大于起点，无视基因方向 */
 	protected int numberend = ListCodAbs.LOC_ORIGINAL; //loc end number
 	/** 本基因起点到上一个基因边界的距离 */
+	@Transient
 	protected int tss2UpGene = ListCodAbs.LOC_ORIGINAL;
 	/** 本基因终点到下一个基因边界的距离 */
+	@Transient
 	protected int tes2DownGene = ListCodAbs.LOC_ORIGINAL;
 	/** 该条目在List-GffDetail中的具体位置 */
+	@Indexed(unique = false)
 	protected int itemNum = ListCodAbs.LOC_ORIGINAL;
 	
 	public ListDetailAbs() {}
