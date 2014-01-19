@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 //import org.apache.ibatis.migration.commands.NewCommand;
 
+import org.simpleframework.xml.Transient;
+
 
 /**
  * 双坐标
@@ -15,16 +17,22 @@ import java.util.Set;
 public class ListCodAbsDu<T extends ListDetailAbs, K extends ListCodAbs<T>>  {
 	//这两个都会在具体的类中新建
 	/** peak与左端Item交集时，交集在左端Item中所占的比例 */
+	@Transient
 	protected double opLeftInItem = -1;
 	/** peak与左端Item交集时，交集在peak中所占的比例，如果本值为100，说明该peak在一个Item内  */
+	@Transient
 	protected double opLeftInCod = -1;
 	/**  peak与左端Item交集时，实际交集的bp数  */
+	@Transient
 	protected int opLeftBp = -1;
 	/**  peak与右端Item交集时，交集在左端Item中所占的比例 */
+	@Transient
 	protected double opRightInItem = -1;
 	/**  peak与右端Item交集时，交集在peak中所占的比例，如果本值为100，说明该peak在一个Item内  */
+	@Transient
 	protected double opRightInCod = -1;
 	/** peak与右端Item交集时，实际交集的bp数 */
+	@Transient
 	protected int opRightBp = -1;
 	
 	public ListCodAbsDu(ArrayList<T> lsgffDetail, K gffCod1, K gffCod2)

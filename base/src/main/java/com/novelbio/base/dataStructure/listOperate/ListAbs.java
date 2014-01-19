@@ -5,31 +5,59 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
 
 import org.apache.log4j.Logger;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.index.Indexed;
 /**
  * 考虑将其拆分成为三个不同的list，一个cis，一个trans，一个null
  * @author zong0jie
  *
  * @param <E>
  */
-public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements Cloneable {
+public class ListAbs <E extends ListDetailAbs> implements Cloneable, Iterable<E> {
 	private static final long serialVersionUID = -3356076601369239937L;
 	private static final Logger logger = Logger.getLogger(ListAbs.class);
 	/**保存某个坐标到所在的内含子/外显子起点的距离 */
+	@Transient
 	HashMap<Integer, Integer> hashLocExInStart;
 	/** 保存某个坐标到所在的内含子/外显子终点的距离 */
+	@Transient
 	HashMap<Integer, Integer> hashLocExInEnd;
 	/** 本条目的名字 */
+	@Indexed
 	protected String listName;
 	/** List的方向 */
 	Boolean cis5to3 = null;
 	
+	ArrayList<E> lsElement = new ArrayList<>();
+	
 	/** 本list的名字，不需要转变为小写 */
 	public void setName(String listName) {
 		this.listName = listName;
+	}
+	/** 具体的内容 */
+	public List<E> getLsElement() {
+		return lsElement;
+	}
+	public void trimToSize() {
+		lsElement.trimToSize();
+	}
+	public int size() {
+		return lsElement.size();
+	}
+	public E get(int index) {
+		return lsElement.get(index);
+	}
+	public int indexOf(Object o) {
+		return lsElement.indexOf(o);
+	}
+	public void clear() {
+		lsElement.clear();
 	}
 	public String getName() {
 		if (listName == null) {
@@ -126,26 +154,26 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 	/** 会将该element的parent设置为本list */
 	public boolean add(E element) {
 		element.setParentListAbs(this);
-		return super.add(element);
+		return lsElement.add(element);
 	}
 	public void add(int index, E element) {
 		element.setParentListAbs(this);
-		super.add(index, element);
+		lsElement.add(index, element);
 	}
 	public boolean addAll(Collection<? extends E> colElement) {
 		for (E element : colElement) {
 			element.setParentListAbs(this);
 		}
-		return super.addAll(colElement);
+		return lsElement.addAll(colElement);
 	}
 	public boolean addAll(int index, Collection<? extends E> colElement) {
 		for (E element : colElement) {
 			element.setParentListAbs(this);
 		}
-		return super.addAll(index, colElement);
+		return lsElement.addAll(index, colElement);
 	}
 	public E set(int index, E element) {
-		return super.set(index, element);
+		return lsElement.set(index, element);
 	}
 	/**
 	 * 输入的loc是否在Start的下游
@@ -294,7 +322,7 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 	 */
 	public int getListLen() {
 		int isoLen = 0;
-		for (E exons : this) {
+		for (E exons : lsElement) {
 			isoLen = isoLen + exons.getLength();
 		}
 		return isoLen;
@@ -323,7 +351,7 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 	 */
 	public LinkedHashMap<String, E> getMapName2DetailAbs() {
 		LinkedHashMap<String, E> mapName2DetailAbs = new LinkedHashMap<String, E>();
-		for (E ele : this) {
+		for (E ele : lsElement) {
 			ArrayList<String> ss = ele.getName();
 			for (String string : ss) {
 				mapName2DetailAbs.put(string.toLowerCase(), ele);
@@ -364,7 +392,7 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 	 */
 	public ArrayList<String> getLsNameAll() {
 		ArrayList<String> lsLocID = new ArrayList<String>();
-		for (E ele : this) {
+		for (E ele : lsElement) {
 			lsLocID.addAll(ele.getName());
 		}
 		return lsLocID;
@@ -381,13 +409,13 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 	 */
 	protected CoordLocationInfo LocPosition( int Coordinate) {
 		if (cis5to3 == null) {
-			return BinarySearch.LocPositionAbs(this, Coordinate);
+			return BinarySearch.LocPositionAbs(lsElement, Coordinate);
 		}
 		else if (cis5to3) {
-			return BinarySearch.LocPositionCis(this, Coordinate);
+			return BinarySearch.LocPositionCis(lsElement, Coordinate);
 		}
 		else {
-			return BinarySearch.LocPositionTran(this, Coordinate);
+			return BinarySearch.LocPositionTran(lsElement, Coordinate);
 		}
 	}
 	
@@ -504,11 +532,11 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 	 */
 	public void sort() {
 		if (cis5to3 == null) {
-			Collections.sort(this, new CompS2MAbs());
+			Collections.sort(lsElement, new CompS2MAbs());
 		} else if (cis5to3) {
-			Collections.sort(this, new CompS2M());
+			Collections.sort(lsElement, new CompS2M());
 		} else {
-			Collections.sort(this, new CompM2S());
+			Collections.sort(lsElement, new CompM2S());
 		}
 	}
 	/**
@@ -517,15 +545,17 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 	@SuppressWarnings("unchecked")
 	public ListAbs<E> clone() {
 		ListAbs<E> result = null;
-		result = (ListAbs<E>) super.clone();
+		try {
+			result = (ListAbs<E>) super.clone();
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		result.cis5to3 = cis5to3;
 		result.hashLocExInEnd = hashLocExInEnd;
 		result.hashLocExInStart = hashLocExInStart;
 		result.listName = listName;
-		result.clear();
-		for (E ele : this) {
-			result.add((E) ele.clone());
-		}
+		result.lsElement = new ArrayList<>(lsElement);
 		return result;
 	}
 	/**
@@ -567,7 +597,7 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 			if (cis5to3 != null && listAbs.isCis5to3() != cis5to3) {
 				continue;
 			}
-			lsAll.addAll(listAbs);
+			lsAll.addAll(listAbs.lsElement);
 		}
 		Collections.sort(lsAll);
 		return lsAll;
@@ -679,7 +709,36 @@ public class ListAbs <E extends ListDetailAbs> extends ArrayList<E>  implements 
 		}
 		return lsExonBounder;
 	}
+
+	public boolean isEmpty() {
+		return lsElement.isEmpty();
+	}
+
+	public boolean contains(Object o) {
+		// TODO Auto-generated method stub
+		return lsElement.contains(o);
+	}
+
+	@Override
+	public Iterator<E> iterator() {
+		// TODO Auto-generated method stub
+		return lsElement.iterator();
+	}
+
+	public boolean remove(Object o) {
+		// TODO Auto-generated method stub
+		return lsElement.remove(o);
+	}
 	
+	public E remove(int index) {
+		// TODO Auto-generated method stub
+		return lsElement.remove(index);
+	}
+
+	public int lastIndexOf(Object o) {
+		// TODO Auto-generated method stub
+		return lsElement.lastIndexOf(o);
+	}
 }
 /**
  * 内建的二分法查找类，专门用于ListAbs查找
@@ -697,7 +756,7 @@ class BinarySearch {
 	 * 不在为0
 	 * 为实际数目
 	 */
-	protected static CoordLocationInfo LocPositionCis(ArrayList<? extends ListDetailAbs> lsElement, int Coordinate) {
+	protected static CoordLocationInfo LocPositionCis(List<? extends ListDetailAbs> lsElement, int Coordinate) {
 		if (lsElement == null) {
 			return null;
 		}
@@ -760,7 +819,7 @@ class BinarySearch {
 	 * 不在为0
 	 * 为实际数目
 	 */
-	protected static CoordLocationInfo LocPositionTran(ArrayList<? extends ListDetailAbs> lsElement, int Coordinate) {
+	protected static CoordLocationInfo LocPositionTran(List<? extends ListDetailAbs> lsElement, int Coordinate) {
 		if (lsElement == null) {
 			return null;
 		}
@@ -819,7 +878,7 @@ class BinarySearch {
 	 * 不在为0
 	 * 为实际数目
 	 */
-	protected static CoordLocationInfo LocPositionAbs(ArrayList<? extends ListDetailAbs> lsElement, int Coordinate) {
+	protected static CoordLocationInfo LocPositionAbs(List<? extends ListDetailAbs> lsElement, int Coordinate) {
 		if (lsElement == null) {
 			return null;
 		}
