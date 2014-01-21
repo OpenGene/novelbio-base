@@ -2,7 +2,6 @@ package com.novelbio.base.dataOperate;
 
 import java.io.BufferedOutputStream;
 import java.io.Closeable;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -15,21 +14,16 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
 import org.apache.log4j.Logger;
 
-import com.novelbio.base.dataOperate.TxtReadandWrite.PlatForm;
 import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
-import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 
 class TxtWrite implements Closeable {
 	private static Logger logger = Logger.getLogger(TxtReadandWrite.class);
 		
 	String txtfile;
-	FileHadoop fileHadoop;
 	
 	BufferedOutputStream outputStream;
 	boolean append = true;
-	
-	PlatForm platform = PlatForm.pc;
 	
 	/**
 	 * 仅仅为了最后关闭zip用
@@ -37,14 +31,6 @@ class TxtWrite implements Closeable {
 	ArchiveOutputStream zipOutputStream;
 	
 	public TxtWrite(String fileName) {
-		if (HdfsBase.isHdfs(fileName)) {
-			try {
-				fileHadoop = new FileHadoop(fileName);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			platform = PlatForm.hadoop;
-		}
 		this.txtfile = fileName;
 	}
 	
@@ -85,17 +71,7 @@ class TxtWrite implements Closeable {
 	}
 	
 	protected void createFile() throws Exception {
-		OutputStream outputStreamRaw = null;
-		if (platform == PlatForm.pc) {
-			outputStreamRaw = new FileOutputStream(txtfile, append);
-		}
-		else if (platform == PlatForm.hadoop) {
-			if (append) {
-				outputStreamRaw = fileHadoop.getOutputStreamAppend();
-			} else {
-				outputStreamRaw = fileHadoop.getOutputStreamNew(true);
-			}
-		}
+		OutputStream outputStreamRaw = FileOperate.getOutputStream(txtfile, true);
 		TXTtype txtTtype = TXTtype.getTxtType(txtfile);
 
 		if (txtTtype == TXTtype.Txt) {

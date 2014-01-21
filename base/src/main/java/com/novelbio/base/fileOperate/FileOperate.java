@@ -59,12 +59,8 @@ public class FileOperate {
 		StringBuffer str = new StringBuffer("");
 		String st = "";
 		try {
-			InputStream fs = null;
-			if (HdfsBase.isHdfs(filePathAndName)) {
-				fs = HdfsBase.getFileSystem().open(new Path(filePathAndName));
-			}else {
-				fs = new FileInputStream(filePathAndName);
-			}
+			InputStream fs = getInputStream(filePathAndName);
+			
 			InputStreamReader isr;
 			if (encoding.equals("")) {
 				isr = new InputStreamReader(fs);
