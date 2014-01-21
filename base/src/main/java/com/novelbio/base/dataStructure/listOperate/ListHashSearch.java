@@ -399,7 +399,7 @@ public abstract class ListHashSearch < T extends ListDetailAbs, E extends ListCo
 //		}
 		lsGffDetailAll = new ArrayList<T>();
 		for (M lsGffDetailGenes : mapChrID2ListGff.values()) {
-			lsGffDetailAll.addAll(lsGffDetailGenes);
+			lsGffDetailAll.addAll(lsGffDetailGenes.getLsElement());
 		}
 		return lsGffDetailAll;
 	}

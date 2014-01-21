@@ -12,7 +12,7 @@ public class PageModel {
 	private int rows = 20;
 	/** 按什么属性排序 */
 	private String sort;
-	/** 排序方式 */
+	/** 排序方式 desc acs */
 	private String order = Sort.Direction.ASC.toString();
 	
 	public int getPage() {
@@ -33,23 +33,19 @@ public class PageModel {
 	public void setRows(int rows) {
 		this.rows = rows;
 	}
-	/** 按照什么属性排序，默认不排序 */
+	/** 按什么属性排序 */
 	public String getSort() {
 		return sort;
 	}
-	/**
-	 * 输入{@linkplain Sort.Direction#ASC}等
-	 * @param sort
-	 */
+	/** 按什么属性排序 */
 	public void setSort(String sort) {
 		this.sort = sort;
 	}
+	/** 排序方式 desc acs */
 	public String getOrder() {
 		return order;
 	}
-	/**
-	 * @param order sort.desc
-	 */
+	/** 排序方式 desc acs */
 	public void setOrder(String order) {
 		this.order = order;
 	}

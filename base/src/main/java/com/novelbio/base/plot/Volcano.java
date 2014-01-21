@@ -54,16 +54,16 @@ public class Volcano {
 	 */
 
 	public void test() {
-		List<List<String>> lsls = ExcelTxtRead.readLsExcelTxtls("/home/novelbio/桌面/test/DIFG56VSWT.txt", 1);
+		List<List<String>> lsls = ExcelTxtRead.readLsExcelTxtls("/home/novelbio/桌面/test/casevscontrol_EdegR.txt", 1);
 		Volcano volcano = new Volcano();
-		volcano.setMaxX(2);
-		volcano.setMinX(-2);
-		volcano.setMaxY(3.5);
+		volcano.setMaxX(15);
+		volcano.setMinX(-15);
+		volcano.setMaxY(30);
 		volcano.setLogFC2Pvalue(lsls, 1, 2);
 		volcano.setLogPvalueBorder(2);
-		volcano.setLogFCBorder(0.5);
+		volcano.setLogFCBorder(1);
 		PlotScatter plotScatter = volcano.drawVolimage("P-Value");
-		plotScatter.saveToFile("/home/novelbio/桌面/test/DIFG56VSWT.png", 1000, 1000);	
+		plotScatter.saveToFile("/home/novelbio/桌面/test/casevscontrol_EdegR.png", 2000, 2000);	
 	}
 
 	public void setLogFC2Pvalue(List<List<String>> lslsExcel, int colLogFC, int colPvalue) {

@@ -242,4 +242,12 @@ public class PathDetail {
 	public static String getTaskRawDataFolderName() {
 		return properties.getProperty("taskRawDataFolderName");
 	}
+	
+	/**
+	 * 取得项目临时文件保存目录
+	 * @return
+	 */
+	public static String getProjectTempSavePath() {
+		return properties.getProperty("projectTempFolderName");
+	}
 }
