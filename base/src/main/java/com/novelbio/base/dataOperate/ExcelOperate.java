@@ -104,18 +104,7 @@ public class ExcelOperate {
 		if (!FileOperate.isFileExist(filename))
 			return EXCEL_NO_FILE;
 		InputStream fos = null;
-		if (HdfsBase.isHdfs(filename)) {
-			FileHadoop f1 = new FileHadoop(filename);
-			fos = f1.getInputStream();
-		} else {
-			try {
-				File f = new File(filename);
-				fos = new FileInputStream(f);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-				return EXCEL_NO_FILE;
-			}
-		}
+		fos = FileOperate.getInputStream(filename);
 
 		if (isExcel2003(fos)) {
 			try {
@@ -124,19 +113,7 @@ public class ExcelOperate {
 			}
 			return EXCEL2003;
 		}
-		
-		if (HdfsBase.isHdfs(filename)) {
-			FileHadoop f1 = new FileHadoop(filename);
-			fos = f1.getInputStream();
-		} else {
-			try {
-				File f = new File(filename);
-				fos = new FileInputStream(f);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-				return EXCEL_NO_FILE;
-			}
-		}
+		fos = FileOperate.getInputStream(filename);
 		
 		if (isExcel2007(fos)) {
 			try {
@@ -243,13 +220,7 @@ public class ExcelOperate {
 				wb = new XSSFWorkbook();
 		} else {
 			InputStream fos;
-			if (HdfsBase.isHdfs(filename)) {
-				FileHadoop f = new FileHadoop(filename);
-				fos = f.getInputStream();
-			}else {
-				File file = new File(filename);
-				fos = new FileInputStream(file);
-			}
+			fos = FileOperate.getInputStream(filename);
 			if (versionXls == EXCEL2003)
 				wb = new HSSFWorkbook(fos);
 			else if (versionXls == EXCEL2007)
@@ -1338,15 +1309,8 @@ public class ExcelOperate {
 			return false;
 		OutputStream out = null;
 		try {
-			if (HdfsBase.isHdfs(filename)) {
-				FileHadoop fileHadoop = new FileHadoop(filename);
-				out = fileHadoop.getOutputStreamNew(true);
-				wb.write(out);
-				out.close();
-			} else {
-				out = new FileOutputStream(filename);
-				wb.write(out);
-			}
+			out = FileOperate.getOutputStream(filename, true);
+			wb.write(out);
 			out.close();
 			return true;
 		} catch (Exception e) {
@@ -1368,14 +1332,8 @@ public class ExcelOperate {
 	public boolean Save(String newfilename) {
 		OutputStream out = null;
 		try {
-			if (HdfsBase.isHdfs(newfilename)) {
-				FileHadoop fileHadoop = new FileHadoop(newfilename);
-				out = fileHadoop.getOutputStreamNew(true);
-				wb.write(out);
-			} else {
-				out = new FileOutputStream(newfilename);
-				wb.write(out);
-			}
+			out = FileOperate.getOutputStream(filename, true);
+			wb.write(out);
 			out.close();
 			return true;
 		} catch (Exception e) {

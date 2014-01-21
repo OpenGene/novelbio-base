@@ -35,6 +35,7 @@ import net.sf.samtools.util.RuntimeIOException;
 
 import com.novelbio.base.dataOperate.HdfsBase;
 import com.novelbio.base.fileOperate.FileHadoop;
+import com.novelbio.base.fileOperate.FileOperate;
 
 /**
  * Create a SAMFileWriter for writing SAM or BAM.
@@ -182,13 +183,7 @@ public class SAMFileWriterFactory {
     
     //新添加的方法
     private OutputStream getOutStream(String fileName) throws IOException {
-    	OutputStream outStream = null;
-    	if (HdfsBase.isHdfs(fileName)) {
-    		FileHadoop fileHadoop = new FileHadoop(fileName);
-			outStream = fileHadoop.getOutputStreamNew(true);
-		} else {
-			outStream = new FileOutputStream(new File(fileName));
-		}
+    	OutputStream outStream = FileOperate.getOutputStream(fileName, true);
     	return outStream;
     }
     

@@ -3,6 +3,7 @@ package com.novelbio.base.dataOperate;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.Closeable;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.zip.GZIPInputStream;
+
+import net.sf.samtools.seekablestream.SeekableStream;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
@@ -40,35 +43,28 @@ class TxtRead implements Closeable {
 	/** 抓取文件中特殊的信息 */
 	String grepContent = "";
 	
-	PlatForm platform = PlatForm.pc;
 	TXTtype txTtype = null;
 	
 	
 	long filesize = 0;
 
 	public TxtRead(String fileName) {
-		if (HdfsBase.isHdfs(fileName)) {
-			platform = PlatForm.hadoop;
-		}
 		this.txtfile = fileName;
 		txTtype = TXTtype.getTxtType(fileName);
 	}
 	
 	public TxtRead(InputStream inputStream) {
 		this.inputStreamRaw = inputStream;
-		platform = PlatForm.stream;
 		txTtype = TXTtype.Txt;
 	}
 	
 	public TxtRead(InputStream inputStream, TXTtype txtTtype) {
 		this.inputStreamRaw = inputStream;
-		platform = PlatForm.stream;
 		txTtype = txtTtype;
 	}
 	
 	@Deprecated
 	public TxtRead(FileHadoop fileHadoop) {
-		this.platform = PlatForm.hadoop;
 		this.txtfile = fileHadoop.getAbsolutePath();
 		txTtype = TXTtype.getTxtType(fileHadoop.getName());
 	}
@@ -537,34 +533,29 @@ class TxtRead implements Closeable {
 	 * @throws Exception
 	 */
 	private void initialReading() throws IOException {
-		if (bufread != null) {
-			bufread.close();
-			bufread = null;
-		}
-		if (inputStream != null) {
-			inputStream.close();
-			inputStream = null;
-		}
-		if (platform != PlatForm.stream) {
+		
+		try {
+			if (bufread != null) {
+				bufread.close();
+				bufread = null;
+			}
+			if (inputStream != null) {
+				inputStream.close();
+				inputStream = null;
+			}
 			if (inputStreamRaw != null) {
 				inputStreamRaw.close();
 				inputStreamRaw = null;
 			}
+		} catch (Exception e) {
 		}
 		
 		setInStreamExp(txTtype);
 	}
 	
 	private void setInStreamExp(TXTtype txtType) throws IOException {
-		if (platform == PlatForm.pc) {
-			filesize = FileOperate.getFileSizeLong(txtfile);
-			inputStreamRaw = new FileInputStream(txtfile);
-		} else if (platform == PlatForm.hadoop) {
-			FileHadoop fileHadoop = new FileHadoop(txtfile);
-			filesize = fileHadoop.getFileSize();
-			inputStreamRaw = fileHadoop.getInputStream();
-		}
-		
+		filesize = FileOperate.getFileSizeLong(txtfile);
+		inputStreamRaw = FileOperate.getInputStream(txtfile);
 		if (txtType == TXTtype.Txt) {
 			if (inputStreamRaw instanceof BufferedInputStream) {
 				inputStream = (BufferedInputStream)inputStreamRaw;
@@ -601,24 +592,12 @@ class TxtRead implements Closeable {
 	}
 	
 	public long getReadByte() {
-		if (platform == PlatForm.pc) {
-			FileInputStream fileInputStream = (FileInputStream)inputStreamRaw;
-			try {
-				return fileInputStream.getChannel().position();
-			} 
-			catch (IOException e) {
-				e.printStackTrace();
-			}
-		} else if (platform == PlatForm.hadoop) {
-			FSDataInputStream fileInputStream = (FSDataInputStream)inputStreamRaw;
-			try {
-				return fileInputStream.getPos();
-			} 
-			catch (IOException e) {
-				e.printStackTrace();
-			}
+		try {
+			SeekableStream seekableStream = (SeekableStream)inputStreamRaw;
+			return seekableStream.position();
+		} catch (Exception e) {
+			return -1;
 		}
-		return -1;
 	}
 	
 	/**

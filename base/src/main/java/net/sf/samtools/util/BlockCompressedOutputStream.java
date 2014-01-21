@@ -38,6 +38,7 @@ import net.sf.samtools.util.BlockCompressedInputStream.FileTermination;
 
 import com.novelbio.base.dataOperate.HdfsBase;
 import com.novelbio.base.fileOperate.FileHadoop;
+import com.novelbio.base.fileOperate.FileOperate;
 
 /**
  * Writer for a file that is a series of gzip blocks (BGZF format).  The caller just treats it as an
@@ -236,9 +237,15 @@ public class BlockCompressedOutputStream
         SeekableStream seekableStream = null;
         long fileLength = 0;
         if (HdfsBase.isHdfs(fileName)) {
-        	FileHadoop fileHadoop = new FileHadoop(fileName);
-			seekableStream = new SeekableHDFSstream(new FileHadoop(fileName));
-			fileLength = fileHadoop.length();
+        	if(FileOperate.isWindows()){
+        		File file = new File(FileHadoop.convertToLocalPath(fileName));
+    			seekableStream = new SeekableFileStream(file);
+    			fileLength = file.length();
+        	}else{
+        		FileHadoop fileHadoop = new FileHadoop(fileName);
+    			seekableStream = new SeekableHDFSstream(new FileHadoop(fileName));
+    			fileLength = fileHadoop.length();
+        	}
 		} else {
 			File file = new File(fileName);
 			seekableStream = new SeekableFileStream(file);

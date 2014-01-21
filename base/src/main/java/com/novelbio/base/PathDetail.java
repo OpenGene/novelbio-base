@@ -16,7 +16,8 @@ public class PathDetail {
 		initial();
 	}
 	private static void initial() {
-		InputStream in = PathDetail.class.getClassLoader().getResourceAsStream("config.properties");
+		String configPath = FileOperate.isWindows() ? "configWindows.properties" : "config.properties";
+		InputStream in = PathDetail.class.getClassLoader().getResourceAsStream(configPath);
 		properties = new Properties();
 		try {
 			properties.load(in);

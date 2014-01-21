@@ -29,6 +29,7 @@ import java.net.URL;
 
 import com.novelbio.base.dataOperate.HdfsBase;
 import com.novelbio.base.fileOperate.FileHadoop;
+import com.novelbio.base.fileOperate.FileOperate;
 
 /**
  * Singleton class for getting {@link SeekableStream}s from URL/paths
@@ -80,7 +81,9 @@ public class SeekableStreamFactory{
             } else if (path.startsWith("ftp:")) {
                 return new SeekableFTPStream(new URL(path));
             } else if (HdfsBase.isHdfs(path)) {
-                return new SeekableHDFSstream(new FileHadoop(path));
+                if(FileOperate.isWindows())
+                	return new SeekableFileStream(new File(FileHadoop.convertToLocalPath(path)));
+            	return new SeekableHDFSstream(new FileHadoop(path));
             } else {
             	return new SeekableFileStream(new File(path));
 			}

@@ -69,12 +69,7 @@ public class ImageUtils {
 		InputStream input = null;
 		BufferedImage bufferedImage = null;
 		try {
-			if (HdfsBase.isHdfs(fileName)) {
-				FileHadoop fileHadoop = new FileHadoop(fileName);
-				input = fileHadoop.getInputStream();
-			} else {
-				input = new FileInputStream(new File(fileName));
-			}
+			input = FileOperate.getInputStream(fileName);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -153,12 +148,7 @@ public class ImageUtils {
 		OutputStream out = null;
 		String outName = null;
 		try {
-			if (HdfsBase.isHdfs(outputFile)) {
-				FileHadoop fileHadoop = new FileHadoop(outputFile);
-				out = fileHadoop.getOutputStreamNew(true);
-			} else {
-				out = new FileOutputStream(new File(outputFile));
-			}
+			out = FileOperate.getOutputStream(outputFile,true);
 			// Handle jpg without transparency.
 			if (ext.toLowerCase().equals("jpg") || ext.toLowerCase().equals("jpeg")) {
 				try {

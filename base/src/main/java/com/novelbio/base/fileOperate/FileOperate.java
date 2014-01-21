@@ -32,7 +32,19 @@ import com.novelbio.base.dataStructure.PatternOperate;
 
 public class FileOperate {
 	private static Logger logger = Logger.getLogger(FileOperate.class);
-
+	
+	
+	/**
+	 * 是否是windows操作系统
+	 */
+	public static boolean isWindows(){
+		boolean isWindowsOS = false;
+	    String osName = System.getProperty("os.name");
+	    if(osName.toLowerCase().indexOf("windows")>-1){
+	      isWindowsOS = true;
+	    }
+	    return isWindowsOS;
+	}
 	/**
 	 * 读取文本文件内容
 	 * 
@@ -82,7 +94,12 @@ public class FileOperate {
 	 */
 	public static File getFile(String filePath){
 		File file = null;
-		if (HdfsBase.isHdfs(filePath)) {
+		if(isWindows()){
+			if(HdfsBase.isHdfs(filePath))
+				filePath = FileHadoop.convertToLocalPath(filePath);
+			file = new File(filePath);
+			System.out.println(file.getAbsolutePath());
+		}else if (HdfsBase.isHdfs(filePath)) {
 			try {
 				file = new FileHadoop(filePath);
 			} catch (IOException e) {
@@ -151,7 +168,8 @@ public class FileOperate {
 			return null;// TODO: handle exception
 		} finally{
 			try {
-				fs.close();
+				if(fs != null)
+					fs.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
