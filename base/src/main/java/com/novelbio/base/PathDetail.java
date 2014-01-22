@@ -12,6 +12,11 @@ import com.novelbio.base.fileOperate.FileOperate;
 
 public class PathDetail {
 	static Properties properties;
+	static String tmpConfFold;
+	static String rworkspace;
+	static String tmpPathRandom;
+	static String tmpPath;
+	static String rworkspaceTmp;
 	static {
 		initial();
 	}
@@ -30,15 +35,55 @@ public class PathDetail {
 				e.printStackTrace();
 			}
 		}
-		String tmp = getTmpPath();
-		if (FileOperate.isFileDirectory(tmp)) {
-			System.setProperty("java.io.tmpdir", tmp);
-			setTmpDir(tmp);
+		
+		//TmpPath
+		tmpPath = properties.getProperty("TMPpath");
+		if (FileOperate.createFolders(tmpPath)) {
+			File file = new File(tmpPath);
+			file.setReadable(true, false);
+			file.setWritable(true, false);
+			System.setProperty("java.io.tmpdir", tmpPath);
+		} else {
+			tmpPath = System.getProperty("java.io.tmpdir");
 		}
+		
+		//getTmpConfFold()
+		tmpConfFold = getProjectPath() + "ConfFold" + FileOperate.getSepPath();
+		if (!FileOperate.createFolders(tmpConfFold)) {
+			tmpConfFold = null;
+		}
+		
+		
+		//getRworkspace()
+		rworkspace = null;
+		String path = properties.getProperty("Rworkspace");
+		if (path != null && !path.equals("")) {
+			rworkspace = path + FileOperate.getSepPath();
+		} else {
+			rworkspace = getProjectPath() + "rscript"  + FileOperate.getSepPath();
+		}
+		if (!FileOperate.createFolders(rworkspace)) {
+			rworkspace = null;
+		}
+		
+		//tmpPathRandom
+		tmpPathRandom = FileOperate.addSep(getTmpPath()) + "tmp" + DateUtil.getDateAndRandom();
+		if (!FileOperate.createFolders(tmpPathRandom)) {
+			tmpPathRandom = null;
+		}
+		
+		rworkspaceTmp = getRworkspace() + "tmp"  + FileOperate.getSepPath();
+		if (!FileOperate.createFolders(rworkspaceTmp)) {
+			rworkspaceTmp = null;
+		}
+		
 	}
 	
 	/** 设定java的临时文件夹(本地) */
 	public static void setTmpDir(String filePath) {
+		if (filePath != null && filePath.equals(PathDetail.tmpPath)) {
+			return;
+		}
 		File f = new File(filePath);
         if (!f.exists()) f.mkdirs();
         f.setReadable(true, false);
@@ -83,11 +128,9 @@ public class PathDetail {
 		filePath = FileOperate.getParentPathName(filePath);
 		return FileOperate.addSep(filePath).replace("\\", "/");
 	}
-	/** 零时文件的文件夹，没有就创建一个(本地) */
+	/** 零时文件的文件夹 */
 	public static String getTmpConfFold() {
-		String fold = getProjectPath() + "ConfFold" + FileOperate.getSepPath();
-		FileOperate.createFolders(fold);
-		return fold;
+		return tmpConfFold;
 	}
 	
 	/**获取订单附件路径
@@ -108,26 +151,15 @@ public class PathDetail {
 	}
 	
 	public static String getRworkspace() {
-		String rworkspace = null;
-		String path = properties.getProperty("Rworkspace");
-		if (path != null && !path.equals("")) {
-			rworkspace = path + FileOperate.getSepPath();
-		} else {
-			rworkspace = getProjectPath() + "rscript"  + FileOperate.getSepPath();
-		}
-		FileOperate.createFolders(rworkspace);
 		return rworkspace;
 	}
 	
 	/** 
 	 * 文件最后带"/"<br>
-	 * 如果没有该文件夹就会自动创建一个
 	 * @return
 	 */
 	public static String getRworkspaceTmp() {
-		String file = getRworkspace() + "tmp"  + FileOperate.getSepPath();
-		FileOperate.createFolders(file);
-		return file;
+		return rworkspaceTmp;
 	}
 	/** 内部自动加空格 */
 	public static String getRscriptWithSpace() {
@@ -141,14 +173,10 @@ public class PathDetail {
 	}
 	/** 一个大的能容纳一些中间过程的文件夹 */
 	public static String getTmpPath() {
-		String tmpPath = properties.getProperty("TMPpath");
-		FileOperate.createFolders(tmpPath);
 		return tmpPath;
 	}
 	/** 在tmp文件夹下新建一个随机文件名的临时文件夹 */
 	public static String getTmpPathRandom() {
-		String tmpPathRandom = FileOperate.addSep(getTmpPath()) + "tmp" + DateUtil.getDateAndRandom();
-		FileOperate.createFolders(tmpPathRandom);
 		return tmpPathRandom;
 	}
 	
