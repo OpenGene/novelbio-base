@@ -94,7 +94,6 @@ public class FileOperate {
 			if(HdfsBase.isHdfs(filePath))
 				filePath = FileHadoop.convertToLocalPath(filePath);
 			file = new File(filePath);
-			System.out.println(file.getAbsolutePath());
 		}else if (HdfsBase.isHdfs(filePath)) {
 			try {
 				file = new FileHadoop(filePath);

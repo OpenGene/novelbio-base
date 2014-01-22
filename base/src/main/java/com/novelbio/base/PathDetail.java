@@ -250,4 +250,12 @@ public class PathDetail {
 	public static String getProjectTempSavePath() {
 		return properties.getProperty("projectTempFolderName");
 	}
+	
+	/**
+	 * 取得报告模板所在位置
+	 * @return
+	 */
+	public static String getReportTempPath() {
+		return properties.getProperty("reportTempPath");
+	}
 }
