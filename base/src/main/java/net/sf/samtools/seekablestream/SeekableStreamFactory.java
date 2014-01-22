@@ -27,7 +27,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
-import com.novelbio.base.dataOperate.HdfsBase;
 import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 
@@ -80,7 +79,7 @@ public class SeekableStreamFactory{
                 return new SeekableHTTPStream(url);
             } else if (path.startsWith("ftp:")) {
                 return new SeekableFTPStream(new URL(path));
-            } else if (HdfsBase.isHdfs(path)) {
+            } else if (FileHadoop.isHdfs(path)) {
                 if(FileOperate.isWindows())
                 	return new SeekableFileStream(new File(FileHadoop.convertToLocalPath(path)));
             	return new SeekableHDFSstream(new FileHadoop(path));

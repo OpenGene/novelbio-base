@@ -6,7 +6,6 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
-import java.awt.Toolkit;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
@@ -18,8 +17,6 @@ import java.awt.image.PixelGrabber;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,10 +35,8 @@ import org.faceless.graph2.Output;
 import org.faceless.graph2.SVGOutput;
 
 import com.novelbio.base.dataOperate.DateUtil;
-import com.novelbio.base.dataOperate.HdfsBase;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.dataStructure.ArrayOperate;
-import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 
 /**

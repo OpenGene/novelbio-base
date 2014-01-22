@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.ContentSummary;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -22,7 +23,6 @@ import org.apache.hadoop.fs.Path;
 
 import com.novelbio.base.PathDetail;
 import com.novelbio.base.dataOperate.DateUtil;
-import com.novelbio.base.dataOperate.HdfsBase;
 import com.novelbio.base.dataStructure.ArrayOperate;
 
 public class FileHadoop extends File {
@@ -32,6 +32,9 @@ public class FileHadoop extends File {
 	FileSystem fsHDFS;
 	Path dst;
 	FileStatus fileStatus;
+	
+	public static String HEAD;	
+	public static String symbol;
 	static {
 		initial();
 	}
@@ -50,6 +53,8 @@ public class FileHadoop extends File {
 				e.printStackTrace();
 			}
 		}
+		HEAD = getHdfsHeadPath();
+		symbol = getHdfsHeadSymbol();
 	}
 	
 	/**
@@ -59,7 +64,7 @@ public class FileHadoop extends File {
 	 */
 	public FileHadoop(String hdfsFilePath) throws IOException {
 		super(hdfsFilePath = copeToHdfsHeadSymbol(hdfsFilePath));
-		this.fsHDFS = HdfsBase.getFileSystem();
+		this.fsHDFS = FileHadoop.getFileSystem();
 		hdfsFilePath = hdfsFilePath.replace(FileHadoop.getHdfsHeadSymbol(), FileHadoop.getHdfsHeadPath());
 		dst = new Path(hdfsFilePath);
 		
@@ -542,7 +547,7 @@ public class FileHadoop extends File {
 	public static String convertToMaprPath(String hdfsPath){
 		if (hdfsPath.length() < 6) {
 			
-		}else if (HdfsBase.isHdfs(hdfsPath) || HdfsBase.isHdfs(hdfsPath.substring(1, hdfsPath.length()-2))) {
+		}else if (FileHadoop.isHdfs(hdfsPath) || FileHadoop.isHdfs(hdfsPath.substring(1, hdfsPath.length()-2))) {
 			hdfsPath = hdfsPath.replace(getHdfsHeadSymbol(), getHdfsHeadPath());
 		}
 		return hdfsPath;
@@ -553,7 +558,7 @@ public class FileHadoop extends File {
 	public static String convertToLocalPath(String hdfsPath) {
 		if (hdfsPath.length() < 6) {
 			
-		}else if (HdfsBase.isHdfs(hdfsPath) || HdfsBase.isHdfs(hdfsPath.substring(1, hdfsPath.length()-2))) {
+		}else if (FileHadoop.isHdfs(hdfsPath) || FileHadoop.isHdfs(hdfsPath.substring(1, hdfsPath.length()-2))) {
 			String parentPath = getHdfsLocalPath();
 			hdfsPath = hdfsPath.replace(getHdfsHeadSymbol(), parentPath);
 		}
@@ -593,6 +598,45 @@ public class FileHadoop extends File {
 	public static String getHdfsLocalPath() {
 		return properties.getProperty("hdfsLocalPath");
 	}
+	
+	public static boolean isHdfs(String fileName) {
+		if (fileName == null || fileName.equals("")) {
+			return false;
+		}
+		fileName = fileName.toLowerCase();
+		return fileName.startsWith(symbol) ? true : false;
+	}
+	static class HdfsBaseHolder {
+		static Configuration conf;
+		static {
+			conf = new Configuration();
+			conf.set("dfs.permissions", "false");
+		}
+	}
+	public static FileSystem getFileSystem(){
+		FileSystem hdfs = null;
+		try {
+			hdfs = FileSystem.get(URI.create(HEAD), HdfsBaseHolder.conf);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return hdfs;
+	}
+	/**
+	 * 创建一个文件夹
+	 * @param path 路径+“/”+文件夹名字
+	 * @throws IOException
+	 */
+	public static void mkdirHDFSFolder(Path path) throws IOException {
+		getFileSystem().mkdirs(path);
+	}
+	
+	/**删除文件
+	 * @throws IOException */
+	public static void removeHDFSfile(Path path) throws IOException {
+		getFileSystem().delete(path, true);
+	}
+
 }
 
 

@@ -24,7 +24,6 @@ import org.apache.log4j.Logger;
 
 import com.novelbio.base.SerializeKryo;
 import com.novelbio.base.cmd.CmdOperate;
-import com.novelbio.base.dataOperate.HdfsBase;
 import com.novelbio.base.dataStructure.PatternOperate;
 
 public class FileOperate {
@@ -88,7 +87,7 @@ public class FileOperate {
 	 */
 	public static File getFile(String filePath){
 		File file = null;
-		boolean isHdfs = HdfsBase.isHdfs(filePath);
+		boolean isHdfs = FileHadoop.isHdfs(filePath);
 		if(isWindows()){
 			if(isHdfs)
 				filePath = FileHadoop.convertToLocalPath(filePath);
