@@ -4,12 +4,14 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.hadoop.fs.ContentSummary;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -25,10 +27,30 @@ import com.novelbio.base.dataStructure.ArrayOperate;
 
 public class FileHadoop extends File {
 	private static final long serialVersionUID = 1L;
-	
+	static Properties properties;
+
 	FileSystem fsHDFS;
 	Path dst;
 	FileStatus fileStatus;
+	static {
+		initial();
+	}
+	private static void initial() {
+		String configPath = FileOperate.isWindows() ? "configWindows.properties" : "config.properties";
+		InputStream in = PathDetail.class.getClassLoader().getResourceAsStream(configPath);
+		properties = new Properties();
+		try {
+			properties.load(in);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		} finally{
+			try {
+				in.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 	
 	/**
 	 * 输入另一个fileHadoop的内容，仅获得其配置信息，不获得其具体文件名
@@ -517,24 +539,6 @@ public class FileHadoop extends File {
 		return super.toString();
 	}
 
-	/** 文件名前添加的HDFS的头，末尾没有"/" */
-	public static String getHdfsHeadSymbol() {
-		return PathDetail.getHdfsHeadSymbol();
-	}
-	
-	/** 在输入的文件名前添加的HDFS的头<br>
-	 * <b>务必输入绝对路径，也就是要以"/"开头</b>
-	 * @param path
-	 * @return
-	 */
-	public static String addHdfsHeadSymbol(String path) {
-		return PathDetail.addHdfsHeadSymbol(path);
-	}
-	
-	/** hadoop实际的hdfs前缀，末尾没有"/" */
-	public static String getHdfsHeadPath() {
-		return PathDetail.getHdfsHeadPath();
-	}
 	public static String convertToMaprPath(String hdfsPath){
 		if (hdfsPath.length() < 6) {
 			
@@ -550,10 +554,44 @@ public class FileHadoop extends File {
 		if (hdfsPath.length() < 6) {
 			
 		}else if (HdfsBase.isHdfs(hdfsPath) || HdfsBase.isHdfs(hdfsPath.substring(1, hdfsPath.length()-2))) {
-			String parentPath = PathDetail.getHdfsLocalPath();
+			String parentPath = getHdfsLocalPath();
 			hdfsPath = hdfsPath.replace(getHdfsHeadSymbol(), parentPath);
 		}
 		return hdfsPath;
+	}
+	
+	
+	
+	/** 
+	 * 用{@link com.novelbio.base.fileOperate.FileHadoop#getHdfsHeadSymbol()}替换<br>
+	 * 文件名前添加的HDFS的头，末尾没有"/" */
+	public static String getHdfsHeadSymbol() {
+		return properties.getProperty("hdfsHeadSymbol");
+	}
+	
+	/** 
+	 * 用{@link com.novelbio.base.fileOperate.FileHadoop#addHdfsHeadSymbol(path)}替换<br>
+	 * 在输入的文件名前添加的HDFS的头<br>
+	 * <b>务必输入绝对路径，也就是要以"/"开头</b>
+	 * @param path
+	 * @return
+	 */
+	public static String addHdfsHeadSymbol(String path) {
+		return properties.getProperty("hdfsHeadSymbol") + path;
+	}
+	
+	/** 
+	 * 用{@link com.novelbio.base.fileOperate.FileHadoop#getHdfsHeadPath()}替换<br>
+	 * hadoop实际的hdfs前缀，末尾没有"/" */
+	public static String getHdfsHeadPath() {
+		return properties.getProperty("hdfsHead");
+	}
+	
+	/** 
+	 * 用{@link com.novelbio.base.fileOperate.FileHadoop#getHdfsLocalPath()}替换<br>
+	 * hdfs挂载在本地硬盘的路径 */
+	public static String getHdfsLocalPath() {
+		return properties.getProperty("hdfsLocalPath");
 	}
 }
 

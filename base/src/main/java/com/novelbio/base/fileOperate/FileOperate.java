@@ -20,29 +20,27 @@ import net.sf.samtools.seekablestream.SeekableStream;
 import net.sf.samtools.seekablestream.SeekableStreamFactory;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 
 import com.novelbio.base.SerializeKryo;
 import com.novelbio.base.cmd.CmdOperate;
 import com.novelbio.base.dataOperate.HdfsBase;
-import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.dataStructure.PatternOperate;
-//import com.novelbio.analysis.tools.compare.runCompSimple;
 
 public class FileOperate {
 	private static Logger logger = Logger.getLogger(FileOperate.class);
-	
+	static boolean isWindowsOS = false;
+	static{
+		    String osName = System.getProperty("os.name");
+		    if(osName.toLowerCase().indexOf("windows")>-1){
+		      isWindowsOS = true;
+		    }
+	}
 	
 	/**
 	 * 是否是windows操作系统
 	 */
 	public static boolean isWindows(){
-		boolean isWindowsOS = false;
-	    String osName = System.getProperty("os.name");
-	    if(osName.toLowerCase().indexOf("windows")>-1){
-	      isWindowsOS = true;
-	    }
 	    return isWindowsOS;
 	}
 	/**
@@ -90,12 +88,12 @@ public class FileOperate {
 	 */
 	public static File getFile(String filePath){
 		File file = null;
+		boolean isHdfs = HdfsBase.isHdfs(filePath);
 		if(isWindows()){
-			if(HdfsBase.isHdfs(filePath))
+			if(isHdfs)
 				filePath = FileHadoop.convertToLocalPath(filePath);
 			file = new File(filePath);
-			System.out.println(file.getAbsolutePath());
-		}else if (HdfsBase.isHdfs(filePath)) {
+		}else if (isHdfs) {
 			try {
 				file = new FileHadoop(filePath);
 			} catch (IOException e) {
@@ -542,6 +540,9 @@ public class FileOperate {
 		String creatPath = "";
 		boolean flag = true;
 		while (flag) {
+			if (foldUpper.equals("")) {
+				return false;
+			}
 			if (isFileDirectory(foldUpper)) {
 				flag = false;
 				break;

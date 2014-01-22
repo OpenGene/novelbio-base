@@ -188,42 +188,6 @@ public class PathDetail {
 		return properties.getProperty("allProjectSavePath");
 	}
 	
-	/** 
-	 * 用{@link com.novelbio.base.fileOperate.FileHadoop#getHdfsHeadSymbol()}替换<br>
-	 * 文件名前添加的HDFS的头，末尾没有"/" */
-	@Deprecated
-	public static String getHdfsHeadSymbol() {
-		return properties.getProperty("hdfsHeadSymbol");
-	}
-	
-	/** 
-	 * 用{@link com.novelbio.base.fileOperate.FileHadoop#addHdfsHeadSymbol(path)}替换<br>
-	 * 在输入的文件名前添加的HDFS的头<br>
-	 * <b>务必输入绝对路径，也就是要以"/"开头</b>
-	 * @param path
-	 * @return
-	 */
-	@Deprecated
-	public static String addHdfsHeadSymbol(String path) {
-		return properties.getProperty("hdfsHeadSymbol") + path;
-	}
-	
-	/** 
-	 * 用{@link com.novelbio.base.fileOperate.FileHadoop#getHdfsHeadPath()}替换<br>
-	 * hadoop实际的hdfs前缀，末尾没有"/" */
-	@Deprecated
-	public static String getHdfsHeadPath() {
-		return properties.getProperty("hdfsHead");
-	}
-	
-	/** 
-	 * 用{@link com.novelbio.base.fileOperate.FileHadoop#getHdfsLocalPath()}替换<br>
-	 * hdfs挂载在本地硬盘的路径 */
-	@Deprecated
-	public static String getHdfsLocalPath() {
-		return properties.getProperty("hdfsLocalPath");
-	}
-	
 	/**
 	 * 取得公共文件保存文件夹
 	 * @return
