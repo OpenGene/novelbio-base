@@ -596,11 +596,7 @@ public class TxtReadandWrite implements Closeable {
 		try { txtWrite.close(); } catch (Exception e) { }
 		if (!read) {
 			try {
-				if (txtWrite.platform == PlatForm.pc) {
-					txtRead = new TxtRead(txtWrite.getFileName());
-				} else if (txtWrite.platform == PlatForm.hadoop) {
-					txtRead = new TxtRead(txtWrite.fileHadoop);
-				}
+				txtRead = new TxtRead(txtWrite.getFileName());
 				read = true;
 			} catch (Exception e) {}
 		}
