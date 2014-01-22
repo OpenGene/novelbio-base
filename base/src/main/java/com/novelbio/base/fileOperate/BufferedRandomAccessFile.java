@@ -1,10 +1,9 @@
 package com.novelbio.base.fileOperate;
 
-import java.io.RandomAccessFile;
 import java.io.File;
-import java.io.IOException;
 import java.io.FileNotFoundException;
-import java.util.ResourceBundle;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 
 /**
  * 感觉不准
