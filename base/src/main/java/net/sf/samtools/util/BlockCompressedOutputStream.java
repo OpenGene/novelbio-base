@@ -32,11 +32,7 @@ import java.util.zip.Deflater;
 import net.sf.samtools.seekablestream.SeekableFileStream;
 import net.sf.samtools.seekablestream.SeekableHDFSstream;
 import net.sf.samtools.seekablestream.SeekableStream;
-import net.sf.samtools.util.BinaryCodec;
-import net.sf.samtools.util.BlockCompressedStreamConstants;
-import net.sf.samtools.util.BlockCompressedInputStream.FileTermination;
 
-import com.novelbio.base.dataOperate.HdfsBase;
 import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 
@@ -236,7 +232,7 @@ public class BlockCompressedOutputStream
         // Can't re-open something that is not a regular file, e.g. a named pipe or an output stream
         SeekableStream seekableStream = null;
         long fileLength = 0;
-        if (HdfsBase.isHdfs(fileName)) {
+        if (FileHadoop.isHdfs(fileName)) {
         	if(FileOperate.isWindows()){
         		File file = new File(FileHadoop.convertToLocalPath(fileName));
     			seekableStream = new SeekableFileStream(file);

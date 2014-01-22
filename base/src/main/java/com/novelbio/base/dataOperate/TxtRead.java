@@ -63,12 +63,6 @@ class TxtRead implements Closeable {
 		txTtype = txtTtype;
 	}
 	
-	@Deprecated
-	public TxtRead(FileHadoop fileHadoop) {
-		this.txtfile = fileHadoop.getAbsolutePath();
-		txTtype = TXTtype.getTxtType(fileHadoop.getName());
-	}
-	
 	public String getFileName() {
 		return txtfile;
 	}

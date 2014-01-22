@@ -33,8 +33,6 @@ import net.sf.samtools.util.IOUtil;
 import net.sf.samtools.util.Md5CalculatingOutputStream;
 import net.sf.samtools.util.RuntimeIOException;
 
-import com.novelbio.base.dataOperate.HdfsBase;
-import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 
 /**
