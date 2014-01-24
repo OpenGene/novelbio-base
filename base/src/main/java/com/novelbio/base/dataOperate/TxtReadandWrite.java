@@ -108,11 +108,12 @@ public class TxtReadandWrite implements Closeable {
 	
 	public TxtReadandWrite(InputStream inputStream) {
 		txtRead = new TxtRead(inputStream);
-		read = false;
+		read = true;
+		
 	}
 	public TxtReadandWrite(InputStream inputStream, TXTtype txtTtype) {
 		txtRead = new TxtRead(inputStream, txtTtype);
-		read = false;
+		read = true;
 	}
 
 	public String getFileName() {

@@ -37,7 +37,7 @@ public class  ZipOperate {
     public static void unZipFiles(File zipFile,String descDir)throws IOException{
     	descDir = FileOperate.addSep(descDir);
         FileOperate.createFolders(descDir);
-        ZipFile zip = new ZipFile(zipFile); 
+        ZipFile zip = new ZipFile(zipFile);
         for(Enumeration entries = zip.getEntries();entries.hasMoreElements();){ 
             ZipEntry entry = (ZipEntry)entries.nextElement(); 
             String zipEntryName = entry.getName(); 

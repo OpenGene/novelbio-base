@@ -3,8 +3,6 @@ package com.novelbio.base.dataOperate;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.Closeable;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -22,12 +20,9 @@ import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.log4j.Logger;
-import org.apache.hadoop.fs.FSDataInputStream;
 
-import com.novelbio.base.dataOperate.TxtReadandWrite.PlatForm;
 import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
 import com.novelbio.base.dataStructure.PatternOperate;
-import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 
 class TxtRead implements Closeable {
@@ -44,26 +39,33 @@ class TxtRead implements Closeable {
 	String grepContent = "";
 	
 	TXTtype txTtype = null;
-	
+	boolean isStream = false;
 	
 	long filesize = 0;
 
 	public TxtRead(String fileName) {
 		this.txtfile = fileName;
 		txTtype = TXTtype.getTxtType(fileName);
+		isStream = false;
 	}
 	
 	public TxtRead(InputStream inputStream) {
 		this.inputStreamRaw = inputStream;
 		txTtype = TXTtype.Txt;
+		isStream = true;
 	}
 	
 	public TxtRead(InputStream inputStream, TXTtype txtTtype) {
 		this.inputStreamRaw = inputStream;
 		txTtype = txtTtype;
+		isStream = true;
 	}
 	
+	/** 如果读取的是流，则返回null */
 	public String getFileName() {
+		if (isStream) {
+			return null;
+		}
 		return txtfile;
 	}
 	
@@ -527,8 +529,6 @@ class TxtRead implements Closeable {
 	 * @throws Exception
 	 */
 	private void initialReading() throws IOException {
-		
-		try {
 			if (bufread != null) {
 				bufread.close();
 				bufread = null;
@@ -537,19 +537,21 @@ class TxtRead implements Closeable {
 				inputStream.close();
 				inputStream = null;
 			}
-			if (inputStreamRaw != null) {
-				inputStreamRaw.close();
-				inputStreamRaw = null;
-			}
-		} catch (Exception e) {
+			
+		if (!isStream && inputStreamRaw != null) {
+			inputStreamRaw.close();
+			inputStreamRaw = null;
 		}
-		
+
 		setInStreamExp(txTtype);
 	}
 	
 	private void setInStreamExp(TXTtype txtType) throws IOException {
-		filesize = FileOperate.getFileSizeLong(txtfile);
-		inputStreamRaw = FileOperate.getInputStream(txtfile);
+		if (!isStream) {
+			filesize = FileOperate.getFileSizeLong(txtfile);
+			inputStreamRaw = FileOperate.getInputStream(txtfile);
+		}
+
 		if (txtType == TXTtype.Txt) {
 			if (inputStreamRaw instanceof BufferedInputStream) {
 				inputStream = (BufferedInputStream)inputStreamRaw;
