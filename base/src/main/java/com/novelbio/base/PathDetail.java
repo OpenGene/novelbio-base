@@ -196,6 +196,11 @@ public class PathDetail {
 		return properties.getProperty("publicFileSavePath");
 	}
 	
+	/** 末尾没有"/" */
+	public static String getSampleQCpath() {
+		return properties.getProperty("sampleQCPath");
+	}
+	
 	/**
 	 * 取得无项目的任务保存文件夹
 	 * @return
