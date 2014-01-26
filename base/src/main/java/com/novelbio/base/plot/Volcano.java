@@ -16,7 +16,7 @@ public class Volcano {
 	/** 设置logFC的边界默认为1 */
 	double logFCBorder = 1;
 	/** 设置Pvalue的边界默认为1.5 */
-	double logPvalueBorder = 1.5;
+	double logPvalueBorder = 0.05;
 	/** 是否需要log转换 */
 	boolean logTransform = false;
 
@@ -54,16 +54,16 @@ public class Volcano {
 	 */
 
 	public void test() {
-		List<List<String>> lsls = ExcelTxtRead.readLsExcelTxtls("/home/novelbio/桌面/test/casevscontrol_EdegR.txt", 1);
+		List<List<String>> lsls = ExcelTxtRead.readLsExcelTxtls("/home/novelbio/桌面/project/火山图Dome/IL15vsIL2all.xls", 1);
 		Volcano volcano = new Volcano();
 		volcano.setMaxX(15);
 		volcano.setMinX(-15);
 		volcano.setMaxY(30);
-		volcano.setLogFC2Pvalue(lsls, 1, 2);
-		volcano.setLogPvalueBorder(2);
+		volcano.setLogFC2Pvalue(lsls, 2, 3);
+		volcano.setLogPvalueBorder(0.05);
 		volcano.setLogFCBorder(1);
 		PlotScatter plotScatter = volcano.drawVolimage("P-Value");
-		plotScatter.saveToFile("/home/novelbio/桌面/test/casevscontrol_EdegR.png", 2000, 2000);	
+		plotScatter.saveToFile("/home/novelbio/桌面/project/火山图Dome/IL15vsIL2all.png", 2000, 2000);	
 	}
 
 	public void setLogFC2Pvalue(List<List<String>> lslsExcel, int colLogFC, int colPvalue) {
@@ -171,19 +171,19 @@ public class Volcano {
 				x = xy[0];
 			}
 			double y = -Math.log10(xy[1]);
-			if (Math.abs(x) > logFCBorder && y > logPvalueBorder) {
+			if (Math.abs(x) > logFCBorder && y > -Math.log10(logPvalueBorder)) {
 				plotScatter.addXY(x, y, dotStyleHalfRed);
-			} else if (Math.abs(x) > logFCBorder && y < logPvalueBorder) {
+			} else if (Math.abs(x) > logFCBorder && y < -Math.log10(logPvalueBorder)) {
 				plotScatter.addXY(x, y, dotStyleHalfBlue);
-			} else if (Math.abs(x) < logFCBorder && y > logPvalueBorder) {
+			} else if (Math.abs(x) < logFCBorder && y > -Math.log10(logPvalueBorder)) {
 				plotScatter.addXY(x, y, dotStyleHalfGreen);
-			} else if (Math.abs(x) < logFCBorder && y < logPvalueBorder) {
+			} else if (Math.abs(x) < logFCBorder && y < -Math.log10(logPvalueBorder)) {
 				plotScatter.addXY(x, y, dotStyleHalfGrey);
 			}
 		}
 		/* 添加一条与X平行的边界 */
 		double[] xBorder1 = { minX, maxX };
-		double[] yBorder1 = { logPvalueBorder, logPvalueBorder };
+		double[] yBorder1 = { -Math.log10(logPvalueBorder), -Math.log10(logPvalueBorder) };
 
 		plotScatter.addXY(xBorder1, yBorder1, dotStyleBorder);
 
