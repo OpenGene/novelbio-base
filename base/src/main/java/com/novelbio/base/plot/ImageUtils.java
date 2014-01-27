@@ -326,7 +326,7 @@ public class ImageUtils {
 	 */
 	public static BufferedImage resizeImage(final BufferedImage bufferedimage,
 			final int w, final int h) {
-		return resizeImage(true, bufferedimage, w, h);
+		return resizeImage(false, bufferedimage, w, h);
 	}
 
 	/**
