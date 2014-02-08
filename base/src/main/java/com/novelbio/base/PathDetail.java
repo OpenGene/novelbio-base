@@ -200,7 +200,10 @@ public class PathDetail {
 	public static String getSampleQCpath() {
 		return properties.getProperty("sampleQCPath");
 	}
-	
+	/** 末尾有"/" */
+	public static String getSampleQCpathWithSep() {
+		return properties.getProperty("sampleQCPath") + FileOperate.getSepPath();
+	}
 	/**
 	 * 取得无项目的任务保存文件夹
 	 * @return

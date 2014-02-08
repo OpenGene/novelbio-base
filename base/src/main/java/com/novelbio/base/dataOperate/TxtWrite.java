@@ -71,7 +71,7 @@ class TxtWrite implements Closeable {
 	}
 	
 	protected void createFile() throws Exception {
-		OutputStream outputStreamRaw = FileOperate.getOutputStream(txtfile, true);
+		OutputStream outputStreamRaw = FileOperate.getOutputStream(txtfile, !append);
 		TXTtype txtTtype = TXTtype.getTxtType(txtfile);
 
 		if (txtTtype == TXTtype.Txt) {

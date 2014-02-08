@@ -426,12 +426,14 @@ public class FileOperate {
 	 * @param filePath
 	 *            目录路径,最后不要加\\或/
 	 * @param filename
-	 *            指定包含的文件名，是正则表达式 ，如 "*",正则表达式无视大小写
+	 *            指定包含的文件名，是正则表达式 ，如 "*",正则表达式无视大小<br>
+	 *            null 表示不指定
 	 * @param suffix
 	 *            指定包含的后缀名，是正则表达式<br>
 	 *            文件 wfese.fse.fe认作 "wfese.fse"和"fe"<br>
 	 *            文件 wfese.fse.认作 "wfese.fse."和""<br>
 	 *            文件 wfese 认作 "wfese"和""<br>
+	 *            null 表示不指定
 	 * @return 返回包含目标文件全名的ArrayList
 	 * @throws IOException 
 	 */
