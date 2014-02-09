@@ -141,6 +141,14 @@ public class PathDetail {
 		return FileHadoop.getHdfsHeadSymbol() + "/nbCloud/public/order/appendix/";
 	}
 	
+	/**获取订单附件路径
+	 * 
+	 * @return
+	 */
+	public static String  getExperimentAppendixPath() {
+		return FileHadoop.getHdfsHeadSymbol() + "/nbCloud/public/experiment/";
+	}
+	
 	/**
 	 * 获取当前合同的附件文件路径
 	 * @return
@@ -200,7 +208,10 @@ public class PathDetail {
 	public static String getSampleQCpath() {
 		return properties.getProperty("sampleQCPath");
 	}
-	
+	/** 末尾有"/" */
+	public static String getSampleQCpathWithSep() {
+		return properties.getProperty("sampleQCPath") + FileOperate.getSepPath();
+	}
 	/**
 	 * 取得无项目的任务保存文件夹
 	 * @return
