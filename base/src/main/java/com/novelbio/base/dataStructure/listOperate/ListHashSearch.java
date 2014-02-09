@@ -16,8 +16,9 @@ import org.apache.log4j.Logger;
  * @locHashtable hash（LOCID）--GeneInforlist
  * @LOCIDList 顺序存储每个基因号或条目号
  */
-public abstract class ListHashSearch < T extends ListDetailAbs, E extends ListCodAbs<T>, K extends ListCodAbsDu<T, E>, M extends ListAbsSearch<T, E, K>> {
-	Logger logger = Logger.getLogger(ListHashSearch.class);
+public abstract class ListHashSearch <T extends ListDetailAbs, E extends ListCodAbs<T>, 
+K extends ListCodAbsDu<T, E>, M extends ListAbsSearch<T, E, K>> {
+	private static final Logger logger = Logger.getLogger(ListHashSearch.class);
 	/**
 	 * <b>key为小写</b><br>
 	 * 哈希表LOC--LOC细节<br>
