@@ -149,6 +149,14 @@ public class PathDetail {
 		return FileHadoop.getHdfsHeadSymbol() + "/nbCloud/public/experiment/";
 	}
 	
+	
+	/**获取订单附件路径
+	 * 
+	 * @return
+	 */
+	public static String  getExperimentPathByLocal() {
+		return "/media/hdfs/nbCloud/public/experiment/";
+	}
 	/**
 	 * 获取当前合同的附件文件路径
 	 * @return
