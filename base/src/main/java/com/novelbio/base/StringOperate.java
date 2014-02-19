@@ -67,6 +67,16 @@ public class StringOperate {
 		return 1 - (float) compare(str, target) / Math.max(str.length(), target.length());
 	}
 
+	public static boolean isRealNull(String string) {
+		if (string == null) {
+			return true;
+		}else  if(string.equals("")) {
+			return true;
+		}else {
+			return false;
+		}
+	}
+	
 	public static void main(String[] args) {
 		String str = "1#2203NO525FANGXIEROADSHANGHAICN";
 		String target = "1#2203NO525FANGXIEROADSHANGHAICN";
