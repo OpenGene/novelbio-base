@@ -14,7 +14,6 @@ public class PathDetail {
 	static Properties properties;
 	static String tmpConfFold;
 	static String rworkspace;
-	static String tmpPathRandom;
 	static String tmpPath;
 	static String rworkspaceTmp;
 	static {
@@ -64,12 +63,6 @@ public class PathDetail {
 		}
 		if (!FileOperate.createFolders(rworkspace)) {
 			rworkspace = null;
-		}
-		
-		//tmpPathRandom
-		tmpPathRandom = FileOperate.addSep(getTmpPath()) + "tmp" + DateUtil.getDateAndRandom();
-		if (!FileOperate.createFolders(tmpPathRandom)) {
-			tmpPathRandom = null;
 		}
 		
 		rworkspaceTmp = getRworkspace() + "tmp"  + FileOperate.getSepPath();
@@ -191,9 +184,14 @@ public class PathDetail {
 	public static String getTmpPath() {
 		return tmpPath;
 	}
-	/** 在tmp文件夹下新建一个随机文件名的临时文件夹 */
+	
+	/** 在tmp文件夹下新建一个随机文件名的临时文件夹，注意每次返回的都不一样 */
 	public static String getTmpPathRandom() {
-		return tmpPathRandom;
+		String tmpPath = FileOperate.addSep(getTmpPath()) + "tmp" + DateUtil.getDateAndRandom();
+		if (!FileOperate.createFolders(tmpPath)) {
+			tmpPath = null;
+		}
+		return tmpPath;
 	}
 	
 	/**
