@@ -152,7 +152,8 @@ public class ListCodAbsDu<T extends ListDetailAbs, K extends ListCodAbs<T>>  {
 		return lsResult;
 	}
 	/**
-	 * 返回被这两个坐标点覆盖的gffDetail信息，并按照cis5to3排序
+	 * 返回被这两个坐标点完全覆盖的gffDetail信息，并按照cis5to3排序
+	 * 不考虑overlap的情况
 	 * @return
 	 * 空的则返回一个size为0的list
 	 */
