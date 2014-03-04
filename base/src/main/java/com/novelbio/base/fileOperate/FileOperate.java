@@ -1473,5 +1473,21 @@ public class FileOperate {
 		}
 		return path;
 	}
+	/**
+	 * 是否存在并且无损
+	 * @param filePath
+	 * @param realSize
+	 * @return
+	 */
+	public static boolean isFileExistAndLossless(String filePath,long realSize) {
+		File file = getFile(filePath);
+		if (!file.exists()) {
+			return false;
+		}
+		if (file.isFile()) {
+			return file.length() == realSize;
+		} 
+		return false;
+	}
 
 }
