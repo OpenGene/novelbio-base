@@ -70,7 +70,7 @@ public class StringOperate {
 	public static boolean isRealNull(String string) {
 		if (string == null) {
 			return true;
-		}else  if(string.equals("")) {
+		}else  if(string.trim().equals("")) {
 			return true;
 		}else {
 			return false;

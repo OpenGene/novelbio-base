@@ -51,16 +51,9 @@ public class MD5generate {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		File file = new File("/home/novelbio/桌面/迅雷7高速通道+离线下载.rar");
-		FileInputStream fs = new FileInputStream(file);
-		System.out.println(fs.available());
-//		int length = 1024*1024*8*20;
-//		int realLength = fs.available();
-//		int byteLength = realLength < length ? realLength : length;
-//		byte[] bytes = new byte[byteLength];
-//		fs.read(bytes, 0 ,bytes.length);
-//		System.out.println(MD5generate.getMD5(bytes));
-//		fs.close();
+		String filePath = "/hdfs:/nbCloud/public/publicFile/deflate.js";
+		if(FileHadoop.isHdfs(filePath))
+			System.out.println(FileHadoop.convertToLocalPath(filePath));
 	}
 	/**
 	 * 返回""表示出错
@@ -110,6 +103,46 @@ public class MD5generate {
 		return bufferToHex(messageDigest.digest());  
 	}
 	
+	/**
+	 * 根据文件全路径获得全文件的md5值
+	 * @param fileName
+	 * @return
+	 * @throws IOException
+	 */
+	public static String getNBCFileRealMd5(String fileName) throws IOException {
+		if(FileHadoop.isHdfs(fileName))
+			fileName = FileHadoop.convertToLocalPath(fileName);
+		File file = new File(fileName);
+		FileInputStream in = new FileInputStream(file);  
+		FileChannel ch = in.getChannel();  
+		
+		//700000000 bytes are about 670M  
+		int maxSize=700000000;  
+		
+		long startPosition=0L;  
+		long step=file.length()/maxSize;  
+		
+		if(step == 0) {  
+			MappedByteBuffer byteBuffer = ch.map(FileChannel.MapMode.READ_ONLY, 0,file.length());
+			messageDigest.update(byteBuffer);  
+			return bufferToHex(messageDigest.digest());  
+		}
+         
+		for(int i=0;i<step;i++) {
+			MappedByteBuffer byteBuffer = ch.map(FileChannel.MapMode.READ_ONLY, startPosition,maxSize);  
+			messageDigest.update(byteBuffer);  
+			startPosition+=maxSize;  
+		}
+         
+		if(startPosition==file.length()) {  
+			return bufferToHex(messageDigest.digest());  
+		}
+   
+		MappedByteBuffer byteBuffer = ch.map(FileChannel.MapMode.READ_ONLY, startPosition,file.length()-startPosition);  
+		messageDigest.update(byteBuffer);  
+		in.close();
+		return bufferToHex(messageDigest.digest()); 
+	}
 	/**
 	 * 根据文件全路径得到指定最大流的1024*1024*5即为5M 值
 	 * @param fileName
