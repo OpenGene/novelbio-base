@@ -311,7 +311,7 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 	 * 坐标是否在基因的内部，包括Tss和GeneEnd的拓展区域
 	 */
 	public boolean isCodInGeneExtend(int coord) {
-		return isCodInGene(coord) || isCodInPromoter(coord) || isCodInGenEnd(coord);
+		return isCodInSide(coord) || isCodInPromoter(coord) || isCodInGenEnd(coord);
 	}
 	
 	/**
@@ -350,7 +350,7 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 	 * 是否在基因内，不拓展
 	 * @return
 	 */
-	public boolean isCodInGene(int coord) {
+	public boolean isCodInSide(int coord) {
 		if (coord >= numberstart && coord <= numberend) {
 			return true;
 		}
@@ -416,14 +416,6 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 		else {
 			return numberend - coord;
 		}
-	}
-	/** 坐标是否在基因内
-	 */
-	public boolean isCodInSide(int coord) {
-		if (coord >= numberstart && coord <=  numberend) {
-			return true;
-		}
-		return false;
 	}
 	
 /////////////////////////////  重写equals等  ////////////////////////////////////

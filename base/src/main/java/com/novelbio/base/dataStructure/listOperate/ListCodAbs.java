@@ -72,7 +72,7 @@ public class ListCodAbs<T extends ListDetailAbs> {
 		if (gffDetailUp == null) {
 			return false;
 		}
-		return gffDetailUp.isCodInGene(Coordinate);
+		return gffDetailUp.isCodInSide(Coordinate);
 	}
 	/**
 	 * 是否在下一个条目内
@@ -82,7 +82,7 @@ public class ListCodAbs<T extends ListDetailAbs> {
 		if (gffDetailDown == null) {
 			return false;
 		}
-		return gffDetailDown.isCodInGene(Coordinate);
+		return gffDetailDown.isCodInSide(Coordinate);
 	}
 	/**
 	 * 

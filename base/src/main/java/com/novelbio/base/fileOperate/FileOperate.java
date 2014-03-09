@@ -14,6 +14,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.List;
 
 import net.sf.samtools.seekablestream.ISeekableStreamFactory;
 import net.sf.samtools.seekablestream.SeekableStream;
@@ -762,9 +763,26 @@ public class FileOperate {
 		if (oldPathFile != null && oldPathFile.equals(newPathFile)) {
 			return true;
 		}
+		File oldfile = getFile(oldPathFile);
+		File newfile = getFile(newPathFile);
+		return copyFile(oldfile, newfile, cover);
+	}
+	/**
+	 * 复制单个文件
+	 * 
+	 * @param oldPathFile
+	 *            准备复制的文件源
+	 * @param newPathFile
+	 *            拷贝到新绝对路径带文件名
+	 * @param cover
+	 *            是否覆盖
+	 * @return
+	 */
+	public static boolean copyFile(File oldfile,File newfile, boolean cover) {
+		if (oldfile != null && oldfile.getAbsoluteFile().equals(newfile.getAbsoluteFile())) {
+			return true;
+		}
 		try {
-			File oldfile = getFile(oldPathFile);
-			File newfile = getFile(newPathFile);
 			if (oldfile.exists()) { // 文件存在时
 				if (newfile.exists()) {
 					if (!cover) {
@@ -799,7 +817,6 @@ public class FileOperate {
 			return false;
 		}
 	}
-
 	/**
 	 * 复制整个文件夹的内容,如果要文件已经存在，则跳过
 	 * 
@@ -1110,14 +1127,14 @@ public class FileOperate {
 		if (oldFileName.equals(newPathName)) {
 			return true;
 		}
-		
-		if (isFileExist(oldFileName)) {
-			okFlag = moveSingleFile(oldFileName, newPath, NewName, cover);
-		} else if (isFileDirectory(oldFileName)) {
+		File oldFile = getFile(oldFileName);
+ 		if (isFileExist(oldFile)) {
+			okFlag = moveSingleFile(oldFile, newPath, NewName, cover);
+		} else if (isFileDirectory(oldFile)) {
 			newPath = newPath + NewName;
-			okFlag = moveFoldFile(oldFileName, newPath, "", cover);
+			okFlag = moveFoldFile(oldFile, newPath, "", cover);
 		}
-		deleteDirectory(oldFileName);
+		deleteDirectory(oldFile);
 		return okFlag;
 	}
 
@@ -1135,9 +1152,13 @@ public class FileOperate {
 	 */
 	public static boolean moveFile(String oldFilePath, String newPath,
 			boolean cover, String NewNameOrPrefix) {
+		if (oldFilePath == null) {
+			return false;
+		}
+		File fileOldFilePath = getFile(oldFilePath);
 		newPath = addSep(newPath);
 		boolean okFlag = false;
-
+		
 		if (isFileExist(oldFilePath)) {
 			if (NewNameOrPrefix == null || NewNameOrPrefix.trim().equals("")) {
 				NewNameOrPrefix = FileOperate.getFileName(oldFilePath);
@@ -1147,7 +1168,7 @@ public class FileOperate {
 			newPath = newPath + getFileName(oldFilePath);
 			okFlag = moveFoldFile(oldFilePath, newPath, NewNameOrPrefix, cover);
 		}
-		deleteDirectory(oldFilePath);
+		deleteDirectory(fileOldFilePath);
 		return okFlag;
 	}
 
@@ -1198,7 +1219,51 @@ public class FileOperate {
 		}
 		return true;
 	}
-
+	/**
+	 * 移动文件，如果新地址有同名文件，则不移动并返回<br>
+	 * 可以创建一级新文件夹<br>
+	 * 如果没有文件则返回<br>
+	 * 注意：新文件夹后不要加\\<br>
+	 * 
+	 * @param oldPath
+	 *            文件路径
+	 * @param newPath
+	 *            新文件所在的文件夹
+	 * @param newName
+	 *            新文件的文件名
+	 * @param cover
+	 *            是否覆盖
+	 * @return true 成功 false 失败
+	 */
+	private static boolean moveSingleFile(File oldFile, String newPath,
+			String newName, boolean cover) {
+		newPath = addSep(newPath);
+		// 文件新（目标）地址
+		// new一个新文件夹
+		File fnewpath = getFile(newPath);
+		if (!oldFile.exists()) {
+			return false;
+		}
+		// 判断文件夹是否存在
+		if (!fnewpath.exists())
+			fnewpath.mkdirs();// 创建新文件
+		// 将文件移到新文件里
+		File fnew = getFile(newPath + newName);
+		if (fnew.exists()) {
+			if (!cover) {
+				return false;
+			}
+			fnew.delete();
+		}
+		if (!oldFile.renameTo(fnew)) {
+			if (copyFile(oldFile, fnew , cover)) {
+				oldFile.delete();
+				return true;
+			}
+			return false;
+		}
+		return true;
+	}
 	/**
 	 * 移动指定文件夹内的全部文件，如果目标文件夹下有重名文件，则跳过，同时返回false<br/>
 	 * 如果新文件夹不存在，就创建新文件夹，不过似乎只能创建一级文件夹。移动顺利则返回true
@@ -1218,8 +1283,29 @@ public class FileOperate {
 		oldfolderfile = addSep(oldfolderfile);
 		newfolderfile = addSep(newfolderfile);
 
-		boolean ok = true;
 		File olddir = getFile(oldfolderfile);
+		return moveFoldFile(olddir, newfolderfile, prix, cover);
+	}
+	
+	/**
+	 * 移动指定文件夹内的全部文件，如果目标文件夹下有重名文件，则跳过，同时返回false<br/>
+	 * 如果新文件夹不存在，就创建新文件夹，不过似乎只能创建一级文件夹。移动顺利则返回true
+	 * 
+	 * @param oldfolderfile
+	 * @param newfolderfile
+	 *            目标文件目录
+	 * @param prix
+	 *            在文件前加上的前缀
+	 * @param cover
+	 *            是否覆盖
+	 * @throws Exception
+	 */
+	public static boolean moveFoldFile(File olddir,
+			String newfolderfile, String prix, boolean cover) {
+		// 如果sPath不以文件分隔符结尾，自动添加文件分隔符
+		newfolderfile = addSep(newfolderfile);
+
+		boolean ok = true;
 		File[] files = olddir.listFiles(); // 文件一览
 		if (files == null)
 			return false;
@@ -1261,7 +1347,7 @@ public class FileOperate {
 		}
 		return ok;
 	}
-
+	
 	/**
 	 * 创建快捷方式，目前只能在linux下使用 内部会根据linkTo的路径自动创建文件夹
 	 * <br>HDFS上没有用
@@ -1280,9 +1366,10 @@ public class FileOperate {
 		if (FileOperate.isFileExist(linkTo) && cover) {
 			FileOperate.delFile(linkTo);
 		}
-		String cmd = "ln -s " + CmdOperate.addQuot(rawFile) + " "
-				+ CmdOperate.addQuot(linkTo);
-		CmdOperate cmdOperate = new CmdOperate(cmd, "lnSeq");
+		List<String> lsCmd = new ArrayList<>();
+		lsCmd.add("ln"); lsCmd.add("-s");
+		lsCmd.add(rawFile); lsCmd.add(linkTo);
+		CmdOperate cmdOperate = new CmdOperate(lsCmd);
 		cmdOperate.run();
 		return true;
 	}
@@ -1306,7 +1393,20 @@ public class FileOperate {
 			return false;
 		}
 	}
-
+	/**
+	 * 判断文件是否存在，并且不是文件夹，给的是绝对路径
+	 * 
+	 * @param fileName
+	 *            如果为null, 直接返回false
+	 * @return
+	 */
+	public static boolean isFileExist(File file) {
+		if (file.exists() && !file.isDirectory()) {// 没有文件，则返回空
+			return true;
+		} else {
+			return false;
+		}
+	}
 	/**
 	 * 判断文件是否存在，并且有一定的大小而不是空文件
 	 * 
@@ -1330,7 +1430,22 @@ public class FileOperate {
 		}
 		return false;
 	}
-
+	/**
+	 * 是否存在并且无损
+	 * @param filePath
+	 * @param realSize
+	 * @return
+	 */
+	public static boolean isFileExistAndLossless(String filePath,long realSize) {
+		File file = getFile(filePath);
+		if (!file.exists()) {
+			return false;
+		}
+		if (file.isFile()) {
+			return file.length() == realSize;
+		} 
+		return false;
+	}
 	/**
 	 * 判断文件是否为文件夹,null直接返回false
 	 * 
@@ -1348,7 +1463,22 @@ public class FileOperate {
 			return false;
 		}
 	}
-
+	/**
+	 * 判断文件是否为文件夹,null直接返回false
+	 * 
+	 * @param fileName
+	 * @return
+	 */
+	public static boolean isFileDirectory(File file) {
+		if (file == null) {
+			return false;
+		}
+		if (file.isDirectory()) {// 没有文件，则返回空
+			return true;
+		} else {
+			return false;
+		}
+	}
 	public static boolean isFileFoldExist(String fileName) {
 		if (fileName == null) {
 			return false;
@@ -1362,34 +1492,14 @@ public class FileOperate {
 	}
 
 	/**
-	 * 删除单个文件
-	 * 
-	 * @param sPath
-	 *            被删除文件的文件名
-	 * @return 单个文件删除成功返回true，否则返回false
-	 */
-	private static boolean deleteFile(String sPath) {
-		boolean flag = false;
-		File file = getFile(sPath);
-		// 路径为文件且不为空则进行删除
-		if (file.isFile() && file.exists()) {
-			file.delete();
-			flag = true;
-		}
-		return flag;
-	}
-
-	/**
 	 * 删除目录（文件夹）以及目录下的文件
 	 * 
 	 * @param sPath
 	 *            被删除目录的文件路径，最后无所谓加不加"/"
 	 * @return 目录删除成功返回true，否则返回false
 	 */
-	private static boolean deleteDirectory(String sPath) {
+	private static boolean deleteDirectory(File dirFile) {
 		// 如果sPath不以文件分隔符结尾，自动添加文件分隔符
-		sPath = addSep(sPath);
-		File dirFile = getFile(sPath);
 		// 如果dir对应的文件不存在，或者不是一个目录，则退出
 		if (!dirFile.exists() || !dirFile.isDirectory()) {
 			return false;
@@ -1400,12 +1510,12 @@ public class FileOperate {
 		for (int i = 0; i < files.length; i++) {
 			// 删除子文件
 			if (files[i].isFile()) {
-				flag = deleteFile(files[i].getAbsolutePath());
+				flag = files[i].delete();;
 				if (!flag)
 					break;
 			} // 删除子目录
 			else {
-				flag = deleteDirectory(files[i].getAbsolutePath());
+				flag = deleteDirectory(files[i]);
 				if (!flag)
 					break;
 			}
@@ -1431,18 +1541,13 @@ public class FileOperate {
 		if (sPath == null || sPath.trim().equals("")) {
 			return true;
 		}
-		boolean flag = false;
 		File file = getFile(sPath);
 		// 判断目录或文件是否存在
-		if (!file.exists()) { // 不存在返回 false
-			return flag;
+		if (file.exists() && file.isDirectory()) { // 不存在返回 false
+			return deleteDirectory(file);
 		} else {
-			// 判断是否为文件
-			if (file.isFile()) { // 为文件时调用删除文件方法
-				return deleteFile(sPath);
-			} else { // 为目录时调用删除目录方法
-				return deleteDirectory(sPath);
-			}
+			file.delete();
+			return true;
 		}
 	}
 
@@ -1472,22 +1577,6 @@ public class FileOperate {
 			path = path.substring(0, path.length() - 1);
 		}
 		return path;
-	}
-	/**
-	 * 是否存在并且无损
-	 * @param filePath
-	 * @param realSize
-	 * @return
-	 */
-	public static boolean isFileExistAndLossless(String filePath,long realSize) {
-		File file = getFile(filePath);
-		if (!file.exists()) {
-			return false;
-		}
-		if (file.isFile()) {
-			return file.length() == realSize;
-		} 
-		return false;
 	}
 
 }
