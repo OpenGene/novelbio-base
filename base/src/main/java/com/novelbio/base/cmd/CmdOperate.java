@@ -407,7 +407,7 @@ public class CmdOperate extends RunProcess<String> {
 				TxtReadandWrite txtWrite = new TxtReadandWrite(saveErrPath, true);
 				errorGobbler.setOutputStream(txtWrite.getOutputStream());
 			} else if (lsErrorInfo != null) {
-				errorGobbler.setLsInfo(lsErrorInfo, lineNumErr);
+				errorGobbler.setLsInfo(lsErrorInfo, lineNumErr, true);
 			} else {
 				errorGobbler.setOutputStream(System.err);
 			}
@@ -424,7 +424,7 @@ public class CmdOperate extends RunProcess<String> {
 				TxtReadandWrite txtWrite = new TxtReadandWrite(saveFilePath, true);
 				outputGobbler.setOutputStream(txtWrite.getOutputStream());
 			} else if (lsOutInfo != null) {
-				outputGobbler.setLsInfo(lsOutInfo, lineNumStd);
+				outputGobbler.setLsInfo(lsOutInfo, lineNumStd, false);
 			} else {
 				outputGobbler.setOutputStream(System.out);
 			}			
@@ -513,6 +513,8 @@ class StreamGobbler extends Thread {
 	boolean isFinished = false;
 	boolean getInputStream = false;
 	int lineNum = 500;
+	/** 如果将输出信息写入lsInfo中，是否还将这些信息打印到控制台 */
+	boolean isSysout = false;
 	StreamGobbler(InputStream is) {
 		this.is = is;
 	}
@@ -528,9 +530,10 @@ class StreamGobbler extends Thread {
 	public void setGetInputStream(boolean getInputStream) {
 		this.getInputStream = getInputStream;
 	}
-	public void setLsInfo(LinkedList<String> lsInfo, int linNum) {
+	public void setLsInfo(LinkedList<String> lsInfo, int linNum, boolean isSysout) {
 		this.lsInfo = lsInfo;
 		this.lineNum = linNum;
+		this.isSysout = isSysout;
 	}
 	public boolean isFinished() {
 		return isFinished;
@@ -566,6 +569,9 @@ class StreamGobbler extends Thread {
 					i++;
 					if (i > lineNum) {
 						lsInfo.poll();
+					}
+					if (isSysout) {
+						System.out.println(line);
 					}
 				}
 			}
