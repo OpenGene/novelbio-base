@@ -197,41 +197,7 @@ K extends ListCodAbsDu<T, E>, M extends ListAbsSearch<T, E, K>> {
 		}
 		return lsResult.get(0);
 	}
-	/**
-	 * 给定ID，在其所对应的信息上加一
-	 * @param name
-	 * @param location
-	 */
-	public void addNumber(String chrID, int location) {
-		ListCodAbs<T> gffCodPeak = searchLocation(chrID, location);
-		if (!gffCodPeak.isInsideLoc()) {
-			return;
-		}
-		T gffDetailPeak = gffCodPeak.getGffDetailThis();
-		gffDetailPeak.addReadsInElementNum();
-	}
-	/**
-	 * 返回区间以及每个区间的数量，前面必须add过
-	 * key：int的区间
-	 * value：具体数量
-	 * @return
-	 */
-	public LinkedHashMap<String,LinkedHashMap<int[], Integer>> getFreq() {
-		LinkedHashMap<String, LinkedHashMap<int[], Integer>> hashResult = new LinkedHashMap<String, LinkedHashMap<int[],Integer>>();
-		Set<String> setChrID = getMapChrID2LsGff().keySet();
-		for (String string : setChrID) {
-			LinkedHashMap<int[], Integer> hashTmpResult = new LinkedHashMap<int[], Integer>();
-			M lsPeak = getListDetail(string);
-			for (T gffDetailPeak : lsPeak) {
-				int[] interval = new int[2];
-				interval[0] = gffDetailPeak.getStartAbs();
-				interval[1]= gffDetailPeak.getEndAbs();
-				hashTmpResult.put(interval, gffDetailPeak.getReadsInElementNum());
-			}
-			hashResult.put(string, hashTmpResult);
-		}
-		return hashResult;
-	}
+	
 	/**
 	 * 在读取文件后如果有什么需要设置的，可以写在setOther();方法里面
 	 * @param gfffilename
@@ -349,7 +315,6 @@ K extends ListCodAbsDu<T, E>, M extends ListAbsSearch<T, E, K>> {
 		for (M lsGffDetail : mapChrID2ListGff.values()) {
 			for (int i = 0; i < lsGffDetail.size(); i++) {
 				T gffDetail = lsGffDetail.get(i);
-				gffDetail.setItemNum(i);
 				T gffDetailUp = null;
 				T gffDetailDown = null;
 				if (i > 0) {
