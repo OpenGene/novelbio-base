@@ -24,6 +24,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 import com.novelbio.base.SerializeKryo;
+import com.novelbio.base.StringOperate;
 import com.novelbio.base.cmd.CmdOperate;
 import com.novelbio.base.dataStructure.PatternOperate;
 
@@ -680,6 +681,8 @@ public class FileOperate {
 	 * @return
 	 */
 	public static void delFolder(String folderPath) {
+		if(StringOperate.isRealNull(folderPath))
+			return;
 		try {
 			delAllFile(folderPath); // 删除完里面所有内容
 			String filePath = folderPath;
