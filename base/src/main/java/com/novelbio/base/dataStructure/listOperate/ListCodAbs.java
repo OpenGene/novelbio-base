@@ -96,9 +96,7 @@ public class ListCodAbs<T extends ListDetailAbs> {
 		if (gffDetailUp == null) {
 			return false;
 		}
-		gffDetailUp.setTssRegion(upTss, 0);
-		gffDetailUp.setTesRegion(0, downTes);
-		return gffDetailUp.isCodInGeneExtend(Coordinate);
+		return gffDetailUp.isCodInGeneExtend(new int[]{upTss, 0}, new int[]{0, downTes}, Coordinate);
 	}
 	/**
 	 * 是否在下一个条目内
@@ -109,9 +107,7 @@ public class ListCodAbs<T extends ListDetailAbs> {
 		if (gffDetailDown == null) {
 			return false;
 		}
-		gffDetailDown.setTssRegion(upTss, 0);
-		gffDetailDown.setTesRegion(0, downTes);
-		return gffDetailDown.isCodInGeneExtend(Coordinate);
+		return gffDetailDown.isCodInGeneExtend(new int[]{upTss, 0}, new int[]{0, downTes}, Coordinate);
 	}
 
 	/**

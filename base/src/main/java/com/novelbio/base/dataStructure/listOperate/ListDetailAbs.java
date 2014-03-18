@@ -25,22 +25,11 @@ import com.novelbio.base.dataStructure.Alignment;
  * @author zong0jie
  */
 public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetailAbs> {
+	private static final Logger logger = Logger.getLogger(ListDetailAbs.class);
+
 	/** 父树 */
 	@Transient
 	protected ListAbs<? extends ListDetailAbs> listAbs;
-	
-	/** 根据cis在起点的上游多少bp，在此范围内则认为在tss区域  */
-	@Transient
-	protected int upTss = 0;
-	/** 根据cis在起点的下游多少bp，在此范围内则认为在tss区域 */
-	@Transient
-	protected int downTss = 0;
-	/** 根据cis在终点的上游多少bp，在此范围内则认为在tes区域 */
-	@Transient
-	protected int upGeneEnd3UTR = 0;
-	/** 根据cis在终点的下游多少bp，在此范围内则认为在tes区域 */
-	@Transient
-	protected int downGeneEnd3UTR = 0;
 	/**
 	 * LOCID，<br>
 	 * 水稻：LOC_Os01g01110<br>
@@ -55,9 +44,6 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 	protected String parentName;
 	/** 转录方向，假设同一基因不管多少转录本都同一转录方向 */
 	protected Boolean cis5to3 = null;
-	/** 本区域内有多少条reads */
-	@Transient
-	int readsInElementNumber = 0;
 	
 	@Indexed(unique = false)
 	/** 本条目起点,起点位置总是小于终点，无视基因方向 */
@@ -71,9 +57,6 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 	/** 本基因终点到下一个基因边界的距离 */
 	@Transient
 	protected int tes2DownGene = ListCodAbs.LOC_ORIGINAL;
-	/** 该条目在List-GffDetail中的具体位置 */
-	@Indexed(unique = false)
-	protected int itemNum = ListCodAbs.LOC_ORIGINAL;
 	
 	public ListDetailAbs() {}
 	/**
@@ -123,79 +106,7 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 	public ListAbs<? extends ListDetailAbs> getParent() {
 		return listAbs;
 	}
-	/**
-	 * 划定Tss范围上游为负数，下游为正数
-	 * @param upTss
-	 * @param downTss
-	 */
-	public void setTssRegion(int upTss, int downTss) {
-		this.upTss = upTss;
-		this.downTss = downTss;
-	}
-	/**
-	 * 划定Tss范围上游为负数，下游为正数
-	 * @param upTss
-	 * @param downTss
-	 */
-	public void setTssRegion(int[] Tss) {
-		if (Tss != null)
-			setTssRegion(Tss[0], Tss[1]);
-	}
-	
-	/**
-	 * 划定Tes范围上游为负数，下游为正数
-	 * @param upTes
-	 * @param downTes
-	 */
-	public void setTesRegion(int upTes, int downTes) {
-		this.upGeneEnd3UTR = upTes;
-		this.downGeneEnd3UTR = downTes;
-	}
-	/**
-	 * 划定Tss范围上游为负数，下游为正数
-	 * @param upTss
-	 * @param downTss
-	 */
-	public void setTesRegion(int[] Tes) {
-		if (Tes != null)
-			setTesRegion(Tes[0], Tes[1]);
-	}
-	/**
-	 * 0：uptss
-	 * 1：downtss
-	 * @return
-	 */
-	public int[] getTssRegion() {
-		return new int[]{upTss, downTss};
-	}
-	/**
-	 * 0：uptes
-	 * 1：downtes
-	 * @return
-	 */
-	public int[] getTesRegion() {
-		return new int[]{upGeneEnd3UTR, downGeneEnd3UTR};
-	}
-	private static Logger logger = Logger.getLogger(ListDetailAbs.class);
-	
-	/** 计数加一 */
-	public void addReadsInElementNum() {
-		readsInElementNumber++;
-	}
-	/**
-	 * 本区域内出现多少的元素，必须前面调用addNumber添加
-	 * @return
-	 */
-	public int getReadsInElementNum() {
-		return readsInElementNumber;
-	}
-	/**
-	 * 从0开始，位于list的第几个位置
-	 * @param itemNum
-	 */
-	public void setItemNum(int itemNum) {
-		this.itemNum = itemNum;
-	}
+
 	/** 
 	 * <b>从0开始计算</b>
 	 * 该条目在List-GffDetail中的具体位置 */
@@ -308,10 +219,15 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 		}
 	}
 	/**
+	 * 
 	 * 坐标是否在基因的内部，包括Tss和GeneEnd的拓展区域
+	 * @param tss
+	 * @param geneEnd
+	 * @param coord
+	 * @return
 	 */
-	public boolean isCodInGeneExtend(int coord) {
-		return isCodInSide(coord) || isCodInPromoter(coord) || isCodInGenEnd(coord);
+	public boolean isCodInGeneExtend(int[] tss, int geneEnd[], int coord) {
+		return isCodInSide(coord) || isCodInPromoter(tss, coord) || isCodInGenEnd(geneEnd, coord);
 	}
 	
 	/**
@@ -319,12 +235,12 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 	 * 所以如果需要只在基因外的tss，需要同时加上isCodInside==false判断
 	 * @return
 	 */
-	public boolean isCodInPromoter(int coord) {
+	public boolean isCodInPromoter(int[] tss, int coord) {
 		if (getCod2Start(coord) == null) {
 			return false;
 		}
 		int cod2start = getCod2Start(coord);
-		if (cod2start >= upTss && cod2start <= downTss) {
+		if (cod2start >= tss[0] && cod2start <= tss[1]) {
 			return true;
 		}
 		return false;
@@ -336,12 +252,12 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 	 * 也就是尾部点，左右扩展geneEnd3UTR长度的bp
 	 * @return
 	 */
-	public boolean isCodInGenEnd(int coord) {
+	public boolean isCodInGenEnd(int[] geneEnd, int coord) {
 		if (getCod2End(coord) == null) {
 			return false;
 		}
 		int cod2end = getCod2End(coord);
-		if (cod2end >= upGeneEnd3UTR && cod2end <= downGeneEnd3UTR ) {
+		if (cod2end >= geneEnd[0] && cod2end <= geneEnd[1] ) {
 			return true;
 		}
 		return false;
@@ -470,18 +386,13 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 		try {
 			result = (ListDetailAbs) super.clone();
 			result.cis5to3 = cis5to3;
-			result.downGeneEnd3UTR = downGeneEnd3UTR;
-			result.downTss = downTss;
 			result.setItemName = new LinkedHashSet<String>(setItemName);
 //			result.itemNum = itemNum;
-			result.readsInElementNumber = readsInElementNumber;
 			result.numberend = numberend;
 			result.numberstart = numberstart;
 			result.parentName = parentName;
 			result.tes2DownGene = tes2DownGene;
 			result.tss2UpGene = tss2UpGene;
-			result.upGeneEnd3UTR = upGeneEnd3UTR;
-			result.upTss = upTss;
 		} catch (CloneNotSupportedException e) {
 			e.printStackTrace();
 		}
