@@ -72,7 +72,7 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 	 */
 	public ListDetailAbs(String chrID, String ItemName, Boolean cis5to3) {
 		if (chrID != null && !chrID.equals("")) {
-			this.parentName = chrID;
+			this.parentName = chrID.toLowerCase();
 		}
 		if (ItemName != null && !ItemName.equals("")) {
 			this.setItemName.add(ItemName);

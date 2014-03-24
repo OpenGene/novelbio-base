@@ -20,7 +20,13 @@ public class SepSign {
 	 * "@@"
 	 */
 	public static final String SEP_INFO = "@@";
-	
+	/**
+	 * <b>不要往这个symbol中添加"/"或"\"</b><br>
+	 * 简单分隔符
+	 * 如NCBI@protein coding
+	 * "@"
+	 */
+	public static final String SEP_INFO_SIMPLE = "@";
 	/**
 	 * <b>不要往这个symbol中添加"/"或"\"</b><br>
 	 * 中间等级
