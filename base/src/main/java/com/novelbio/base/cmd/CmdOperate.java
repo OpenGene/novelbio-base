@@ -53,7 +53,7 @@ public class CmdOperate extends RunProcess<String> {
 	/** 标准输出的信息 */
 	LinkedList<String> lsOutInfo;
 	/** 出错输出的信息 */
-	LinkedList<String> lsErrorInfo;
+	LinkedList<String> lsErrorInfo = new LinkedList<>();
 	StreamGobbler errorGobbler;
 	StreamGobbler outputGobbler;
 	
