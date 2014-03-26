@@ -367,7 +367,7 @@ public class FileHadoop extends File {
 		try {
 			return fsHDFS.delete(dst, false);
 		} catch (IOException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			return false;
 		}
 	}

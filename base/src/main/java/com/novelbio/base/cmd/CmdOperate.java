@@ -53,7 +53,7 @@ public class CmdOperate extends RunProcess<String> {
 	/** 标准输出的信息 */
 	LinkedList<String> lsOutInfo;
 	/** 出错输出的信息 */
-	LinkedList<String> lsErrorInfo;
+	LinkedList<String> lsErrorInfo = new LinkedList<>();
 	StreamGobbler errorGobbler;
 	StreamGobbler outputGobbler;
 	
@@ -188,7 +188,7 @@ public class CmdOperate extends RunProcess<String> {
 	}
 	
 	/** 将cmd中的hdfs路径改为本地路径 */
-	private String convertToLocalCmd(String tmpCmd) {
+	private static String convertToLocalCmd(String tmpCmd) {
 		String[] subcmd = tmpCmd.split("=");
 		subcmd[0] = FileHadoop.convertToLocalPath(subcmd[0]);
 		for (int i = 1; i < subcmd.length; i++) {

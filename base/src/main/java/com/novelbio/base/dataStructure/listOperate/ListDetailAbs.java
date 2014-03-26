@@ -72,7 +72,7 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 	 */
 	public ListDetailAbs(String chrID, String ItemName, Boolean cis5to3) {
 		if (chrID != null && !chrID.equals("")) {
-			this.parentName = chrID;
+			this.parentName = chrID.toLowerCase();
 		}
 		if (ItemName != null && !ItemName.equals("")) {
 			this.setItemName.add(ItemName);
@@ -87,7 +87,7 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 	 */
 	public ListDetailAbs(ListAbs<? extends ListDetailAbs> listAbs, String ItemName, Boolean cis5to3) {
 		this.listAbs = listAbs;
-		this.parentName = listAbs.getName();
+		this.parentName = listAbs.getName().toLowerCase();
 		if (ItemName != null) {
 			this.setItemName.add(ItemName);
 		}
@@ -100,7 +100,7 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 	public void setParentListAbs(ListAbs<? extends ListDetailAbs> listAbs) {
 		this.listAbs = listAbs;
 		if (this.parentName == null) {
-			this.parentName = listAbs.getName();
+			this.parentName = listAbs.getName().toLowerCase();
 		}
 	}
 	public ListAbs<? extends ListDetailAbs> getParent() {
@@ -148,7 +148,7 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 	 * @param parentName
 	 */
 	public void setParentName(String parentName) {
-		this.parentName = parentName;
+		this.parentName = parentName.toLowerCase();
 	}
 	/** 本基因起点到上一个基因边界的距离  */
 	public void setTss2UpGene(int tss2UpGene) {
@@ -352,7 +352,7 @@ public class ListDetailAbs implements Alignment, Cloneable, Comparable<ListDetai
 		return
 		numberend == otherObj.numberend && 
 		numberstart == otherObj.numberstart &&
-		parentName.equals(otherObj.parentName) &&
+		parentName.equalsIgnoreCase(otherObj.parentName) &&
 //		getItemNum() == otherObj.getItemNum() &&
 		cis5to3 == otherObj.cis5to3;
 	}

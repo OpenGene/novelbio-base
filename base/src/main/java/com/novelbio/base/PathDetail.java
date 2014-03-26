@@ -272,4 +272,12 @@ public class PathDetail {
 	public static String getReportTempPath() {
 		return properties.getProperty("reportTempPath");
 	}
+	
+	/**
+	 * 取得blast的保存路径
+	 * @return
+	 */
+	public static String getBlastFolder() {
+		return properties.getProperty("blastSavePath");
+	}
 }
