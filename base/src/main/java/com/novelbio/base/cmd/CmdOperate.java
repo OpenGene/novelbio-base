@@ -201,8 +201,26 @@ public class CmdOperate extends RunProcess<String> {
 		return result;
 	}
 	
-	/** 返回执行的具体cmd命令，会将文件路径删除，仅给相对路径 */
+	/** 返回执行的具体cmd命令，不会将文件路径删除，仅给相对路径 */
 	public String getCmdExeStr() {
+		StringBuilder strBuilder = new StringBuilder();
+		for (String cmdTmp : realCmd) {
+			strBuilder.append(" ");
+			strBuilder.append(cmdTmp.replace(" ", "\\ "));
+		}
+		if (saveFilePath != null && !saveFilePath.equals("")) {
+			strBuilder.append(" > ");
+			strBuilder.append(saveFilePath);
+		}
+		if (saveErrPath != null && !saveErrPath.equals("")) {
+			strBuilder.append(" 2> ");
+			strBuilder.append(saveErrPath);
+		}
+		return strBuilder.toString().trim();
+	}
+	
+	/** 返回执行的具体cmd命令，会将文件路径删除，仅给相对路径 */
+	public String getCmdExeStrModify() {
 		StringBuilder strBuilder = new StringBuilder();
 		for (String cmdTmp : realCmd) {
 			String[] subcmd = cmdTmp.split("=");
@@ -230,6 +248,14 @@ public class CmdOperate extends RunProcess<String> {
 		for (String cmdTmp : realCmd) {
 			strBuilder.append(" ");
 			strBuilder.append(cmdTmp.replace(" ", "\\ "));
+		}
+		if (saveFilePath != null && !saveFilePath.equals("")) {
+			strBuilder.append(" > ");
+			strBuilder.append(saveFilePath);
+		}
+		if (saveErrPath != null && !saveErrPath.equals("")) {
+			strBuilder.append(" 2> ");
+			strBuilder.append(saveErrPath);
 		}
 		return strBuilder.toString().trim();
 	}
