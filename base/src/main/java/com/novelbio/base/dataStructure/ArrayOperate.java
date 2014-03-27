@@ -243,7 +243,9 @@ public class ArrayOperate {
 		if (ls == null) ls = new ArrayList<>();
 		
 		for (T t : array) {
-			ls.add(t);
+			if (t != null) {
+				ls.add(t);
+			}
 		}
 	}
 	
