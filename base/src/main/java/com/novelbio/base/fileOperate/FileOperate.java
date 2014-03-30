@@ -291,7 +291,11 @@ public class FileOperate {
 			return 0;
 		}
 		if (file.isFile()) {
-			return file.length()/1024;
+			double size = file.length()/1024;
+			if (size == 0 && FileHadoop.isHdfs(filePath)) {
+				return getFileSize(FileHadoop.convertToLocalPath(filePath));
+			}
+			return size;
 		} else if (file.isDirectory()) {
 			ArrayList<String[]> lsFileName = getFoldFileName(filePath);
 
@@ -326,7 +330,11 @@ public class FileOperate {
 			return 0;
 		}
 		if (file.isFile()) {
-			return file.length();
+			long size = file.length();
+			if (size == 0 && FileHadoop.isHdfs(filePath)) {
+				return getFileSizeLong(FileHadoop.convertToLocalPath(filePath));
+			}
+			return size;
 		} else if (file.isDirectory()) {
 			ArrayList<String[]> lsFileName = getFoldFileName(filePath);
 
@@ -1425,7 +1433,7 @@ public class FileOperate {
 		}
 		File file = getFile(fileName);
 		if (file.exists() && !file.isDirectory()) {// 没有文件，则返回空
-			if(file.length() > size) {
+			if(FileOperate.getFileSize(fileName) > size) {
 				return true;
 			}
 		} else {
