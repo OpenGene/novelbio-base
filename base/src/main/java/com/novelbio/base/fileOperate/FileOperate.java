@@ -1433,7 +1433,7 @@ public class FileOperate {
 		}
 		File file = getFile(fileName);
 		if (file.exists() && !file.isDirectory()) {// 没有文件，则返回空
-			if(FileOperate.getFileSize(fileName) > size) {
+			if(FileOperate.getFileSizeLong(fileName) > size) {
 				return true;
 			}
 		} else {
