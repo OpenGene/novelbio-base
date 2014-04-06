@@ -16,6 +16,7 @@ import org.apache.log4j.Logger;
 import com.novelbio.base.PathDetail;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
+import com.novelbio.base.dataStructure.PatternOperate;
 import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.base.multithread.RunProcess;
@@ -64,9 +65,9 @@ public class CmdOperate extends RunProcess<String> {
 	
 	
 	/** 如果选择用list来保存结果输出，最多保存500行的输出信息 */
-	int lineNumStd = 500;
+	int lineNumStd = 1000;
 	/** 如果选择用list来保存错误输出，最多保存500行的输出信息 */
-	int lineNumErr = 500;//最多保存500行的输出信息
+	int lineNumErr = 1000;//最多保存500行的输出信息
 
 	/**
 	 * 直接运行，不写入文本
@@ -203,20 +204,7 @@ public class CmdOperate extends RunProcess<String> {
 	
 	/** 返回执行的具体cmd命令，不会将文件路径删除，仅给相对路径 */
 	public String getCmdExeStr() {
-		StringBuilder strBuilder = new StringBuilder();
-		for (String cmdTmp : realCmd) {
-			strBuilder.append(" ");
-			strBuilder.append(cmdTmp.replace(" ", "\\ "));
-		}
-		if (saveFilePath != null && !saveFilePath.equals("")) {
-			strBuilder.append(" > ");
-			strBuilder.append(saveFilePath);
-		}
-		if (saveErrPath != null && !saveErrPath.equals("")) {
-			strBuilder.append(" 2> ");
-			strBuilder.append(saveErrPath);
-		}
-		return strBuilder.toString().trim();
+		return getCmdExeStrModify();
 	}
 	
 	/** 返回执行的具体cmd命令，会将文件路径删除，仅给相对路径 */
@@ -303,13 +291,9 @@ public class CmdOperate extends RunProcess<String> {
 		lsOutInfo = new LinkedList<>();
 	}
 
-	/** 需要获得错误输出流，用getStdErr获得 */
-	public void setGetLsErrOut() {
-		lsErrorInfo = new LinkedList<>();
-	}
-	/** 需要获得错误输出流，用getStdErr获得 */
+	/** 需要获得多少行错误输出流 */
 	public void setGetLsErrOut(int lineNum) {
-		lsErrorInfo = new LinkedList<>();
+		this.lineNumErr = lineNum;
 	}
 	
 	/** 程序执行完后可以看错误输出<br>
@@ -528,6 +512,16 @@ public class CmdOperate extends RunProcess<String> {
 	/** 添加引号，一般是文件路径需要添加引号 **/
 	public static String addQuot(String pathName) {
 		return "\"" + pathName + "\"";
+	}
+	
+	/** 将输入的含有path的信息修改为相对路径 */
+	public static String makePathToRelative(String input) {
+		PatternOperate patternOperate = new PatternOperate("\"(.+?)\"", false);
+		List<String> lsInfo = patternOperate.getPat(input, 1);
+		for (String string : lsInfo) {
+			input = input.replace(string, FileOperate.getFileName(string));
+		}
+		return input;
 	}
 }
 
