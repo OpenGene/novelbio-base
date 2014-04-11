@@ -234,17 +234,23 @@ public class ArrayOperate {
 	}
 	
 	/**
-	 * 将array中的元素添加到list中
+	 * 将array中的元素添加到list中 如果参数是null的话，就不加进去
 	 * @param ls 如果为null则新建一个list
 	 * @param array 如果为null则返回
 	 */
 	public static<T> void addArrayToList(List<T> ls, T[] array) {
 		if (array == null) return;
 		if (ls == null) ls = new ArrayList<>();
-		
+		boolean flag = true;
 		for (T t : array) {
-			if (t != null) {
-				ls.add(t);
+			if (t == null) {
+				flag = false;
+				break;
+			}
+		}
+		if (flag) {
+			for (T t2 : array) {
+				ls.add(t2);
 			}
 		}
 	}
