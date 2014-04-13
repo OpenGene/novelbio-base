@@ -15,7 +15,9 @@ public abstract class RunProcess<T> implements Runnable {
 
 	/** 是否要停止本线程 */
 	protected volatile boolean flagStop = true;
+	protected volatile RunThreadStat runThreadStat = RunThreadStat.notStart;
 	protected boolean suspendFlag = false;
+	Throwable exception;
 	/** 是否正常结束 */
 	protected boolean flagFinish = false;
 	
@@ -26,27 +28,36 @@ public abstract class RunProcess<T> implements Runnable {
 	/** 程序暂停 */
 	public void threadSuspend() {
 		this.suspendFlag = true;
+		runThreadStat = RunThreadStat.threadSuspend;
 	}
 	/** 进程恢复 */
 	public void threadResume() {
+		threadResume(false);
+	}
+	/** 进程恢复 */
+	private void threadResume(boolean isThreadStop) {
 		if (suspendFlag == false) {
 			return;
 		}
 		this.suspendFlag = false;
+		if (!isThreadStop) {
+			runThreadStat = RunThreadStat.running;
+		}
 		if (runGetInfo != null) {
 			runGetInfo.threadResumed(this);
 		}
 		lock.notify();
 	}
 	/** 终止线程，需要在循环中添加<br>
-	 * if (!flagRun)<br>
+	 * if (flagStop)<br>
 	*			break; */
 	public synchronized void threadStop() {
-		flagStop = true;		
+		flagStop = true;
+		runThreadStat = RunThreadStat.finishInterrupt;
 		if (runGetInfo != null) {
 			runGetInfo.threadStop(this);
 		}
-		threadResume();
+		threadResume(true);
 	}
 	/**
 	 * 放在循环中，检查是否终止线程
@@ -64,8 +75,15 @@ public abstract class RunProcess<T> implements Runnable {
 	@Override
 	public void run() {
 		flagStop = false;
-		running();
-	
+		runThreadStat = RunThreadStat.running;
+		
+		try {
+			running();
+			runThreadStat = RunThreadStat.finishNormal;
+		} catch (Throwable e) {
+			exception = e;
+			runThreadStat = RunThreadStat.finishAbnormal;
+		}
 		flagStop = true;
 		if (runGetInfo != null) {
 			runGetInfo.done(this);
@@ -95,5 +113,17 @@ public abstract class RunProcess<T> implements Runnable {
 	 */
 	public boolean isFinished() {
 		return flagFinish;
+	}
+	
+	/** 返回线程运行时的状态 */
+	public RunThreadStat getRunThreadStat() {
+		return runThreadStat;
+	}
+	/** 返回异常 */
+	public Throwable getException() {
+		return exception;
+	}
+	public static enum RunThreadStat {
+		notStart, running, finishNormal, threadSuspend, finishInterrupt, finishAbnormal
 	}
 }

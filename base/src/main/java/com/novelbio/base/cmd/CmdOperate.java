@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,6 +13,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 import com.novelbio.base.PathDetail;
+import com.novelbio.base.cmd.CmdOperate.FinishFlag;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.dataStructure.PatternOperate;
@@ -49,7 +49,7 @@ public class CmdOperate extends RunProcess<String> {
 	String saveErrPath;
 	
 	/** 结束标志，0表示正常退出 */
-	int info = -1000;
+	FinishFlag finishFlag;
 	long runTime = 0;
 	/** 标准输出的信息 */
 	LinkedList<String> lsOutInfo;
@@ -377,7 +377,7 @@ public class CmdOperate extends RunProcess<String> {
 	 * @throws Exception
 	 */
 	private void doInBackgroundB() throws Exception {
-		info = -1000;
+		finishFlag = new FinishFlag();
 		process.exec(realCmd);
 //		logger.info("process id : " + CmdOperate.getUnixPID(process));
 
@@ -388,7 +388,7 @@ public class CmdOperate extends RunProcess<String> {
 		errorGobbler.start();
 		outputGobbler.start();
 		
-		info = process.waitFor();
+		finishFlag.flag = process.waitFor();
 		outputGobbler.join();
 		errorGobbler.join();
 		if (!getCmdInStdStream && saveFilePath != null) {
@@ -410,7 +410,7 @@ public class CmdOperate extends RunProcess<String> {
 	}
 	
 	private void setErrorStream() {
-		errorGobbler = new StreamGobbler(process.getStdErr());
+		errorGobbler = new StreamGobbler(process.getStdErr(), finishFlag);
 		if (!getCmdInErrStream) {
 			if (saveErrPath != null) {
 				//标准输出流不能被关闭
@@ -427,7 +427,7 @@ public class CmdOperate extends RunProcess<String> {
 	}
 
 	private void setStdStream() {
-		outputGobbler = new StreamGobbler(process.getStdOut());
+		outputGobbler = new StreamGobbler(process.getStdOut(), finishFlag);
 		if (!getCmdInStdStream) {
 			if (saveFilePath != null) {
 				//标准输出流不能被关闭
@@ -464,14 +464,14 @@ public class CmdOperate extends RunProcess<String> {
 	
 	@Override
 	public boolean isRunning() {
-		if(info < 0)
+		if(finishFlag != null && finishFlag.flag == null)
 			return true;
 		return false;
 	}
 
 	/** 是否正常结束 */
 	public boolean isFinishedNormal() {
-		if (info == 0) {
+		if (finishFlag != null && finishFlag.flag != null && finishFlag.flag == 0) {
 			return true;
 		}
 		return false;
@@ -514,14 +514,19 @@ public class CmdOperate extends RunProcess<String> {
 		return "\"" + pathName + "\"";
 	}
 	
-	/** 将输入的含有path的信息修改为相对路径 */
+	/** 将输入的被引号--包括英文的单引号和双引号--包围的path信息修改为相对路径 */
 	public static String makePathToRelative(String input) {
-		PatternOperate patternOperate = new PatternOperate("\"(.+?)\"", false);
-		List<String> lsInfo = patternOperate.getPat(input, 1);
+		PatternOperate patternOperate = new PatternOperate("\"(.+?)\"|\'(.+?)\'", false);
+		List<String> lsInfo = patternOperate.getPat(input, 1,2);		
 		for (String string : lsInfo) {
 			input = input.replace(string, FileOperate.getFileName(string));
 		}
+		
 		return input;
+	}
+	
+	static class FinishFlag {
+		Integer flag = null;
 	}
 }
 
@@ -530,13 +535,15 @@ class StreamGobbler extends Thread {
 	InputStream is;
 	OutputStream os;
 	LinkedList<String> lsInfo;
+	FinishFlag finishFlag;
 	boolean isFinished = false;
 	boolean getInputStream = false;
 	int lineNum = 500;
 	/** 如果将输出信息写入lsInfo中，是否还将这些信息打印到控制台 */
 	boolean isSysout = false;
-	StreamGobbler(InputStream is) {
+	StreamGobbler(InputStream is, FinishFlag finishFlag) {
 		this.is = is;
+		this.finishFlag = finishFlag;
 	}
 	/** 制定一个out流，cmd的输出流就会定向到该流中<br>
 	 * 该方法和{@link #setGetInputStream(boolean)} 冲突
@@ -565,10 +572,10 @@ class StreamGobbler extends Thread {
 		isFinished = false;
 		if (!getInputStream) {
 			if (os == null) {
-				exhaustInStream(is);
+				exhaustInStream(is, finishFlag);
 			} else {
 				try {
-					IOUtils.copy(is, os);
+					copyLarge(is, os, finishFlag);
 				} catch (IOException ioe) {
 					ioe.printStackTrace();
 				}
@@ -577,13 +584,13 @@ class StreamGobbler extends Thread {
 		}
 	}
 	
-	private void exhaustInStream(InputStream inputStream) {
+	private void exhaustInStream(InputStream inputStream, FinishFlag finishFlag) {
 		try {
 			InputStreamReader isr = new InputStreamReader(inputStream);
 			BufferedReader br = new BufferedReader(isr);
 			String line = null;
 			int i = 0;
-			while ((line = br.readLine()) != null) {
+			while (finishFlag.flag == null && (line = br.readLine()) != null) {
 				if (lsInfo != null) {
 					lsInfo.add(line);
 					i++;
@@ -600,6 +607,34 @@ class StreamGobbler extends Thread {
 		}
 	}
 	
+	private static final int EOF = -1;
+  /**
+    * Copies bytes from a large (over 2GB) <code>InputStream</code> to an
+    * <code>OutputStream</code>.
+    * <p>
+    * This method uses the provided buffer, so there is no need to use a
+    * <code>BufferedInputStream</code>.
+    * <p>
+    *
+    * @param input  the <code>InputStream</code> to read from
+    * @param output  the <code>OutputStream</code> to write to
+    * @param buffer the buffer to use for the copy
+    * @return the number of bytes copied
+    * @throws NullPointerException if the input or output is null
+    * @throws IOException if an I/O error occurs
+    * @since 2.2
+    */
+	public static long copyLarge(final InputStream input, final OutputStream output, final FinishFlag finishFlag)
+					throws IOException {
+		byte[] buffer = new byte[1024 * 4];
+		long count = 0;
+		int n = 0;
+		while (finishFlag.flag == null && EOF != (n = input.read(buffer))) {
+			output.write(buffer, 0, n);
+			count += n;
+		}
+		return count;
+	}
 	
 	/** 关闭输出流 */
 	public void close() {
