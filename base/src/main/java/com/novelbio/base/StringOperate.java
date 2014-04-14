@@ -1,5 +1,9 @@
 package com.novelbio.base;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 public class StringOperate {
 
 	private static int compare(String str, String target) {
@@ -77,11 +81,17 @@ public class StringOperate {
 		}
 	}
 	
-	public static void main(String[] args) {
-		String str = "1#2203NO525FANGXIEROADSHANGHAICN";
-		String target = "1#2203NO525FANGXIEROADSHANGHAICN";
-		System.out.println("similarityRatio=" + StringOperate.getSimilarityRatio(str, target));
-	}
-
 	// 代码是网上找的 不过感觉不错 大家可以试试
+	/**
+	 * 完全分割一个字符串
+	 * @param key
+	 * @return
+	 */
+	public static Set<String> splitAbsolute(String key){
+		Set<String> setWords = new HashSet<>();
+		for (int i = 1; i <= key.length(); i++) {
+			setWords.add(key.substring(i-1, i));
+		}
+		return setWords;
+	}
 }

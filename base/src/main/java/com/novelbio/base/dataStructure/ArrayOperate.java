@@ -56,6 +56,25 @@ public class ArrayOperate {
 		return result;
 	}
 	/**
+	 * 打乱一个数组
+	 * @param array
+	 * @return
+	 */
+	public static <T> T[] shuffle(T[] array){
+		T tmp;
+		int length = array.length;
+		for (int i = 0; i < array.length; i++) {
+			int index = (int)Math.floor(Math.random()*(length-i))+i;
+			if(index == i || index >= length)
+				continue;
+			tmp = array[i];
+			array[i] = tmp;
+			array[i] = array[index];
+			array[index] = tmp;
+		}
+		return array;
+	}
+	/**
 	 * 给定lsString，将lsString看作ArrayList-String[]，纵向将其合并为String[][]，也就是类似cbind
 	 * @param lsStrings
 	 * @return
