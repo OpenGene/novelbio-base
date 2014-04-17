@@ -81,6 +81,7 @@ public abstract class RunProcess<T> implements Runnable {
 			running();
 			runThreadStat = RunThreadStat.finishNormal;
 		} catch (Throwable e) {
+			e.printStackTrace();
 			exception = e;
 			runThreadStat = RunThreadStat.finishAbnormal;
 		}
