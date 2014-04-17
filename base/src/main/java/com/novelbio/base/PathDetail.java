@@ -154,7 +154,7 @@ public class PathDetail {
 	 * 获取当前合同的附件文件路径
 	 * @return
 	 */
-	public static String getHDFSTmpFold() {
+	public static String getContractFileSaveFold() {
 		String hdfsTmpPath = FileHadoop.getHdfsHeadSymbol() + "/nbCloud/public/contract/appendix/";
 		return hdfsTmpPath;
 	}
