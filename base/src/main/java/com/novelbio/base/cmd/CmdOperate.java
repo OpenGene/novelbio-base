@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 import com.novelbio.base.PathDetail;
@@ -456,7 +455,7 @@ public class CmdOperate extends RunProcess<String> {
 			e.printStackTrace();
 			logger.error("cmd cannot executed correctly: " + cmd);
 		}
-		runTime = dateTime.getEclipseTime();
+		runTime = dateTime.getElapseTime();
 		if (process instanceof ProcessRemote) {
 			((ProcessRemote)process).close();
 		}

@@ -65,7 +65,7 @@ public class DateUtil {
 	 * 从设定starttime开始返回运行时间，单位ms
 	 * @return
 	 */
-	public long getEclipseTime() {
+	public long getElapseTime() {
 		long end=System.currentTimeMillis(); //获取运行结束时间
 		return end-start; 
 	}
