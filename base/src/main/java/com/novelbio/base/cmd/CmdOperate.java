@@ -300,6 +300,20 @@ public class CmdOperate extends RunProcess<String> {
 	 * 内部实现为linkedlist
 	 */
 	public List<String> getLsErrOut() {
+		int i = 0;
+		while (errorGobbler == null) {
+			if (i++ > 10) {
+				break;
+			}
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		if (errorGobbler == null) {
+			return new ArrayList<>();
+		}
 		while (true) {
 			if (errorGobbler.isFinished()) {
 				break;
@@ -331,6 +345,20 @@ public class CmdOperate extends RunProcess<String> {
 	 * 内部实现为linkedlist
 	 */
 	public List<String> getLsStdOut() {
+		int i  = 0;
+		while (outputGobbler == null) {
+			if (i++ > 10) {
+				break;
+			}
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		if (outputGobbler == null) {
+			return new ArrayList<>();
+		}
 		while (true) {
 			if (outputGobbler.isFinished()) {
 				break;
