@@ -33,6 +33,10 @@ public class DateUtil {
 	
 	/** 当前日期的月份 */
 	public static final String PATTERN_MM = "MM";
+	/**
+	 * 年-月-日
+	 */
+	public static final String PATTERN_hhmm = "hh_mm";
 	
 	long start = 0;
 	/**

@@ -437,7 +437,7 @@ public class CmdOperate extends RunProcess<String> {
 	}
 	
 	private void setErrorStream() {
-		errorGobbler = new StreamGobbler(process.getStdErr(), finishFlag);
+		errorGobbler = new StreamGobbler(process.getStdErr());
 		if (!getCmdInErrStream) {
 			if (saveErrPath != null) {
 				//标准输出流不能被关闭
@@ -454,7 +454,7 @@ public class CmdOperate extends RunProcess<String> {
 	}
 
 	private void setStdStream() {
-		outputGobbler = new StreamGobbler(process.getStdOut(), finishFlag);
+		outputGobbler = new StreamGobbler(process.getStdOut());
 		if (!getCmdInStdStream) {
 			if (saveFilePath != null) {
 				//标准输出流不能被关闭
@@ -568,9 +568,8 @@ class StreamGobbler extends Thread {
 	int lineNum = 500;
 	/** 如果将输出信息写入lsInfo中，是否还将这些信息打印到控制台 */
 	boolean isSysout = false;
-	StreamGobbler(InputStream is, FinishFlag finishFlag) {
+	StreamGobbler(InputStream is) {
 		this.is = is;
-		this.finishFlag = finishFlag;
 	}
 	/** 制定一个out流，cmd的输出流就会定向到该流中<br>
 	 * 该方法和{@link #setGetInputStream(boolean)} 冲突
@@ -599,10 +598,10 @@ class StreamGobbler extends Thread {
 		isFinished = false;
 		if (!getInputStream) {
 			if (os == null) {
-				exhaustInStream(is, finishFlag);
+				exhaustInStream(is);
 			} else {
 				try {
-					copyLarge(is, os, finishFlag);
+					copyLarge(is, os);
 				} catch (IOException ioe) {
 					ioe.printStackTrace();
 				}
@@ -611,13 +610,13 @@ class StreamGobbler extends Thread {
 		}
 	}
 	
-	private void exhaustInStream(InputStream inputStream, FinishFlag finishFlag) {
+	private void exhaustInStream(InputStream inputStream) {
 		try {
 			InputStreamReader isr = new InputStreamReader(inputStream);
 			BufferedReader br = new BufferedReader(isr);
 			String line = null;
 			int i = 0;
-			while (finishFlag.flag == null && (line = br.readLine()) != null) {
+			while ((line = br.readLine()) != null) {
 				if (lsInfo != null) {
 					lsInfo.add(line);
 					i++;
@@ -651,12 +650,12 @@ class StreamGobbler extends Thread {
     * @throws IOException if an I/O error occurs
     * @since 2.2
     */
-	public static long copyLarge(final InputStream input, final OutputStream output, final FinishFlag finishFlag)
+	public static long copyLarge(final InputStream input, final OutputStream output)
 					throws IOException {
 		byte[] buffer = new byte[1024 * 4];
 		long count = 0;
 		int n = 0;
-		while (finishFlag.flag == null && EOF != (n = input.read(buffer))) {
+		while (EOF != (n = input.read(buffer))) {
 			output.write(buffer, 0, n);
 			count += n;
 		}
