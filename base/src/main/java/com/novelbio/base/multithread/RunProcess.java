@@ -14,7 +14,7 @@ public abstract class RunProcess<T> implements Runnable {
 	byte[] lock = new byte[0];
 
 	/** 是否要停止本线程 */
-	protected volatile boolean flagStop = true;
+	protected volatile boolean flagStop = false;
 	protected volatile RunThreadStat runThreadStat = RunThreadStat.notStart;
 	protected boolean suspendFlag = false;
 	Throwable exception;
