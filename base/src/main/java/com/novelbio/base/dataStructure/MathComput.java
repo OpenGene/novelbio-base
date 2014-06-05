@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.math3.stat.StatUtils;
 import org.apache.log4j.Logger;
@@ -99,6 +100,15 @@ public class MathComput {
 		return avg;
 	}
 	
+	public static double mean(Set<? extends Number> lsNumbers) {
+		double length=lsNumbers.size();
+		double sum=0;
+		for (Number number : lsNumbers) {
+			sum = sum + number.doubleValue();;
+		}
+		double avg=sum/length;
+		return avg;
+	}
 	
 	/**
 	 * 输入数据，获得平均数

@@ -15,6 +15,7 @@ public class PathDetail {
 	static String tmpConfFold;
 	static String rworkspace;
 	static String tmpPath;
+	static String tmpHdfsPath;
 	static String rworkspaceTmp;
 	static {
 		initial();
@@ -34,7 +35,7 @@ public class PathDetail {
 				e.printStackTrace();
 			}
 		}
-		
+		tmpHdfsPath = properties.getProperty("tmpHdfsPath");
 		//TmpPath
 		tmpPath = properties.getProperty("TMPpath");
 		if (FileOperate.createFolders(tmpPath)) {
@@ -184,6 +185,11 @@ public class PathDetail {
 	public static String getTmpPath() {
 		return tmpPath;
 	}
+	/** 一个大的能容纳一些中间过程的文件夹hdfs开头 */
+	public static String getTmpHdfsPath() {
+		return tmpHdfsPath;
+	}
+	
 	
 	/** 在tmp文件夹下新建一个随机文件名的临时文件夹，注意每次返回的都不一样 */
 	public static String getTmpPathRandom() {

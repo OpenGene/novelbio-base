@@ -76,6 +76,8 @@ public class StringOperate {
 			return true;
 		}else  if(string.trim().equals("")) {
 			return true;
+		}else if(string.equals("null")){
+			return true;
 		}else {
 			return false;
 		}
