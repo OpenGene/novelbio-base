@@ -93,6 +93,7 @@ public class HttpFetch implements Closeable {
 	DefaultHttpClient httpclient;
 	
 	HttpRequestBase httpRequest;
+	/** post提交的参数 */
 	UrlEncodedFormEntity postEntity;
 	
 	/** 好像httpclient会自动保存cookie */
@@ -418,6 +419,33 @@ public class HttpFetch implements Closeable {
 		}
 		return querySucess;
 	}
+	
+	/** 重试若干次,在0-100之间，如果没成功则抛出runtime异常 */
+	public void queryExp(int retryNum) {
+		if (retryNum <= 0 || retryNum > 100) {
+			retryNum = 2;
+		}
+		Exception exp = null;
+		try {
+			//重试好多次
+			int queryNum = 0;
+			while (!querySucess) {
+				getResponseExp();
+				queryNum ++;
+				if (queryNum > retryNum) {
+					break;
+				}
+			}
+		} catch (ClientProtocolException e) {
+			exp = e;
+		} catch (IOException e) {
+			exp = e;
+		}
+		if(!querySucess) {
+			throw new RuntimeException("query error:" + uri, exp);
+		}
+	}
+	
 	/**
 	 * 返回null 表示没有成功
 	 * @return
@@ -480,6 +508,7 @@ public class HttpFetch implements Closeable {
 	
 	public void close() {
 		closeStream();
+		httpclient = null;
 	}
 	public static void ressetCM() {
 		if (cm != null) {
