@@ -129,6 +129,9 @@ public class HttpFetch implements Closeable {
 	}
 	/** 返回与输入的webFetch共用同一个连接池的webFetch */
 	public static HttpFetch getInstance(HttpFetch webFetch) {
+		if (webFetch == null) {
+			return new HttpFetch();
+		}
 		return new HttpFetch(webFetch.httpclient);
 	}
 	private HttpFetch() {

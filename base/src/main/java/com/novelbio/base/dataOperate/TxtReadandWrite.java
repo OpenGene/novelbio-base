@@ -101,11 +101,13 @@ public class TxtReadandWrite implements Closeable {
 		}
 	}
 	
+	/** 写入模式 */
 	public TxtReadandWrite(OutputStream outputStream) {
 		txtWrite = new TxtWrite(outputStream);
 		read = false;
 	}
 	
+	/** 读取模式 */
 	public TxtReadandWrite(InputStream inputStream) {
 		txtRead = new TxtRead(inputStream);
 		read = true;
