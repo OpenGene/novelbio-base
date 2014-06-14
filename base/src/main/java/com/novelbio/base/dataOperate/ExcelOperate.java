@@ -185,7 +185,11 @@ public class ExcelOperate {
 	 * @return
 	 */
 	public boolean newExcelOpen(String filenameinput) {
-		return newExcelOpen(filenameinput, false);
+		boolean excel2007 = false;
+		if (filenameinput.endsWith("xlsx")) {
+			excel2007 = true;
+		}
+		return newExcelOpen(filenameinput, excel2007);
 	}
 
 	public boolean newExcelOpen(String filenameinput, boolean excel2007) {
