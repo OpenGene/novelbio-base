@@ -135,16 +135,19 @@ public class PathDetail {
 		return FileHadoop.getHdfsHeadSymbol() + "/nbCloud/public/order/appendix/";
 	}
 	
-	/**获取订单附件路径
-	 * 
-	 * @return
-	 */
-	public static String  getExperimentAppendixPath() {
-		return FileHadoop.getHdfsHeadSymbol() + "/nbCloud/public/experiment/";
+//	/**获取实验附件路径
+//	 * 
+//	 * @return
+//	 */
+//	public static String  getExperimentAppendixPath(String experimentId) {
+//		return FileHadoop.getHdfsHeadSymbol() + "/nbCloud/public/experiment/" + experimentId.toUpperCase() + FileOperate.getSepPath()+"Annach" + FileOperate.getSepPath() ;
+//	}
+	
+	public static String getExperimentZip(String experimentId) {
+		 return FileHadoop.getHdfsHeadSymbol() + "/nbCloud/public/experiment/" + experimentId.toUpperCase() + FileOperate.getSepPath();
 	}
 	
-	
-	/**获取订单附件路径
+	/**获取实验压缩包路径
 	 * 
 	 * @return
 	 */
