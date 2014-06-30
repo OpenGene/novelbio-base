@@ -18,8 +18,6 @@ public abstract class RunProcess<T> implements Runnable {
 	protected volatile RunThreadStat runThreadStat = RunThreadStat.notStart;
 	protected boolean suspendFlag = false;
 	Throwable exception;
-	/** 是否正常结束 */
-	protected boolean flagFinish = false;
 	
 	/** 给定运行中需要修改的信息 */
 	public void setRunGetInfo(RunGetInfo runGetInfo) {
@@ -112,8 +110,8 @@ public abstract class RunProcess<T> implements Runnable {
 	 * 是否正常结束，如果isRunning为false，而isFinished也为false，则表示运行出错。
 	 * @return
 	 */
-	public boolean isFinished() {
-		return flagFinish;
+	public boolean isFinishedNormal() {
+		return runThreadStat == RunThreadStat.finishNormal;
 	}
 	
 	/** 返回线程运行时的状态 */

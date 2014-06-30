@@ -464,7 +464,7 @@ public class CmdOperate extends RunProcess<String> {
 				outputGobbler.setLsInfo(lsOutInfo, lineNumStd, false);
 			} else {
 				outputGobbler.setOutputStream(System.out);
-			}			
+			}
 		} else {
 			outputGobbler.setGetInputStream(true);
 		}

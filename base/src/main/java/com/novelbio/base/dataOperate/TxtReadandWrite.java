@@ -28,7 +28,6 @@ import java.util.TreeMap;
 import org.apache.log4j.Logger;
 
 import com.novelbio.base.dataStructure.ArrayOperate;
-import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 
 /**

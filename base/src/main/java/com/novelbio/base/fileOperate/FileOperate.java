@@ -87,7 +87,7 @@ public class FileOperate {
 	 * @param filePath
 	 * @return
 	 */
-	public static File getFile(String filePath){
+	public static File getFile(String filePath) {
 		File file = null;
 		boolean isHdfs = FileHadoop.isHdfs(filePath);
 		if(isWindows()){
@@ -738,12 +738,12 @@ public class FileOperate {
 		return bea;
 	}
 	
-	public static SeekableStream getInputStream(String filePath) throws IOException{
+	public static SeekableStream getInputStream(String filePath) throws IOException {
 		ISeekableStreamFactory seekableStreamFactory = SeekableStreamFactory.getInstance();
 		return seekableStreamFactory.getStreamFor(filePath);
 	}
 	
-	public static OutputStream getOutputStream(String filePath,boolean cover){
+	public static OutputStream getOutputStream(String filePath, boolean cover) {
 		try {
 			File file =  getFile(filePath);
 			OutputStream fs = null;

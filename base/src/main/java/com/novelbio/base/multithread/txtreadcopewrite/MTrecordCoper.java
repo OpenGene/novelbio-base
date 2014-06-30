@@ -30,7 +30,7 @@ public abstract class MTrecordCoper<T extends MTRecordCope> extends RunProcess<M
 	
 	protected boolean isReadingFinished() throws InterruptedException {
 		while (absQueue.isEmpty()) {
-			if (mtOneThreadReader.isFinished()) {
+			if (!mtOneThreadReader.isRunning()) {
 				return true;
 			}
 			Thread.sleep(20);

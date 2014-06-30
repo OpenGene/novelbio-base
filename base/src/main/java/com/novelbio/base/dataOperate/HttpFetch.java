@@ -2,16 +2,13 @@ package com.novelbio.base.dataOperate;
 
 import java.io.BufferedReader;
 import java.io.Closeable;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -21,7 +18,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+
 import javax.net.ssl.SSLHandshakeException;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHost;
@@ -43,7 +42,6 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.CookiePolicy;
 import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.ManagedClientConnection;
 import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
@@ -61,6 +59,8 @@ import org.apache.http.params.HttpProtocolParamBean;
 import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.log4j.Logger;
+
+import com.novelbio.base.fileOperate.FileOperate;
 //import com.sun.xml.internal.xsom.impl.WildcardImpl.Other;
 
 /**
@@ -383,8 +383,7 @@ public class HttpFetch implements Closeable {
 		if (!querySucess) {
 			return false;
 		}
-		File file = new File(fileName);
-		FileOutputStream out = new FileOutputStream(file);
+		OutputStream out = FileOperate.getOutputStream(fileName, true);
 		byte[] b = new byte[BUFFER];
 		int len = 0;
 		while ((len = instream.read(b)) != -1) {
