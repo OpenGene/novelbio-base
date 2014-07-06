@@ -132,7 +132,7 @@ public class MathComput {
 	 * 可能存在重复基因，所以要对重复行(也就是重复基因)，取中位数
 	 * @param lsIn
 	 * @param colAccID 实际列，从1开始计数
-	 * @param colNum
+	 * @param colNum 实际列，从1开始计算
 	 * @return
 	 */
 	public static ArrayList<String[]> getMedian(List<String[]> lsIn, int colAccID, List<Integer> colNum) {

@@ -22,6 +22,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import com.novelbio.base.PathDetail;
+import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataStructure.ArrayOperate;
 
@@ -604,7 +605,10 @@ public class FileHadoop extends File {
 			return false;
 		}
 		fileName = fileName.toLowerCase();
-		return fileName.startsWith(symbol) ? true : false;
+		if (!StringOperate.isRealNull(symbol)) {
+			return fileName.startsWith(symbol) ? true : false;
+		}
+		return false;
 	}
 	static class HdfsBaseHolder {
 		static Configuration conf;

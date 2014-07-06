@@ -318,12 +318,11 @@ public class FileOperate {
 
 	/**
 	 * <b>未经测试</b> 给定文件路径，返回大小，单位为byte
-	 * 
 	 * @param filePath
 	 * @return 没有文件返回0；出错返回-1000000000
 	 * @throws IOException 
 	 */
-	public static long getFileSizeLong(String filePath){
+	public static long getFileSizeLong(String filePath) {
 		File file = getFile(filePath);
 		long totalsize = 0;
 		if (!file.exists()) {
@@ -337,7 +336,6 @@ public class FileOperate {
 			return size;
 		} else if (file.isDirectory()) {
 			ArrayList<String[]> lsFileName = getFoldFileName(filePath);
-
 			for (String[] strings : lsFileName) {
 				String fileName = null;
 				// 获得文件名
