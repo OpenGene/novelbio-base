@@ -23,8 +23,8 @@ import com.novelbio.base.fileOperate.FileOperate;
  * 本类需要实例化才能使用 读取excel文件,注意读取前最好将excel的所有格式全部清除，不然可能会有问题。
  * 清除方法，将excel拷贝入txt文件，再拷贝回来 可以跨平台使用 读取速度可以
  * 读取块返回的是一个二维数组，然后这个二维数组的起点是[0][0]，不同于C#中的[1,1]
- * 本类似乎无法获得最大列的数目,这里可以考虑采用一维数目不同的二维数组，这个实现可以考虑用foreach来遍历 本代码原始作者 caihua ，Zong
- * Jie修改
+ * 本类似乎无法获得最大列的数目,这里可以考虑采用一维数目不同的二维数组，这个实现可以考虑用foreach来遍历 本代码原始作者 caihua ，
+ * Zong Jie修改
  */
 public class ExcelOperate {
 	public static final int EXCEL2003 = 2003;
@@ -38,6 +38,7 @@ public class ExcelOperate {
 	private String filename = "";
 	/** excel 2003 或者 excel 2007 */
 	int versionXls = 0;
+	/** 设定NBC的excel风格 */
 	private boolean isNBCExcel = false;
 	public ExcelOperate() {
 	}
@@ -919,7 +920,7 @@ public class ExcelOperate {
 			return false;
 		}
 	}
-	private void setNBCCellStyle(short color,CellStyle style){
+	private void setNBCCellStyle(short color,CellStyle style) {
 		style.setFillForegroundColor(color);//设置前景色
 		style.setBorderBottom(CellStyle.BORDER_THIN);
 		style.setBorderLeft(CellStyle.BORDER_THIN);
