@@ -231,7 +231,7 @@ public class PathDetail {
 	 * 取得无项目的任务保存文件夹
 	 * @return
 	 */
-	public static String getTestTasksSavePath(){
+	public static String getTestTasksSavePath() {
 		return properties.getProperty("testTasksSavePath");
 	}
 	
@@ -257,13 +257,6 @@ public class PathDetail {
 	 */
 	public static String getRawDataFolderPath() {
 		return properties.getProperty("rawDataFolderPath");
-	}
-	/**
-	 * 取得task的rawData的存放文件名称
-	 * @return
-	 */
-	public static String getTaskRawDataFolderName() {
-		return properties.getProperty("taskRawDataFolderName");
 	}
 	
 	/**

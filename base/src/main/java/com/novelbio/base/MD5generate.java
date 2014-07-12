@@ -109,6 +109,7 @@ public class MD5generate {
 	 * @return
 	 * @throws IOException
 	 */
+	//TODO 效果一般待修正
 	public static String getNBCFileRealMd5(String fileName) throws IOException {
 		if(FileHadoop.isHdfs(fileName))
 			fileName = FileHadoop.convertToLocalPath(fileName);

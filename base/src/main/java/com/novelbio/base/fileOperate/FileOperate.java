@@ -182,7 +182,7 @@ public class FileOperate {
 	 */
 	public static String getParentPathName(String fileName){
 		if (fileName == null) return null;
-		File file = getFile(fileName);
+		File file = new File(fileName);
 		String fileParent = file.getParent();
 		if (fileParent == null) {
 			return "";
