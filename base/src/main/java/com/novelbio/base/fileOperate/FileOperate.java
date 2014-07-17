@@ -1402,6 +1402,37 @@ public class FileOperate {
 			return false;
 		}
 	}
+	
+	/**
+	 * 判断文件是否存在，并且不是文件夹，给的是绝对路径
+	 * 
+	 * @param fileName
+	 *            如果为null, 直接返回false
+	 * @return
+	 */
+	public static boolean isFileOrDirectoryExist(String fileName) {
+		if (fileName == null || fileName.trim().equals("")) {
+			return false;
+		}
+		
+		File file = getFile(fileName);
+		if (file.exists()) {// 没有文件，则返回空
+			return true;
+		} else {
+			return false;
+		}
+	}
+	/**
+	 * 判断文件是否存在，并且不是文件夹，给的是绝对路径
+	 * 
+	 * @param fileName
+	 *            如果为null, 直接返回false
+	 * @return
+	 */
+	public static boolean isFileOrDirectoryExist(File file) {
+		return file.exists();
+	}
+	
 	/**
 	 * 判断文件是否存在，并且不是文件夹，给的是绝对路径
 	 * 
@@ -1508,6 +1539,9 @@ public class FileOperate {
 	 * @return 目录删除成功返回true，否则返回false
 	 */
 	private static boolean deleteDirectory(File dirFile) {
+		if (dirFile instanceof FileHadoop) {
+			return dirFile.delete();
+		}
 		// 如果sPath不以文件分隔符结尾，自动添加文件分隔符
 		// 如果dir对应的文件不存在，或者不是一个目录，则退出
 		if (!dirFile.exists() || !dirFile.isDirectory()) {

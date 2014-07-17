@@ -155,14 +155,19 @@ public class PathDetail {
 		return "/media/hdfs/nbCloud/public/experiment/";
 	}
 	/**
-	 * 获取当前合同的附件文件路径
+	 * 获取当前合同的附件文件路径，最后没有加“/”
 	 * @return
 	 */
-	public static String getContractFileSaveFold() {
-		String hdfsTmpPath = FileHadoop.getHdfsHeadSymbol() + "/nbCloud/public/contract/appendix/";
-		return hdfsTmpPath;
+	public static String getContractFileSaveFoldNoSep() {
+		return FileOperate.removeSep(properties.getProperty("contractFileSaveFold"));
 	}
-	
+	/**
+	 * 获取当前合同的附件文件路径，最后没有加“/”
+	 * @return
+	 */
+	public static String getContractFileSaveFoldAddSep() {
+		return FileOperate.addSep(properties.getProperty("contractFileSaveFold"));
+	}
 	public static String getRworkspace() {
 		return rworkspace;
 	}

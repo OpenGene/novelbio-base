@@ -362,13 +362,13 @@ public class FileHadoop extends File {
 	public boolean createNewFile() throws IOException {
 		return fsHDFS.createNewFile(dst);
 	}
-
+	
 	@Override
 	public boolean delete() {
 		try {
-			return fsHDFS.delete(dst, false);
+			return fsHDFS.delete(dst, true);
 		} catch (IOException e) {
-//			e.printStackTrace();
+			e.printStackTrace();
 			return false;
 		}
 	}
@@ -388,7 +388,7 @@ public class FileHadoop extends File {
 	@Override
 	public File[] listFiles() {
 		String[] files = list();
-		List<File> lsFiles = new ArrayList<File>();
+		List<File> lsFiles = new ArrayList<>();
 		for (int i = 0; i < files.length; i++) {
 			FileHadoop fileHadoop = null;
 			try {
