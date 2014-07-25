@@ -352,9 +352,8 @@ public class FileHadoop extends File {
 		try {
 			return fileStatus.getModificationTime();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return -1000;
+			throw new RuntimeException(e);
+//			return -1000;
 		}
 	}
 

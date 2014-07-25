@@ -682,7 +682,7 @@ public class TxtReadandWrite implements Closeable {
 		String fileName = getFileName();
 		TXTtype txTtype = TXTtype.getTxtType(fileName);
 		if (txTtype == TXTtype.Txt) {
-			FileOperate.moveFile(fileName, FileOperate.getParentPathName(tmpTxt), FileOperate.getFileName(tmpTxt), true);
+			FileOperate.moveFile(fileName, FileOperate.getParentPathNameWithSep(tmpTxt), FileOperate.getFileName(tmpTxt), true);
 			return;
 		}
 		TxtReadandWrite txtOut = new TxtReadandWrite(tmpTxt, true);

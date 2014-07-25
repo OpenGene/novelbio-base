@@ -3,6 +3,7 @@ package com.novelbio.base;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Properties;
 
 import com.novelbio.base.dataOperate.DateUtil;
@@ -11,6 +12,8 @@ import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 
 public class PathDetail {
+	/** 临时文件夹中的文件保留若干天 */
+	static final int tmpFileRemainDay = 6;
 	static Properties properties;
 	static String tmpConfFold;
 	static String rworkspace;
@@ -96,7 +99,7 @@ public class PathDetail {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		filePath = FileOperate.getParentPathName(filePath);
+		filePath = FileOperate.getParentPathNameWithSep(filePath);
 		return FileOperate.addSep(filePath);
 	}
 	/** 返回jar内部路径 */
@@ -119,7 +122,7 @@ public class PathDetail {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		filePath = FileOperate.getParentPathName(filePath);
+		filePath = FileOperate.getParentPathNameWithSep(filePath);
 		return FileOperate.addSep(filePath).replace("\\", "/");
 	}
 	/** 零时文件的文件夹 */
@@ -193,6 +196,46 @@ public class PathDetail {
 	public static String getTmpPath() {
 		return tmpPath;
 	}
+	
+	public static void cleanTmpPath() {
+		deleteFileFolder(FileOperate.getFile(tmpPath), tmpPath);
+	}
+	
+	/**
+	 * 清理临时文件夹中的过时文件
+	 * @param file
+	 * @param parentPath
+	 * @return 文件夹是否被清空
+	 */
+	public static boolean deleteFileFolder(File file, String parentPath) {
+		boolean isClear = true;
+		if (FileOperate.isFileExist(file)) {
+			long createTime = DateUtil.getNowTimeLong() - FileOperate.getTimeLastModify(file);
+			if (createTime > tmpFileRemainDay * 24*3600 * 1000) {
+				FileOperate.delFile(file);
+				return true;
+			} else {
+				return false;
+			}
+		} else if (FileOperate.isFileDirectory(file)) {
+			List<String> lsFile = FileOperate.getFoldFileNameLs(file.getAbsolutePath(), "*", "*");
+			for (String string : lsFile) {
+				File file2 = FileOperate.getFile(string);
+				boolean isClearSub = deleteFileFolder(file2, parentPath);
+				if (isClear && !isClearSub) {
+					isClear = false;
+				}
+			}
+			if (isClear && !file.getAbsolutePath().equals(parentPath)) {
+				FileOperate.delFile(file);
+				return true;
+			} else {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	/** 一个大的能容纳一些中间过程的文件夹hdfs开头 */
 	public static String getTmpHdfsPath() {
 		return tmpHdfsPath;
@@ -208,6 +251,14 @@ public class PathDetail {
 		return tmpPath;
 	}
 	
+	/** 在tmp文件夹下新建一个随机文件名的临时文件夹，注意每次返回的都不一样，最后有“/” */
+	public static String getTmpPathRandomWithSep(String prefix) {
+		String tmpPath = FileOperate.addSep(getTmpPath()) + prefix + DateUtil.getDateAndRandom() + FileOperate.getSepPath();
+		if (!FileOperate.createFolders(tmpPath)) {
+			tmpPath = null;
+		}
+		return tmpPath;
+	}
 	/**
 	 * 得到hdfs上所有project保存的路径
 	 * @return

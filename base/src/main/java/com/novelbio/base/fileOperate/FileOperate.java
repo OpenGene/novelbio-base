@@ -180,7 +180,7 @@ public class FileOperate {
 	 * @return
 	 * @throws IOException 
 	 */
-	public static String getParentPathName(String fileName){
+	public static String getParentPathNameWithSep(String fileName){
 		if (fileName == null) return null;
 		File file = new File(fileName);
 		String fileParent = file.getParent();
@@ -202,7 +202,7 @@ public class FileOperate {
 		if (fileName.endsWith("/") || fileName.endsWith("\\")) {
 			return fileName;
 		}
-		return getParentPathName(fileName);
+		return getParentPathNameWithSep(fileName);
 	}
 	/**
 	 * 给定文件名，加上后缀
@@ -241,7 +241,12 @@ public class FileOperate {
         File f = getFile(fileName);
         return f.lastModified();
 	}
-	
+	public static long getTimeLastModify(File file) {
+		if (!file.exists()) {
+			return 0;
+		}
+        return file.lastModified();
+	}
 	/**
 	 * 给定路径名，返回其名字 如给定/home/zong0jie/和/home/zong0jie 都返回zong0jie 可以给定不存在的路径
 	 * 
@@ -557,7 +562,7 @@ public class FileOperate {
 				break;
 			}
 			creatPath = getFileName(foldUpper) + File.separator + creatPath;
-			foldUpper = getParentPathName(foldUpper);
+			foldUpper = getParentPathNameWithSep(foldUpper);
 		}
 		foldUpper = addSep(foldUpper);
 		String subFold = "";
@@ -678,7 +683,28 @@ public class FileOperate {
 		try { Thread.sleep(500); } catch (InterruptedException e) { }
 		return bea;
 	}
-
+	/**
+	 * 删除文件
+	 * 
+	 * @param filePathAndName
+	 *            文本文件完整绝对路径及文件名 文件不存在则返回false
+	 * @return Boolean 成功删除返回true遭遇异常返回false
+	 */
+	public static boolean delFile(File myDelFile) {
+		boolean bea = false;
+		try {
+			if (myDelFile.exists()) {
+				bea = myDelFile.delete();
+			} else {
+				bea = false;
+				// message = (filePathAndName+"删除文件操作出错");
+			}
+		} catch (Exception e) {
+			logger.error(e.toString());
+		}
+		try { Thread.sleep(500); } catch (InterruptedException e) { }
+		return bea;
+	}
 	/**
 	 * 删除文件夹
 	 * 
@@ -940,7 +966,7 @@ public class FileOperate {
 	 */
 	public static String changeFilePrefixReal(String fileName, String append, String suffix) {
 		String newFile = changeFilePrefix(fileName, append, suffix);
-		moveSingleFile(fileName, getParentPathName(newFile),
+		moveSingleFile(fileName, getParentPathNameWithSep(newFile),
 				getFileName(newFile), true);
 		return newFile;
 	}
@@ -1057,7 +1083,7 @@ public class FileOperate {
 	 */
 	public static String changeFileSuffixReal(String fileName, String append, String suffix) {
 		String newFile = changeFileSuffix(fileName, append, suffix);
-		moveSingleFile(fileName, getParentPathName(newFile),
+		moveSingleFile(fileName, getParentPathNameWithSep(newFile),
 				getFileName(newFile), true);
 		return newFile;
 	}
@@ -1110,7 +1136,7 @@ public class FileOperate {
 	 * @return
 	 */
 	public static boolean moveFile(boolean cover, String oldFileName, String newFileName) {
-		String newPath = FileOperate.getParentPathName(newFileName);
+		String newPath = FileOperate.getParentPathNameWithSep(newFileName);
 		String newName = FileOperate.getFileName(newFileName);
 		return moveFile(oldFileName, newPath, newName, cover);
 		
@@ -1369,7 +1395,7 @@ public class FileOperate {
 		if (!FileOperate.isFileExist(rawFile)) {
 			return false;
 		}
-		if (!FileOperate.createFolders(FileOperate.getParentPathName(linkTo))) {
+		if (!FileOperate.createFolders(FileOperate.getParentPathNameWithSep(linkTo))) {
 			return false;
 		}
 		if (FileOperate.isFileExist(linkTo) && cover) {

@@ -79,7 +79,7 @@ public class FtpFetch {
 	/** 输入的是具体的文件url */
 	public void setDownLoadUrl(String urlAll) {
 		try {
-			String urlPath = FileOperate.getParentPathName(urlAll).replace(":/", "://");
+			String urlPath = FileOperate.getParentPathNameWithSep(urlAll).replace(":/", "://");
 			URL decodeUrl = new URL(urlPath);
 			this.ftpFileName = FileOperate.getFileName(urlAll);
 			String remotePath = decodeUrl.getPath();

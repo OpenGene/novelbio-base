@@ -226,7 +226,7 @@ public class ImageUtils {
 		TxtReadandWrite txtReadandWriteNew = null;
 		try {
 			String tempSvgFilePath = FileOperate.addSep(FileOperate
-					.getParentPathName(path)) + DateUtil.getDateAndRandom();
+					.getParentPathNameWithSep(path)) + DateUtil.getDateAndRandom();
 			((SVGOutput) output).writeSVG(new FileWriter(new File(
 					tempSvgFilePath)), true);
 			txtReadandWrite = new TxtReadandWrite(tempSvgFilePath, false);

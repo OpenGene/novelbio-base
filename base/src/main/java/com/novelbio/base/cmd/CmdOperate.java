@@ -203,7 +203,7 @@ public class CmdOperate extends RunProcess<String> {
 	
 	/** 返回执行的具体cmd命令，不会将文件路径删除，仅给相对路径 */
 	public String getCmdExeStr() {
-		return getCmdExeStrModify();
+		return getCmdExeStrReal();
 	}
 	
 	/** 返回执行的具体cmd命令，会将文件路径删除，仅给相对路径 */
@@ -418,10 +418,10 @@ public class CmdOperate extends RunProcess<String> {
 		finishFlag.flag = process.waitFor();
 		outputGobbler.join();
 		errorGobbler.join();
-		if (!getCmdInStdStream && saveFilePath != null) {
+		if (!getCmdInStdStream || saveFilePath != null) {
 			outputGobbler.close();
 		}
-		if (!getCmdInErrStream && saveErrPath != null) {
+		if (!getCmdInErrStream || saveErrPath != null) {
 			errorGobbler.close();
 		}
 	}

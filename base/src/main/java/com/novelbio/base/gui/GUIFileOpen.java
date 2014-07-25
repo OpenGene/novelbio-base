@@ -36,7 +36,7 @@ public class GUIFileOpen  extends JFrame {
 		int returnVal = chooser.showOpenDialog(getParent());
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			String path = chooser.getSelectedFile().getAbsolutePath();
-			currendDir = new File(FileOperate.getParentPathName(path));
+			currendDir = new File(FileOperate.getParentPathNameWithSep(path));
 			return path;
 		}
 		return null;
@@ -61,7 +61,7 @@ public class GUIFileOpen  extends JFrame {
 		int returnVal = chooser.showOpenDialog(getParent());
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			String path = chooser.getSelectedFile().getAbsolutePath();
-			currendDir = new File(FileOperate.getParentPathName(path));
+			currendDir = new File(FileOperate.getParentPathNameWithSep(path));
 			if (FileOperate.isFileDirectory(path)) {
 				path = FileOperate.addSep(path);
 			}

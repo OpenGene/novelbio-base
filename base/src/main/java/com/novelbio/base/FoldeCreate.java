@@ -23,7 +23,7 @@ public class FoldeCreate {
 		if (pathPrefix.endsWith("\\")|| pathPrefix.endsWith("/")) {
 			lastParentFoldPath = pathPrefix;
 		} else {
-			lastParentFoldPath = FileOperate.getParentPathName(pathPrefix);
+			lastParentFoldPath = FileOperate.getParentPathNameWithSep(pathPrefix);
 			prefix = FileOperate.getFileName(pathPrefix);
 		}
 		lastParentFoldName = FileOperate.getFileName(lastParentFoldPath);
@@ -48,7 +48,7 @@ public class FoldeCreate {
 		if (pathPrefix.endsWith("\\")|| pathPrefix.endsWith("/")) {
 			lastParentFoldPath = pathPrefix;
 		} else {
-			lastParentFoldPath = FileOperate.getParentPathName(pathPrefix);
+			lastParentFoldPath = FileOperate.getParentPathNameWithSep(pathPrefix);
 			prefix = FileOperate.getFileName(pathPrefix);
 		}
 		lastParentFoldName = FileOperate.getFileName(lastParentFoldPath);
