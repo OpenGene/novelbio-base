@@ -33,7 +33,7 @@ public class MapRTest {
 //		
 //		Configuration conf = new Configuration();
 //		conf.set("dfs.permissions", "false");
-		FileHadoop fileHadoop = new FileHadoop(PathDetail.getHdfsHeadSymbol() + "/test/fastq/798B_CGATGT_L004_R1_001.fastq.gz");
+		FileHadoop fileHadoop = new FileHadoop(PathDetail.getHdfsSymbol() + "/test/fastq/798B_CGATGT_L004_R1_001.fastq.gz");
 		System.out.println(fileHadoop.getName());
 		System.out.println(fileHadoop.getAbsolutePath());
 		System.out.println(fileHadoop.getParent());

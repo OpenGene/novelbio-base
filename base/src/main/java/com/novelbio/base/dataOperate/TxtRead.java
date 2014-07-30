@@ -3,6 +3,7 @@ package com.novelbio.base.dataOperate;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -548,7 +549,8 @@ class TxtRead implements Closeable {
 	
 	private void setInStreamExp(TXTtype txtType) throws IOException {
 		if (!isStream) {
-			filesize = FileOperate.getFileSizeLong(txtfile);
+			File file = FileOperate.getFile(txtfile);
+			filesize = FileOperate.getFileSizeLong(file);
 			inputStreamRaw = FileOperate.getInputStream(txtfile);
 		}
 

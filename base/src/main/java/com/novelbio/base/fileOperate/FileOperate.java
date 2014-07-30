@@ -34,7 +34,7 @@ public class FileOperate {
 	static{
 		    String osName = System.getProperty("os.name");
 		    if(osName.toLowerCase().indexOf("windows")>-1){
-		      isWindowsOS = true;
+		    	isWindowsOS = true;
 		    }
 	}
 	
@@ -143,7 +143,7 @@ public class FileOperate {
 		}
 	}
 	
-	public static Object readFileAsObject(String fileName){
+	public static Object readFileAsObject(String fileName) {
 		InputStream fs = null;
 		try {
 			File file = getFile(fileName);
@@ -180,7 +180,7 @@ public class FileOperate {
 	 * @return
 	 * @throws IOException 
 	 */
-	public static String getParentPathNameWithSep(String fileName){
+	public static String getParentPathNameWithSep(String fileName) {
 		if (fileName == null) return null;
 		File file = new File(fileName);
 		String fileParent = file.getParent();
@@ -357,7 +357,41 @@ public class FileOperate {
 			return -1000000000;
 		}
 	}
-
+	/**
+	 * <b>未经测试</b> 给定文件路径，返回大小，单位为byte
+	 * @param filePath
+	 * @return 没有文件返回0；出错返回-1000000000
+	 * @throws IOException 
+	 */
+	public static long getFileSizeLong(File file) {
+		long totalsize = 0;
+		if (!file.exists()) {
+			return 0;
+		}
+		if (file.isFile()) {
+			long size = file.length();
+			if (size == 0 && file instanceof FileHadoop) {
+				return getFileSizeLong(FileHadoop.convertToLocalPath( file.getAbsolutePath()));
+			}
+			return size;
+		} else if (file.isDirectory()) {
+			ArrayList<String[]> lsFileName = getFoldFileName( file.getAbsolutePath());
+			for (String[] strings : lsFileName) {
+				String fileName = null;
+				// 获得文件名
+				if (strings[1].equals("")) {
+					fileName = addSep( file.getAbsolutePath()) + strings[0];
+				} else {
+					fileName = addSep( file.getAbsolutePath()) + strings[0] + "." + strings[1];
+				}
+				totalsize = totalsize + getFileSizeLong(fileName);
+			}
+			return totalsize;
+		} else {
+			logger.error("出错！");
+			return -1000000000;
+		}
+	}
 	/**
 	 * 给定路径名，返回其名字,不带后缀名<br>
 	 * 如给定/home/zong0jie.aa.txt<br>
@@ -539,7 +573,7 @@ public class FileOperate {
 	 * 多级目录创建
 	 * 
 	 * @param folderPath
-	 *            准备要在本级目录下创建新目录的目录路径 例如 c:myf
+	 *            准备要在本级目录下创建新目录的目录路径 例如 /home/novelbio/myf，最后可以不加"/"
 	 * @param paths
 	 *            无限级目录参数，各级目录以/或\\区分 例如 a/b/c
 	 * @return 返回创建文件后的路径 例如 c:/myf/a/b/c
@@ -587,77 +621,77 @@ public class FileOperate {
 		}
 	}
 
-	/**
-	 * 新建文件
-	 * 
-	 * @param filePathAndName
-	 *            文本文件完整绝对路径及文件名
-	 * @param fileContent
-	 *            文本文件内容
-	 * @return
-	 */
-	public static void createFile(String filePathAndName, String fileContent) {
+//	/**
+//	 * 新建文件
+//	 * 
+//	 * @param filePathAndName
+//	 *            文本文件完整绝对路径及文件名
+//	 * @param fileContent
+//	 *            文本文件内容
+//	 * @return
+//	 */
+//	public static void createFile(String filePathAndName, String fileContent) {
+//
+//		try {
+//			String filePath = filePathAndName;
+//			filePath = filePath.toString();
+//			File myFilePath = getFile(filePath);
+//			if (!myFilePath.exists()) {
+//				myFilePath.createNewFile();
+//			}
+//			if (myFilePath instanceof FileHadoop) {
+//				FileHadoop fileHadoop = (FileHadoop)myFilePath;
+//				if (fileContent != null) {
+//					fileHadoop.writeln(fileContent,false);
+//				}
+//			}else {
+//				FileWriter resultFile = new FileWriter(myFilePath);
+//				if (fileContent != null) {
+//					PrintWriter myFile = new PrintWriter(resultFile);
+//					myFile.println(fileContent);
+//					myFile.close();
+//					resultFile.close();
+//				}
+//			}
+//		} catch (Exception e) {
+//			logger.error("创建文件操作出错");
+//		}
+//	}
 
-		try {
-			String filePath = filePathAndName;
-			filePath = filePath.toString();
-			File myFilePath = getFile(filePath);
-			if (!myFilePath.exists()) {
-				myFilePath.createNewFile();
-			}
-			if (myFilePath instanceof FileHadoop) {
-				FileHadoop fileHadoop = (FileHadoop)myFilePath;
-				if (fileContent != null) {
-					fileHadoop.writeln(fileContent,false);
-				}
-			}else {
-				FileWriter resultFile = new FileWriter(myFilePath);
-				if (fileContent != null) {
-					PrintWriter myFile = new PrintWriter(resultFile);
-					myFile.println(fileContent);
-					myFile.close();
-					resultFile.close();
-				}
-			}
-		} catch (Exception e) {
-			logger.error("创建文件操作出错");
-		} 
-	}
-
-	/**
-	 * 有编码方式的文件创建,HDFS上只支持UTF8
-	 * 
-	 * @param filePathAndName
-	 *            文本文件完整绝对路径及文件名
-	 * @param fileContent
-	 *            文本文件内容
-	 * @param encoding
-	 *            编码方式 例如 GBK 或者 UTF-8
-	 * @return
-	 */
-	public static void createFile(String filePathAndName, String fileContent,
-			String encoding) {
-
-		try {
-			String filePath = filePathAndName;
-			filePath = filePath.toString();
-			File myFilePath = getFile(filePath);
-			if (!myFilePath.exists()) {
-				myFilePath.createNewFile();
-			}
-			if (myFilePath instanceof FileHadoop) {
-				FileHadoop fileHadoop = (FileHadoop)myFilePath;
-				fileHadoop.writeln(fileContent,false);
-			}else {
-				PrintWriter myFile = new PrintWriter(myFilePath, encoding);
-				String strContent = fileContent;
-				myFile.println(strContent);
-				myFile.close();
-			}
-		} catch (Exception e) {
-			logger.error("创建文件操作出错");
-		}
-	}
+//	/**
+//	 * 有编码方式的文件创建,HDFS上只支持UTF8
+//	 * 
+//	 * @param filePathAndName
+//	 *            文本文件完整绝对路径及文件名
+//	 * @param fileContent
+//	 *            文本文件内容
+//	 * @param encoding
+//	 *            编码方式 例如 GBK 或者 UTF-8
+//	 * @return
+//	 */
+//	public static void createFile(String filePathAndName, String fileContent,
+//			String encoding) {
+//
+//		try {
+//			String filePath = filePathAndName;
+//			filePath = filePath.toString();
+//			File myFilePath = getFile(filePath);
+//			if (!myFilePath.exists()) {
+//				myFilePath.createNewFile();
+//			}
+//			if (myFilePath instanceof FileHadoop) {
+//				FileHadoop fileHadoop = (FileHadoop)myFilePath;
+//				fileHadoop.writeln(fileContent,false);
+//			}else {
+//				PrintWriter myFile = new PrintWriter(myFilePath, encoding);
+//				String strContent = fileContent;
+//				myFile.println(strContent);
+//				myFile.close();
+//			}
+//		} catch (Exception e) {
+//			logger.error("创建文件操作出错");
+//		}
+//	}
 
 	/**
 	 * 删除文件
@@ -783,6 +817,15 @@ public class FileOperate {
 		}
 	}
 	
+	public static boolean copyFileFolder(String oldPathFile, String newPathFile, boolean cover) {
+		boolean isFolder = FileOperate.isFileDirectory(oldPathFile);
+		if (isFolder) {
+			return copyFolder(oldPathFile, newPathFile, cover);
+		} else {
+			return copyFile(oldPathFile, newPathFile, cover);
+		}
+	}
+	
 	/**
 	 * 复制单个文件
 	 * 
@@ -861,7 +904,7 @@ public class FileOperate {
 	 *            指定绝对路径的新目录
 	 * @return
 	 */
-	public static void copyFolder(String oldPath, String newPath, boolean cover) {
+	public static boolean copyFolder(String oldPath, String newPath, boolean cover) {
 		newPath = addSep(newPath);
 		oldPath = addSep(oldPath);
 		try {
@@ -910,7 +953,9 @@ public class FileOperate {
 			}
 		} catch (Exception e) {
 			logger.error("复制整个文件夹内容操作出错");
+			return false;
 		}
+		return true;
 	}
 
 	/**
@@ -1488,7 +1533,7 @@ public class FileOperate {
 		}
 		File file = getFile(fileName);
 		if (file.exists() && !file.isDirectory()) {// 没有文件，则返回空
-			if(FileOperate.getFileSizeLong(fileName) > size) {
+			if(FileOperate.getFileSizeLong(file) > size) {
 				return true;
 			}
 		} else {

@@ -24,12 +24,12 @@ public class SeekableHDFSstream extends SeekableStream {
 	public SeekableHDFSstream(FileHadoop fileHadoop) {
 		this.fileHadoop = fileHadoop;
 		this.fsDataInputStream = fileHadoop.getInputStream();
-		fileLength = fileHadoop.getContentSummary().getLength();
+		fileLength = fileHadoop.length();
 	}
 	
 	@Override
 	public long length() {
-		return fileHadoop.getContentSummary().getLength();
+		return fileHadoop.length();
 	}
 
 	@Override

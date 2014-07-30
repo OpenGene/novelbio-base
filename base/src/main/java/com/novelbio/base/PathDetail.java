@@ -20,6 +20,7 @@ public class PathDetail {
 	static String tmpPath;
 	static String tmpHdfsPath;
 	static String rworkspaceTmp;
+	
 	static {
 		initial();
 	}
@@ -135,7 +136,7 @@ public class PathDetail {
 	 * @return
 	 */
 	public static String  getOrderAppendixPath() {
-		return FileHadoop.getHdfsHeadSymbol() + "/nbCloud/public/order/appendix/";
+		return FileHadoop.getHdfsSymbol() + "/nbCloud/public/order/appendix/";
 	}
 	
 //	/**获取实验附件路径
@@ -147,7 +148,7 @@ public class PathDetail {
 //	}
 	
 	public static String getExperimentZip(String experimentId) {
-		 return FileHadoop.getHdfsHeadSymbol() + "/nbCloud/public/experiment/" + experimentId.toUpperCase() + FileOperate.getSepPath();
+		 return FileHadoop.getHdfsSymbol() + "/nbCloud/public/experiment/" + experimentId.toUpperCase() + FileOperate.getSepPath();
 	}
 	
 	/**获取实验压缩包路径

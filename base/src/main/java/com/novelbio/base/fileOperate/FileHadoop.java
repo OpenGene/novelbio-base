@@ -1,62 +1,28 @@
 package com.novelbio.base.fileOperate;
 
 import java.io.File;
-import java.io.FileFilter;
-import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.ContentSummary;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-import com.novelbio.base.PathDetail;
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataStructure.ArrayOperate;
 
 public class FileHadoop extends File {
 	private static final long serialVersionUID = 1L;
-	static Properties properties;
-
 	FileSystem fsHDFS;
 	Path dst;
 	FileStatus fileStatus;
-	
-	public static String HEAD;	
-	public static String symbol;
-	static {
-		initial();
-	}
-	private static void initial() {
-		String configPath = FileOperate.isWindows() ? "configWindows.properties" : "config.properties";
-		InputStream in = PathDetail.class.getClassLoader().getResourceAsStream(configPath);
-		properties = new Properties();
-		try {
-			properties.load(in);
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		} finally{
-			try {
-				in.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		HEAD = getHdfsHeadPath();
-		symbol = getHdfsHeadSymbol();
-	}
 	
 	/**
 	 * 输入另一个fileHadoop的内容，仅获得其配置信息，不获得其具体文件名
@@ -65,55 +31,30 @@ public class FileHadoop extends File {
 	 */
 	public FileHadoop(String hdfsFilePath) throws IOException {
 		super(hdfsFilePath = copeToHdfsHeadSymbol(hdfsFilePath));
-		this.fsHDFS = FileHadoop.getFileSystem();
-		hdfsFilePath = hdfsFilePath.replace(FileHadoop.getHdfsHeadSymbol(), FileHadoop.getHdfsHeadPath());
+		this.fsHDFS = HdfsInitial.getFileSystem();
+		hdfsFilePath = hdfsFilePath.replace(FileHadoop.getHdfsSymbol(), HdfsInitial.getHEAD());
+		//TODO 以后就应该是 hdfsFilePath = hdfsFilePath.replace(FileHadoop.getHdfsHeadSymbol(), "");
 		dst = new Path(hdfsFilePath);
-		
 	}
-	
-	/**
-	 * 初始化
-	 * @return
-	 */
-	private void init(){
+	/** 初始化 */
+	private void init() {
 		try{
 			if(fileStatus != null)
 				return;
 			if (fsHDFS.exists(dst)) {
 				fileStatus = fsHDFS.getFileStatus(dst);
 			}
-		}catch(Exception e){
-		}
+		} catch(Exception e) { }
 	}
 	
 	private static String copeToHdfsHeadSymbol(String hdfsFilePath) {
-		if (hdfsFilePath.startsWith(FileHadoop.getHdfsHeadPath())) {
-			hdfsFilePath = hdfsFilePath.replace(FileHadoop.getHdfsHeadPath(), FileHadoop.getHdfsHeadSymbol());
+		if (hdfsFilePath.startsWith(HdfsInitial.getHEAD())) {
+			hdfsFilePath = hdfsFilePath.replace(HdfsInitial.getHEAD(), FileHadoop.getHdfsSymbol());
 		}
-		if (!hdfsFilePath.startsWith(FileHadoop.getHdfsHeadSymbol())) {
+		if (!hdfsFilePath.startsWith(FileHadoop.getHdfsSymbol())) {
 			hdfsFilePath = FileHadoop.addHdfsHeadSymbol(hdfsFilePath);
 		}
 		return hdfsFilePath;
-	}
-	
-	/**
-	 * 返回设定的文件系统
-	 * @return
-	 */
-	public FileSystem getFsHDFS() {
-		return fsHDFS;
-	}
-	
-	/**
-	 * @return 返回文件总结信息
-	 * 通过该summary可以获得文件长度等信息
-	 */
-	public ContentSummary getContentSummary() {
-		try {
-			return fsHDFS.getContentSummary(dst);
-		} catch (IOException e) {
-			return null;
-		}
 	}
 	
 	public FSDataInputStream getInputStream() {
@@ -122,31 +63,6 @@ public class FileHadoop extends File {
 		} catch (IOException e) {
 			return null;
 		}
-	}
-	
-	/** 返回小于0表示出错 使用length()代替*/
-	@Deprecated
-	public long getFileSize() {        
-		try {
-			return fsHDFS.getFileStatus(dst).getLen();
-		} catch (IOException e) {
-			return -1;
-		}
-	}
-	
-	public boolean writeln(String fileContent,boolean overwrite) {
-		try {
-			FSDataOutputStream fsStream = getOutputStreamNew(overwrite);
-			fsStream.writeUTF(fileContent);
-			String lineSeparater =  (String) java.security.AccessController.doPrivileged(
-		               new sun.security.action.GetPropertyAction("line.separator"));
-			fsStream.writeUTF(lineSeparater);
-			fsStream.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
-		}
-		return true;
 	}
 	
 	/**
@@ -198,15 +114,6 @@ public class FileHadoop extends File {
 	}
 	
 	/**
-	 * 取得文件名
-	 * @return
-	 */
-	@Override
-	public String getName() {
-		return super.getName();
-	}
-	
-	/**
 	 * 是不是目录
 	 */
 	@Override
@@ -235,7 +142,6 @@ public class FileHadoop extends File {
 			}
 		}else
 			return true;
-		
 	}
 	
 	/**
@@ -275,85 +181,20 @@ public class FileHadoop extends File {
 	}
 
 	@Override
-	public File getParentFile() {
-		return super.getParentFile();
-	}
-
-	@Override
-	public String getPath() {
-		return super.getPath();
-	}
-
-	@Override
-	public boolean isAbsolute() {
-		// TODO Auto-generated method stub
-		return super.isAbsolute();
-	}
-
-	@Override
-	public String getAbsolutePath() {
-		return super.getAbsolutePath();
-	}
-
-	@Override
-	public File getAbsoluteFile() {
-		// TODO Auto-generated method stub
-		return super.getAbsoluteFile();
-	}
-
-	@Override
-	public String getCanonicalPath() throws IOException {
-		// TODO Auto-generated method stub
-		return super.getCanonicalPath();
-	}
-
-	@Override
-	public File getCanonicalFile() throws IOException {
-		// TODO Auto-generated method stub
-		return super.getCanonicalFile();
-	}
-
-	@Override
 	@Deprecated
 	public URL toURL() throws MalformedURLException {
 		// TODO Auto-generated method stub
 		return super.toURL();
 	}
 
-	@Override
-	public URI toURI() {
-		// TODO Auto-generated method stub
-		return super.toURI();
-	}
-
-	@Override
-	public boolean canRead() {
-		// TODO Auto-generated method stub
-		return super.canRead();
-	}
-
-	@Override
-	public boolean canWrite() {
-		// TODO Auto-generated method stub
-		return super.canWrite();
-	}
-
-	@Override
-	public boolean isHidden() {
-		// TODO Auto-generated method stub
-		return super.isHidden();
-	}
-
 	/** 出错返回 -1000 */
 	@Override
 	public long lastModified() {
-		// TODO Auto-generated method stub
 		init();
 		try {
 			return fileStatus.getModificationTime();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
-//			return -1000;
 		}
 	}
 
@@ -373,18 +214,6 @@ public class FileHadoop extends File {
 	}
 
 	@Override
-	public void deleteOnExit() {
-		// TODO Auto-generated method stub
-		super.deleteOnExit();
-	}
-
-	@Override
-	public String[] list(FilenameFilter filter) {
-		// TODO Auto-generated method stub
-		return super.list(filter);
-	}
-
-	@Override
 	public File[] listFiles() {
 		String[] files = list();
 		List<File> lsFiles = new ArrayList<>();
@@ -401,18 +230,6 @@ public class FileHadoop extends File {
 		if(children == null)
 			return new File[]{};
 		return ArrayOperate.converList2Array(lsFiles);
-	}
-
-	@Override
-	public File[] listFiles(FilenameFilter filter) {
-		// TODO Auto-generated method stub
-		return super.listFiles(filter);
-	}
-
-	@Override
-	public File[] listFiles(FileFilter filter) {
-		// TODO Auto-generated method stub
-		return super.listFiles(filter);
 	}
 
 	@Override
@@ -448,107 +265,11 @@ public class FileHadoop extends File {
 		}
 	}
 
-	@Override
-	public boolean setLastModified(long time) {
-		// TODO Auto-generated method stub
-		return super.setLastModified(time);
-	}
-
-	@Override
-	public boolean setReadOnly() {
-		// TODO Auto-generated method stub
-		return super.setReadOnly();
-	}
-
-	@Override
-	public boolean setWritable(boolean writable, boolean ownerOnly) {
-		// TODO Auto-generated method stub
-		return super.setWritable(writable, ownerOnly);
-	}
-
-	@Override
-	public boolean setWritable(boolean writable) {
-		// TODO Auto-generated method stub
-		return super.setWritable(writable);
-	}
-
-	@Override
-	public boolean setReadable(boolean readable, boolean ownerOnly) {
-		// TODO Auto-generated method stub
-		return super.setReadable(readable, ownerOnly);
-	}
-
-	@Override
-	public boolean setReadable(boolean readable) {
-		// TODO Auto-generated method stub
-		return super.setReadable(readable);
-	}
-
-	@Override
-	public boolean setExecutable(boolean executable, boolean ownerOnly) {
-		// TODO Auto-generated method stub
-		return super.setExecutable(executable, ownerOnly);
-	}
-
-	@Override
-	public boolean setExecutable(boolean executable) {
-		// TODO Auto-generated method stub
-		return super.setExecutable(executable);
-	}
-
-	@Override
-	public boolean canExecute() {
-		// TODO Auto-generated method stub
-		return super.canExecute();
-	}
-
-	@Override
-	public long getTotalSpace() {
-		// TODO Auto-generated method stub
-		return super.getTotalSpace();
-	}
-
-	@Override
-	public long getFreeSpace() {
-		// TODO Auto-generated method stub
-		return super.getFreeSpace();
-	}
-
-	@Override
-	public long getUsableSpace() {
-		// TODO Auto-generated method stub
-		return super.getUsableSpace();
-	}
-
-	@Override
-	public int compareTo(File pathname) {
-		// TODO Auto-generated method stub
-		return super.compareTo(pathname);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		// TODO Auto-generated method stub
-		return super.equals(obj);
-	}
-
-	@Override
-	public int hashCode() {
-		// TODO Auto-generated method stub
-		return super.hashCode();
-	}
-	
-	@Override
-	public String toString() {
-		// TODO Auto-generated method stub
-		return super.toString();
-	}
-
 	public static String convertToMaprPath(String hdfsPath){
 		if (hdfsPath.length() < 6) {
 			
 		}else if (FileHadoop.isHdfs(hdfsPath) || FileHadoop.isHdfs(hdfsPath.substring(1, hdfsPath.length()-2))) {
-			hdfsPath = hdfsPath.replace(getHdfsHeadSymbol(), getHdfsHeadPath());
+			hdfsPath = hdfsPath.replace(HdfsInitial.getSymbol(), HdfsInitial.getHEAD());
 		}
 		return hdfsPath;
 	}
@@ -560,18 +281,16 @@ public class FileHadoop extends File {
 			
 		}else if (FileHadoop.isHdfs(hdfsPath) || FileHadoop.isHdfs(hdfsPath.substring(1, hdfsPath.length()-2))) {
 			String parentPath = getHdfsLocalPath();
-			hdfsPath = hdfsPath.replace(getHdfsHeadSymbol(), parentPath);
+			hdfsPath = hdfsPath.replace(getHdfsSymbol(), parentPath);
 		}
 		return hdfsPath;
 	}
 	
-	
-	
 	/** 
-	 * 用{@link com.novelbio.base.fileOperate.FileHadoop#getHdfsHeadSymbol()}替换<br>
+	 * 用{@link com.novelbio.base.fileOperate.FileHadoop#getHdfsSymbol()}替换<br>
 	 * 文件名前添加的HDFS的头，末尾没有"/" */
-	public static String getHdfsHeadSymbol() {
-		return properties.getProperty("hdfsHeadSymbol");
+	public static String getHdfsSymbol() {
+		return HdfsInitial.getSymbol();
 	}
 	
 	/** 
@@ -582,21 +301,14 @@ public class FileHadoop extends File {
 	 * @return
 	 */
 	public static String addHdfsHeadSymbol(String path) {
-		return properties.getProperty("hdfsHeadSymbol") + path;
-	}
-	
-	/** 
-	 * 用{@link com.novelbio.base.fileOperate.FileHadoop#getHdfsHeadPath()}替换<br>
-	 * hadoop实际的hdfs前缀，末尾没有"/" */
-	public static String getHdfsHeadPath() {
-		return properties.getProperty("hdfsHead");
+		return HdfsInitial.getSymbol() + path;
 	}
 	
 	/** 
 	 * 用{@link com.novelbio.base.fileOperate.FileHadoop#getHdfsLocalPath()}替换<br>
 	 * hdfs挂载在本地硬盘的路径 */
 	public static String getHdfsLocalPath() {
-		return properties.getProperty("hdfsLocalPath");
+		return HdfsInitial.getHdfsLocalPath();
 	}
 	
 	public static boolean isHdfs(String fileName) {
@@ -604,42 +316,25 @@ public class FileHadoop extends File {
 			return false;
 		}
 		fileName = fileName.toLowerCase();
-		if (!StringOperate.isRealNull(symbol)) {
-			return fileName.startsWith(symbol) ? true : false;
+		if (!StringOperate.isRealNull(HdfsInitial.getHEAD())) {
+			return fileName.startsWith(HdfsInitial.getSymbol()) ? true : false;
 		}
 		return false;
 	}
-	static class HdfsBaseHolder {
-		static Configuration conf;
-		static {
-			conf = new Configuration();
-			conf.set("dfs.permissions", "false");
-		}
-	}
-	public static FileSystem getFileSystem(){
-		FileSystem hdfs = null;
-		try {
-			hdfs = FileSystem.get(URI.create(HEAD), HdfsBaseHolder.conf);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return hdfs;
-	}
-	/**
-	 * 创建一个文件夹
-	 * @param path 路径+“/”+文件夹名字
-	 * @throws IOException
-	 */
-	public static void mkdirHDFSFolder(Path path) throws IOException {
-		getFileSystem().mkdirs(path);
-	}
-	
-	/**删除文件
-	 * @throws IOException */
-	public static void removeHDFSfile(Path path) throws IOException {
-		getFileSystem().delete(path, true);
-	}
 
+	
+//	/**
+//	 * @return 返回文件总结信息
+//	 * 通过该summary可以获得文件长度等信息
+//	 */
+//	@Deprecated
+//	public ContentSummary getContentSummary() {
+//		try {
+//			return fsHDFS.getContentSummary(dst);
+//		} catch (IOException e) {
+//			return null;
+//		}
+//	}
 }
 
 

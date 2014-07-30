@@ -6,11 +6,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -20,7 +18,6 @@ import com.novelbio.base.StringOperate;
 import com.novelbio.base.cmd.CmdOperate.FinishFlag;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
-import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.dataStructure.PatternOperate;
 import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
@@ -37,13 +34,8 @@ import com.novelbio.base.multithread.RunProcess;
 public class CmdOperate extends RunProcess<String> {
 	private static final Logger logger = Logger.getLogger(CmdOperate.class);
 
-	/** 是否将pid加2，如果是写入文本然后sh执行，则需要加上2 */
-	boolean shPID = false;
-
 	/** 进程 */
 	IntProcess process;
-	/** 待运行的命令 */
-	List<String> lsCmd = new ArrayList<>();
 	
 	/** 临时文件在文件夹 */
 	String scriptFold = "";
@@ -55,8 +47,6 @@ public class CmdOperate extends RunProcess<String> {
 	
 	/**输出文件的名字 */
 	Set<String> setOutfile = new HashSet<>();
-	/** 是否将输出文件重定位到临时文件夹，最后再拷贝回去 */
-	boolean isRedirectToTmp;
 	
 	/** 结束标志，0表示正常退出 */
 	FinishFlag finishFlag;
@@ -73,6 +63,8 @@ public class CmdOperate extends RunProcess<String> {
 	/** 是否需要获取cmd的标准错误流 */
 	boolean getCmdInErrStream = false;
 	
+	/** 用来传递参数，拷贝输入输出文件夹的类 */
+	CmdPath cmdPath = new CmdPath();
 	
 	/** 如果选择用list来保存结果输出，最多保存500行的输出信息 */
 	int lineNumStd = 1000;
@@ -92,7 +84,7 @@ public class CmdOperate extends RunProcess<String> {
 			if (string.trim().equals("")) {
 				continue;
 			}
-			lsCmd.add(string);
+			cmdPath.addCmdParam(string);
 		}
 	}
 
@@ -123,19 +115,18 @@ public class CmdOperate extends RunProcess<String> {
 				newCmd += " " + FileHadoop.convertToLocalPath(text);
 			}
 		}
-		shPID = true;
 		logger.info(newCmd);
 		String cmd1SH = PathDetail.getTmpConfFold() + cmdWriteInFileName.replace("\\", "/") + DateUtil.getDateAndRandom() + ".sh";
 		TxtReadandWrite txtCmd1 = new TxtReadandWrite(cmd1SH, true);
 		txtCmd1.writefile(newCmd);
 		txtCmd1.close();
-		lsCmd.clear();
-		lsCmd.add("sh");
-		lsCmd.add(cmd1SH);
+		cmdPath.clearLsCmd();
+		cmdPath.addCmdParam("sh");
+		cmdPath.addCmdParam(cmd1SH);
 	}
 	public CmdOperate(List<String> lsCmd) {
 		process = new ProcessCmd();
-		this.lsCmd = lsCmd;
+		cmdPath.setLsCmd(lsCmd);
 	}
 
 	/**
@@ -147,7 +138,7 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	public CmdOperate(String ip, String usr, String pwd, List<String> lsCmd) {
 		process = new ProcessRemote(ip, usr, pwd);
-		this.lsCmd = lsCmd;
+		cmdPath.setLsCmd(lsCmd);
 	}
 	
 	/**
@@ -161,7 +152,7 @@ public class CmdOperate extends RunProcess<String> {
 	public CmdOperate(String ip, String usr, String pwd, String keyInfo, List<String> lsCmd) {
 		process = new ProcessRemote(ip, usr, pwd);
 		((ProcessRemote)process).setKey(keyInfo);
-		this.lsCmd = lsCmd;
+		cmdPath.setLsCmd(lsCmd);
 	}
 	/**
 	 * 远程登录的方式运行cmd命令，<b>cmd命令运行完毕后会断开连接</b>
@@ -187,7 +178,7 @@ public class CmdOperate extends RunProcess<String> {
 	public CmdOperate(String ip, String usr, String pwd, char[] keyInfo, List<String> lsCmd) {
 		process = new ProcessRemote(ip, usr, pwd);
 		((ProcessRemote)process).setKey(keyInfo);
-		this.lsCmd = lsCmd;
+		cmdPath.setLsCmd(lsCmd);
 	}
 	
 	/**
@@ -201,22 +192,29 @@ public class CmdOperate extends RunProcess<String> {
 	public CmdOperate(String ip, String usr, String pwd, List<String> lsCmd, String keyFile) {
 		process = new ProcessRemote(ip, usr, pwd);
 		((ProcessRemote)process).setKeyFile(keyFile);
-		this.lsCmd = lsCmd;
+		cmdPath.setLsCmd(lsCmd);
 	}
 	
 	/** 如果为null就不加入 */
 	public void addCmdParam(String param) {
 		if (!StringOperate.isRealNull(param)) {
-			lsCmd.add(param);
+			cmdPath.addCmdParam(param);
 		}
 	}
-	
-	/** 是否将输出先重定位到临时文件夹，再拷贝回实际文件夹 */
-	public void setRedirectToTmp(boolean isRedirectToTmp) {
-		this.isRedirectToTmp = isRedirectToTmp;
+	/**
+	 * 添加输入文件路径的参数，配合{@link #setRedirectInToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
+	 * @param output 输出文件的哪个参数
+	 * @param isAddToLsCmd 是否加入参数list<br>
+	 * true: 作为一个参数加入lscmd<br>
+	 * false: 不加入lsCmd，仅仅标记一下
+	 * 
+	 * @param output
+	 */
+	public void addCmdParamInput(String input, boolean isAddToLsCmd) {
+		cmdPath.addCmdParamInput(input, isAddToLsCmd);
 	}
 	/**
-	 * 添加输出文件路径的参数，配合{@link #setRedirectToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
+	 * 添加输出文件路径的参数，配合{@link #setRedirectOutToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
 	 * @param output 输出文件的哪个参数
 	 * @param isAddToLsCmd 是否加入参数list<br>
 	 * true: 作为一个参数加入lscmd<br>
@@ -225,34 +223,25 @@ public class CmdOperate extends RunProcess<String> {
 	 * @param output
 	 */
 	public void addCmdParamOutput(String output, boolean isAddToLsCmd) {
-		if (StringOperate.isRealNull(output)) {
-			throw new ExceptionCmd("Output is null");
-		}
-		setOutfile.add(output);
-		if (isAddToLsCmd) {
-			lsCmd.add(output);
-		}
+		cmdPath.addCmdParamOutput(output, isAddToLsCmd);
+	}
+	
+	/** 是否将输入文件拷贝到临时文件夹，默认为false */
+	public void setRedirectInToTmp(boolean isRedirectInToTmp) {
+		cmdPath.setRedirectInToTmp(isRedirectInToTmp);
+	}
+	/** 是否将输出先重定位到临时文件夹，再拷贝回实际文件夹，默认为false */
+	public void setRedirectOutToTmp(boolean isRedirectOutToTmp) {
+		cmdPath.setRedirectOutToTmp(isRedirectOutToTmp);
 	}
 	
 	/** 如果param为null则返回 */
 	public void addCmdParam(List<String> lsCmd) {
-		if (lsCmd == null) {
-			return;
-		}
-		String[] param = lsCmd.toArray(new String[0]);
-		addCmdParam(param);
+		cmdPath.addCmdParam(lsCmd);
 	}
 	/** 如果param为null则返回 */
 	public void addCmdParam(String[] param) {
-		if (param == null) {
-			return;
-		}
-		for (String string : param) {
-			if (StringOperate.isRealNull(string)) {
-				throw new ExceptionCmd("param contains null");
-			}
-			lsCmd.add(string);
-		}
+		cmdPath.addCmdParam(param);
 	}
 
 	
@@ -263,31 +252,12 @@ public class CmdOperate extends RunProcess<String> {
 	
 	/** 返回执行的具体cmd命令，会将文件路径删除，仅给相对路径 */
 	public String getCmdExeStrModify() {
-		return getCmdModify(lsCmd);
+		return cmdPath.getCmdExeStrModify();
 	}
 	
 	/** 返回执行的具体cmd命令，实际cmd命令 */
 	public String getCmdExeStrReal() {
-		return ArrayOperate.cmbString(lsCmd.toArray(new String[0]), " ");
-	}
-	
-	public static String getCmdModify(List<String> lsCmd) {
-		String[] cmdArray = lsCmd.toArray(new String[0]);
-		return getCmdModify(cmdArray);
-	}
-	
-	public static String getCmdModify(String[] cmdArray) {
-		StringBuilder strBuilder = new StringBuilder();
-		for (String cmdTmp : cmdArray) {
-			String[] subcmd = cmdTmp.split("=");
-			strBuilder.append(" ");
-			strBuilder.append(FileOperate.getFileName(subcmd[0]));
-			for (int i = 1; i < subcmd.length; i++) {
-				strBuilder.append("=");
-				strBuilder.append(FileOperate.getFileName(subcmd[i]));
-			}
-		}
-		return strBuilder.toString().trim();
+		return cmdPath.getCmdExeStrReal();
 	}
 	
 	/** 是否获得cmd的标准输出流
@@ -388,7 +358,7 @@ public class CmdOperate extends RunProcess<String> {
 	}
 	
 	/** 获得命令行的标准输出流， <br>
-	 * 设定了{@link #setGetCmdInStdStream(boolean)} 才有用 */
+	 * 设定了{@link #setGetCmdInStdStream(boolean)} 为true才有用 */
 	public InputStream getStreamStd() {
 		while (outputGobbler == null) {
 			try {
@@ -400,7 +370,7 @@ public class CmdOperate extends RunProcess<String> {
 		return outputGobbler.getCmdOutStream();
 	}
 	/** 获得命令行的错误输出流， <br>
-	 * 设定了{@link #setGetCmdInErrStream(boolean)} 才有用 */
+	 * 设定了{@link #setGetCmdInErrStream(boolean)} 为true才有用 */
 	public InputStream getStreamErr() {
 		while (errorGobbler == null) {
 			try {
@@ -421,9 +391,12 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	private void doInBackgroundB() throws Exception {
 		finishFlag = new FinishFlag();
+		cmdPath.copyFileIn();
+		String[] cmdRun = cmdPath.getRunCmd();
+		saveFilePath = cmdPath.getSaveFilePath();
+		saveErrPath = cmdPath.getSaveErrPath();
 		
-		Map<String, String> mapOutFile2Tmp = getMapOutFile2TmpFile();
-		process.exec(getRunCmd(mapOutFile2Tmp));
+		process.exec(cmdRun);
 
 		setErrorStream();
 		setStdStream();
@@ -441,125 +414,12 @@ public class CmdOperate extends RunProcess<String> {
 			errorGobbler.close();
 		}
 		
-		if (isRedirectToTmp) {
-			copyFile(mapOutFile2Tmp);
+		if (isFinishedNormal()) {
+			cmdPath.copyFileOut();
 		}
-	}
-	
-	/**
-	 * 输出文件名和临时文件夹的对照表，用途是首先将输出结果输出到tmp文件夹下，然后再拷贝到hdfs中。防止直接使用nfs报错
-	 * key 输出文件名，value 重定向到的临时文件夹名
-	 * @return
-	 */
-	private Map<String, String> getMapOutFile2TmpFile() {
-		//key 输出文件名，value 重定向到的临时文件夹名
-		Map<String, String> mapOutFile2Tmp = new HashMap<>();
-		if (isRedirectToTmp) {
-			int i = 0;
-			for (String outFile : setOutfile) {
-				String outRealPath = FileOperate.getPathName(outFile);
-				boolean isCreatFold = FileOperate.createFolders(outRealPath);
-				if (!isCreatFold) {
-					throw new ExceptionCmd("create folder error: " + outRealPath);
-				}
-				i++;//防止起随机名字的时候出现相同的名字
-				String outTmpName = getRedirectPath(PathDetail.getTmpPathRandomWithSep(FileOperate.getFileName(outFile) + i), outFile);
-				
-				//如果输出文件存在了就把文件移动到临时文件夹中，这是考虑到bwa输入文件
-				//为chr.fa，并且没有输出文件，这时候就可以把输入的chr.fa当做输出文件
-				if (FileOperate.isFileExistAndBigThanSize(outFile, 0)) {
-					FileOperate.copyFile(outFile, outTmpName, true);
-				}
-				mapOutFile2Tmp.put(outFile, outTmpName);
-			}
-		}
-		return mapOutFile2Tmp;
-	}
-	
-	/** 返回实际运行的cmd string数组
-	 * 必须设定好lcCmd后才能使用
-	 * @return
-	 */
-	private String[] getRunCmd(Map<String, String> mapOutPath2TmpOut) {
-		List<String> lsReal = new ArrayList<>();
-		boolean stdOut = false;
-		boolean errOut = false;
-		for (String tmpCmd : lsCmd) {
-			if (tmpCmd.equals(">")) {
-				stdOut = true;
-				continue;
-			} else if (tmpCmd.equals("2>")) {
-				errOut = true;
-				continue;
-			}
-			
-			if (!errOut && !stdOut && isRedirectToTmp && setOutfile.contains(tmpCmd)) {
-				tmpCmd = mapOutPath2TmpOut.get(tmpCmd);
-			}
-			
-			if (stdOut) {
-				saveFilePath = tmpCmd;
-				stdOut = false;
-				continue;
-			} else if (errOut) {
-				saveErrPath = tmpCmd;
-				errOut = false;
-				continue;
-			}
-			
-			lsReal.add(convertToLocalCmd(tmpCmd));
-		}
-		String[] realCmd = lsReal.toArray(new String[0]);
-		shPID = false;
-		return realCmd;
-	}
-	
-	/** 将cmd中的hdfs路径改为本地路径 */
-	private static String convertToLocalCmd(String tmpCmd) {
-		String[] subcmd = tmpCmd.split("=");
-		subcmd[0] = FileHadoop.convertToLocalPath(subcmd[0]);
-		for (int i = 1; i < subcmd.length; i++) {
-			subcmd[i] = FileHadoop.convertToLocalPath(subcmd[i]);
-		}
-		String result = subcmd[0];
-		for (int i = 1; i < subcmd.length; i++) {
-			result = result + "=" + subcmd[i];
-		}
-		return result;
-	}
-	
-	private static String getRedirectPath(String tmpPath, String outFileName) {
-		String fileName = "";
-		if (!outFileName.endsWith("/") && !outFileName.endsWith("\\")) {
-			fileName = FileOperate.getFileName(outFileName);
-		}
-		String tmpFileName = tmpPath + fileName;
-		return tmpFileName;
+		cmdPath.deleteTmpFile();
 	}
 
-	/**
-	 * 将tmpPath文件夹中的内容全部移动到resultPath中
-	 * notmove是不需要移动的文件名
-	 * @param tmpPath
-	 * @param resultPath
-	 * @param notMove
-	 * @param isDelFile 如果出错是否删除原来的文件
-	 */
-	private void copyFile(Map<String, String> mapOutFile2Tmp) {
-		for (String outFile : mapOutFile2Tmp.keySet()) {
-			String outTmpPath = FileOperate.getPathName(mapOutFile2Tmp.get(outFile));
-			String outRealPath = FileOperate.getPathName(outFile);
-			
-			List<String> lsFilesFinish = FileOperate.getFoldFileNameLs(outTmpPath, "*", "*");
-			for (String filePath : lsFilesFinish) {
-				String  filePathResult = filePath.replaceFirst(outTmpPath, outRealPath);
-				boolean isSucess = FileOperate.copyFile(filePath, filePathResult, false);
-				if (!isSucess) {
-					throw new ExceptionCmd("cannot copy " + filePath + " to " + filePathResult);
-				}
-			}
-		}
-	}
 	/** 必须等程序启动后才能获得
 	 * 得到 输入给cmd 的 output流，可以往里面写东西
 	 */
@@ -638,26 +498,18 @@ public class CmdOperate extends RunProcess<String> {
 		return false;
 	}
 
-	/**
-	 * 返回运行所耗时间，单位ms
-	 * 
-	 * @return
-	 */
+	/** 返回运行所耗时间，单位ms */
 	public long getRunTime() {
 		return runTime;
 	}
 
 	/** 不能实现 */
 	@Deprecated
-	public void threadSuspend() {
-	}
+	public void threadSuspend() { }
 
-	/**
-	 * 不能实现
-	 * */
+	/** 不能实现 */
 	@Deprecated
-	public synchronized void threadResume() {
-	}
+	public synchronized void threadResume() { }
 
 	/** 终止线程，在循环中添加 */
 	public void threadStop() {
