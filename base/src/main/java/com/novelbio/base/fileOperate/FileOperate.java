@@ -4,12 +4,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -17,10 +15,13 @@ import java.util.Collection;
 import java.util.List;
 
 import net.sf.samtools.seekablestream.ISeekableStreamFactory;
+import net.sf.samtools.seekablestream.SeekableFileStream;
+import net.sf.samtools.seekablestream.SeekableHDFSstream;
 import net.sf.samtools.seekablestream.SeekableStream;
 import net.sf.samtools.seekablestream.SeekableStreamFactory;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.log4j.Logger;
 
 import com.novelbio.base.SerializeKryo;
@@ -796,9 +797,19 @@ public class FileOperate {
 		return bea;
 	}
 	
-	public static SeekableStream getInputStream(String filePath) throws IOException {
+	public static SeekableStream getInputStreamSeekable(String filePath) throws IOException {
 		ISeekableStreamFactory seekableStreamFactory = SeekableStreamFactory.getInstance();
 		return seekableStreamFactory.getStreamFor(filePath);
+	}
+	
+	public static InputStream getInputStream(String filePath) throws IOException {
+		 if (FileHadoop.isHdfs(filePath)) {
+             if(FileOperate.isWindows())
+             	return new FileInputStream(new File(FileHadoop.convertToLocalPath(filePath)));
+         	return new FileHadoop(filePath).getInputStream();
+         } else {
+         	return new FileInputStream(new File(filePath));
+         }
 	}
 	
 	public static OutputStream getOutputStream(String filePath, boolean cover) {

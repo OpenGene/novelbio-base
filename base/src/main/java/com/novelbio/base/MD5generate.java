@@ -152,16 +152,12 @@ public class MD5generate {
 	 */
 	public static String getNBCFileMD5(String fileName) throws IOException {
 		InputStream in = FileOperate.getInputStream(fileName);
-		int maxSize = 1024*1024*5;//100;
-		int fileLength = 0;
-		if(in instanceof FSDataInputStream){
-			fileLength = (int) ((FSDataInputStream) in).getFileLength();
-		}else{
-			fileLength = in.available();
-		}
+		long maxSize = 1024*1024*5;//100;
+		long fileLength = 0;
+		fileLength = FileOperate.getFileSizeLong(fileName);
 		maxSize = (maxSize > fileLength ? fileLength : maxSize);
 		System.out.println(maxSize);
-		byte[] b = new byte[maxSize];
+		byte[] b = new byte[(int)maxSize];
 		in.read(b);
 		in.close();
 		String str = Base64.encodeBase64String(b);

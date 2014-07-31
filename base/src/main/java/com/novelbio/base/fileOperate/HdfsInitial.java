@@ -48,14 +48,21 @@ public class HdfsInitial {
 		symbol = properties.getProperty("hdfsHeadSymbol");
 		hdfsLocalPath = properties.getProperty("hdfsLocalPath");
 		IntHdfsBaseHolder hdfsBase = null;
-		if (properties.contains("hdfs-core-xml")) {
+		if (properties.containsKey("hdfs-core-xml")) {
 			hdfsBase = new HdfsBaseHolderHadoop2();
+			((HdfsBaseHolderHadoop2)hdfsBase).setCorexml(properties.getProperty("hdfs-core-xml"));
+			((HdfsBaseHolderHadoop2)hdfsBase).setHdfsxml(properties.getProperty("hdfs-xml"));
+			HEAD = null;
 		} else {
 			hdfsBase = new HdfsBaseHolderMapr();
 		}
 		conf = hdfsBase.getConf();
 		try {
-			fsHDFS = FileSystem.get(URI.create(HEAD), conf);
+			if (properties.containsKey("hdfs-core-xml")) {
+				fsHDFS = FileSystem.get(conf);
+			} else {
+				fsHDFS = FileSystem.get(URI.create(HEAD), conf);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -102,10 +109,18 @@ public class HdfsInitial {
 	}
 	
 	static class HdfsBaseHolderHadoop2 implements IntHdfsBaseHolder {
-		static String hdfsxml;
-		static String corexml;
-		static Configuration conf;
-		static {
+		String hdfsxml;
+		String corexml;
+		Configuration conf;
+		
+		public void setCorexml(String corexml) {
+			this.corexml = corexml;
+		}
+		public void setHdfsxml(String hdfsxml) {
+			this.hdfsxml = hdfsxml;
+		}
+		
+		public synchronized Configuration getConf() {
 			conf = new Configuration();
 //			conf.set("fs.defaultFS", "hdfs://cluster1");
 //			conf.set("dfs.nameservices", "cluster1");
@@ -114,16 +129,16 @@ public class HdfsInitial {
 //			conf.set("dfs.namenode.rpc-address.cluster1.nn2", "192.168.0.181:8020");
 //			conf.set("dfs.client.failover.proxy.provider.cluster1", "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider");
 			conf.set("dfs.permissions.enabled", "false");
-//			conf.set("dfs.permissions.superusergroup", "novelbio");
-//			conf.set("hadoop.job.ugi", "novelbio");
 			try {
 				readXml();
 			} catch (DocumentException e) {
-				throw new RuntimeException(e);
+				e.printStackTrace();
+				return null;
 			}
+			return conf;
 		}
 		
-		private static void readXml() throws DocumentException {
+		private void readXml() throws DocumentException {
 			Document document = new SAXReader().read(FileOperate.getFile(corexml));
 			List<Element> lsElements = document.selectNodes("//configuration/property");
 			for (Element ele : lsElements) {
@@ -151,11 +166,7 @@ public class HdfsInitial {
 				}
 			}
 		}
-		
-		
-		public Configuration getConf() {
-			return conf;
-		}
+
 	}
 
 }

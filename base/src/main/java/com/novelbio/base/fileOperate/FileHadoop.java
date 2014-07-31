@@ -48,7 +48,7 @@ public class FileHadoop extends File {
 	}
 	
 	private static String copeToHdfsHeadSymbol(String hdfsFilePath) {
-		if (hdfsFilePath.startsWith(HdfsInitial.getHEAD())) {
+		if (!StringOperate.isRealNull(HdfsInitial.getHEAD()) && hdfsFilePath.startsWith(HdfsInitial.getHEAD())) {
 			hdfsFilePath = hdfsFilePath.replace(HdfsInitial.getHEAD(), FileHadoop.getHdfsSymbol());
 		}
 		if (!hdfsFilePath.startsWith(FileHadoop.getHdfsSymbol())) {
@@ -316,10 +316,7 @@ public class FileHadoop extends File {
 			return false;
 		}
 		fileName = fileName.toLowerCase();
-		if (!StringOperate.isRealNull(HdfsInitial.getHEAD())) {
-			return fileName.startsWith(HdfsInitial.getSymbol()) ? true : false;
-		}
-		return false;
+		return fileName.startsWith(HdfsInitial.getSymbol()) ? true : false;
 	}
 
 	
