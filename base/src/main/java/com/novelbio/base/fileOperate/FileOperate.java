@@ -96,11 +96,7 @@ public class FileOperate {
 				filePath = FileHadoop.convertToLocalPath(filePath);
 			file = new File(filePath);
 		}else if (isHdfs) {
-			try {
-				file = new FileHadoop(filePath);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			file = new FileHadoop(filePath);
 		}else {
 			file = new File(filePath);
 		}

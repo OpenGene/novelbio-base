@@ -29,7 +29,7 @@ public class FileHadoop extends File {
 	 * @param fileHadoop
 	 * @throws IOException 
 	 */
-	public FileHadoop(String hdfsFilePath) throws IOException {
+	public FileHadoop(String hdfsFilePath) {
 		super(hdfsFilePath = copeToHdfsHeadSymbol(hdfsFilePath));
 		this.fsHDFS = HdfsInitial.getFileSystem();
 		hdfsFilePath = hdfsFilePath.replace(FileHadoop.getHdfsSymbol(), HdfsInitial.getHEAD());
@@ -125,7 +125,7 @@ public class FileHadoop extends File {
 				return false;
 			}
 		}else
-			return fileStatus.isDir();
+			return fileStatus.isDirectory();
 	}
 	/**
 	 * 存不存在此文件
@@ -134,6 +134,7 @@ public class FileHadoop extends File {
 	
 	@Override
 	public boolean exists() {
+		
 		if(fileStatus == null){
 			try {
 				return fsHDFS.exists(dst);
@@ -218,12 +219,7 @@ public class FileHadoop extends File {
 		String[] files = list();
 		List<File> lsFiles = new ArrayList<>();
 		for (int i = 0; i < files.length; i++) {
-			FileHadoop fileHadoop = null;
-			try {
-				fileHadoop = new FileHadoop(FileOperate.addSep(getPath()) + files[i]);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			FileHadoop fileHadoop = new FileHadoop(FileOperate.addSep(getPath()) + files[i]);
 			lsFiles.add(fileHadoop);
 		}
 		File[] children = ArrayOperate.converList2Array(lsFiles);
