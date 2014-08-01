@@ -4,12 +4,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -27,6 +25,7 @@ import com.novelbio.base.SerializeKryo;
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.cmd.CmdOperate;
 import com.novelbio.base.dataStructure.PatternOperate;
+import com.novelbio.base.dataStructure.PatternOperate.PatternUnit;
 
 public class FileOperate {
 	private static Logger logger = Logger.getLogger(FileOperate.class);
@@ -481,6 +480,7 @@ public class FileOperate {
 	 *            文件 wfese.fse.认作 "wfese.fse."和""<br>
 	 *            文件 wfese 认作 "wfese"和""<br>
 	 *            null 表示不指定
+	 *            如果要指定多个后缀，可以用fastq|fq.gz|fq 这种形式 不需要\\|
 	 * @return 返回包含目标文件全名的ArrayList
 	 * @throws IOException 
 	 */
@@ -548,10 +548,18 @@ public class FileOperate {
 	private static boolean isNeedFile(PatternOperate patName, PatternOperate patSuffix, 
 			String fileName, String regxFilename, String regxSuffix) {
 		String[] fileNameSep = getFileNameSep(fileName);
-		if (patName.getPatFirst(fileNameSep[0]) != null && patSuffix.getPatFirst(fileNameSep[1]) != null) {
-			return true;
+		if (patName.getPatFirst(fileNameSep[0]) == null) {
+			return false;
 		}
-		return false;
+		patSuffix.setInputStr(fileName);
+		List<PatternUnit> lsPat = patSuffix.getLsPatternUnits();
+		if (lsPat.isEmpty()) {
+			return false;
+		}
+		if (lsPat.get(lsPat.size() - 1).getEndLoc() > 1) {
+			return false;
+		}
+		return true;
 	}
 
 	/**

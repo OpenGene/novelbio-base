@@ -121,7 +121,7 @@ public class DateUtil {
 	/**
 	 * String转Long
 	 * @param date
-	 * @param pattern
+	 * @param pattern 格式类似：yyyy-MM-dd HH:mm:ss，注意大小写
 	 * @return
 	 */
 	public static Long string2DateLong(String date,String pattern){
