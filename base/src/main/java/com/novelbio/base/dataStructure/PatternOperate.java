@@ -46,14 +46,14 @@ public class PatternOperate {
     
     private void getPatternInfo() {
     	//hashtable用来装载正则表达式的不同具体字符串，用以判断某个特定字符串出现的次数
-    	Map<String, Integer> mapPat2Num=new HashMap<>();
+    	Map<String, Integer> mapPat2Num = new HashMap<>();
     	lsPatternUnits = new ArrayList<>();
-    	matInput=patInput.matcher(inputStr);
+    	matInput = patInput.matcher(inputStr);
     	Integer index;//某个字符的出现次数
     	while(matInput.find()) {
     		PatternUnit patternUnit = new PatternUnit();
     		patternUnit.setPatternStr(matInput.group());
-    		if((index = mapPat2Num.get(patternUnit.getPatternStr())) ==null) {
+    		if((index = mapPat2Num.get(patternUnit.getPatternStr())) == null) {
     			mapPat2Num.put(patternUnit.getPatternStr(), 1);//第一次发现该字符串，则设定为1
     		}
     		else {
@@ -63,16 +63,15 @@ public class PatternOperate {
     		int locationend = 0;//该表达式到终点距离为0
     		int num = mapPat2Num.get(patternUnit.getPatternStr());//总共发现了num次
     		for(int i=0; i<num;i++) {
-    			locationstart=inputStr.indexOf(patternUnit.getPatternStr(), locationstart)+1;
+    			locationstart = inputStr.indexOf(patternUnit.getPatternStr(), locationstart)+1;
     		}
-    		locationend=inputStr.length() - locationstart - patternUnit.getPatternStr().length() + 2;
+    		locationend = inputStr.length() - locationstart - patternUnit.getPatternStr().length() + 2;
     		patternUnit.setStartLoc(locationstart);
     		patternUnit.setEndLoc(locationend);
     		lsPatternUnits.add(patternUnit);
     	}
     }
 
-    
     public static class PatternUnit {
     	/** 匹配到的某个特定的字符串 */
     	String patternStr;

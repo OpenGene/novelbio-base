@@ -804,9 +804,19 @@ public class FileOperate {
 		return bea;
 	}
 	
-	public static SeekableStream getInputStream(String filePath) throws IOException {
+	public static SeekableStream getInputStreamSeekable(String filePath) throws IOException {
 		ISeekableStreamFactory seekableStreamFactory = SeekableStreamFactory.getInstance();
 		return seekableStreamFactory.getStreamFor(filePath);
+	}
+	
+	public static InputStream getInputStream(String filePath) throws IOException {
+		 if (FileHadoop.isHdfs(filePath)) {
+            if(FileOperate.isWindows())
+            	return new FileInputStream(new File(FileHadoop.convertToLocalPath(filePath)));
+        	return new FileHadoop(filePath).getInputStream();
+        } else {
+        	return new FileInputStream(new File(filePath));
+        }
 	}
 	
 	public static OutputStream getOutputStream(String filePath, boolean cover) {
