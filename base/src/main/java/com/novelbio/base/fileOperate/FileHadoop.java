@@ -312,7 +312,10 @@ public class FileHadoop extends File {
 			return false;
 		}
 		fileName = fileName.toLowerCase();
-		return fileName.startsWith(HdfsInitial.getSymbol()) ? true : false;
+		if (!StringOperate.isRealNull(HdfsInitial.getHEAD())) {
+			return fileName.startsWith(HdfsInitial.getSymbol()) ? true : false;
+		}
+		return false;
 	}
 
 	
