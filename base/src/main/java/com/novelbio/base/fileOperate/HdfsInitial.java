@@ -45,6 +45,9 @@ public class HdfsInitial {
 			}
 		}
 		HEAD = properties.getProperty("hdfsHead");
+		if (HEAD == null) {
+			HEAD = "";
+		}
 		symbol = properties.getProperty("hdfsHeadSymbol");
 		hdfsLocalPath = properties.getProperty("hdfsLocalPath");
 		IntHdfsBaseHolder hdfsBase = null;
@@ -52,7 +55,6 @@ public class HdfsInitial {
 			hdfsBase = new HdfsBaseHolderHadoop2();
 			((HdfsBaseHolderHadoop2)hdfsBase).setCorexml(properties.getProperty("hdfs-core-xml"));
 			((HdfsBaseHolderHadoop2)hdfsBase).setHdfsxml(properties.getProperty("hdfs-xml"));
-			HEAD = null;
 		} else {
 			hdfsBase = new HdfsBaseHolderMapr();
 		}
