@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
+import java.util.zip.GZIPOutputStream;
 
 import net.sf.samtools.seekablestream.ISeekableStreamFactory;
 import net.sf.samtools.seekablestream.SeekableStream;
@@ -24,6 +25,7 @@ import org.apache.log4j.Logger;
 import com.novelbio.base.SerializeKryo;
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.cmd.CmdOperate;
+import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.dataStructure.PatternOperate;
 import com.novelbio.base.dataStructure.PatternOperate.PatternUnit;
 
@@ -495,9 +497,16 @@ public class FileOperate {
 		// ================================================================//
 		ArrayList<String> lsFilenames = new ArrayList<String>();
 		// 开始判断
-		PatternOperate patName = new PatternOperate(filename, false);
+		PatternOperate patName = null;
+		PatternOperate patSuffix = null;
+		if (!filename.equals(".*")) {
+			patName = new PatternOperate(filename, false);
+		}
 		// 开始判断
-		PatternOperate patSuffix = new PatternOperate(suffix, false);
+		if (!suffix.equals(".*")) {
+			patSuffix = new PatternOperate(suffix, false);
+		}
+		
 		String[] filenameraw = null;
 		File file = getFile(filePath);
 		if (filePath.equals("")) {
@@ -548,16 +557,22 @@ public class FileOperate {
 	private static boolean isNeedFile(PatternOperate patName, PatternOperate patSuffix, 
 			String fileName, String regxFilename, String regxSuffix) {
 		String[] fileNameSep = getFileNameSep(fileName);
-		if (patName.getPatFirst(fileNameSep[0]) == null) {
+		if (patName != null && patName.getPatFirst(fileNameSep[0]) == null) {
 			return false;
+		}
+		if (patSuffix == null) {
+			return true;
 		}
 		patSuffix.setInputStr(fileName);
 		List<PatternUnit> lsPat = patSuffix.getLsPatternUnits();
 		if (lsPat.isEmpty()) {
 			return false;
 		}
-		if (lsPat.get(lsPat.size() - 1).getEndLoc() > 1) {
-			return false;
+		for (int i = lsPat.size() - 1; i >= 0; i--) {
+			PatternUnit patUnit = lsPat.get(i);
+			if (patUnit.getEndLoc() == 1) {
+				return true;
+			}
 		}
 		return true;
 	}
@@ -860,8 +875,13 @@ public class FileOperate {
 			return true;
 		}
 		File oldfile = getFile(oldPathFile);
-		File newfile = getFile(newPathFile);
-		return copyFile(oldfile, newfile, cover);
+		String newPathTmp = FileOperate.changeFileSuffix(newPathFile, "_tmp", null);
+		File newfile = getFile(newPathTmp);
+		boolean isSucess = copyFile(oldfile, newfile, cover);
+		if (isSucess) {
+			return moveFile(true, newPathTmp, newPathFile);
+		}
+		return false;
 	}
 	/**
 	 * 复制单个文件
@@ -874,7 +894,7 @@ public class FileOperate {
 	 *            是否覆盖
 	 * @return
 	 */
-	public static boolean copyFile(File oldfile,File newfile, boolean cover) {
+	private static boolean copyFile(File oldfile,File newfile, boolean cover) {
 		if (oldfile != null && oldfile.getAbsoluteFile().equals(newfile.getAbsoluteFile())) {
 			return true;
 		}
@@ -1667,7 +1687,8 @@ public class FileOperate {
 	 * 
 	 * @param sPath
 	 *            要删除的目录或文件
-	 * @return 删除成功返回 true，否则返回 false。
+	 * @return 删除成功返回 true，否则返回 false
+	 * 不存在文件也返回true
 	 */
 	public static boolean DeleteFileFolder(String sPath) {
 		if (sPath == null || sPath.trim().equals("")) {
@@ -1675,12 +1696,14 @@ public class FileOperate {
 		}
 		File file = getFile(sPath);
 		// 判断目录或文件是否存在
-		if (file.exists() && file.isDirectory()) { // 不存在返回 false
-			return deleteDirectory(file);
-		} else {
-			file.delete();
-			return true;
+		if (file.exists()) {
+			if (file.isDirectory()) {
+				return deleteDirectory(file);
+			} else {
+				return file.delete();
+			}
 		}
+		return true;
 	}
 
 	/**
@@ -1710,5 +1733,35 @@ public class FileOperate {
 		}
 		return path;
 	}
-
+	
+	/**
+	 * 
+	 * 将输入流保存到指定文件
+	 * @param inputStream
+	 * @param outPath 输出文件名，不会修改该输出文件名
+	 * @param isOutputGzip 是否将输出流进行压缩
+	 * @param uploadFileSize 上传文件的大小，小于等于0表示不考虑
+	 * @return
+	 * @throws IOException 抛出异常，但并不删除已上传的文件
+	 */
+	public static long uploadFile(InputStream inputStream, String outPath, boolean isOutputGzip, long uploadFileSize) throws IOException {
+		if (StringOperate.isRealNull(outPath)) {
+			return 0;
+		}
+		
+		OutputStream os = FileOperate.getOutputStream(outPath, true);
+		if (isOutputGzip) {
+			os =  new GZIPOutputStream(os, TxtReadandWrite.bufferLen);
+		}
+		
+		long outputLen = IOUtils.copyLarge(inputStream, os);
+		os.flush();
+		inputStream.close();
+		os.close();
+		if (uploadFileSize > 0 && outputLen != uploadFileSize) {
+			throw new IOException("file Length is incorrect! inputLen: " + uploadFileSize + "   realLen: " + outputLen);
+		}
+		return outputLen;
+	}
+	
 }
