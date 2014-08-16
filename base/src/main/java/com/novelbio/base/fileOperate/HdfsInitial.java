@@ -54,10 +54,12 @@ public class HdfsInitial {
 			hdfsBase = new HdfsBaseHolderMapr();
 		}
 		conf = hdfsBase.getConf();
-		try {
-			fsHDFS = FileSystem.get(URI.create(HEAD), conf);
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (HEAD != null) {
+			try {
+				fsHDFS = FileSystem.get(URI.create(HEAD), conf);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	@Deprecated

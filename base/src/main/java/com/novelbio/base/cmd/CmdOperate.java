@@ -261,6 +261,8 @@ public class CmdOperate extends RunProcess<String> {
 	}
 	
 	/** 是否获得cmd的标准输出流
+	 * 默认false<br>
+	 * 设定为true就可以通过{@link #getStreamStd()}来获得输出流<br>
 	 * <b>优先级高于cmd命令中的重定向</b>
 	 * @param getCmdInStdStream
 	 */
@@ -268,6 +270,8 @@ public class CmdOperate extends RunProcess<String> {
 		this.getCmdInStdStream = getCmdInStdStream;
 	}
 	/** 是否获得cmd的错误输出流
+	 * 默认false<br>
+	 * 设定为true就可以通过{@link #getStreamErr()}来获得错误流<br>
 	 * <b>优先级高于cmd命令中的重定向</b>
 	 * @param getCmdInStdStream
 	 */
@@ -407,10 +411,10 @@ public class CmdOperate extends RunProcess<String> {
 		finishFlag.flag = process.waitFor();
 		outputGobbler.join();
 		errorGobbler.join();
-		if (!getCmdInStdStream || saveFilePath != null) {
+		if (!getCmdInStdStream && saveFilePath != null) {
 			outputGobbler.close();
 		}
-		if (!getCmdInErrStream || saveErrPath != null) {
+		if (!getCmdInErrStream && saveErrPath != null) {
 			errorGobbler.close();
 		}
 		
@@ -544,7 +548,7 @@ public class CmdOperate extends RunProcess<String> {
 }
 
 class StreamGobbler extends Thread {
-	Logger logger = Logger.getLogger(StreamGobbler.class);
+	private static final Logger logger = Logger.getLogger(StreamGobbler.class);
 	InputStream is;
 	OutputStream os;
 	LinkedList<String> lsInfo;
@@ -610,7 +614,7 @@ class StreamGobbler extends Thread {
 						lsInfo.poll();
 					}
 					if (isSysout) {
-						System.out.println(line);
+						logger.info(line);
 					}
 				}
 			}
