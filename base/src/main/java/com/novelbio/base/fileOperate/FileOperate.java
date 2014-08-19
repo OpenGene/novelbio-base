@@ -3,6 +3,7 @@ package com.novelbio.base.fileOperate;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -1580,6 +1581,21 @@ public class FileOperate {
 		return false;
 	}
 	/**
+	 * 判断文件是否存在，并且有一定的大小而不是空文件
+	 * 
+	 * @param fileName
+	 *            如果为null, 直接返回false
+	 * @param size
+	 *            大小 byte为单位
+	 * @return
+	 * @throws FileNotFoundException 
+	 */
+	public static void checkFileExistAndBigThanSize(String fileName, double size) {
+		if (!isFileExistAndBigThanSize(fileName, size)) {
+			throw new ExceptionFileNotExist("cannot find file: " + fileName);
+		}
+	}
+	/**
 	 * 是否存在并且无损
 	 * @param filePath
 	 * @param realSize
@@ -1764,4 +1780,12 @@ public class FileOperate {
 		return outputLen;
 	}
 	
+	
+	public static class ExceptionFileNotExist extends RuntimeException {
+		private static final long serialVersionUID = 8125052068436320509L;
+
+		public ExceptionFileNotExist(String info) {
+			super(info);
+		}
+	}
 }

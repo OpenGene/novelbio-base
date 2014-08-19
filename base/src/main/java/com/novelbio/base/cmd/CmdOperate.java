@@ -468,6 +468,23 @@ public class CmdOperate extends RunProcess<String> {
 		}
 	}
 	
+	/** 运行，出错会抛出异常
+	 * @param info 输入异常的信息，譬如软件名，类似
+	 * bwa error: 这种，后面会附上具体运行的代码等
+	 */
+	public void runWithExp(String info) {
+		run();
+		if (!isFinishedNormal()) {
+			throw new ExceptionCmd(info, this);
+		}
+	}
+	/** 运行，出错会抛出异常 */
+	public void runWithExp() {
+		run();
+		if (!isFinishedNormal()) {
+			throw new ExceptionCmd(this);
+		}
+	}
 	
 	@Override
 	protected void running() {
