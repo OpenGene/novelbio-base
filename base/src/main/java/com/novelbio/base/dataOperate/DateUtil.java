@@ -55,6 +55,7 @@ public class DateUtil {
 	public static long getNowTimeLong() {
 		return new Date().getTime();
 	}
+	
 	public static String getNowTimeLongRandom() {
 	     Random random = new Random(System.currentTimeMillis());
 		return new Date().getTime() + "_" + random.nextInt();
@@ -83,6 +84,16 @@ public class DateUtil {
 	public static String date2String(Date date,String pattern) {
 		SimpleDateFormat sf = new SimpleDateFormat(pattern);
 		return sf.format(date);
+	}
+	/**
+	 * 把long类型的日期转换成String
+	 * @param dateLong
+	 * @param pattern
+	 * @return
+	 */
+	public static String date2String(long dateLong, String pattern) {
+		Date date = new Date(dateLong);
+		return date2String(date, pattern);
 	}
 	
 	/**
