@@ -1,12 +1,13 @@
 package com.novelbio.base.fileOperate;
 
 import java.io.File;
+import java.io.FileFilter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -16,14 +17,16 @@ import org.apache.hadoop.fs.Path;
 
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataOperate.DateUtil;
-import com.novelbio.base.dataStructure.ArrayOperate;
 
 public class FileHadoop extends File {
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 8341313247682247317L;
 	FileSystem fsHDFS;
 	Path dst;
 	FileStatus fileStatus;
-	
+	String fileName;
+	public Path getDst() {
+		return dst;
+	}
 	/**
 	 * 输入另一个fileHadoop的内容，仅获得其配置信息，不获得其具体文件名
 	 * @param fileHadoop
@@ -39,6 +42,19 @@ public class FileHadoop extends File {
 		}
 		//TODO 以后就应该是
 		dst = new Path(hdfsFilePath);
+		this.fileName = hdfsFilePath;
+	}
+	/**
+	 * 输入另一个fileHadoop的内容，仅获得其配置信息，不获得其具体文件名
+	 * @param fileHadoop
+	 * @throws IOException 
+	 */
+	public FileHadoop(String fileName, Path path) {
+		super(copeToHdfsHeadSymbol(fileName));
+		this.fsHDFS = HdfsInitial.getFileSystem();
+		//TODO 以后就应该是
+		dst = path;
+		this.fileName = fileName;
 	}
 	/** 初始化 */
 	private void init() {
@@ -83,8 +99,12 @@ public class FileHadoop extends File {
 		}
 	}
 	
-	
-	
+    public FileHadoop getParentFile() {
+        String p = this.getParent();
+        if (p == null) return null;
+        return new FileHadoop(p);
+    }
+
 	/**
 	 * 根据文件产生一个流，如果文件不存在则返回null
 	 * 如果文件存在则衔接上去
@@ -136,10 +156,8 @@ public class FileHadoop extends File {
 	 * 存不存在此文件
 	 * @return
 	 */
-	
 	@Override
 	public boolean exists() {
-		
 		if(fileStatus == null){
 			try {
 				return fsHDFS.exists(dst);
@@ -149,9 +167,21 @@ public class FileHadoop extends File {
 		}else
 			return true;
 	}
+	public String getAbsolutePath() {
+		return copeToHdfsHeadSymbol(fileName);
+	}
+	@Deprecated
+    public FileHadoop getAbsoluteFile() {
+        String absPath = getAbsolutePath();
+        return new FileHadoop(absPath);
+    }
+	@Deprecated
+	public FileHadoop getCanonicalFile() throws IOException {
+		return new FileHadoop(getCanonicalPath());
+	}
 	
 	/**
-	 * 列出子文件
+	 * 列出子文件名，相对文件名
 	 * @return
 	 */
 	@Override
@@ -192,7 +222,12 @@ public class FileHadoop extends File {
 		// TODO Auto-generated method stub
 		return super.toURL();
 	}
-
+	
+	@Deprecated
+	public boolean isHidden() {
+		 throw new ExceptionFile("No support method");
+	}
+	
 	/** 出错返回 -1000 */
 	@Override
 	public long lastModified() {
@@ -200,7 +235,7 @@ public class FileHadoop extends File {
 		try {
 			return fileStatus.getModificationTime();
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw new ExceptionFile(e);
 		}
 	}
 
@@ -218,21 +253,52 @@ public class FileHadoop extends File {
 			return false;
 		}
 	}
-
+	/** 无法使用 */
+	@Deprecated
+	 public void deleteOnExit() {
+		 throw new ExceptionFile("No support method");
+	 }
 	@Override
-	public File[] listFiles() {
-		String[] files = list();
-		List<File> lsFiles = new ArrayList<>();
-		for (int i = 0; i < files.length; i++) {
-			FileHadoop fileHadoop = new FileHadoop(FileOperate.addSep(getPath()) + files[i]);
-			lsFiles.add(fileHadoop);
+	public FileHadoop[] listFiles() {
+		FileStatus[] childrenFileStatus;
+		try {
+			childrenFileStatus = fsHDFS.listStatus(dst);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
 		}
-		File[] children = ArrayOperate.converList2Array(lsFiles);
-		if(children == null)
-			return new File[]{};
-		return ArrayOperate.converList2Array(lsFiles);
+		FileHadoop[] files = {};
+		if (childrenFileStatus.length != 0) {
+			files = new FileHadoop[childrenFileStatus.length];
+		}
+		for (int i = 0; i < childrenFileStatus.length; i++) {
+			Path childPath = childrenFileStatus[i].getPath();
+			files[i] = new FileHadoop(FileOperate.addSep(fileName) + childPath.getName(), childPath);
+		}
+		return files;
 	}
-
+	
+    public FileHadoop[] listFiles(FilenameFilter filter) {
+        FileHadoop ss[] = listFiles();
+        if (ss == null) return null;
+        ArrayList<FileHadoop> files = new ArrayList<>();
+        for (FileHadoop s : ss)
+            if ((filter == null) || filter.accept(this, s.dst.getName()))
+                files.add(s);
+        return files.toArray(new FileHadoop[files.size()]);
+    }
+    
+    public FileHadoop[] listFiles(FileFilter filter) {
+    	FileHadoop ss[] = listFiles();
+        if (ss == null) return null;
+        ArrayList<FileHadoop> files = new ArrayList<>();
+        for (FileHadoop s : ss) {
+            if ((filter == null) || filter.accept(s))
+                files.add(s);
+        }
+        return files.toArray(new FileHadoop[files.size()]);
+    }
+    
 	@Override
 	public boolean mkdir() {
 		try {
@@ -252,7 +318,49 @@ public class FileHadoop extends File {
 		}
 		return false;
 	}
-
+	@Deprecated
+    public boolean setLastModified(long time) {
+        if (time < 0) throw new IllegalArgumentException("Negative time");
+        try {
+			fsHDFS.setTimes(dst, time, time);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+        return true;
+    }
+    @Deprecated
+    public boolean setReadOnly() {
+    	 throw new ExceptionFile("No support method");
+    }
+    @Deprecated
+    public boolean setWritable(boolean writable, boolean ownerOnly) {
+    	 throw new ExceptionFile("No support method");
+    }
+    @Deprecated
+    public boolean setWritable(boolean writable) {
+    	 throw new ExceptionFile("No support method");
+    }
+    @Deprecated
+    public boolean setReadable(boolean readable, boolean ownerOnly) {
+    	 throw new ExceptionFile("No support method");
+    }
+    @Deprecated
+    public boolean setReadable(boolean readable) {
+    	 throw new ExceptionFile("No support method");
+    }
+    @Deprecated
+    public boolean setExecutable(boolean executable, boolean ownerOnly) {
+    	 throw new ExceptionFile("No support method");
+    }
+    @Deprecated
+    public boolean setExecutable(boolean executable) {
+    	 throw new ExceptionFile("No support method");
+    }
+    public boolean canExecute() {
+    	 throw new ExceptionFile("No support method");
+    }
+    
 	/**
 	 * 未测试
 	 */
@@ -323,19 +431,99 @@ public class FileHadoop extends File {
 		return false;
 	}
 
-	
-//	/**
-//	 * @return 返回文件总结信息
-//	 * 通过该summary可以获得文件长度等信息
-//	 */
-//	@Deprecated
-//	public ContentSummary getContentSummary() {
-//		try {
-//			return fsHDFS.getContentSummary(dst);
-//		} catch (IOException e) {
-//			return null;
-//		}
-//	}
+	@Deprecated
+	public static File[] listRoots() {
+        return null;
+    }
+
+
+   @Deprecated
+    public long getTotalSpace() {
+	   throw new ExceptionFile("No support method");
+    }
+
+   @Deprecated
+    public long getFreeSpace() {
+    	throw new ExceptionFile("No support method");
+    }
+
+    @Deprecated
+    public long getUsableSpace() {
+    	 throw new ExceptionFile("No support method");
+    }
+    
+    /* -- Basic infrastructure -- */
+
+    /**
+     * Compares two abstract pathnames lexicographically.  The ordering
+     * defined by this method depends upon the underlying system.  On UNIX
+     * systems, alphabetic case is significant in comparing pathnames; on Microsoft Windows
+     * systems it is not.
+     *
+     * @param   pathname  The abstract pathname to be compared to this abstract
+     *                    pathname
+     *
+     * @return  Zero if the argument is equal to this abstract pathname, a
+     *          value less than zero if this abstract pathname is
+     *          lexicographically less than the argument, or a value greater
+     *          than zero if this abstract pathname is lexicographically
+     *          greater than the argument
+     *
+     * @since   1.2
+     */
+    public int compareTo(File pathname) {
+        return super.compareTo(pathname);
+    }
+
+    /**
+     * Tests this abstract pathname for equality with the given object.
+     * Returns <code>true</code> if and only if the argument is not
+     * <code>null</code> and is an abstract pathname that denotes the same file
+     * or directory as this abstract pathname.  Whether or not two abstract
+     * pathnames are equal depends upon the underlying system.  On UNIX
+     * systems, alphabetic case is significant in comparing pathnames; on Microsoft Windows
+     * systems it is not.
+     *
+     * @param   obj   The object to be compared with this abstract pathname
+     *
+     * @return  <code>true</code> if and only if the objects are the same;
+     *          <code>false</code> otherwise
+     */
+    public boolean equals(Object obj) {
+        if ((obj != null) && (obj instanceof File)) {
+            return compareTo((File)obj) == 0;
+        }
+        return false;
+    }
+
+    /**
+     * Computes a hash code for this abstract pathname.  Because equality of
+     * abstract pathnames is inherently system-dependent, so is the computation
+     * of their hash codes.  On UNIX systems, the hash code of an abstract
+     * pathname is equal to the exclusive <em>or</em> of the hash code
+     * of its pathname string and the decimal value
+     * <code>1234321</code>.  On Microsoft Windows systems, the hash
+     * code is equal to the exclusive <em>or</em> of the hash code of
+     * its pathname string converted to lower case and the decimal
+     * value <code>1234321</code>.  Locale is not taken into account on
+     * lowercasing the pathname string.
+     *
+     * @return  A hash code for this abstract pathname
+     */
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    /**
+     * Returns the pathname string of this abstract pathname.  This is just the
+     * string returned by the <code>{@link #getPath}</code> method.
+     *
+     * @return  The string form of this abstract pathname
+     */
+    public String toString() {
+        return getPath();
+    }
+    
 }
 
 
