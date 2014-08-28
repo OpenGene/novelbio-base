@@ -32,8 +32,12 @@ public class FileHadoop extends File {
 	public FileHadoop(String hdfsFilePath) {
 		super(hdfsFilePath = copeToHdfsHeadSymbol(hdfsFilePath));
 		this.fsHDFS = HdfsInitial.getFileSystem();
-		hdfsFilePath = hdfsFilePath.replace(FileHadoop.getHdfsSymbol(), HdfsInitial.getHEAD());
-		//TODO 以后就应该是 hdfsFilePath = hdfsFilePath.replace(FileHadoop.getHdfsHeadSymbol(), "");
+		if (HdfsInitial.isHadoop2()) {
+			hdfsFilePath = hdfsFilePath.replace(FileHadoop.getHdfsSymbol(), "");
+		} else {
+			hdfsFilePath = hdfsFilePath.replace(FileHadoop.getHdfsSymbol(), HdfsInitial.getHEAD());
+		}
+		//TODO 以后就应该是
 		dst = new Path(hdfsFilePath);
 	}
 	/** 初始化 */
@@ -66,6 +70,7 @@ public class FileHadoop extends File {
 	}
 	
 	/**
+	 * <b>如果本方法长时间卡死，清check /etc/hosts中是否配置了相关的yarn-master</b><br>
 	 * 根据文件产生一个流
 	 * @param overwrite  false：如果文件不存在，则返回nulll
 	 * @return

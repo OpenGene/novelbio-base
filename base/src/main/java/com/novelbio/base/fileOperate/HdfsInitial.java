@@ -18,7 +18,8 @@ import com.novelbio.base.PathDetail;
 public class HdfsInitial {
 	private static final long serialVersionUID = 1L;
 	@Deprecated
-	private static String HEAD;	
+	private static String HEAD;
+	private static boolean isHadoop2 = false;
 	private static String symbol;
 	/** hdfs挂载在本地哪个盘下面 */
 	private static String hdfsLocalPath;
@@ -55,8 +56,10 @@ public class HdfsInitial {
 			hdfsBase = new HdfsBaseHolderHadoop2();
 			((HdfsBaseHolderHadoop2)hdfsBase).setCorexml(properties.getProperty("hdfs-core-xml"));
 			((HdfsBaseHolderHadoop2)hdfsBase).setHdfsxml(properties.getProperty("hdfs-xml"));
+			isHadoop2 = true;
 		} else {
 			hdfsBase = new HdfsBaseHolderMapr();
+			isHadoop2 = false;
 		}
 		conf = hdfsBase.getConf();
 		try {
@@ -78,6 +81,10 @@ public class HdfsInitial {
 	}
 	public static String getSymbol() {
 		return symbol;
+	}
+	
+	public static boolean isHadoop2() {
+		return isHadoop2;
 	}
 	
 	/**
