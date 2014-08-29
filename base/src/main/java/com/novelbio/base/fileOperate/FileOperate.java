@@ -268,7 +268,7 @@ public class FileOperate {
 	public static double getFileSizeEvaluateK(Collection<String> colFileName){
 		double allFileSize = 0;
 		for (String fileName : colFileName) {
-			double size = FileOperate.getFileSize(fileName);
+			double size = (double)FileOperate.getFileSizeLong(fileName)/1024;
 			// 如果是压缩文件就假设源文件为6倍大 */
 			String suffix = getFileNameSep(fileName)[1].toLowerCase();
 			if (suffix.equals("gz") || suffix.equals("zip")
@@ -283,46 +283,7 @@ public class FileOperate {
 	}
 
 	/**
-	 * <b>未经测试</b> 给定文件路径，返回大小，单位为K
-	 * 
-	 * @param filePath
-	 * @return 没有文件返回0；出错返回-1000000000
-	 * @throws IOException 
-	 */
-	public static double getFileSize(String filePath) {
-		double totalsize = 0;
-		File file = getFile(filePath);
-		if (!file.exists()) {
-			return 0;
-		}
-		if (file.isFile()) {
-			double size = file.length()/1024;
-			if (size == 0 && FileHadoop.isHdfs(filePath)) {
-				return getFileSize(FileHadoop.convertToLocalPath(filePath));
-			}
-			return size;
-		} else if (file.isDirectory()) {
-			ArrayList<String[]> lsFileName = getFoldFileName(filePath);
-
-			for (String[] strings : lsFileName) {
-				String fileName = null;
-				// 获得文件名
-				if (strings[1].equals("")) {
-					fileName = addSep(filePath) + strings[0];
-				} else {
-					fileName = addSep(filePath) + strings[0] + "." + strings[1];
-				}
-				totalsize = totalsize + getFileSize(fileName);
-			}
-			return totalsize;
-		} else {
-			logger.error("出错！");
-			return -1000000000;
-		}
-	}
-
-	/**
-	 * <b>未经测试</b> 给定文件路径，返回大小，单位为byte
+	 * 给定文件路径，返回大小，单位为byte，如果有链接，则返回链接的大小
 	 * @param filePath
 	 * @return 没有文件返回0；出错返回-1000000000
 	 * @throws IOException 
@@ -340,16 +301,9 @@ public class FileOperate {
 			}
 			return size;
 		} else if (file.isDirectory()) {
-			ArrayList<String[]> lsFileName = getFoldFileName(filePath);
-			for (String[] strings : lsFileName) {
-				String fileName = null;
-				// 获得文件名
-				if (strings[1].equals("")) {
-					fileName = addSep(filePath) + strings[0];
-				} else {
-					fileName = addSep(filePath) + strings[0] + "." + strings[1];
-				}
-				totalsize = totalsize + getFileSizeLong(fileName);
+			List<File> lsFileChild = getFoldFileLs(file, "*", "*");
+			for (File fileChild : lsFileChild) {
+				totalsize = totalsize + getFileSizeLong(fileChild);
 			}
 			return totalsize;
 		} else {
@@ -502,6 +456,23 @@ public class FileOperate {
 	}
 	
 	/**
+	 * 获取文件夹下全部文件名
+	 * @return 返回包含目标文件全名的List
+	 * @throws IOException 
+	 */
+	public static List<File> getFoldFileLs(File file) {
+		return getFoldFileLs(file, "*", "*");
+	}
+	/**
+	 * 获取文件夹下全部文件名
+	 * @return 返回包含目标文件全名的List
+	 * @throws IOException 
+	 */
+	public static List<File> getFoldFileLs(String file) {
+		return getFoldFileLs(file, "*", "*");
+	}
+	
+	/**
 	 * 获取文件夹下包含指定文件名与后缀的所有文件名,等待增加功能子文件夹下的文件。也就是循环获得文件<br>
 	 * 如果文件不存在则返回空的list<br>
 	 * 如果不是文件夹，则返回该文件名<br>
@@ -557,9 +528,6 @@ public class FileOperate {
 		}
 		@Override
 		public boolean accept(File pathname) {
-			if (pathname.isDirectory()) {
-				return false;
-			}
 			String[] fileNameSep = getFileNameSepWithoutPath(pathname.getName());
 			if (patName.getPatFirst(fileNameSep[0]) != null && patSuffix.getPatFirst(fileNameSep[1]) != null) {
 				return true;

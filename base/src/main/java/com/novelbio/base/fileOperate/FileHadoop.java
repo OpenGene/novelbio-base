@@ -27,6 +27,7 @@ public class FileHadoop extends File {
 	public Path getDst() {
 		return dst;
 	}
+	
 	/**
 	 * 输入另一个fileHadoop的内容，仅获得其配置信息，不获得其具体文件名
 	 * @param fileHadoop
@@ -43,7 +44,9 @@ public class FileHadoop extends File {
 		//TODO 以后就应该是
 		dst = new Path(hdfsFilePath);
 		this.fileName = hdfsFilePath;
+		init();
 	}
+	
 	/**
 	 * 输入另一个fileHadoop的内容，仅获得其配置信息，不获得其具体文件名
 	 * @param fileHadoop
@@ -55,7 +58,9 @@ public class FileHadoop extends File {
 		//TODO 以后就应该是
 		dst = path;
 		this.fileName = fileName;
+		init();
 	}
+	
 	/** 初始化 */
 	private void init() {
 		try{
@@ -120,7 +125,6 @@ public class FileHadoop extends File {
 	}
 	
 	public String getModificationTime(){
-		init();
 		return DateUtil.date2String(new Date(fileStatus.getModificationTime()), DateUtil.PATTERN_DATETIME);
 	}
 	
@@ -158,7 +162,7 @@ public class FileHadoop extends File {
 	 */
 	@Override
 	public boolean exists() {
-		if(fileStatus == null){
+		if(fileStatus == null) {
 			try {
 				return fsHDFS.exists(dst);
 			} catch (IOException e) {
@@ -205,21 +209,17 @@ public class FileHadoop extends File {
 
 	@Override
 	public boolean isFile() {
-		return !isDirectory();
+		return fileStatus == null? false : fileStatus.isFile();
 	}
 	
 	@Override
 	public long length() {
-		init();
-		if(fileStatus == null)
-			return 0;
-		return fileStatus.getLen();
+		return fileStatus == null? 0 : fileStatus.getLen();
 	}
 
 	@Override
 	@Deprecated
 	public URL toURL() throws MalformedURLException {
-		// TODO Auto-generated method stub
 		return super.toURL();
 	}
 	
@@ -231,12 +231,7 @@ public class FileHadoop extends File {
 	/** 出错返回 -1000 */
 	@Override
 	public long lastModified() {
-		init();
-		try {
-			return fileStatus.getModificationTime();
-		} catch (Exception e) {
-			throw new ExceptionFile(e);
-		}
+		return fileStatus == null? 0 : fileStatus.getModificationTime();
 	}
 
 	@Override
@@ -246,6 +241,9 @@ public class FileHadoop extends File {
 	
 	@Override
 	public boolean delete() {
+		if (fileStatus == null) {
+			return true;
+		}
 		try {
 			return fsHDFS.delete(dst, true);
 		} catch (IOException e) {
@@ -265,7 +263,7 @@ public class FileHadoop extends File {
 			childrenFileStatus = fsHDFS.listStatus(dst);
 		} catch (IOException e) {
 			e.printStackTrace();
-			return null;
+			return new FileHadoop[]{};
 		}
 		FileHadoop[] files = {};
 		if (childrenFileStatus.length != 0) {
