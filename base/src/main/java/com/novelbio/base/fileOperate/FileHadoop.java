@@ -82,6 +82,10 @@ public class FileHadoop extends File {
 		return hdfsFilePath;
 	}
 	
+	public short getReplication() {
+		return fileStatus.getReplication();
+	}
+	
 	public FSDataInputStream getInputStream() {
 		try {
 			return fsHDFS.open(dst);
