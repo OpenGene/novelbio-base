@@ -835,6 +835,14 @@ public class FileOperate {
         }
 	}
 	
+	public static InputStream getInputStream(File file) throws IOException {
+		 if (file instanceof FileHadoop) {
+			 return ((FileHadoop)file).getInputStream();
+       } else {
+       	return new FileInputStream(file);
+       }
+	}
+	
 	public static OutputStream getOutputStream(String filePath, boolean cover) {
 		try {
 			File file =  getFile(filePath);

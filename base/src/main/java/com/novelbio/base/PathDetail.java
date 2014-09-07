@@ -57,7 +57,6 @@ public class PathDetail {
 			tmpConfFold = null;
 		}
 		
-		
 		//getRworkspace()
 		rworkspace = null;
 		String path = properties.getProperty("Rworkspace");
@@ -74,22 +73,7 @@ public class PathDetail {
 		if (!FileOperate.createFolders(rworkspaceTmp)) {
 			rworkspaceTmp = null;
 		}
-		
 	}
-	
-	/** 设定java的临时文件夹(本地) */
-	public static void setTmpDir(String filePath) {
-		if (filePath != null && filePath.equals(PathDetail.tmpPath)) {
-			return;
-		}
-		File f = new File(filePath);
-        if (!f.exists()) f.mkdirs();
-        f.setReadable(true, false);
-        f.setWritable(true, false);
-        System.setProperty("java.io.tmpdir", f.getAbsolutePath()); // in loop so that last one takes effect
-	}
-	
-	
 	
 	/** 返回jar所在的路径 */
 	public static String getProjectPath() {
@@ -103,6 +87,7 @@ public class PathDetail {
 		filePath = FileOperate.getParentPathNameWithSep(filePath);
 		return FileOperate.addSep(filePath);
 	}
+	
 	/** 返回jar内部路径 */
 	public static String getProjectPathInside() {
 		java.net.URL url = PathDetail.class.getProtectionDomain().getCodeSource().getLocation();
@@ -135,29 +120,10 @@ public class PathDetail {
 	 * 
 	 * @return
 	 */
-	public static String  getOrderAppendixPath() {
-		return FileHadoop.getHdfsSymbol() + "/nbCloud/public/order/appendix/";
+	public static String getOrderAppendixPath() {
+		return properties.getProperty("orderAppendix");
 	}
-	
-//	/**获取实验附件路径
-//	 * 
-//	 * @return
-//	 */
-//	public static String  getExperimentAppendixPath(String experimentId) {
-//		return FileHadoop.getHdfsHeadSymbol() + "/nbCloud/public/experiment/" + experimentId.toUpperCase() + FileOperate.getSepPath()+"Annach" + FileOperate.getSepPath() ;
-//	}
-	
-	public static String getExperimentZip(String experimentId) {
-		 return FileHadoop.getHdfsSymbol() + "/nbCloud/public/experiment/" + experimentId.toUpperCase() + FileOperate.getSepPath();
-	}
-	
-	/**获取实验压缩包路径
-	 * 
-	 * @return
-	 */
-	public static String  getExperimentPathByLocal() {
-		return "/media/hdfs/nbCloud/public/experiment/";
-	}
+
 	/**
 	 * 获取当前合同的附件文件路径，最后没有加“/”
 	 * @return
