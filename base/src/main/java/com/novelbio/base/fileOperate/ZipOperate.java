@@ -74,23 +74,24 @@ public class  ZipOperate {
     	/**
     	 * 
     	 * @param inputFileName 输入一个文件夹
-    	 * @param zipFileName	输出一个压缩文件夹，打包后文件名字
+    	 * @param zipOutName	输出一个压缩文件夹，打包后文件名字
     	 * @throws Exception
     	 */
-    	public static void zip(String inputFileName, String zipFileName) throws Exception {
-    		logger.info("start zip file: " + zipFileName);
-    		zip(zipFileName, FileOperate.getFile(zipFileName));
+    	public static void zip(String inputFileName, String zipOutName) throws Exception {
+    		zip( FileOperate.getFile(inputFileName), zipOutName);
     	}
     	
     	/**
     	 *
-    	 *  @param inputFile 输入一个文件
-    	 * @param zipFileName	输出一个压缩文件夹，打包后文件名字
+    	 *  @param inputFile 输入一个文件或件夹
+    	 * @param zipOutName	输出一个压缩文件夹，打包后文件名字
     	 * @throws Exception
     	 * 
     	 */
-    	private static void zip(String zipFileName, File inputFile) throws Exception {
-    		ZipOutputStream out = new ZipOutputStream(FileOperate.getOutputStream(zipFileName, true));
+    	public static void zip(File inputFile, String zipOutName) throws Exception {
+    		logger.info("start zip file: " + zipOutName);
+    		OutputStream outFileStream = FileOperate.getOutputStream(zipOutName, true);
+    		ZipOutputStream out = new ZipOutputStream(outFileStream);
     		zip(out, inputFile, "");
     		logger.info("zip done");
     		out.close();

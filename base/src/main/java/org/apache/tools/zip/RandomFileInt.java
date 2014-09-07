@@ -67,9 +67,9 @@ class RandomFileLocal extends RandomAccessFile implements RandomFileInt {
 
 class RandomFileHdfs implements RandomFileInt {
 	FSDataInputStream fsDataInputStream;
-	
+	FileHadoop fileHadoop;
 	public RandomFileHdfs(String file) throws IOException {
-		FileHadoop fileHadoop = new FileHadoop(file);
+		fileHadoop = new FileHadoop(file);
 		fsDataInputStream = fileHadoop.getInputStream();
 	}
 	
@@ -133,8 +133,7 @@ class RandomFileHdfs implements RandomFileInt {
 
 	@Override
 	public long length() throws IOException {
-		// TODO Auto-generated method stub
-		return fsDataInputStream.getFileLength();
+		return fileHadoop.length();
 	}
 
 	@Override
