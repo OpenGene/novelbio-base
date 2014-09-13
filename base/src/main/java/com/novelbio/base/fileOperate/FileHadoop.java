@@ -223,6 +223,9 @@ public class FileHadoop extends File {
 		//TODO hadoop2
 //		return fileStatus == null? false : fileStatus.isFile();
 		//map3
+		if (isDirectory()) {
+			return false;
+		}
 		return fileStatus == null? false : true;
 	}
 	
