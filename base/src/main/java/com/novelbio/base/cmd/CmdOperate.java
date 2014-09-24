@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.apache.log4j.Logger;
 
@@ -223,16 +225,22 @@ public class CmdOperate extends RunProcess<String> {
 	 * @param output
 	 */
 	public void addCmdParamOutput(String output, boolean isAddToLsCmd) {
+		if (StringOperate.isRealNull(saveErrPath)) {
+			saveErrPath = output + "errorInfo.txt";
+		}
+		if (StringOperate.isRealNull(saveFilePath)) {
+			saveFilePath = output + "stdInfo.txt";
+		}
 		cmdPath.addCmdParamOutput(output, isAddToLsCmd);
 	}
 	
 	/** 是否将输入文件拷贝到临时文件夹，默认为false */
 	public void setRedirectInToTmp(boolean isRedirectInToTmp) {
-		cmdPath.setRedirectInToTmp(isRedirectInToTmp);
+//		cmdPath.setRedirectInToTmp(isRedirectInToTmp);
 	}
 	/** 是否将输出先重定位到临时文件夹，再拷贝回实际文件夹，默认为false */
 	public void setRedirectOutToTmp(boolean isRedirectOutToTmp) {
-		cmdPath.setRedirectOutToTmp(isRedirectOutToTmp);
+//		cmdPath.setRedirectOutToTmp(isRedirectOutToTmp);
 	}
 	
 	/** 如果param为null则返回 */
@@ -247,7 +255,7 @@ public class CmdOperate extends RunProcess<String> {
 	
 	/** 返回执行的具体cmd命令，不会将文件路径删除，仅给相对路径 */
 	public String getCmdExeStr() {
-		return getCmdExeStrModify();
+		return getCmdExeStrReal();
 	}
 	
 	/** 返回执行的具体cmd命令，会将文件路径删除，仅给相对路径 */
@@ -397,13 +405,20 @@ public class CmdOperate extends RunProcess<String> {
 		finishFlag = new FinishFlag();
 		cmdPath.copyFileIn();
 		String[] cmdRun = cmdPath.getRunCmd();
-		saveFilePath = cmdPath.getSaveFilePath();
-		saveErrPath = cmdPath.getSaveErrPath();
+		boolean writeStdTxt = true, writeErrTxt = true;
+		if (!StringOperate.isRealNull(cmdPath.getSaveFilePath())) {
+			this.saveFilePath = cmdPath.getSaveFilePath();
+			writeStdTxt = false;
+		}
+		if (!StringOperate.isRealNull(cmdPath.getSaveErrPath())) {
+			this.saveErrPath = cmdPath.getSaveErrPath();
+			writeErrTxt = false;
+		}
 		
 		process.exec(cmdRun);
 
-		setErrorStream();
-		setStdStream();
+		setErrorStream(writeStdTxt);
+		setStdStream(writeErrTxt);
 
 		errorGobbler.start();
 		outputGobbler.start();
@@ -434,34 +449,48 @@ public class CmdOperate extends RunProcess<String> {
 		return process.getStdIn();
 	}
 	
-	private void setErrorStream() {
+	/** 是否将err写入外部指定的文件中，而不是写入cmd中的文件，同时会定时--约2秒， 刷新 输出文件<p>
+	 * 使用场景：cmd命令在std上会有标准输出和错误输出信息，那么我们希望将输出信息写入一个文本，<br>
+	 * 因为标准输出和错误输出的信息量一般不多，所以写入很长时间也不一定会刷新，那么我们这里就会<br>
+	 * 定时的刷新文本，以保证能及时看到输出信息结果
+	 * @param writeErrTxt
+	 */
+	private void setErrorStream(boolean writeErrTxt) {
 		errorGobbler = new StreamGobbler(process.getStdErr());
 		if (!getCmdInErrStream) {
 			if (saveErrPath != null) {
+				FileOperate.createFolders(FileOperate.getPathName(saveErrPath));
 				//标准输出流不能被关闭
 				TxtReadandWrite txtWrite = new TxtReadandWrite(saveErrPath, true);
-				errorGobbler.setOutputStream(txtWrite.getOutputStream());
+				errorGobbler.setOutputStream(txtWrite.getOutputStream(), writeErrTxt);
 			} else if (lsErrorInfo != null) {
 				errorGobbler.setLsInfo(lsErrorInfo, lineNumErr, true);
 			} else {
-				errorGobbler.setOutputStream(System.err);
+				errorGobbler.setOutputStream(System.err, false);
 			}
 		} else {
 			errorGobbler.setGetInputStream(true);
 		}
 	}
 
-	private void setStdStream() {
+	/** 是否将std写入外部指定的文件中，而不是写入cmd中的文件，同时会定时--约2秒， 刷新 输出文件<p>
+	 * 使用场景：cmd命令在std上会有标准输出和错误输出信息，那么我们希望将输出信息写入一个文本，<br>
+	 * 因为标准输出和错误输出的信息量一般不多，所以写入很长时间也不一定会刷新，那么我们这里就会<br>
+	 * 定时的刷新文本，以保证能及时看到输出信息结果
+	 * @param writeStdTxt
+	 */
+	private void setStdStream(boolean writeStdTxt) {
 		outputGobbler = new StreamGobbler(process.getStdOut());
 		if (!getCmdInStdStream) {
 			if (saveFilePath != null) {
+				FileOperate.createFolders(FileOperate.getPathName(saveFilePath));
 				//标准输出流不能被关闭
 				TxtReadandWrite txtWrite = new TxtReadandWrite(saveFilePath, true);
-				outputGobbler.setOutputStream(txtWrite.getOutputStream());
+				outputGobbler.setOutputStream(txtWrite.getOutputStream(), writeStdTxt);
 			} else if (lsOutInfo != null) {
 				outputGobbler.setLsInfo(lsOutInfo, lineNumStd, false);
 			} else {
-				outputGobbler.setOutputStream(System.out);
+				outputGobbler.setOutputStream(System.out, false);
 			}
 		} else {
 			outputGobbler.setGetInputStream(true);
@@ -566,6 +595,12 @@ public class CmdOperate extends RunProcess<String> {
 
 class StreamGobbler extends Thread {
 	private static final Logger logger = Logger.getLogger(StreamGobbler.class);
+	
+	/** 每2000ms刷新一次txt文本，这是因为写入错误行会很慢，刷新就可以做到及时看结果 */
+	private static final int txtFlushTime = 2000;
+	
+	Timer timer = new Timer();
+	
 	InputStream is;
 	OutputStream os;
 	LinkedList<String> lsInfo;
@@ -575,17 +610,29 @@ class StreamGobbler extends Thread {
 	int lineNum = 500;
 	/** 如果将输出信息写入lsInfo中，是否还将这些信息打印到控制台 */
 	boolean isSysout = false;
+	
+	/** 是否按照写入txt的格式来写入流 */
+	boolean isWriteToTxt = false;
+	DateUtil dateUtil = new DateUtil();
+	
 	StreamGobbler(InputStream is) {
 		this.is = is;
 	}
-	/** 制定一个out流，cmd的输出流就会定向到该流中<br>
+	/**
+	 *  指定一个out流，cmd的输出流就会定向到该流中<br>
 	 * 该方法和{@link #setGetInputStream(boolean)} 冲突
+	 * @param os 输出流
+	 * @param isWriteToTxt 是否按照写入txt的格式来写输出流，并且定时刷新
+	 * true则表示会从输入流中逐行读取，然后写入 os，并且会定时刷新os，以保证能够及时看到输出文件中的内容
 	 */
-	public void setOutputStream(OutputStream os) {
+	public void setOutputStream(OutputStream os, boolean isWriteToTxt) {
 		this.os = os;
+		this.isWriteToTxt = isWriteToTxt;
 	}
+
+	
 	/** 是否要获取输入流，默认为false<br>
-	 * 该方法和{@link #setOutputStream(OutputStream)} 冲突
+	 * {@link #setOutputStream(OutputStream)} 会覆盖该方法
 	 *  */
 	public void setGetInputStream(boolean getInputStream) {
 		this.getInputStream = getInputStream;
@@ -602,16 +649,25 @@ class StreamGobbler extends Thread {
 		return is;
 	}
 	public void run() {
+		dateUtil.setStartTime();
 		isFinished = false;
 		if (!getInputStream) {
 			if (os == null) {
 				exhaustInStream(is);
 			} else {
-				try {
+				if (isWriteToTxt) {
+				    timer.schedule(new TimerTask() {
+						public void run() {
+							try { os.flush(); } catch (Exception e) {e.printStackTrace(); }							
+						}
+					}, txtFlushTime, txtFlushTime);
+					
+					writeToTxt(is, os);
+					timer.cancel();
+				} else {
 					copyLarge(is, os);
-				} catch (IOException ioe) {
-					ioe.printStackTrace();
 				}
+
 			}
 			isFinished = true;
 		}
@@ -630,10 +686,36 @@ class StreamGobbler extends Thread {
 					if (i > lineNum) {
 						lsInfo.poll();
 					}
-					if (isSysout) {
+//					if (isSysout) {
 						logger.info(line);
-					}
+//					}
 				}
+			}
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+		}
+	}
+	
+	/** 从流中读取string，然后写入outputStream，同时也会写入lsInfo */
+	private void writeToTxt(InputStream inputStream, OutputStream outputStream) {
+		try {
+			InputStreamReader isr = new InputStreamReader(inputStream);
+			BufferedReader br = new BufferedReader(isr);
+			String line = null;
+			int i = 0;
+			while ((line = br.readLine()) != null) {
+				if (lsInfo != null) {
+					lsInfo.add(line);
+					i++;
+					if (i > lineNum) {
+						lsInfo.poll();
+					}	
+				}
+//				if (isSysout) {
+					logger.info(line);
+//				}
+				outputStream.write((DateUtil.getDateDetail() + " " + line + TxtReadandWrite.ENTER_LINUX).getBytes());
+				outputStream.flush();
 			}
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
@@ -657,16 +739,20 @@ class StreamGobbler extends Thread {
     * @throws IOException if an I/O error occurs
     * @since 2.2
     */
-	public static long copyLarge(final InputStream input, final OutputStream output)
-					throws IOException {
-		byte[] buffer = new byte[1024 * 4];
-		long count = 0;
-		int n = 0;
-		while (EOF != (n = input.read(buffer))) {
-			output.write(buffer, 0, n);
-			count += n;
+	public static long copyLarge(final InputStream input, final OutputStream output) {
+		try {
+			byte[] buffer = new byte[1024 * 4];
+			long count = 0;
+			int n = 0;
+			while (EOF != (n = input.read(buffer))) {
+				output.write(buffer, 0, n);
+				count += n;
+			}
+			return count;
+		} catch (Exception e) {
+			throw new RuntimeException("copy info error", e);
 		}
-		return count;
+
 	}
 	
 	/** 关闭输出流 */

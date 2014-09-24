@@ -12,6 +12,7 @@ import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
+import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.log4j.Logger;
 
 import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
@@ -23,6 +24,7 @@ class TxtWrite implements Closeable {
 	String txtfile;
 	
 	BufferedOutputStream outputStream;
+	OutputStream outputStreamRaw;
 	boolean append = true;
 	
 	/**
@@ -71,9 +73,8 @@ class TxtWrite implements Closeable {
 	}
 	
 	protected void createFile() throws Exception {
-		OutputStream outputStreamRaw = FileOperate.getOutputStream(txtfile, !append);
+		outputStreamRaw = FileOperate.getOutputStream(txtfile, !append);
 		TXTtype txtTtype = TXTtype.getTxtType(txtfile);
-
 		if (txtTtype == TXTtype.Txt) {
 			outputStream = new BufferedOutputStream(outputStreamRaw, TxtReadandWrite.bufferLen);
 		} else if (txtTtype == TXTtype.Gzip) {
@@ -97,6 +98,9 @@ class TxtWrite implements Closeable {
 	public void flush() {
 		try {
 			outputStream.flush();
+			if (outputStreamRaw instanceof FSDataOutputStream) {
+				((FSDataOutputStream)outputStreamRaw).hflush();
+			}
 		} catch (Exception e) {e.printStackTrace(); }
 	}
 	
@@ -118,6 +122,9 @@ class TxtWrite implements Closeable {
 			outputStream.write(content);
 			if (flush) {
 				outputStream.flush();
+				if (outputStreamRaw instanceof FSDataOutputStream) {
+					((FSDataOutputStream)outputStreamRaw).hflush();
+				}
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -134,6 +141,9 @@ class TxtWrite implements Closeable {
 			outputStream.write(content.getBytes());
 			if (flush) {
 				outputStream.flush();
+				if (outputStreamRaw instanceof FSDataOutputStream) {
+					((FSDataOutputStream)outputStreamRaw).hflush();
+				}
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -175,6 +185,9 @@ class TxtWrite implements Closeable {
 			outputStream.write((content + TxtReadandWrite.ENTER_LINUX).getBytes());
 			if (flash) {
 				outputStream.flush();
+				if (outputStreamRaw instanceof FSDataOutputStream) {
+					((FSDataOutputStream)outputStreamRaw).hflush();
+				}
 			}
 		} catch (Exception e) { }
 	}
@@ -244,6 +257,9 @@ class TxtWrite implements Closeable {
 				outputStream.write(mychar[i]);
 			}
 			outputStream.flush();
+			if (outputStreamRaw instanceof FSDataOutputStream) {
+				((FSDataOutputStream)outputStreamRaw).hflush();
+			}
 		} catch (Exception e) {
 		}
 	}
@@ -290,6 +306,9 @@ class TxtWrite implements Closeable {
 				}
 			}
 			outputStream.flush();
+			if (outputStreamRaw instanceof FSDataOutputStream) {
+				((FSDataOutputStream)outputStreamRaw).hflush();
+			}
 		} catch (Exception e) {
 			logger.error("file error: "+ getFileName());
 		}
@@ -312,6 +331,9 @@ class TxtWrite implements Closeable {
 				}
 			}
 			outputStream.flush();
+			if (outputStreamRaw instanceof FSDataOutputStream) {
+				((FSDataOutputStream)outputStreamRaw).hflush();
+			}
 		} catch (Exception e) {
 			logger.error("file error: "+getFileName());
 		}
@@ -332,6 +354,9 @@ class TxtWrite implements Closeable {
 			}
 		}
 		outputStream.flush();
+		if (outputStreamRaw instanceof FSDataOutputStream) {
+			((FSDataOutputStream)outputStreamRaw).hflush();
+		}
 		close();
 	}
 	/**
@@ -350,6 +375,9 @@ class TxtWrite implements Closeable {
 				outputStream.write(TxtReadandWrite.ENTER_LINUX.getBytes());
 			}
 			outputStream.flush();
+			if (outputStreamRaw instanceof FSDataOutputStream) {
+				((FSDataOutputStream)outputStreamRaw).hflush();
+			}
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
@@ -385,6 +413,9 @@ class TxtWrite implements Closeable {
 				outputStream.write(TxtReadandWrite.ENTER_LINUX.getBytes());// 换行
 			}
 			outputStream.flush();// 写入文本
+			if (outputStreamRaw instanceof FSDataOutputStream) {
+				((FSDataOutputStream)outputStreamRaw).hflush();
+			}
 		} catch (Exception e) {
 			logger.error("write list data error:"+getFileName());
 		}
@@ -422,6 +453,9 @@ class TxtWrite implements Closeable {
 				outputStream.write(TxtReadandWrite.ENTER_LINUX.getBytes());// 换行
 			}
 			outputStream.flush();// 写入文本
+			if (outputStreamRaw instanceof FSDataOutputStream) {
+				((FSDataOutputStream)outputStreamRaw).hflush();
+			}
 		} else {
 			ArrayList<Integer> lscolumn = new ArrayList<Integer>();
 			for (int i = 0; i < column.length; i++) {
@@ -443,6 +477,9 @@ class TxtWrite implements Closeable {
 				outputStream.write(TxtReadandWrite.ENTER_LINUX.getBytes());// 换行
 			}
 			outputStream.flush();// 写入文本
+			if (outputStreamRaw instanceof FSDataOutputStream) {
+				((FSDataOutputStream)outputStreamRaw).hflush();
+			}
 		}
 	}
 
@@ -451,7 +488,11 @@ class TxtWrite implements Closeable {
 	 * 关闭流文件
 	 */
 	public void close() {
-		try { outputStream.flush(); } catch (Exception e) {}
+		try { outputStream.flush(); 
+		if (outputStreamRaw instanceof FSDataOutputStream) {
+			((FSDataOutputStream)outputStreamRaw).hflush();
+		}
+		} catch (Exception e) {}
 		try { outputStream.close(); } catch (Exception e) {}
 		try { zipOutputStream.closeArchiveEntry(); } catch (Exception e) { }
 	}
