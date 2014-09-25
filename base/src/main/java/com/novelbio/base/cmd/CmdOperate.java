@@ -236,11 +236,13 @@ public class CmdOperate extends RunProcess<String> {
 	
 	/** 是否将输入文件拷贝到临时文件夹，默认为false */
 	public void setRedirectInToTmp(boolean isRedirectInToTmp) {
-//		cmdPath.setRedirectInToTmp(isRedirectInToTmp);
+		//TODO
+		cmdPath.setRedirectInToTmp(isRedirectInToTmp);
 	}
 	/** 是否将输出先重定位到临时文件夹，再拷贝回实际文件夹，默认为false */
 	public void setRedirectOutToTmp(boolean isRedirectOutToTmp) {
-//		cmdPath.setRedirectOutToTmp(isRedirectOutToTmp);
+		//TODO
+		cmdPath.setRedirectOutToTmp(isRedirectOutToTmp);
 	}
 	
 	/** 如果param为null则返回 */
@@ -434,7 +436,7 @@ public class CmdOperate extends RunProcess<String> {
 		}
 		
 		if (isFinishedNormal()) {
-			cmdPath.copyFileOut();
+			cmdPath.moveFileOut();
 		}
 		cmdPath.deleteTmpFile();
 	}
@@ -598,9 +600,7 @@ class StreamGobbler extends Thread {
 	
 	/** 每2000ms刷新一次txt文本，这是因为写入错误行会很慢，刷新就可以做到及时看结果 */
 	private static final int txtFlushTime = 2000;
-	
-	Timer timer = new Timer();
-	
+		
 	InputStream is;
 	OutputStream os;
 	LinkedList<String> lsInfo;
@@ -656,6 +656,8 @@ class StreamGobbler extends Thread {
 				exhaustInStream(is);
 			} else {
 				if (isWriteToTxt) {
+					Timer timer = new Timer();
+
 				    timer.schedule(new TimerTask() {
 						public void run() {
 							try { os.flush(); } catch (Exception e) {e.printStackTrace(); }							
@@ -715,7 +717,6 @@ class StreamGobbler extends Thread {
 					logger.info(line);
 //				}
 				outputStream.write((DateUtil.getDateDetail() + " " + line + TxtReadandWrite.ENTER_LINUX).getBytes());
-				outputStream.flush();
 			}
 		} catch (IOException ioe) {
 			ioe.printStackTrace();

@@ -39,7 +39,7 @@ public class TestCmdPath extends TestCase {
 		TxtReadandWrite txtWrite = new TxtReadandWrite(FileOperate.getPathName(ss[1]) + resultFileName, true);
 		txtWrite.writefileln("testCmdPath");
 		txtWrite.close();
-		cmdPath.copyFileOut();
+		cmdPath.moveFileOut();
 		
 		assertEquals(true, FileOperate.isFileExistAndBigThanSize(FileOperate.getPathName(inFile) + resultFileName, 0));
 	}
@@ -67,7 +67,7 @@ public class TestCmdPath extends TestCase {
 		TxtReadandWrite txtWrite = new TxtReadandWrite(FileOperate.getPathName(ss[2]) + resultFileName, true);
 		txtWrite.writefileln("testCmdPath");
 		txtWrite.close();
-		cmdPath.copyFileOut();
+		cmdPath.moveFileOut();
 		assertEquals(true, FileOperate.isFileExistAndBigThanSize(outFile, 0));
 	}
 	
@@ -97,7 +97,7 @@ public class TestCmdPath extends TestCase {
 		TxtReadandWrite txtWrite = new TxtReadandWrite(outPath, true);
 		txtWrite.writefileln("testCmdPath");
 		txtWrite.close();
-		cmdPath.copyFileOut();
+		cmdPath.moveFileOut();
 		assertEquals(true, FileOperate.isFileExistAndBigThanSize(outFile + resultFileName, 0));
 	}
 	
@@ -127,7 +127,7 @@ public class TestCmdPath extends TestCase {
 		TxtReadandWrite txtWrite = new TxtReadandWrite(outPath, true);
 		txtWrite.writefileln("testCmdPath");
 		txtWrite.close();
-		cmdPath.copyFileOut();
+		cmdPath.moveFileOut();
 		assertEquals(true, FileOperate.isFileExistAndBigThanSize(outFile + FileOperate.getSepPath() + resultFileName, 0));
 	}
 	
@@ -157,7 +157,7 @@ public class TestCmdPath extends TestCase {
 		TxtReadandWrite txtWrite = new TxtReadandWrite(outPath, true);
 		txtWrite.writefileln("testCmdPath");
 		txtWrite.close();
-		cmdPath.copyFileOut();
+		cmdPath.moveFileOut();
 		assertEquals(true, FileOperate.isFileExistAndBigThanSize(outFile + FileOperate.getSepPath() + resultFileName, 0));
 	}
 }

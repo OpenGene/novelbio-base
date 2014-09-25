@@ -47,6 +47,9 @@ public class CmdPath {
 	/** 截获标准错误流的错误文件名 */
 	String saveErrPath = null;
 	
+	/** 是否已经生成了临时文件夹，生成一次就够了 */
+	boolean isGenerateTmpPath = false;
+	
 	/** 如果为null就不加入 */
 	public void addCmdParam(String param) {
 		if (!StringOperate.isRealNull(param)) {
@@ -139,19 +142,16 @@ public class CmdPath {
 	
 	/** 返回执行的具体cmd命令，会将文件路径删除，仅给相对路径 */
 	public String getCmdExeStrModify() {
-		return getCmdModify(lsCmd);
+		generateTmPath();
+		return getCmdModify(generateRunCmd(false));
 	}
 	
 	/** 返回执行的具体cmd命令，实际cmd命令 */
 	public String getCmdExeStrReal() {
-		return ArrayOperate.cmbString(lsCmd.toArray(new String[0]), " ");
+		generateTmPath();
+		return ArrayOperate.cmbString(generateRunCmd(false), " ");
 	}
-	
-	public static String getCmdModify(List<String> lsCmd) {
-		String[] cmdArray = lsCmd.toArray(new String[0]);
-		return getCmdModify(cmdArray);
-	}
-	
+
 	public static String getCmdModify(String[] cmdArray) {
 		StringBuilder strBuilder = new StringBuilder();
 		for (String cmdTmp : cmdArray) {
@@ -168,6 +168,7 @@ public class CmdPath {
 	/** 在cmd运行前，将输入文件拷贝到临时文件夹下 */
 	public void copyFileIn() {
 		generateTmPath();
+		createFoldTmp();
 		if (!isRedirectInToTmp) return;
 		
 		for (String inFile : setInput) {
@@ -177,12 +178,16 @@ public class CmdPath {
 	}
 	
 	/** 必须先调用{@link #copyFileIn()}，
-	 * 等运行cmd结束后还需要调用{@link #copyFileOut()} 来完成运行 */
+	 * 等运行cmd结束后还需要调用{@link #moveFileOut()} 来完成运行 */
 	public String[] getRunCmd() {
-		return generateRunCmd();
+		generateTmPath();
+		return generateRunCmd(true);
 	}
 	
-	private void generateTmPath() {
+	protected synchronized void generateTmPath() {
+		if (isGenerateTmpPath) {
+			return;
+		}
 		Set<String> setPath = new HashSet<>();
 		Set<String> setFileNameAll = new HashSet<>();
 		mapPath2TmpPath.clear();
@@ -218,28 +223,40 @@ public class CmdPath {
 			if (filePathName.endsWith("/") || filePathName.endsWith("\\")) {
 				tmpPath = FileOperate.addSep(tmpPath);
 			}
+			mapName2TmpName.put(filePathName, tmpPath);
+		}
+		isGenerateTmpPath = true;
+	}
+	
+	/** 将已有的输出文件夹在临时文件夹中创建好 */
+	private void createFoldTmp() {
+		for (String filePathName : mapName2TmpName.keySet()) {
+			String tmpPath = mapName2TmpName.get(filePathName);
 			if ( FileOperate.isFileDirectory(filePathName)) {
 				FileOperate.createFolders(tmpPath);
 			}
-			mapName2TmpName.put(filePathName, tmpPath);
 		}
 	}
 	
 	/** 返回实际运行的cmd string数组
 	 * 必须设定好lcCmd后才能使用
+	 * @param redirectStdErr 是否重定向标准输出和错误输出，如果只是获得命令，那不需要重定向<br>
+	 * 如果是实际执行的cmd，就需要重定向
 	 * @return
 	 */
-	private String[] generateRunCmd() {
+	private String[] generateRunCmd(boolean redirectStdErr) {
 		List<String> lsReal = new ArrayList<>();
 		boolean stdOut = false;
 		boolean errOut = false;
 		for (String tmpCmd : lsCmd) {
-			if (tmpCmd.equals(">")) {
-				stdOut = true;
-				continue;
-			} else if (tmpCmd.equals("2>")) {
-				errOut = true;
-				continue;
+			if (redirectStdErr) {
+				if (tmpCmd.equals(">")) {
+					stdOut = true;
+					continue;
+				} else if (tmpCmd.equals("2>")) {
+					errOut = true;
+					continue;
+				}
 			}
 			
 			if ((isRedirectInToTmp && setInput.contains(tmpCmd))
@@ -286,7 +303,7 @@ public class CmdPath {
 	 * @param notMove
 	 * @param isDelFile 如果出错是否删除原来的文件
 	 */
-	public void copyFileOut() {
+	public void moveFileOut() {
 		for (String outPath : mapPath2TmpPath.keySet()) {
 			String outTmpPath = mapPath2TmpPath.get(outPath);
 			
@@ -296,7 +313,7 @@ public class CmdPath {
 				if (setInput.contains(filePathResult) && FileOperate.isFileExistAndBigThanSize(filePathResult, 0)) {
 					continue;
 				}
-				boolean isSucess = FileOperate.copyFileFolder(filePath, filePathResult, true);
+				boolean isSucess = FileOperate.moveFile(true, filePath, filePathResult);
 				if (!isSucess) {
 					logger.error("cannot copy " + filePath + " to " + filePathResult);
 					throw new ExceptionCmd("cannot copy " + filePath + " to " + filePathResult);

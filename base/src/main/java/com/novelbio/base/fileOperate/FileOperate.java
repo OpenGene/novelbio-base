@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.reflect.Proxy;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -25,6 +26,7 @@ import net.sf.samtools.seekablestream.SeekableStreamFactory;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.log4j.Logger;
 import org.apache.tools.ant.types.FileList.FileName;
 import org.aspectj.weaver.patterns.IfPointcut;
@@ -879,10 +881,12 @@ public class FileOperate {
 			OutputStream fs = null;
 			if (file instanceof FileHadoop) {
 				FileHadoop fileHadoop = (FileHadoop) file;
-				fs = fileHadoop.getOutputStreamNew(cover);
+				FSDataOutputStream fsHdfs = fileHadoop.getOutputStreamNew(cover);
+				fs = new OutputStreamHdfs(fsHdfs);
 			}else {
 				fs = new FileOutputStream(file, !cover);
 			}
+
 			return fs;
 		}catch(Exception e) {
 			logger.error("get output stream error: " + filePath + "   is cover: " + cover, e);
