@@ -17,7 +17,6 @@ import org.apache.log4j.Logger;
 
 import com.novelbio.base.PathDetail;
 import com.novelbio.base.StringOperate;
-import com.novelbio.base.cmd.CmdOperate.FinishFlag;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.dataStructure.PatternOperate;
@@ -236,12 +235,10 @@ public class CmdOperate extends RunProcess<String> {
 	
 	/** 是否将输入文件拷贝到临时文件夹，默认为false */
 	public void setRedirectInToTmp(boolean isRedirectInToTmp) {
-		//TODO
 		cmdPath.setRedirectInToTmp(isRedirectInToTmp);
 	}
 	/** 是否将输出先重定位到临时文件夹，再拷贝回实际文件夹，默认为false */
 	public void setRedirectOutToTmp(boolean isRedirectOutToTmp) {
-		//TODO
 		cmdPath.setRedirectOutToTmp(isRedirectOutToTmp);
 	}
 	
@@ -407,20 +404,20 @@ public class CmdOperate extends RunProcess<String> {
 		finishFlag = new FinishFlag();
 		cmdPath.copyFileIn();
 		String[] cmdRun = cmdPath.getRunCmd();
-		boolean writeStdTxt = true, writeErrTxt = true;
+		boolean isWriteStdTxt = true, isWriteErrTxt = true;
 		if (!StringOperate.isRealNull(cmdPath.getSaveFilePath())) {
 			this.saveFilePath = cmdPath.getSaveFilePath();
-			writeStdTxt = false;
+			isWriteStdTxt = false;
 		}
 		if (!StringOperate.isRealNull(cmdPath.getSaveErrPath())) {
 			this.saveErrPath = cmdPath.getSaveErrPath();
-			writeErrTxt = false;
+			isWriteErrTxt = false;
 		}
 		
 		process.exec(cmdRun);
 
-		setErrorStream(writeStdTxt);
-		setStdStream(writeErrTxt);
+		setStdStream(isWriteStdTxt, isWriteStdTxt);
+		setErrorStream(isWriteErrTxt, isWriteErrTxt);
 
 		errorGobbler.start();
 		outputGobbler.start();
@@ -428,19 +425,42 @@ public class CmdOperate extends RunProcess<String> {
 		finishFlag.flag = process.waitFor();
 		outputGobbler.join();
 		errorGobbler.join();
-		if (!getCmdInStdStream && saveFilePath != null) {
-			outputGobbler.close();
-		}
-		if (!getCmdInErrStream && saveErrPath != null) {
-			errorGobbler.close();
-		}
+		closeOutStream(isWriteStdTxt, isWriteErrTxt);
 		
 		if (isFinishedNormal()) {
 			cmdPath.moveFileOut();
 		}
 		cmdPath.deleteTmpFile();
 	}
-
+	
+	/** 关闭输出流 */
+	private void closeOutStream(boolean isWriteStdTxt, boolean isWriteErrTxt) {
+		if (!getCmdInStdStream && saveFilePath != null) {
+			if (isWriteStdTxt) {
+				if (isFinishedNormal()) {
+					outputGobbler.close(DateUtil.getNowTimeStr() + " Task Finish Normally");
+				} else {
+					outputGobbler.close(DateUtil.getNowTimeStr() + " Task Finish AbNormally");
+				}
+			} else {
+				outputGobbler.close();
+			}
+		}
+		
+		if (!getCmdInErrStream && saveErrPath != null) {
+			if (isWriteErrTxt) {
+				if(isFinishedNormal()) {
+					errorGobbler.close("Task Finish Normally");
+				} else {
+					errorGobbler.close("Task Finish AbNormally");
+				}
+			} else {
+				errorGobbler.close();
+			}
+		}
+	}
+	
+	
 	/** 必须等程序启动后才能获得
 	 * 得到 输入给cmd 的 output流，可以往里面写东西
 	 */
@@ -455,20 +475,21 @@ public class CmdOperate extends RunProcess<String> {
 	 * 使用场景：cmd命令在std上会有标准输出和错误输出信息，那么我们希望将输出信息写入一个文本，<br>
 	 * 因为标准输出和错误输出的信息量一般不多，所以写入很长时间也不一定会刷新，那么我们这里就会<br>
 	 * 定时的刷新文本，以保证能及时看到输出信息结果
-	 * @param writeErrTxt
+	 * @param isWriteErrTxt 是否是写入文本并需要定时刷新
+	 * @param isWriteErrTips 是否需要每隔几分钟写一小段话以表示程序还在运行中
 	 */
-	private void setErrorStream(boolean writeErrTxt) {
+	private void setErrorStream(boolean isWriteErrTxt, boolean isWriteErrTips) {
 		errorGobbler = new StreamGobbler(process.getStdErr());
 		if (!getCmdInErrStream) {
 			if (saveErrPath != null) {
 				FileOperate.createFolders(FileOperate.getPathName(saveErrPath));
 				//标准输出流不能被关闭
 				TxtReadandWrite txtWrite = new TxtReadandWrite(saveErrPath, true);
-				errorGobbler.setOutputStream(txtWrite.getOutputStream(), writeErrTxt);
+				errorGobbler.setOutputStream(txtWrite.getOutputStream(), isWriteErrTxt, isWriteErrTips);
 			} else if (lsErrorInfo != null) {
 				errorGobbler.setLsInfo(lsErrorInfo, lineNumErr, true);
 			} else {
-				errorGobbler.setOutputStream(System.err, false);
+				errorGobbler.setOutputStream(System.err, false, false);
 			}
 		} else {
 			errorGobbler.setGetInputStream(true);
@@ -479,20 +500,21 @@ public class CmdOperate extends RunProcess<String> {
 	 * 使用场景：cmd命令在std上会有标准输出和错误输出信息，那么我们希望将输出信息写入一个文本，<br>
 	 * 因为标准输出和错误输出的信息量一般不多，所以写入很长时间也不一定会刷新，那么我们这里就会<br>
 	 * 定时的刷新文本，以保证能及时看到输出信息结果
-	 * @param writeStdTxt
+	 * @param isWriteStdTxt 是否是写入文本并需要定时刷新
+	 * @param isWriteStdTips 是否需要每隔几分钟写一小段话以表示程序还在运行中
 	 */
-	private void setStdStream(boolean writeStdTxt) {
+	private void setStdStream(boolean isWriteStdTxt, boolean isWriteStdTips) {
 		outputGobbler = new StreamGobbler(process.getStdOut());
 		if (!getCmdInStdStream) {
 			if (saveFilePath != null) {
 				FileOperate.createFolders(FileOperate.getPathName(saveFilePath));
 				//标准输出流不能被关闭
 				TxtReadandWrite txtWrite = new TxtReadandWrite(saveFilePath, true);
-				outputGobbler.setOutputStream(txtWrite.getOutputStream(), writeStdTxt);
+				outputGobbler.setOutputStream(txtWrite.getOutputStream(), isWriteStdTxt, isWriteStdTips);
 			} else if (lsOutInfo != null) {
 				outputGobbler.setLsInfo(lsOutInfo, lineNumStd, false);
 			} else {
-				outputGobbler.setOutputStream(System.out, false);
+				outputGobbler.setOutputStream(System.out, false, false);
 			}
 		} else {
 			outputGobbler.setGetInputStream(true);
@@ -599,21 +621,34 @@ class StreamGobbler extends Thread {
 	private static final Logger logger = Logger.getLogger(StreamGobbler.class);
 	
 	/** 每2000ms刷新一次txt文本，这是因为写入错误行会很慢，刷新就可以做到及时看结果 */
-	private static final int txtFlushTime = 2000;
-		
+	private static final int timeTxtFlush = 5000;
+	/** 每分钟写一个信息到文本中，意思该程序还在运行中，主要是针对RNAmapping这种等待时间很长的程序 */
+	private static final int timeTxtWiteTips = 120000;
+	
 	InputStream is;
 	OutputStream os;
 	LinkedList<String> lsInfo;
-	FinishFlag finishFlag;
+	/** lsInfo中最多存储500条信息 */
+	int lineNum = 500;
+	
 	boolean isFinished = false;
 	boolean getInputStream = false;
-	int lineNum = 500;
+
 	/** 如果将输出信息写入lsInfo中，是否还将这些信息打印到控制台 */
 	boolean isSysout = false;
+
+	//==================定时刷新，以表示程序正在运行中============================	
+	/** 流中是否有信息，没信息就不刷新 */
+	boolean isStartWrite = false;
 	
 	/** 是否按照写入txt的格式来写入流 */
 	boolean isWriteToTxt = false;
-	DateUtil dateUtil = new DateUtil();
+	/** 如果写入txt，是否写入提示信息，譬如每2分钟写入一个信息表示现在程序正在运行中 */
+	boolean isWriteTIPS = false;
+
+	
+	Timer timerFlush;
+	Timer timerWriteTips;
 	
 	StreamGobbler(InputStream is) {
 		this.is = is;
@@ -623,11 +658,13 @@ class StreamGobbler extends Thread {
 	 * 该方法和{@link #setGetInputStream(boolean)} 冲突
 	 * @param os 输出流
 	 * @param isWriteToTxt 是否按照写入txt的格式来写输出流，并且定时刷新
+	 * @param isWriteTIPS 当
 	 * true则表示会从输入流中逐行读取，然后写入 os，并且会定时刷新os，以保证能够及时看到输出文件中的内容
 	 */
-	public void setOutputStream(OutputStream os, boolean isWriteToTxt) {
+	public void setOutputStream(OutputStream os, boolean isWriteToTxt, boolean isWriteTIPS) {
 		this.os = os;
 		this.isWriteToTxt = isWriteToTxt;
+		this.isWriteTIPS = isWriteTIPS;
 	}
 
 	
@@ -649,23 +686,18 @@ class StreamGobbler extends Thread {
 		return is;
 	}
 	public void run() {
-		dateUtil.setStartTime();
 		isFinished = false;
 		if (!getInputStream) {
 			if (os == null) {
 				exhaustInStream(is);
 			} else {
 				if (isWriteToTxt) {
-					Timer timer = new Timer();
-
-				    timer.schedule(new TimerTask() {
-						public void run() {
-							try { os.flush(); } catch (Exception e) {e.printStackTrace(); }							
-						}
-					}, txtFlushTime, txtFlushTime);
+					initialTxtFlush();
 					
 					writeToTxt(is, os);
-					timer.cancel();
+					
+					finishFlush();
+					
 				} else {
 					copyLarge(is, os);
 				}
@@ -688,13 +720,52 @@ class StreamGobbler extends Thread {
 					if (i > lineNum) {
 						lsInfo.poll();
 					}
-//					if (isSysout) {
+					if (isSysout) {
 						logger.info(line);
-//					}
+					}
 				}
 			}
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
+		}
+	}
+	
+	/** 定时刷新输出的stdout和stderr文本 */
+	private void initialTxtFlush() {
+		timerFlush = new Timer();
+		timerFlush.schedule(new TimerTask() {
+			public void run() {
+				if (!isStartWrite) return;
+				
+				synchronized (this) {
+					try { os.flush(); } catch (Exception e) {e.printStackTrace(); }				
+				}
+			}
+		}, timeTxtFlush, timeTxtFlush);
+		
+		if (isWriteTIPS) {
+			timerWriteTips = new Timer();
+			timerWriteTips.schedule(new TimerTask() {
+				public void run() {
+					if (!isStartWrite) return;
+					
+					synchronized (this) {
+						try {
+							os.write((DateUtil.getNowTimeStr() + " Program Is Still Running, This Tip Display " + timeTxtWiteTips/1000 + " seconds per time" + TxtReadandWrite.ENTER_LINUX).getBytes());
+						} catch (Exception e) {e.printStackTrace(); }				
+					}		
+				}
+			}, timeTxtWiteTips, timeTxtWiteTips);		
+		}
+	}
+	
+	/** 关闭这两个刷新任务 */
+	private void finishFlush() {
+		if (timerFlush != null) {
+			timerFlush.cancel();
+		}
+		if (timerWriteTips != null) {
+			timerWriteTips.cancel();
 		}
 	}
 	
@@ -713,14 +784,28 @@ class StreamGobbler extends Thread {
 						lsInfo.poll();
 					}	
 				}
-//				if (isSysout) {
+				if (isSysout) {
 					logger.info(line);
-//				}
-				outputStream.write((DateUtil.getDateDetail() + " " + line + TxtReadandWrite.ENTER_LINUX).getBytes());
+				}
+				//说明流中有东西
+				if (!isStartWrite) isStartWrite = true;
+				
+				synchronized (this) {
+					outputStream.write((line + TxtReadandWrite.ENTER_LINUX).getBytes());
+				}
 			}
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
+	}
+	
+	/** 往stdErr或stdOut中输出结束信息，表示程序运行完毕了
+	 * 只有当{@link #setOutputStream(OutputStream, boolean, boolean)}的后两项
+	 * isWriteToTxt和isWriteTIPS都设定为True的时候才会写入信息<br>
+	 * <b>并且写完后就会关闭流</b>
+	 *  */
+	protected void writeFinishToTxt(String finishInfo) {
+		
 	}
 	
 	private static final int EOF = -1;
@@ -757,13 +842,37 @@ class StreamGobbler extends Thread {
 	}
 	
 	/** 关闭输出流 */
-	public void close() {
+	public synchronized void close() {
 		//不用关闭输入流，因为process会自动关闭该流
 		try {
 			os.flush();
 			os.close();
 		} catch (Exception e) { }
 	}
+	/** 
+	 * 关闭输出流，同时
+	 * 往stdErr或stdOut中输出结束信息，表示程序运行完毕<p>
+	 * 只有当{@link #setOutputStream(OutputStream, boolean, boolean)}的后两项
+	 * isWriteToTxt和isWriteTIPS都设定为True的时候才会写入信息<br>
+	 * <b>并且写完后就会关闭流</b>
+	 * <p>
+	 * 如果本输出流没有东西，就不会把文字写进去
+	 *  */
+	public synchronized void close(String finishInfo) {
+		if (isWriteToTxt && isWriteTIPS) {
+			try {
+				if (isStartWrite) {
+					os.write((DateUtil.getNowTimeStr() + " " + finishInfo).getBytes());
+				}
+				os.flush();
+				os.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
 }
 
 
