@@ -1,18 +1,15 @@
 package com.novelbio.base.cmd;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Field;
-import java.nio.charset.Charset;
-
-import com.novelbio.base.dataOperate.TxtReadandWrite;
-import com.novelbio.base.fileOperate.FileOperate;
+import java.util.List;
 
 import ch.ethz.ssh2.ChannelCondition;
 import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.Session;
+
+import com.novelbio.base.dataOperate.TxtReadandWrite;
 
 public class ProcessRemote implements IntProcess {
 
@@ -136,6 +133,11 @@ public class ProcessRemote implements IntProcess {
 	@Override
 	public void stopProcess() throws Exception {
 		session.close();
+	}
+
+	@Override
+	public List<ProcessInfo> getLsProcInfo() throws Exception {
+		throw new ExceptionCmd("cannot get processinfo while using remote cmd");
 	}
 
 

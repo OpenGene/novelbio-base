@@ -287,7 +287,9 @@ public class CmdOperate extends RunProcess<String> {
 	}
 
 
-	/** 只有当{@link #setGetCmdInErrStream(boolean)} 为false时才有用 <br>
+	/** 
+	 * 默认不启用
+	 * 只有当{@link #setGetCmdInErrStream(boolean)} 为false时才有用 <br>
 	 * 用getStdOut获得标准输出的结果， */
 	public void setGetLsStdOut() {
 		lsOutInfo = new LinkedList<>();
@@ -479,13 +481,16 @@ public class CmdOperate extends RunProcess<String> {
 	 * @param isWriteErrTips 是否需要每隔几分钟写一小段话以表示程序还在运行中
 	 */
 	private void setErrorStream(boolean isWriteErrTxt, boolean isWriteErrTips) {
-		errorGobbler = new StreamGobbler(process.getStdErr());
+		errorGobbler = new StreamGobbler(process.getStdErr(), process);
 		if (!getCmdInErrStream) {
 			if (saveErrPath != null) {
 				FileOperate.createFolders(FileOperate.getPathName(saveErrPath));
 				//标准输出流不能被关闭
 				TxtReadandWrite txtWrite = new TxtReadandWrite(saveErrPath, true);
 				errorGobbler.setOutputStream(txtWrite.getOutputStream(), isWriteErrTxt, isWriteErrTips);
+				if (isWriteErrTxt && lsErrorInfo != null) {
+					errorGobbler.setLsInfo(lsErrorInfo, lineNumErr, false);
+				}
 			} else if (lsErrorInfo != null) {
 				errorGobbler.setLsInfo(lsErrorInfo, lineNumErr, true);
 			} else {
@@ -504,13 +509,16 @@ public class CmdOperate extends RunProcess<String> {
 	 * @param isWriteStdTips 是否需要每隔几分钟写一小段话以表示程序还在运行中
 	 */
 	private void setStdStream(boolean isWriteStdTxt, boolean isWriteStdTips) {
-		outputGobbler = new StreamGobbler(process.getStdOut());
+		outputGobbler = new StreamGobbler(process.getStdOut(), process);
 		if (!getCmdInStdStream) {
 			if (saveFilePath != null) {
 				FileOperate.createFolders(FileOperate.getPathName(saveFilePath));
 				//标准输出流不能被关闭
 				TxtReadandWrite txtWrite = new TxtReadandWrite(saveFilePath, true);
 				outputGobbler.setOutputStream(txtWrite.getOutputStream(), isWriteStdTxt, isWriteStdTips);
+				if (isWriteStdTxt && lsOutInfo != null) {
+					outputGobbler.setLsInfo(lsOutInfo, lineNumStd, false);
+				}
 			} else if (lsOutInfo != null) {
 				outputGobbler.setLsInfo(lsOutInfo, lineNumStd, false);
 			} else {
@@ -619,12 +627,13 @@ public class CmdOperate extends RunProcess<String> {
 
 class StreamGobbler extends Thread {
 	private static final Logger logger = Logger.getLogger(StreamGobbler.class);
-	
 	/** 每2000ms刷新一次txt文本，这是因为写入错误行会很慢，刷新就可以做到及时看结果 */
 	private static final int timeTxtFlush = 5000;
 	/** 每分钟写一个信息到文本中，意思该程序还在运行中，主要是针对RNAmapping这种等待时间很长的程序 */
 	private static final int timeTxtWiteTips = 120000;
 	
+	/** 运行进程的pid */
+	IntProcess process;
 	InputStream is;
 	OutputStream os;
 	LinkedList<String> lsInfo;
@@ -650,8 +659,9 @@ class StreamGobbler extends Thread {
 	Timer timerFlush;
 	Timer timerWriteTips;
 	
-	StreamGobbler(InputStream is) {
+	StreamGobbler(InputStream is, IntProcess process) {
 		this.is = is;
+		this.process = process;
 	}
 	/**
 	 *  指定一个out流，cmd的输出流就会定向到该流中<br>
@@ -752,6 +762,10 @@ class StreamGobbler extends Thread {
 					synchronized (this) {
 						try {
 							os.write((DateUtil.getNowTimeStr() + " Program Is Still Running, This Tip Display " + timeTxtWiteTips/1000 + " seconds per time" + TxtReadandWrite.ENTER_LINUX).getBytes());
+							List<ProcessInfo> lsProcInfo = process.getLsProcInfo();
+							for (ProcessInfo processInfo : lsProcInfo) {
+								os.write((processInfo.toString() + TxtReadandWrite.ENTER_LINUX).getBytes());
+							}
 						} catch (Exception e) {e.printStackTrace(); }				
 					}		
 				}
@@ -866,6 +880,7 @@ class StreamGobbler extends Thread {
 				}
 				os.flush();
 				os.close();
+				process = null;
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

@@ -2,6 +2,7 @@ package com.novelbio.base.cmd;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 
 public interface IntProcess {
 	/** 第一个执行 */
@@ -19,5 +20,8 @@ public interface IntProcess {
 	
 	/** 关闭本线程 */
 	public void stopProcess() throws Exception;
+
+	/** 获得本进程以及其子进程的pid和运行情况，目前只有本地版的cmd才能使用 */
+	List<ProcessInfo> getLsProcInfo() throws Exception;
 
 }

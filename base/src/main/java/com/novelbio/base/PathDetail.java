@@ -87,18 +87,6 @@ public class PathDetail {
 		filePath = FileOperate.getParentPathNameWithSep(filePath);
 		return FileOperate.addSep(filePath);
 	}
-	
-	/** 返回jar内部路径 */
-	public static String getProjectPathInside() {
-		java.net.URL url = PathDetail.class.getProtectionDomain().getCodeSource().getLocation();
-		String filePath = null;
-		try {
-			filePath = HttpFetch.decode(url.getPath());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return FileOperate.addSep(filePath);
-	}
 	/** 返回jar所在的路径，路径分隔符都为"/" */
 	public static String getProjectPathLinux() {
 		java.net.URL url = PathDetail.class.getProtectionDomain().getCodeSource().getLocation();
@@ -111,6 +99,19 @@ public class PathDetail {
 		filePath = FileOperate.getParentPathNameWithSep(filePath);
 		return FileOperate.addSep(filePath).replace("\\", "/");
 	}
+	
+	/** 返回jar内部路径 */
+	public static String getProjectPathInside() {
+		java.net.URL url = PathDetail.class.getProtectionDomain().getCodeSource().getLocation();
+		String filePath = null;
+		try {
+			filePath = HttpFetch.decode(url.getPath());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return FileOperate.addSep(filePath);
+	}
+
 	/** 零时文件的文件夹 */
 	public static String getTmpConfFold() {
 		return tmpConfFold;

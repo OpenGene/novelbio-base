@@ -1,0 +1,209 @@
+package com.novelbio.base.cmd;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.novelbio.base.dataStructure.ArrayOperate;
+
+/**
+ * 从cmd的top命令获得的进程信息
+ * @author novelbio
+ *
+ */
+public class ProcessInfo {
+	/** cpu使用百分比 */
+	double cpuUsage;
+	/** 内存使用百分比 */
+	double memUsage;
+	/** 命令名称 */
+	String cmdName;
+	/** 用户名 */
+	String userName;
+	/** id */
+	int pid;
+	/** parentId */
+	int ppid;
+	/** 进程状态 */
+	EnumProcessStatus status;
+	/** 运行时间，单位为毫秒 */
+	long runtime;
+
+	/**
+	 * @param infoLine 指定的列
+	 * @param mapColNum2Title 列数 对应该列的 名字<br>
+	 * 列数从0开始计算
+	 */
+	public ProcessInfo(String infoLine, Map<Integer, String> mapColNum2Title) {
+		String[] ss = infoLine.split(" ");
+		int i = 0;
+		for (String info : ss) {
+			info = info.trim();
+			if (info.equals("")) continue;
+			
+			String title = mapColNum2Title.get(i);
+			if (title == null) continue;
+			
+			if (title.equals("PID")) {
+				pid = Integer.parseInt(info);
+			} else if (title.equals("USER")) {
+				userName = info;
+			} else if (title.equals("%CPU")) {
+				cpuUsage = Double.parseDouble(info);
+			} else if (title.equals("%MEM")) {
+				memUsage = Double.parseDouble(info);
+			} else if (title.equals("S")) {
+				status = EnumProcessStatus.valueOf(info);
+			} else if (title.equals("COMMAND")) {
+				cmdName = info;
+			} else if (title.equals("PPID")) {
+				ppid = Integer.parseInt(info);
+			} else if (title.equals("TIME+")) {
+				setRunTime(info);
+			}
+			i++;
+		}
+	}
+	
+	/** 设定运行时间，输入类似
+	 * 623:09.64
+	 * @param rumtime
+	 */
+	private void setRunTime(String rumtime) {
+		String[] ss = rumtime.split(":");
+		double sec = Double.parseDouble(ss[1]);
+		double runTimeSec = Integer.parseInt(ss[0]) * 60 + sec;
+		if (sec > 60) {
+			throw new RuntimeException("second cannot bigger then 60");
+		}
+		this.runtime = (long)runTimeSec* 1000;
+	}
+
+	
+	public double getCpuUsage() {
+		return cpuUsage;
+	}
+	public double getMemUsage() {
+		return memUsage;
+	}
+	public String getCmdName() {
+		return cmdName;
+	}
+	public String getUserName() {
+		return userName;
+	}
+	/** 进程号 */
+	public int getPid() {
+		return pid;
+	}
+	/** 父进程号 */
+	public int getPpid() {
+		return ppid;
+	}
+	
+	public EnumProcessStatus getStatus() {
+		return status;
+	}
+	/** 运行时间，秒为单位 */
+	public int getRuntimeSec() {
+		return (int)(runtime/1000);
+	}
+	/** 运行时间，分为单位 */
+	public String getRuntimeMin() {
+		int secAll = (int)(runtime/1000);
+		int min = secAll/60;
+		int sec = secAll%60;
+
+		return min + ":" + sec;
+	}
+	
+	public String toString() {
+		List<String> lsResult = new ArrayList<String>();
+		lsResult.add(pid + "");
+		lsResult.add(ppid + "");
+		lsResult.add(cpuUsage + "");
+		lsResult.add(memUsage + "");
+		lsResult.add(status + "");
+		lsResult.add(runtime + "");
+		lsResult.add(cmdName);
+		return ArrayOperate.cmbString(lsResult.toArray(new String[0]), "\t");
+	}
+	
+	public static List<ProcessInfo> getLsPid(int pid, boolean isGetChild) {
+		List<String> lsCmd = new ArrayList<>();
+		lsCmd.add("ps"); lsCmd.add("-eo");
+		lsCmd.add("pid,ppid,user,%cpu,%mem,s,vsize,comm,user,time");
+//		ps -eo pid,ppid,user,%cpu,%mem,s,vsize,comm,user,time
+
+		CmdOperate cmdOperate = new CmdOperate(lsCmd);
+		cmdOperate.setGetLsStdOut();
+		cmdOperate.run();
+		List<String> lsStd = cmdOperate.getLsStdOut();
+		return getLsPid(lsStd, pid, isGetChild);
+	}
+	
+	/**
+	 * 给定top出来的结果，指定pid，提取相关的进程
+	 * @param lsTopInfo
+	 * @param pid 指定的进程
+	 * @param isGetChild 是否提取该进程的子进程(第归提取)
+	 * @return
+	 */
+	private static List<ProcessInfo> getLsPid(List<String> lsTopInfo, int pid, boolean isGetChild) {
+		List<ProcessInfo> lsResult = new ArrayList<ProcessInfo>();
+		ArrayListMultimap<Integer, ProcessInfo> mapPid2ProcInfo = ArrayListMultimap.create();
+		boolean startGetInfo = false;
+		Map<Integer, String> mapColNum2Title = null;
+		for (String string : lsTopInfo) {
+			if ((!startGetInfo && string.contains(":")) || string.trim().equals("")) continue;
+			
+			if (string.trim().contains("PID")) {
+				startGetInfo = true;
+				mapColNum2Title = getMapColNum2Title(string);
+				continue;
+			}
+
+			ProcessInfo processInfo = new ProcessInfo(string, mapColNum2Title);
+			if (processInfo.getPid() == pid) {
+				lsResult.add(processInfo);
+				continue;
+			}
+			if (processInfo.getPpid() == 0) continue;
+			mapPid2ProcInfo.put(processInfo.getPpid(), processInfo);
+		}
+		if (isGetChild) {
+			lsResult = getLsChildPid(lsResult, mapPid2ProcInfo);
+		}
+		
+		return lsResult;
+	}
+	
+	private static List<ProcessInfo> getLsChildPid(List<ProcessInfo> lsParent, ArrayListMultimap<Integer, ProcessInfo> mapPid2ProcInfo) {
+		List<ProcessInfo> lsChildProc = new ArrayList<ProcessInfo>();
+		for (ProcessInfo proc : lsParent) {
+			lsChildProc.addAll(mapPid2ProcInfo.get(proc.getPid()));
+		}
+		if (!lsChildProc.isEmpty()) {
+			lsChildProc.addAll(getLsChildPid(lsChildProc, mapPid2ProcInfo));
+		}
+		lsParent.addAll(lsChildProc);
+		return lsParent;
+	}
+	
+	
+	private static Map<Integer, String> getMapColNum2Title(String title) {
+		Map<Integer, String> mapColNum2Title = new HashMap<>();
+		title = title.trim();
+		String[] ss = title.split(" ");
+		int i = 0;
+		for (String info : ss) {
+			info = info.trim();
+			if (info.equals("")) continue;
+			mapColNum2Title.put(i, info);
+			i++;
+		}
+		return mapColNum2Title;
+	}
+}
