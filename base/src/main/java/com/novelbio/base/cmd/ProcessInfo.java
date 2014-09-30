@@ -119,6 +119,18 @@ public class ProcessInfo {
 		return min + ":" + sec;
 	}
 	
+	public static String getTitle() {
+		List<String> lsResult = new ArrayList<String>();
+		lsResult.add("PID");
+		lsResult.add("PPID");
+		lsResult.add("CpuUsage");
+		lsResult.add("MemUsage");
+		lsResult.add("Status");
+		lsResult.add("Runtime");
+		lsResult.add("CmdName");
+		return ArrayOperate.cmbString(lsResult.toArray(new String[0]), "\t");
+	}
+	
 	public String toString() {
 		List<String> lsResult = new ArrayList<String>();
 		lsResult.add(pid + "");
@@ -174,9 +186,8 @@ public class ProcessInfo {
 			mapPid2ProcInfo.put(processInfo.getPpid(), processInfo);
 		}
 		if (isGetChild) {
-			lsResult = getLsChildPid(lsResult, mapPid2ProcInfo);
+			lsResult.addAll(getLsChildPid(lsResult, mapPid2ProcInfo));
 		}
-		
 		return lsResult;
 	}
 	
@@ -188,8 +199,7 @@ public class ProcessInfo {
 		if (!lsChildProc.isEmpty()) {
 			lsChildProc.addAll(getLsChildPid(lsChildProc, mapPid2ProcInfo));
 		}
-		lsParent.addAll(lsChildProc);
-		return lsParent;
+		return lsChildProc;
 	}
 	
 	
