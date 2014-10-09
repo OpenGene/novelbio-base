@@ -282,6 +282,9 @@ public class FileHadoop extends File {
 			e.printStackTrace();
 			return new FileHadoop[]{};
 		}
+		if (childrenFileStatus == null || childrenFileStatus.length == 0) {
+			return new FileHadoop[]{};
+		}
 		FileHadoop[] files = {};
 		if (childrenFileStatus.length != 0) {
 			files = new FileHadoop[childrenFileStatus.length];

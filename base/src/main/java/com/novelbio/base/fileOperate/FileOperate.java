@@ -549,6 +549,24 @@ public class FileOperate {
 	 * 
 	 * @param filePath
 	 *            目录路径,最后不要加\\或/
+	 * @return 返回包含目标文件全名的ArrayList
+	 * @throws IOException 
+	 */
+	public static ArrayList<String> getFoldFileNameLs(String filePath) {
+		List<File> lsFile = getFoldFileLs(filePath);
+		ArrayList<String> lsFileName = new ArrayList<String>();
+		for (File file : lsFile) {
+			lsFileName.add(file.getAbsolutePath());
+		}
+		return lsFileName;
+	}
+	/**
+	 * 获取文件夹下包含指定文件名与后缀的所有文件名,等待增加功能子文件夹下的文件。也就是循环获得文件<br>
+	 * 如果文件不存在则返回null<br>
+	 * 如果不是文件夹，则返回该文件名<br>
+	 * 
+	 * @param filePath
+	 *            目录路径,最后不要加\\或/
 	 * @param filename
 	 *            指定包含的文件名，是正则表达式 ，如 "*",正则表达式无视大小<br>
 	 *            null 表示不指定
