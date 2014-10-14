@@ -913,6 +913,25 @@ public class FileOperate {
 		}
 	}
 	
+	public static OutputStream getOutputStream(File file, boolean cover) {
+		try {
+			OutputStream fs = null;
+			if (file instanceof FileHadoop) {
+				FileHadoop fileHadoop = (FileHadoop) file;
+				FSDataOutputStream fsHdfs = fileHadoop.getOutputStreamNew(cover);
+				fs = new OutputStreamHdfs(fsHdfs);
+			}else {
+				fs = new FileOutputStream(file, !cover);
+			}
+
+			return fs;
+		}catch(Exception e) {
+			logger.error("get output stream error: " + file.getAbsolutePath() + "   is cover: " + cover, e);
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
 	public static boolean copyFileFolder(String oldPathFile, String newPathFile, boolean cover) {
 		boolean isFolder = FileOperate.isFileDirectory(oldPathFile);
 		if (isFolder) {

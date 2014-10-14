@@ -80,6 +80,14 @@ public class TxtReadandWrite implements Closeable {
 	
 	boolean read = true;
 	
+	public TxtReadandWrite(File file) {
+		this(file, false);
+	}
+	
+	public TxtReadandWrite(File file, boolean creatFile) {
+		this(file, creatFile, false);
+	}
+	
 	public TxtReadandWrite(String fileName) {
 		this(fileName, false);
 	}
@@ -96,6 +104,18 @@ public class TxtReadandWrite implements Closeable {
 			read = false;
 		} else {
 			txtRead = new TxtRead(fileName);
+			read = true;
+		}
+	}
+	
+	public TxtReadandWrite(File file, boolean writeFile, boolean append) {
+		if (writeFile) {
+			txtWrite = new TxtWrite(file);
+			txtWrite.setAppend(append);
+			try { txtWrite.createFile(); } catch (Exception e) { e.printStackTrace(); }
+			read = false;
+		} else {
+			txtRead = new TxtRead(file);
 			read = true;
 		}
 	}

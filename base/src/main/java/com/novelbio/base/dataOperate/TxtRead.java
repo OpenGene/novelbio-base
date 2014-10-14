@@ -31,7 +31,8 @@ class TxtRead implements Closeable {
 	
 	/** 读取本地文件时设定 */
 	String txtfile;
-
+	File file;
+	
 	InputStream inputStreamRaw;
 	InputStream inputStream;
 	BufferedReader bufread;
@@ -47,6 +48,13 @@ class TxtRead implements Closeable {
 	public TxtRead(String fileName) {
 		this.txtfile = fileName;
 		txTtype = TXTtype.getTxtType(fileName);
+		isStream = false;
+	}
+	
+	public TxtRead(File file) {
+		this.file = file;
+		this.txtfile = file.getAbsolutePath();
+		txTtype = TXTtype.getTxtType(txtfile);
 		isStream = false;
 	}
 	
@@ -549,9 +557,14 @@ class TxtRead implements Closeable {
 	
 	private void setInStreamExp(TXTtype txtType) throws IOException {
 		if (!isStream) {
-			File file = FileOperate.getFile(txtfile);
-			filesize = FileOperate.getFileSizeLong(file);
-			inputStreamRaw = FileOperate.getInputStream(txtfile);
+			File fileThis;
+			if (file == null) {
+				fileThis = FileOperate.getFile(txtfile);
+			} else {
+				fileThis = file;
+			}
+			filesize = FileOperate.getFileSizeLong(fileThis);
+			inputStreamRaw = FileOperate.getInputStream(fileThis);
 		}
 
 		if (txtType == TXTtype.Txt) {

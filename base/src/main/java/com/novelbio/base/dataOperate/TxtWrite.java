@@ -2,6 +2,7 @@ package com.novelbio.base.dataOperate;
 
 import java.io.BufferedOutputStream;
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ class TxtWrite implements Closeable {
 	private static Logger logger = Logger.getLogger(TxtReadandWrite.class);
 		
 	String txtfile;
-	
+	File file;
 	BufferedOutputStream outputStream;
 	boolean append = true;
 	
@@ -34,7 +35,10 @@ class TxtWrite implements Closeable {
 	public TxtWrite(String fileName) {
 		this.txtfile = fileName;
 	}
-	
+	public TxtWrite(File file) {
+		this.file = file;
+		this.txtfile = file.getAbsolutePath();
+	}
 	public TxtWrite(OutputStream outputStream) {
 		if (outputStream instanceof BufferedOutputStream) {
 			this.outputStream = (BufferedOutputStream)outputStream;
@@ -72,7 +76,12 @@ class TxtWrite implements Closeable {
 	}
 	
 	protected void createFile() throws Exception {
-		OutputStream outputStreamRaw = FileOperate.getOutputStream(txtfile, !append);
+		OutputStream outputStreamRaw = null;
+		if (file != null) {
+			outputStreamRaw = FileOperate.getOutputStream(file, !append);
+		} else {
+			outputStreamRaw = FileOperate.getOutputStream(txtfile, !append);
+		}
 		TXTtype txtTtype = TXTtype.getTxtType(txtfile);
 		if (txtTtype == TXTtype.Txt) {
 			outputStream = new BufferedOutputStream(outputStreamRaw, TxtReadandWrite.bufferLen);
