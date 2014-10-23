@@ -18,6 +18,15 @@ public class PatternOperate {
 	Matcher matInput;
 	String inputStr;
 	List<PatternUnit> lsPatternUnits;
+	
+	 /**
+	  * 设定正则表达式，默认大小写不敏感
+	  * @param regex
+	  */
+	public PatternOperate(String regex) {
+		this(regex, false);
+	}
+  
 	 /**
 	  * 设定正则表达式
 	  * @param regex

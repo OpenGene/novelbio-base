@@ -1,5 +1,6 @@
 package com.novelbio.base.dataOperate;
 
+import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +27,7 @@ import com.novelbio.base.fileOperate.FileOperate;
  * 本类似乎无法获得最大列的数目,这里可以考虑采用一维数目不同的二维数组，这个实现可以考虑用foreach来遍历 本代码原始作者 caihua ，
  * Zong Jie修改
  */
-public class ExcelOperate {
+public class ExcelOperate implements Closeable {
 	public static final int EXCEL2003 = 2003;
 	public static final int EXCEL2007 = 2007;
 	public static final int EXCEL_NOT = 100;
@@ -53,7 +54,9 @@ public class ExcelOperate {
 	 * @param imputfilename
 	 */
 	public ExcelOperate(String imputfilename) {
-		openExcel(imputfilename, false);
+		String suffix = FileOperate.getFileNameSep(imputfilename)[1].toLowerCase();
+		boolean isexcel2007 = suffix.equals("xlsx") ? true : false;
+		openExcel(imputfilename, isexcel2007);
 	}
 	
 	public void setNBCExcel(boolean isNBCExcel) {
@@ -751,8 +754,6 @@ public class ExcelOperate {
 
 		Sheet sheet = getSheet(sheetName, sheetNum);
 		writeExcel(sheet, rowNum, cellNum, content);
-		if (filename != "")
-			Save();
 		return true;
 	}
 
@@ -777,8 +778,6 @@ public class ExcelOperate {
 
 		Sheet sheet = getSheet(sheetName, sheetNum);
 		writeExcel(sheet, rowNum, cellNum, content);
-		if (filename != "")
-			Save();
 		return true;
 	}
 
@@ -843,8 +842,6 @@ public class ExcelOperate {
 			} catch (Exception e) {
 				cell.setCellValue(content);
 			}
-			if (filename != "")
-				Save();
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1397,7 +1394,8 @@ public class ExcelOperate {
 	/**
 	 * 暂时没功能
 	 */
-	public void Close() {// 暂时不会
+	public void close() {// 暂时不会
+		Save();
 		wb = null;// book [includes sheet]
 		sheet = null;
 	}

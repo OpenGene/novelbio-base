@@ -151,7 +151,7 @@ public class ExcelTxtRead {
 		if (ExcelOperate.isExcel(excelFile)) {
 			ExcelOperate excel = new ExcelOperate(excelFile);
 			ls1 = excel.ReadLsExcel(sheetNum, firstlinels1, 1, -1,-1);
-			excel.Close();
+			excel.close();
 			return ls1;
 		}
 		TxtReadandWrite txt = new TxtReadandWrite(excelFile);
@@ -178,7 +178,7 @@ public class ExcelTxtRead {
 		if (ExcelOperate.isExcel(excelFile)) {
 			ExcelOperate excel = new ExcelOperate(excelFile);
 			ls1 = excel.ReadLsExcel(rowStart, colStart, rowEnd, colEnd);
-			excel.Close();
+			excel.close();
 			return ls1;
 		}
 		TxtReadandWrite txt = new TxtReadandWrite(excelFile, false);
@@ -213,7 +213,7 @@ public class ExcelTxtRead {
 		if (ExcelOperate.isExcel(excelFile)) {
 			ExcelOperate excel = new ExcelOperate(excelFile);
 			ls1 = excel.ReadLsExcel(sheetNum, rowStart, colStart, rowEnd, colEnd);
-			excel.Close();
+			excel.close();
 			return ls1;
 		}
 		TxtReadandWrite txt = new TxtReadandWrite(excelFile, false);
@@ -255,7 +255,7 @@ public class ExcelTxtRead {
 			} else {
 				ls1 = excel.ReadLsExcel(sheetName, rowStart, colStart, rowEnd, colEnd);
 			}
-			excel.Close();
+			excel.close();
 			return ls1;
 		}
 		TxtReadandWrite txt = new TxtReadandWrite(excelFile, false);
@@ -279,7 +279,7 @@ public class ExcelTxtRead {
 		if (ExcelOperate.isExcel(excelTxtFile)) {
 			ExcelOperate excel = new ExcelOperate(excelTxtFile);
 			excel.WriteExcel(1, 1, lsContent);
-			excel.Close();
+			excel.close();
 			return ls1;
 		}
 		TxtReadandWrite txt = new TxtReadandWrite(excelTxtFile, true);
