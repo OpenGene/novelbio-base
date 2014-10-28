@@ -83,6 +83,20 @@ public class StringOperate {
 		}
 	}
 	
+	public static boolean isEqual(String string1, String string2) {
+		if ((string1 == null && string2 != null)
+				||
+				string1 != null && string2 == null
+				) {
+			return false;
+		}
+		
+		if (string1 == null && string2 == null) {
+			return true;
+		}
+		return string1.equals(string2);
+	}
+	
 	// 代码是网上找的 不过感觉不错 大家可以试试
 	/**
 	 * 完全分割一个字符串
