@@ -44,4 +44,9 @@ public class SepSign {
 	 */
 	public static final String SEP_INFO_SAMEDB = "#/#";
 	
+//	/**
+//	 * 分割url中的名字的
+//	 */
+//	public static final String SEP_URL = "$$";
+	
 }

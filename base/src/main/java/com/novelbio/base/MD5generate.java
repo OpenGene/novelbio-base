@@ -156,7 +156,6 @@ public class MD5generate {
 		long fileLength = 0;
 		fileLength = FileOperate.getFileSizeLong(fileName);
 		maxSize = (maxSize > fileLength ? fileLength : maxSize);
-		System.out.println(maxSize);
 		byte[] b = new byte[(int)maxSize];
 		in.read(b);
 		in.close();
