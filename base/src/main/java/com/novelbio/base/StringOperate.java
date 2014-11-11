@@ -1,5 +1,6 @@
 package com.novelbio.base;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -109,5 +110,24 @@ public class StringOperate {
 			setWords.add(key.substring(i-1, i));
 		}
 		return setWords;
+	}
+	
+	/**
+	 * 判断文本中是否有乱码，用于get提交出现乱码现象
+	 * @param strText：要判断的文本
+	 * @return
+	 */
+	public static boolean isHaveMessyCode(String strText) {
+		String strUtf;
+		String strIso;
+		try {
+			strUtf = new String(strText.getBytes("ISO-8859-1"), "utf-8");
+			strIso = new String(strUtf.getBytes("utf-8"), "ISO-8859-1");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+		return strIso.equals(strText);
 	}
 }
