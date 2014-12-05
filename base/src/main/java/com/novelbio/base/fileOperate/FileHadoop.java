@@ -14,6 +14,7 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.permission.FsPermission;
 
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataOperate.DateUtil;
@@ -443,10 +444,10 @@ public class FileHadoop extends File {
 			return false;
 		}
 		fileName = fileName.toLowerCase();
-		if (!StringOperate.isRealNull(HdfsInitial.getHEAD())) {
-			return fileName.startsWith(HdfsInitial.getSymbol()) ? true : false;
+		if (StringOperate.isRealNull(HdfsInitial.getSymbol())) {
+			return false;
 		}
-		return false;
+		return fileName.startsWith(HdfsInitial.getSymbol()) ? true : false;
 	}
 
 	@Deprecated

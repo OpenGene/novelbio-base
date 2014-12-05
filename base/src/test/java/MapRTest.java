@@ -1,8 +1,14 @@
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.novelbio.base.PathDetail;
+import com.novelbio.base.cmd.CmdOperate;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.fileOperate.FileHadoop;
 
+import org.apache.hadoop.yarn.applications.distributedshell.ApplicationMaster;
+import org.springframework.util.MultiValueMap;  
 /**
  * Assumes mapr installed in /opt/mapr
  * 
@@ -20,69 +26,25 @@ import com.novelbio.base.fileOperate.FileHadoop;
  */
 public class MapRTest {
 	public static void main(String args[]) throws Exception {
-		byte buf[] = new byte[65 * 1024];
-		int ac = 0;
-
-		// maprfs:/// -> uses the first entry in
-		// /opt/mapr/conf/mapr-clusters.conf
-		// maprfs:///mapr/my.cluster.com/
-		// /mapr/my.cluster.com/
-//		FileHadoop fileHadoop = new FileHadoop("/haha/hoo");
-//		fileHadoop.mkdirs();
-		String dirname = "/my.cluster.com/hoho";
-//		
-//		Configuration conf = new Configuration();
-//		conf.set("dfs.permissions", "false");
-		FileHadoop fileHadoop = new FileHadoop(PathDetail.getHdfsSymbol() + "/test/fastq/798B_CGATGT_L004_R1_001.fastq.gz");
-		System.out.println(fileHadoop.getName());
-		System.out.println(fileHadoop.getAbsolutePath());
-		System.out.println(fileHadoop.getParent());
-		FileHadoop fileHadoop2 = new FileHadoop(fileHadoop.getParent());
-		
-		TxtReadandWrite txtRead = new TxtReadandWrite(PathDetail.addHdfsHeadSymbol("/test/fastq/798B_CGATGT_L004_R1_001.fastq.gz"));
-		int i = 0;
+		TxtReadandWrite txtRead = new TxtReadandWrite("/home/novelbio/software/hadoop/etc/hadoop/core-site.xml");
+		TxtReadandWrite txtWrite = new TxtReadandWrite("/hdfs:/nbCloud/testFile", true);
+		txtWrite.writefileln("setstgfsaerae");
 		for (String content : txtRead.readlines()) {
-			if (i > 10) {
-				break;
-			}
-			i++;
-			System.out.println(content);
+			txtWrite.writefileln(content);
 		}
+		txtRead.close();
+//		txtWrite.close();
 		
-//		FileSystem fs = HdfsBase.getFileSystem();
-//		fs.mkdirs(new Path(dirname));
-		//FileSystem fs = FileSystem.get(URI.create(uri), conf); // if wanting
-//		// to use a different cluster
-//		//FileSystem fs = FileSystem.get(conf);
-//
-		//Path dirpath = new Path(dirname + "/dir");
-//		// Path rfilepath = new Path( dirname + "/file.r");
-//		System.out.println(dirpath.getParent());
-//		// try mkdir
-		//boolean res = fs.mkdirs(dirpath);
-//		if (!res) {
-//			System.out.println("mkdir failed, path: " + dirpath);
-//			return;
-//		}
-//
-//		System.out.println("mkdir( " + dirpath + ") went ok, now writing file");
-//
-//		// create wfile
-//		FSDataOutputStream ostr = fs.create(wfilepath, true, // overwrite
-//				512, // buffersize
-//				(short) 1, // replication
-//				(long) (64 * 1024 * 1024) // chunksize
-//				);
-//		ostr.write(buf);
-//		ostr.close();
-//
-//		System.out.println("write( " + wfilepath + ") went ok");
-//
-//		// read rfile
-//		System.out.println("reading file: " + rfilepath);
-//		FSDataInputStream istr = fs.open(rfilepath);
-//		int bb = istr.readInt();
-//		istr.close();
-//		System.out.println("Read ok");
+		List<String> lsCmd = new ArrayList<String>();
+		lsCmd.add("ifconfig");
+		
+		CmdOperate cmdOperate = new CmdOperate(lsCmd);
+		cmdOperate.setGetLsStdOut();
+		cmdOperate.run();
+		for (String string : cmdOperate.getLsStdOut()) {
+			txtWrite.writefileln(string);
+		}
+		txtWrite.flush();
+		txtWrite.close();
 	}
 }

@@ -138,6 +138,8 @@ public class HdfsInitial {
 //			conf.set("dfs.namenode.rpc-address.cluster1.nn2", "192.168.0.181:8020");
 //			conf.set("dfs.client.failover.proxy.provider.cluster1", "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider");
 			conf.set("dfs.permissions.enabled", "false");
+		    conf.set("dfs.client.block.write.replace-datanode-on-failure.policy", "NEVER"); 
+		    conf.set("dfs.client.block.write.replace-datanode-on-failure.enable", "true"); 
 			try {
 				readXml();
 			} catch (DocumentException e) {

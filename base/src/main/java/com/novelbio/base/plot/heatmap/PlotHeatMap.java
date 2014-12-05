@@ -1,24 +1,11 @@
 package com.novelbio.base.plot.heatmap;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.Iterator;
 
-import javax.imageio.IIOImage;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageWriteParam;
-import javax.imageio.ImageWriter;
-import javax.imageio.stream.FileImageOutputStream;
-import javax.swing.*;
-
-import org.apache.commons.math.analysis.solvers.LaguerreSolver;
-
-import com.novelbio.base.fileOperate.FileOperate;
-import com.novelbio.base.plot.ImageUtils;
-import com.novelbio.base.plot.JpanelPlot;
 import com.novelbio.base.plot.PlotNBC;
 import com.novelbio.base.plot.java.HeatChartDataInt;
 

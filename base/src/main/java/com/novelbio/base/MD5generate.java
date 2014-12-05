@@ -2,7 +2,6 @@ package com.novelbio.base;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -12,14 +11,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.validator.Field;
-import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.log4j.Logger;
-import org.jboss.netty.handler.codec.base64.Base64Encoder;
-import org.springframework.jdbc.support.lob.LobCreator;
-import org.springframework.jdbc.support.lob.LobCreatorUtils;
-import org.springframework.jdbc.support.lob.LobHandler;
-import org.springframework.orm.hibernate3.HibernateAccessor;
 
 import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;

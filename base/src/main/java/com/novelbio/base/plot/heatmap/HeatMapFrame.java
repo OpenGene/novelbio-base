@@ -156,12 +156,7 @@ class HeatMapFrame extends JFrame
     	        com.paint(g2);
     	        g2.dispose();  
     	        bufferImage = ImageUtils.resizeImage(bufferImage, 100, 100);
-    	        try {
-					saveGraphicJpeg(bufferImage,path, 1.0f);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+    	    	ImageUtils.saveBufferedImage(bufferImage,path);
     	    }  
     
     
