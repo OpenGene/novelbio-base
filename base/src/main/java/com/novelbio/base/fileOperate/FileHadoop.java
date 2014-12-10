@@ -91,6 +91,7 @@ public class FileHadoop extends File {
 		try {
 			return fsHDFS.open(dst);
 		} catch (IOException e) {
+			e.printStackTrace();
 			return null;
 		}
 	}

@@ -100,11 +100,7 @@ public class FileOperate {
 	public static File getFile(String filePath) {
 		File file = null;
 		boolean isHdfs = FileHadoop.isHdfs(filePath);
-		if(isWindows()){
-			if(isHdfs)
-				filePath = FileHadoop.convertToLocalPath(filePath);
-			file = new File(filePath);
-		}else if (isHdfs) {
+		if (isHdfs) {
 			file = new FileHadoop(filePath);
 		}else {
 			file = new File(filePath);
