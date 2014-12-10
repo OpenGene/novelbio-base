@@ -14,8 +14,8 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.permission.FsPermission;
 
+import com.novelbio.base.PathDetail;
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataOperate.DateUtil;
 
@@ -96,6 +96,12 @@ public class FileHadoop extends File {
 		}
 	}
 	
+	/**
+	 * <b>如果本方法长时间卡死，清check /etc/hosts中是否配置了相关的yarn-master</b><br>
+	 * 根据文件产生一个流
+	 * @param overwrite  false：如果文件不存在，则返回nulll
+	 * @return
+	 */
 	public FSDataOutputStream getOutputStreamNew(boolean overwrite) {
 		try {
 			return fsHDFS.create(dst, overwrite);
@@ -389,18 +395,23 @@ public class FileHadoop extends File {
 	@Override
 	public boolean renameTo(File dest) {
 		try {
-			return fsHDFS.rename(dst, new Path(convertToMaprPath(dest.getPath())));
+			String path = dest.getPath();
+			if (FileHadoop.isHdfs(path) || FileHadoop.isHdfs(path.substring(1, path.length()-2))) {
+				path = path.replace(HdfsInitial.getSymbol(), HdfsInitial.getHEAD());
+			}
+			return fsHDFS.rename(dst, new Path(path));
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;
 		}
 	}
-
-	public static String convertToMaprPath(String hdfsPath){
-		if (hdfsPath.length() < 6) {
-			
-		}else if (FileHadoop.isHdfs(hdfsPath) || FileHadoop.isHdfs(hdfsPath.substring(1, hdfsPath.length()-2))) {
-			hdfsPath = hdfsPath.replace(HdfsInitial.getSymbol(), HdfsInitial.getHEAD());
+	
+	
+	/** 把 /media/nbfs这种改成hdfs的形式，如果不是/media/hdfs这种，就不要动 */
+	public static String convertToHadoop(String hdfsPath) {
+		hdfsPath = FileOperate.removeSplashHead(hdfsPath, true);
+		if (hdfsPath.toLowerCase().startsWith(PathDetail.getHdfsLocalPath().toLowerCase())) {
+			hdfsPath.replace(PathDetail.getHdfsLocalPath(), HdfsInitial.getSymbol());
 		}
 		return hdfsPath;
 	}
