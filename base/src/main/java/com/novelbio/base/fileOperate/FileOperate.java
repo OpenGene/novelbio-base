@@ -429,6 +429,47 @@ public class FileOperate {
 		return lsResult;
 	}
 	
+	/** 将文件开头的"//"这种多个的去除
+	 * @param fileName
+	 * @param keepOne 是否保留一个“/”
+	 * @return
+	 */
+	public static String removeSplashHead(String fileName, boolean keepOne) {
+		String head = "//";
+		if (!keepOne) {
+			head = "/";
+		}
+		String fileNameThis = fileName;
+		while (true) {
+			if (fileNameThis.startsWith(head)) {
+				fileNameThis = fileNameThis.substring(1);
+			} else {
+				break;
+			}
+		}
+		return fileNameThis;
+	}
+	/** 将文件结尾的"//"这种多个的去除
+	 * @param fileName
+	 * @param keepOne 是否保留一个“/”
+	 * @return
+	 */
+	public static String removeSplashTail(String fileName, boolean keepOne) {
+		String tail = "//";
+		if (!keepOne) {
+			tail = "/";
+		}
+		String fileNameThis = fileName;
+		while (true) {
+			if (fileNameThis.endsWith(tail)) {
+				fileNameThis = fileNameThis.substring(0,fileNameThis.length() - 1);
+			} else {
+				break;
+			}
+		}
+		return fileNameThis;
+	}
+	
 	/**
 	 * 获取文件夹下包含指定文件名与后缀的所有文件名,等待增加功能子文件夹下的文件。也就是循环获得文件<br>
 	 * 如果文件不存在则返回空的list<br>

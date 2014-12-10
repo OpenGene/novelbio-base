@@ -96,17 +96,19 @@ public class FileHadoop extends File {
 		}
 	}
 	
-	/**
-	 * <b>如果本方法长时间卡死，清check /etc/hosts中是否配置了相关的yarn-master</b><br>
-	 * 根据文件产生一个流
-	 * @param overwrite  false：如果文件不存在，则返回nulll
-	 * @return
-	 */
 	public FSDataOutputStream getOutputStreamNew(boolean overwrite) {
 		try {
 			return fsHDFS.create(dst, overwrite);
 		} catch (IOException e) {
-			e.printStackTrace();
+			if (!overwrite) {
+				try {
+					return fsHDFS.append(dst);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+					return null;
+				}
+			}
 			return null;
 		}
 	}

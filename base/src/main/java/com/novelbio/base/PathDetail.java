@@ -266,7 +266,10 @@ public class PathDetail {
 	public static String getProjectAttachFolderName() {
 		return properties.getProperty("projectAttachFolderName");
 	}
-	
+	/** 取得hdfs挂载的本地文件夹路径 */
+	public static String getHdfsLocalPath() {
+		return properties.getProperty("hdfsLocalPath");
+	}
 	/**
 	 * 取得nbcFile的开头形式
 	 * @return
