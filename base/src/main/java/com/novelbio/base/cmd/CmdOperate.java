@@ -258,6 +258,14 @@ public class CmdOperate extends RunProcess<String> {
 		cmdPath.addCmdParamOutput(output, isAddToLsCmd);
 	}
 	
+	/** 是否将hdfs的路径，改为本地路径，<b>默认为true</b><br>
+	 * 如将 /hdfs:/fseresr 改为 /media/hdfs/fseresr<br>
+	 * 只有类似varscan这种我们修改了代码，让其兼容hdfs的程序才不需要修改
+	 */
+	public void set(boolean isConvertHdfs2Loc) {
+		cmdPath.setConvertHdfs2Loc(isConvertHdfs2Loc);
+	}
+	
 	/** 是否将输入文件拷贝到临时文件夹，默认为false */
 	public void setRedirectInToTmp(boolean isRedirectInToTmp) {
 		cmdPath.setRedirectInToTmp(isRedirectInToTmp);
@@ -275,7 +283,6 @@ public class CmdOperate extends RunProcess<String> {
 	public void addCmdParam(String[] param) {
 		cmdPath.addCmdParam(param);
 	}
-
 	
 	/** 返回执行的具体cmd命令，不会将文件路径删除，仅给相对路径 */
 	public String getCmdExeStr() {

@@ -50,11 +50,25 @@ public class CmdPath {
 	/** 是否已经生成了临时文件夹，生成一次就够了 */
 	boolean isGenerateTmpPath = false;
 	
+	/** 是否将hdfs的路径，改为本地路径
+	 * 如将 /hdfs:/fseresr 改为 /media/hdfs/fseresr
+	 * 只有类似varscan这种我们修改了代码，让其兼容hdfs的程序才不需要修改
+	 */
+	boolean isConvertHdfs2Loc = true;
+	
 	/** 如果为null就不加入 */
 	public void addCmdParam(String param) {
 		if (!StringOperate.isRealNull(param)) {
 			lsCmd.add(param);
 		}
+	}
+	
+	/** 是否将hdfs的路径，改为本地路径，<b>默认为true</b><br>
+	 * 如将 /hdfs:/fseresr 改为 /media/hdfs/fseresr<br>
+	 * 只有类似varscan这种我们修改了代码，让其兼容hdfs的程序才不需要修改
+	 */
+	public void setConvertHdfs2Loc(boolean isConvertHdfs2Loc) {
+		this.isConvertHdfs2Loc = isConvertHdfs2Loc;
 	}
 	
 	/** 是否将输入文件拷贝到临时文件夹，默认为false */
@@ -274,8 +288,10 @@ public class CmdPath {
 				errOut = false;
 				continue;
 			}
-			
-			lsReal.add(convertToLocalCmd(tmpCmd));
+			if (isConvertHdfs2Loc) {
+				tmpCmd = convertToLocalCmd(tmpCmd);
+			}
+			lsReal.add(tmpCmd);
 		}
 		String[] realCmd = lsReal.toArray(new String[0]);
 		return realCmd;
