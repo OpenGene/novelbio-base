@@ -47,8 +47,6 @@ public class Computer implements Serializable {
 	/** 实际空闲内存数量 */
 	protected int memoryFreeReal;
 	
-	/** 虽然是单例，不过序列化之后依然可以产生多例 */
-	private static Computer computer;
 	
 	protected Computer() {}
 	
