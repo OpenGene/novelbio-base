@@ -411,7 +411,7 @@ public class FileHadoop extends File {
 	public static String convertToHadoop(String hdfsPath) {
 		hdfsPath = FileOperate.removeSplashHead(hdfsPath, true);
 		if (hdfsPath.toLowerCase().startsWith(PathDetail.getHdfsLocalPath().toLowerCase())) {
-			hdfsPath.replace(PathDetail.getHdfsLocalPath(), HdfsInitial.getSymbol());
+			hdfsPath = hdfsPath.replace(PathDetail.getHdfsLocalPath(), HdfsInitial.getSymbol());
 		}
 		return hdfsPath;
 	}
