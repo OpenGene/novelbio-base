@@ -43,7 +43,6 @@ public class PathDetail {
 		//TmpPath
 		tmpPath = properties.getProperty("TMPpath");
 		if (FileOperate.createFolders(tmpPath)) {
-			File file = new File(tmpPath);
 //			file.setReadable(true, false);
 //			file.setWritable(true, false);
 			System.setProperty("java.io.tmpdir", tmpPath);
