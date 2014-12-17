@@ -16,17 +16,18 @@ public class TestCmdPath extends TestCase {
 		cmd3();
 		cmd4();
 		cmd5();
+		cmd6();
 	}
 	private void cmd1() {
 		CmdPath cmdPath = new CmdPath();
 		List<String> lsCmd = new ArrayList<>();
-		String inFile = "/media/winE/test/testCmdPath/test.fa";
+		String inFile = "/home/novelbio/NBCsource/test/CmdOperate/chrALL_orange.fa";
 		lsCmd.add("bwa-index"); lsCmd.add(inFile);
 		cmdPath.setLsCmd(lsCmd);
 		cmdPath.setRedirectInToTmp(true);
 		cmdPath.setRedirectOutToTmp(true);
 		cmdPath.addCmdParamInput(inFile, false);
-		cmdPath.addCmdParamOutput("/media/winE/test/testCmdPath/", false);
+		cmdPath.addCmdParamOutput("/home/novelbio/NBCsource/test/CmdOperate/cmdResult/", false);
 		cmdPath.copyFileIn();
 		String[] ss = cmdPath.getRunCmd();
 		System.out.println(ArrayOperate.cmbString(ss, " "));
@@ -47,8 +48,8 @@ public class TestCmdPath extends TestCase {
 	private void cmd2() {
 		CmdPath cmdPath = new CmdPath();
 		List<String> lsCmd = new ArrayList<>();
-		String inFile = "/media/winE/test/testCmdPath/test.fa";
-		String outFile = "/media/winE/test/testCmdPath/test2";
+		String inFile = "/home/novelbio/NBCsource/test/CmdOperate/chrALL_orange.fa";
+		String outFile = "/home/novelbio/NBCsource/test/CmdOperate/cmdResult/test2";
 		lsCmd.add("bwa-index"); lsCmd.add(inFile); lsCmd.add(outFile);
 		cmdPath.setLsCmd(lsCmd);
 		cmdPath.setRedirectInToTmp(true);
@@ -75,8 +76,8 @@ public class TestCmdPath extends TestCase {
 	private void cmd3() {
 		CmdPath cmdPath = new CmdPath();
 		List<String> lsCmd = new ArrayList<>();
-		String inFile = "/media/winE/test/testCmdPath/test.fa";
-		String outFile = "/media/winE/test/testCmdPath/test3/";
+		String inFile = "/home/novelbio/NBCsource/test/CmdOperate/chrALL_orange.fa";
+		String outFile = "/home/novelbio/NBCsource/test/CmdOperate/cmdResult/test3/";
 		lsCmd.add("bwa-index"); lsCmd.add(inFile); lsCmd.add(outFile);
 		cmdPath.setLsCmd(lsCmd);
 		cmdPath.setRedirectInToTmp(true);
@@ -105,8 +106,8 @@ public class TestCmdPath extends TestCase {
 	private void cmd4() {
 		CmdPath cmdPath = new CmdPath();
 		List<String> lsCmd = new ArrayList<>();
-		String inFile = "/media/winE/test/testCmdPath/test.fa";
-		String outFile = "/media/winE/test/testCmdPath/test4";
+		String inFile = "/home/novelbio/NBCsource/test/CmdOperate/chrALL_orange.fa";
+		String outFile = "/home/novelbio/NBCsource/test/CmdOperate/cmdResult/test4";
 		lsCmd.add("bwa-index"); lsCmd.add(inFile); lsCmd.add(outFile);
 		cmdPath.setLsCmd(lsCmd);
 		cmdPath.setRedirectInToTmp(false);
@@ -135,9 +136,9 @@ public class TestCmdPath extends TestCase {
 	private void cmd5() {
 		CmdPath cmdPath = new CmdPath();
 		List<String> lsCmd = new ArrayList<>();
-		String inFile = "/media/winE/test/testCmdPath/test.fa";
+		String inFile = "/home/novelbio/NBCsource/test/CmdOperate/chrALL_orange.fa";
 		
-		String outFile = "/media/winE/test/testCmdPath/test5";
+		String outFile = "/home/novelbio/NBCsource/test/CmdOperate/cmdResult/test5";
 		lsCmd.add("bwa-index"); lsCmd.add(inFile); lsCmd.add(outFile);
 		cmdPath.setLsCmd(lsCmd);
 		cmdPath.setRedirectInToTmp(true);
@@ -159,5 +160,30 @@ public class TestCmdPath extends TestCase {
 		txtWrite.close();
 		cmdPath.moveFileOut();
 		assertEquals(true, FileOperate.isFileExistAndBigThanSize(outFile + FileOperate.getSepPath() + resultFileName, 0));
+	}
+	
+	private void cmd6() {
+		CmdPath cmdPath = new CmdPath();
+		List<String> lsCmd = new ArrayList<>();
+		String inFile = "/home/novelbio/NBCsource/test/CmdOperate/chrALL_orange.fa";
+		String outPath = "/home/novelbio/NBCsource/test/CmdOperate/cmdResult/test2.fa";
+		lsCmd.add("bwa-index");
+		lsCmd.add("--inPath=" + inFile);
+		lsCmd.add("--outPath=" + outPath);
+		cmdPath.setLsCmd(lsCmd);
+		cmdPath.setRedirectOutToTmp(true);
+		cmdPath.addCmdParamOutput(outPath, false);
+		cmdPath.copyFileIn();
+		String[] ss = cmdPath.getRunCmd();
+		System.out.println(ArrayOperate.cmbString(ss, " "));
+		String resultFileName = "test2.fatestResult.txt";
+		//往结果中写个文件 */
+		String outTmp = ss[2].split("=")[1];
+		TxtReadandWrite txtWrite = new TxtReadandWrite(FileOperate.getPathName(outTmp) + resultFileName, true);
+		txtWrite.writefileln("testCmdPath");
+		txtWrite.close();
+		cmdPath.moveFileOut();
+		
+		assertEquals(true, FileOperate.isFileExistAndBigThanSize(FileOperate.getPathName(outPath) + resultFileName, 0));
 	}
 }

@@ -104,7 +104,7 @@ public class CmdPath {
 	
 	/**
 	 * 添加输出文件路径的参数，配合{@link #setRedirectOutToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
-	 * @param output 输出文件的哪个参数
+	 * @param output 输出文件的哪个参数，如果输入参数类似 "--outPath=/hdfs:/test.fa"，这里填写 "/hdfs:/test.fa"
 	 * @param isAddToLsCmd 是否加入参数list<br>
 	 * true: 作为一个参数加入lscmd<br>
 	 * false: 不加入lsCmd，仅仅标记一下
@@ -273,11 +273,7 @@ public class CmdPath {
 				}
 			}
 			
-			if ((isRedirectInToTmp && setInput.contains(tmpCmd))
-					|| 
-					(!errOut && !stdOut && isRedirectOutToTmp && setOutput.contains(tmpCmd))) {
-				tmpCmd = mapName2TmpName.get(tmpCmd);
-			}
+			tmpCmd = convertToTmpPath(stdOut, errOut, tmpCmd);
 			
 			if (stdOut) {
 				saveFilePath = tmpCmd;
@@ -295,6 +291,26 @@ public class CmdPath {
 		}
 		String[] realCmd = lsReal.toArray(new String[0]);
 		return realCmd;
+	}
+	
+	/** 将cmd中需要定位到临时文件夹的信息修改过来，譬如
+	 * -output=/hdfs:/test.txt 修改为
+	 * -output=/home/novelbio/test.txt
+	 * @return
+	 */
+	private String convertToTmpPath(boolean stdOut, boolean errOut, String tmpCmd) {
+		if (tmpCmd.contains("=")) {
+			String[] tmpCmd2Path = tmpCmd.split("=");
+			tmpCmd = tmpCmd2Path[0] + "=" + convertToTmpPath(stdOut, errOut, tmpCmd2Path[1]);
+			return tmpCmd;
+		} else {
+			if ((isRedirectInToTmp && setInput.contains(tmpCmd))
+					|| 
+					(!errOut && !stdOut && isRedirectOutToTmp && setOutput.contains(tmpCmd))) {
+				tmpCmd = mapName2TmpName.get(tmpCmd);
+			}
+			return tmpCmd;
+		}
 	}
 	
 	/** 将cmd中的hdfs路径改为本地路径 */
