@@ -171,9 +171,9 @@ public class FileHadoop extends File {
 			}
 		} else {
 			//TODO hadoop2
-//			return fileStatus.isDirectory();
+			return fileStatus.isDirectory();
 			//mapr
-			return fileStatus.isDir();
+//			return fileStatus.isDir();
 		}
 			
 	}

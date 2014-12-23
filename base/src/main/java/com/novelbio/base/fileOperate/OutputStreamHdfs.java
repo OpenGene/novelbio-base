@@ -31,10 +31,10 @@ public class OutputStreamHdfs extends OutputStream {
 
     public void flush() throws IOException {
     	//TODO MapR
-    	osHdfs.sync();
+//    	osHdfs.sync();
     	
 		//TODO hadoop2
-//		osHdfs.hflush();
+		osHdfs.hflush();
     }
 
     /**

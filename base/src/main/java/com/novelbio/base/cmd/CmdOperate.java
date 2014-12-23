@@ -38,9 +38,15 @@ public class CmdOperate extends RunProcess<String> {
 	
 	/** 标准输出流保存的路径 */
 	String stdOutPath;
+	/** 是否产生标准输出信息的文件，只有在将输出文件写入临时文件夹的情况
+	 * 下才会产生标准输出流信息文件，目的是给用户反馈目前的软件进度 */
+	boolean isStdoutInfo = false;
+	
 	/** 标准错误流保存的路径 */
 	String stdErrPath;
-	
+	/** 是否产生标准错误信息的文件，只有在将输出文件写入临时文件夹的情况
+	 * 下才会产生标准错误流信息文件，目的是给用户反馈目前的软件进度 */
+	boolean isStderrInfo = false;
 	/**输出文件的名字 */
 	Set<String> setOutfile = new HashSet<>();
 	
@@ -243,9 +249,11 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	public void addCmdParamOutput(String output, boolean isAddToLsCmd) {
 		if (StringOperate.isRealNull(stdErrPath)) {
+			isStderrInfo = true;
 			stdErrPath = output + "errorInfo.txt";
 		}
 		if (StringOperate.isRealNull(stdOutPath)) {
+			isStdoutInfo = true;
 			stdOutPath = output + "stdInfo.txt";
 		}
 		cmdPath.addCmdParamOutput(output, isAddToLsCmd);
@@ -587,6 +595,15 @@ public class CmdOperate extends RunProcess<String> {
 		runTime = dateTime.getElapseTime();
 		if (process instanceof ProcessRemote) {
 			((ProcessRemote)process).close();
+		}
+		
+		if (isFinishedNormal()) {
+			if (isStderrInfo) {
+				FileOperate.DeleteFileFolder(stdErrPath);
+			}
+			if (isStdoutInfo) {
+				FileOperate.DeleteFileFolder(stdOutPath);
+			}
 		}
 	}
 	
