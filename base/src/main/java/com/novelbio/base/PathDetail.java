@@ -111,37 +111,6 @@ public class PathDetail {
 		return FileOperate.addSep(filePath);
 	}
 
-	/** 零时文件的文件夹 */
-	public static String getTmpConfFold() {
-		return tmpConfFold;
-	}
-	
-	/**获取订单附件路径
-	 * 
-	 * @return
-	 */
-	public static String getOrderAppendixPath() {
-		return properties.getProperty("orderAppendix");
-	}
-
-	/**
-	 * 获取当前合同的附件文件路径，最后没有加“/”
-	 * @return
-	 */
-	public static String getContractFileSaveFoldNoSep() {
-		return FileOperate.removeSep(properties.getProperty("contractFileSaveFold"));
-	}
-	/**
-	 * 获取当前合同的附件文件路径，最后没有加“/”
-	 * @return
-	 */
-	public static String getContractFileSaveFoldAddSep() {
-		return FileOperate.addSep(properties.getProperty("contractFileSaveFold"));
-	}
-	public static String getRworkspace() {
-		return rworkspace;
-	}
-	
 	/** 
 	 * 文件最后带"/"<br>
 	 * @return
@@ -226,45 +195,23 @@ public class PathDetail {
 		}
 		return tmpPath;
 	}
+
 	/**
-	 * 得到hdfs上所有project保存的路径
+	 * 取得报告模板所在位置
 	 * @return
 	 */
-	public static String getProjectSavePath() {
-		return properties.getProperty("allProjectSavePath");
+	public static String getReportTempPath() {
+		return properties.getProperty("reportTemplatePath");
 	}
 	
-	/**
-	 * 取得公共文件保存文件夹
-	 * @return
-	 */
-	public static String getPublicFileSavePath() {
-		return properties.getProperty("publicFileSavePath");
+	/** 临时文件的文件夹 */
+	public static String getTmpConfFold() {
+		return tmpConfFold;
+	}
+	public static String getRworkspace() {
+		return rworkspace;
 	}
 	
-	/** 末尾没有"/" */
-	public static String getSampleQCpath() {
-		return properties.getProperty("sampleQCPath");
-	}
-	/** 末尾有"/" */
-	public static String getSampleQCpathWithSep() {
-		return properties.getProperty("sampleQCPath") + FileOperate.getSepPath();
-	}
-	/**
-	 * 取得无项目的任务保存文件夹
-	 * @return
-	 */
-	public static String getTestTasksSavePath() {
-		return properties.getProperty("testTasksSavePath");
-	}
-	
-	/**
-	 * 得到项目附件存放文件夹的名称，有(/)
-	 * @return
-	 */
-	public static String getProjectAttachFolderName() {
-		return properties.getProperty("projectAttachFolderName");
-	}
 	/** 取得hdfs挂载的本地文件夹路径 */
 	public static String getHdfsLocalPath() {
 		return properties.getProperty("hdfsLocalPath");
@@ -276,36 +223,5 @@ public class PathDetail {
 	public static String getNBCFileHead() {
 		return properties.getProperty("nbcFileHead");
 	}
-	
-	/**
-	 * 取得project的rawData的存放路径
-	 * @return
-	 */
-	public static String getRawDataFolderPath() {
-		return properties.getProperty("rawDataFolderPath");
-	}
-	
-	/**
-	 * 取得项目临时文件保存目录
-	 * @return
-	 */
-	public static String getProjectTempSavePath() {
-		return properties.getProperty("projectTempFolderName");
-	}
-	
-	/**
-	 * 取得报告模板所在位置
-	 * @return
-	 */
-	public static String getReportTempPath() {
-		return properties.getProperty("reportTempPath");
-	}
-	
-	/**
-	 * 取得blast的保存路径
-	 * @return
-	 */
-	public static String getBlastFolder() {
-		return properties.getProperty("blastSavePath");
-	}
+
 }
