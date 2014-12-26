@@ -123,8 +123,7 @@ public class PathDetail {
 		return properties.getProperty("R_SCRIPT") + " ";
 	}
 	
-	
-	/** 内部自动加空格 */
+	/** 内部不加空格 */
 	public static String getRscript() {
 		return properties.getProperty("R_SCRIPT");
 	}

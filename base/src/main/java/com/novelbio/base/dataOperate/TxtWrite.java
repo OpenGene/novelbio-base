@@ -106,7 +106,7 @@ class TxtWrite implements Closeable {
 	public void flush() {
 		try {
 			outputStream.flush();
-		} catch (Exception e) {e.printStackTrace(); }
+		} catch (Exception e) {}
 	}
 	
 	/**
