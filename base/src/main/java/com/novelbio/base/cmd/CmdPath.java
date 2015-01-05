@@ -355,6 +355,7 @@ public class CmdPath {
 		
 	}
 	
+	/** 删除中间文件，会把临时的input文件也删除 */
 	public void deleteTmpFile() {
 		for (String tmpPath : mapPath2TmpPath.values()) {
 			FileOperate.DeleteFileFolder(tmpPath);

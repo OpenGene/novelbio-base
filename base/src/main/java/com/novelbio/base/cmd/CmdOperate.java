@@ -231,9 +231,18 @@ public class CmdOperate extends RunProcess<String> {
 		cmdPath.addCmdParamInput(input, isAddToLsCmd);
 	}
 	/**
+	 * 添加输入文件路径的参数，配合{@link #setRedirectInToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
+	 * @param output 输出文件的哪个参数，默认不加入参数list，仅仅标记一下
+	 * @param output
+	 */
+	public void addCmdParamInput(String input) {
+		cmdPath.addCmdParamInput(input, false);
+	}
+	
+	/**
 	 * <b>本参数只用来标记需要重定位的文件输出参数，不加入cmd的参数列表</b><br>
 	 * 添加输出文件路径的参数，配合{@link #setRedirectOutToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
-	 * @param output 输出文件的哪个参数
+	 * @param output 输出文件的哪个参数，默认不加入参数list，仅仅标记一下
 	 */
 	public void addCmdParamOutput(String output) {
 		addCmdParamOutput(output, false);

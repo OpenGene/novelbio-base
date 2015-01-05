@@ -8,6 +8,7 @@ import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
@@ -131,21 +132,19 @@ public class HdfsInitial {
 		
 		public synchronized Configuration getConf() {
 			conf = new Configuration();
-//			conf.set("fs.defaultFS", "hdfs://cluster1");
-//			conf.set("dfs.nameservices", "cluster1");
-//			conf.set("dfs.ha.namenodes.cluster1", "nn1,nn2");
-//			conf.set("dfs.namenode.rpc-address.cluster1.nn1", "192.168.0.180:8020");
-//			conf.set("dfs.namenode.rpc-address.cluster1.nn2", "192.168.0.181:8020");
-//			conf.set("dfs.client.failover.proxy.provider.cluster1", "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider");
+			conf.addResource(new Path(corexml));
+			conf.addResource(new Path(hdfsxml));
+
+
 			conf.set("dfs.permissions.enabled", "false");
 		    conf.set("dfs.client.block.write.replace-datanode-on-failure.policy", "NEVER"); 
 		    conf.set("dfs.client.block.write.replace-datanode-on-failure.enable", "true"); 
-			try {
-				readXml();
-			} catch (DocumentException e) {
-				e.printStackTrace();
-				return null;
-			}
+//			try {
+//				readXml();
+//			} catch (DocumentException e) {
+//				e.printStackTrace();
+//				return null;
+//			}
 			return conf;
 		}
 		
