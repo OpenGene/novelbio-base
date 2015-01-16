@@ -118,7 +118,7 @@ public class CmdOperate extends RunProcess<String> {
 			}
 		}
 		logger.info(newCmd);
-		String cmd1SH = PathDetail.getTmpConfFold() + cmdWriteInFileName.replace("\\", "/") + DateUtil.getDateAndRandom() + ".sh";
+		String cmd1SH = PathDetail.getTmpPath() + cmdWriteInFileName.replace("\\", "/") + DateUtil.getDateAndRandom() + ".sh";
 		TxtReadandWrite txtCmd1 = new TxtReadandWrite(cmd1SH, true);
 		txtCmd1.writefile(newCmd);
 		txtCmd1.close();

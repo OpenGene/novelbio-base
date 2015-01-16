@@ -453,6 +453,10 @@ public class FileHadoop extends File {
 		return HdfsInitial.getHdfsLocalPath();
 	}
 	
+	public static FileSystem getHadoopFileSystem() {
+		return HdfsInitial.getFileSystem();
+	}
+	
 	public static boolean isHdfs(String fileName) {
 		if (fileName == null || fileName.equals("")) {
 			return false;

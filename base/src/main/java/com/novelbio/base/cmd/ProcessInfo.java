@@ -119,6 +119,13 @@ public class ProcessInfo {
 		return min + ":" + sec;
 	}
 	
+	public void killProc() {
+		List<String> lsCmd = new ArrayList<>();
+		lsCmd.add("kill"); lsCmd.add("-9"); lsCmd.add(pid + "");
+		CmdOperate cmdOperate = new CmdOperate(lsCmd);
+		cmdOperate.run();
+	}
+	
 	public static String getTitle() {
 		List<String> lsResult = new ArrayList<String>();
 		lsResult.add("PID");
@@ -142,6 +149,43 @@ public class ProcessInfo {
 		lsResult.add(cmdName);
 		return ArrayOperate.cmbString(lsResult.toArray(new String[0]), "\t");
 	}
+	
+	public static List<ProcessInfo> getLsSubPid(int pid) {
+		List<String> lsCmd = new ArrayList<>();
+		lsCmd.add("ps"); 
+		lsCmd.add("--ppid");lsCmd.add(pid + "");
+		lsCmd.add("-o");
+		lsCmd.add("pid,ppid,user,%cpu,%mem,s,vsize,comm,user,time");
+//		ps -eo pid,ppid,user,%cpu,%mem,s,vsize,comm,user,time
+
+		CmdOperate cmdOperate = new CmdOperate(lsCmd);
+		cmdOperate.setGetLsStdOut();
+		cmdOperate.run();
+		List<String> lsStd = cmdOperate.getLsStdOut();
+		return getLsPid(lsStd);
+	}
+	
+	/** 给定ps出来的结果，返回具体的信息 */
+	private static List<ProcessInfo> getLsPid(List<String> lsTopInfo) {
+		List<ProcessInfo> lsResult = new ArrayList<ProcessInfo>();
+		boolean startGetInfo = false;
+		Map<Integer, String> mapColNum2Title = null;
+		for (String string : lsTopInfo) {
+			if ((!startGetInfo && string.contains(":")) || string.trim().equals("")) continue;
+			
+			if (string.trim().contains("PID")) {
+				startGetInfo = true;
+				mapColNum2Title = getMapColNum2Title(string);
+				continue;
+			}
+
+			ProcessInfo processInfo = new ProcessInfo(string, mapColNum2Title);
+			if (processInfo.getPpid() == 0) continue;
+			lsResult.add(processInfo);
+		}
+		return lsResult;
+	}
+	
 	
 	public static List<ProcessInfo> getLsPid(int pid, boolean isGetChild) {
 		List<String> lsCmd = new ArrayList<>();
@@ -178,11 +222,11 @@ public class ProcessInfo {
 			}
 
 			ProcessInfo processInfo = new ProcessInfo(string, mapColNum2Title);
+			if (processInfo.getPpid() == 0) continue;
 			if (processInfo.getPid() == pid) {
 				lsResult.add(processInfo);
 				continue;
 			}
-			if (processInfo.getPpid() == 0) continue;
 			mapPid2ProcInfo.put(processInfo.getPpid(), processInfo);
 		}
 		if (isGetChild) {

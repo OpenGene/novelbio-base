@@ -15,7 +15,6 @@ public class PathDetail {
 	/** 临时文件夹中的文件保留若干天 */
 	static final int tmpFileRemainDay = 6;
 	static Properties properties;
-	static String tmpConfFold;
 	static String rworkspace;
 	static String tmpPath;
 	static String tmpHdfsPath;
@@ -50,12 +49,6 @@ public class PathDetail {
 			tmpPath = System.getProperty("java.io.tmpdir");
 		}
 		
-		//getTmpConfFold()
-		tmpConfFold = getProjectPath() + "ConfFold" + FileOperate.getSepPath();
-		if (!FileOperate.createFolders(tmpConfFold)) {
-			tmpConfFold = null;
-		}
-		
 		//getRworkspace()
 		rworkspace = null;
 		String path = properties.getProperty("Rworkspace");
@@ -75,6 +68,7 @@ public class PathDetail {
 	}
 	
 	/** 返回jar所在的路径 */
+	@Deprecated
 	public static String getProjectPath() {
 		java.net.URL url = PathDetail.class.getProtectionDomain().getCodeSource().getLocation();
 		String filePath = null;
@@ -203,10 +197,6 @@ public class PathDetail {
 		return properties.getProperty("reportTemplatePath");
 	}
 	
-	/** 临时文件的文件夹 */
-	public static String getTmpConfFold() {
-		return tmpConfFold;
-	}
 	public static String getRworkspace() {
 		return rworkspace;
 	}
