@@ -162,6 +162,19 @@ public class DateUtil {
 	}
 	
 	/**
+	 * 返回当前日期，格式“yyyyMMddHHmmssSSS”
+	 * @return
+	 */
+	public static String getDateMSAndRandom() {
+		SimpleDateFormat formatDate = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+		Date currentDate = new Date();
+		String date = formatDate.format(currentDate);
+	     Random random = new Random(System.currentTimeMillis());
+	     short Tmp = (short)random.nextInt();
+	     return date + Tmp;
+	}
+	
+	/**
 	 * 返回当前日期加上一个随机数，做唯一文件编码用，格式 "yyyy-MM-ddhhss"
 	 * @return
 	 */
