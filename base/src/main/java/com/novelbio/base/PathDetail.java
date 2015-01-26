@@ -39,32 +39,6 @@ public class PathDetail {
 			}
 		}
 		tmpHdfsPath = properties.getProperty("tmpHdfsPath");
-		//TmpPath
-		tmpPath = properties.getProperty("TMPpath");
-		if (FileOperate.createFolders(tmpPath)) {
-//			file.setReadable(true, false);
-//			file.setWritable(true, false);
-			System.setProperty("java.io.tmpdir", tmpPath);
-		} else {
-			tmpPath = System.getProperty("java.io.tmpdir");
-		}
-		
-		//getRworkspace()
-		rworkspace = null;
-		String path = properties.getProperty("Rworkspace");
-		if (path != null && !path.equals("")) {
-			rworkspace = path + FileOperate.getSepPath();
-		} else {
-			rworkspace = getProjectPath() + "rscript"  + FileOperate.getSepPath();
-		}
-		if (!FileOperate.createFolders(rworkspace)) {
-			rworkspace = null;
-		}
-		
-		rworkspaceTmp = getRworkspace() + "tmp"  + FileOperate.getSepPath();
-		if (!FileOperate.createFolders(rworkspaceTmp)) {
-			rworkspaceTmp = null;
-		}
 	}
 	
 	/** 返回jar所在的路径 */
@@ -110,8 +84,15 @@ public class PathDetail {
 	 * @return
 	 */
 	public static String getRworkspaceTmp() {
+		if(rworkspaceTmp == null) {
+			rworkspaceTmp = getRworkspace() + "tmp"  + File.separator;
+			if (!FileOperate.createFolders(rworkspaceTmp)) {
+				rworkspaceTmp = "";
+			}
+		}
 		return rworkspaceTmp;
 	}
+	
 	/** 内部自动加空格 */
 	public static String getRscriptWithSpace() {
 		return properties.getProperty("R_SCRIPT") + " ";
@@ -123,6 +104,19 @@ public class PathDetail {
 	}
 	/** 一个大的能容纳一些中间过程的文件夹 */
 	public static String getTmpPath() {
+		if (tmpPath == null) {
+			synchronized (properties) {
+				tmpPath = properties.getProperty("TMPpath");
+				if (FileOperate.createFolders(tmpPath)) {
+//					file.setReadable(true, false);
+//					file.setWritable(true, false);
+					System.setProperty("java.io.tmpdir", tmpPath);
+				} else {
+					tmpPath = System.getProperty("java.io.tmpdir");
+				}
+			}
+		}
+
 		return tmpPath;
 	}
 	
@@ -198,6 +192,20 @@ public class PathDetail {
 	}
 	
 	public static String getRworkspace() {
+		if (rworkspace == null) {
+			synchronized (properties) {
+				String path = properties.getProperty("Rworkspace");
+				if (path != null && !path.equals("")) {
+					rworkspace = path + File.separator;
+				} else {
+					rworkspace = getProjectPath() + "rscript"  + File.separator;
+				}
+				if (!FileOperate.createFolders(rworkspace)) {
+					rworkspace = null;
+				}
+			}
+		}
+		
 		return rworkspace;
 	}
 	
@@ -212,5 +220,18 @@ public class PathDetail {
 	public static String getNBCFileHead() {
 		return properties.getProperty("nbcFileHead");
 	}
-
+	
+	public static String getHdpHdfsXml() {
+		return properties.getProperty("hdfs-xml");
+	}
+	public static String getHdpCoreXml() {
+		return properties.getProperty("hdfs-core-xml");
+	}
+	public static String getHdpYarnXml() {
+		return properties.getProperty("yarn-xml");
+	}
+	public static String getHdpHdfsHeadSymbol() {
+		return properties.getProperty("hdfsHeadSymbol");
+	}
+	
 }

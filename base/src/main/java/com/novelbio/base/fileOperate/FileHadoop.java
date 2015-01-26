@@ -37,11 +37,7 @@ public class FileHadoop extends File {
 	public FileHadoop(String hdfsFilePath) {
 		super(hdfsFilePath = copeToHdfsHeadSymbol(hdfsFilePath));
 		this.fsHDFS = HdfsInitial.getFileSystem();
-		if (HdfsInitial.isHadoop2()) {
-			hdfsFilePath = hdfsFilePath.replace(FileHadoop.getHdfsSymbol(), "");
-		} else {
-			hdfsFilePath = hdfsFilePath.replace(FileHadoop.getHdfsSymbol(), HdfsInitial.getHEAD());
-		}
+		hdfsFilePath = hdfsFilePath.replace(FileHadoop.getHdfsSymbol(), "");
 		//TODO 以后就应该是
 		dst = new Path(hdfsFilePath);
 		this.fileName = hdfsFilePath;
@@ -74,9 +70,6 @@ public class FileHadoop extends File {
 	}
 	
 	private static String copeToHdfsHeadSymbol(String hdfsFilePath) {
-		if (!StringOperate.isRealNull(HdfsInitial.getHEAD()) && hdfsFilePath.startsWith(HdfsInitial.getHEAD())) {
-			hdfsFilePath = hdfsFilePath.replace(HdfsInitial.getHEAD(), FileHadoop.getHdfsSymbol());
-		}
 		if (!hdfsFilePath.startsWith(FileHadoop.getHdfsSymbol())) {
 			hdfsFilePath = FileHadoop.addHdfsHeadSymbol(hdfsFilePath);
 		}
@@ -397,7 +390,7 @@ public class FileHadoop extends File {
 		try {
 			String path = dest.getPath();
 			if (FileHadoop.isHdfs(path) || FileHadoop.isHdfs(path.substring(1, path.length()-2))) {
-				path = path.replace(HdfsInitial.getSymbol(), HdfsInitial.getHEAD());
+				path = path.replace(HdfsInitial.getSymbol(), "");//TODO 也可以是 "hdfs:/"
 			}
 			return fsHDFS.rename(dst, new Path(path));
 		} catch (IOException e) {
@@ -410,8 +403,8 @@ public class FileHadoop extends File {
 	/** 把 /media/nbfs这种改成hdfs的形式，如果不是/media/hdfs这种，就不要动 */
 	public static String convertToHadoop(String hdfsPath) {
 		hdfsPath = FileOperate.removeSplashHead(hdfsPath, true);
-		if (hdfsPath.toLowerCase().startsWith(PathDetail.getHdfsLocalPath().toLowerCase())) {
-			hdfsPath = hdfsPath.replace(PathDetail.getHdfsLocalPath(), HdfsInitial.getSymbol());
+		if (hdfsPath.toLowerCase().startsWith(HdfsInitial.getHdfsLocalPath().toLowerCase())) {
+			hdfsPath = hdfsPath.replace(HdfsInitial.getHdfsLocalPath(), HdfsInitial.getSymbol());
 		}
 		return hdfsPath;
 	}
