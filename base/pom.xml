@@ -6,6 +6,7 @@
 	<version>0.0.3-SNAPSHOT</version>
 	
 	<dependencies>
+
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
@@ -309,6 +310,16 @@
 			<groupId>com.novelbio</groupId>
 			<artifactId>bfograph</artifactId>
 			<version>1.0.14</version>
+		</dependency>
+		<dependency>
+			<groupId>com.novelbio</groupId>
+			<artifactId>jai_core</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.novelbio</groupId>
+			<artifactId>jai_codec</artifactId>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.novelbio</groupId>
