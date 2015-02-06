@@ -74,6 +74,11 @@ public class CmdOperate extends RunProcess<String> {
 	int lineNumErr = 1000;//最多保存500行的输出信息
 	
 	
+	/** 设定复制输入输出文件所到的临时文件夹 */
+	public static void setTmpPath(String tmpPath) {
+		CmdPath.setTmpPath(tmpPath);
+	}
+	
 	public CmdOperate()  {}
 	/**
 	 * 直接运行，不写入文本
@@ -108,6 +113,7 @@ public class CmdOperate extends RunProcess<String> {
 	 * 
 	 * @param cmd
 	 */
+	@Deprecated
 	private void setCmdFile(String cmd, String cmdWriteInFileName) {
 		String newCmd = null;
 		for(String text : cmd.trim().split(" ")){

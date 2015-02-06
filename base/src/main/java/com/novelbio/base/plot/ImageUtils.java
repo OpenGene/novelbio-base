@@ -16,16 +16,20 @@ import java.awt.image.DirectColorModel;
 import java.awt.image.PixelGrabber;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+import java.awt.image.renderable.ParameterBlock;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
+import javax.media.jai.JAI;
+import javax.media.jai.RenderedOp;
 
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
@@ -34,10 +38,14 @@ import org.apache.batik.transcoder.image.PNGTranscoder;
 import org.faceless.graph2.Output;
 import org.faceless.graph2.SVGOutput;
 
+import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.dataStructure.ArrayOperate;
+import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
+import com.sun.media.jai.codec.FileSeekableStream;
+import com.sun.media.jai.codec.SeekableStream;
 
 /**
  * 对BufferedImage做各种处理<br>
@@ -61,8 +69,23 @@ public class ImageUtils {
 
 	}
 	public static BufferedImage read(String fileName) {
+		if (StringOperate.isRealNull(fileName)) {
+			return null;
+		}
+		
 		InputStream input = null;
 		BufferedImage bufferedImage = null;
+		
+		if (fileName.endsWith(".tiff") || fileName.endsWith(".tif")) {
+			try {
+				bufferedImage = readTiffBufferedImage(fileName);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return bufferedImage;
+		}
+		//============================================
 		try {
 			input = FileOperate.getInputStream(fileName);
 		} catch (Exception e) {
@@ -81,6 +104,24 @@ public class ImageUtils {
 		}
 		return bufferedImage;
 	}
+	
+	/** 获取tiff格式图片的BufferedImage，需传入图片的全路经 */
+	private final static BufferedImage readTiffBufferedImage(String tiffImagePath) throws IOException {
+			
+		File file =  FileOperate.getFile(tiffImagePath);
+		SeekableStream seekableStream = new FileSeekableStream(file);
+		ParameterBlock parameterBlock = new ParameterBlock();
+		parameterBlock.add(seekableStream);
+		RenderedOp renderedOp = JAI.create("tiff", parameterBlock);
+		String[] lsPropertyName = renderedOp.getPropertyNames();
+		Hashtable<String, Object> properties = new Hashtable<String, Object>();
+		for(int i = 0; i < lsPropertyName.length; i++) {
+			properties.put(lsPropertyName[i], renderedOp.getProperty(lsPropertyName[i]));
+		}
+		BufferedImage cache_buffer = new BufferedImage(renderedOp.getColorModel(), (WritableRaster)renderedOp.getData(), false, properties);
+		return cache_buffer;
+	}
+
 	/**
 	 * 将svg转化为BufferedImage，方便后期处理
 	 * 

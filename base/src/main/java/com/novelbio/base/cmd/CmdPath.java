@@ -25,6 +25,8 @@ import com.novelbio.base.fileOperate.FileOperate;
  */
 public class CmdPath {
 	private static final Logger logger = Logger.getLogger(CmdPath.class);
+	static String tmpPath = PathDetail.getTmpPath();
+	
 	List<String> lsCmd;
 	
 	boolean isRedirectInToTmp = false;
@@ -32,7 +34,6 @@ public class CmdPath {
 
 	Set<String> setInput = new HashSet<>();
 	Set<String> setOutput = new HashSet<>();
-	
 	/**
 	 * 输出文件夹路径
 	 * key: 文件名
@@ -55,6 +56,11 @@ public class CmdPath {
 	 * 只有类似varscan这种我们修改了代码，让其兼容hdfs的程序才不需要修改
 	 */
 	boolean isConvertHdfs2Loc = true;
+	
+	/** 设定复制输入输出文件所到的临时文件夹 */
+	public static void setTmpPath(String tmpPath) {
+		CmdPath.tmpPath = tmpPath;
+	}
 	
 	/** 如果为null就不加入 */
 	public void addCmdParam(String param) {
@@ -225,8 +231,8 @@ public class CmdPath {
 		int i  = 0;//防止产生同名文件夹的措施
 		for (String path : setPath) {
 			i++;
-			String tmpPath = PathDetail.getTmpPathRandomWithSep(FileOperate.getFileName(path) + i);
-			mapPath2TmpPath.put(path, tmpPath);
+			String tmpPathThis = PathDetail.getRandomWithSep(tmpPath, FileOperate.getFileName(path) + i);
+			mapPath2TmpPath.put(path, tmpPathThis);
 		}
 		
 		for (String filePathName : setFileNameAll) {

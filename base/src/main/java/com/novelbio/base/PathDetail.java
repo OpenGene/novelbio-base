@@ -182,7 +182,16 @@ public class PathDetail {
 		}
 		return tmpPath;
 	}
-
+	
+	/** 在tmp文件夹下新建一个随机文件名的临时文件夹，注意每次返回的都不一样，最后有“/” */
+	public static String getRandomWithSep(String tmpPath, String prefix) {
+		String tmpPathResult = FileOperate.addSep(tmpPath) + prefix + DateUtil.getDateAndRandom() + FileOperate.getSepPath();
+		if (!FileOperate.createFolders(tmpPathResult)) {
+			tmpPathResult = null;
+		}
+		return tmpPathResult;
+	}
+	
 	/**
 	 * 取得报告模板所在位置
 	 * @return
