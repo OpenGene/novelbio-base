@@ -17,6 +17,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import com.novelbio.base.dataOperate.ExcelStyle.EnumXlsCell;
 import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.fileOperate.FileOperate;
 
@@ -701,6 +702,22 @@ public class ExcelOperate implements Closeable {
 	public boolean WriteExcel(int rowNum, int cellNum, List<String[]> content) {
 		return WriteExcel(null, 1, rowNum, cellNum, content);
 	}
+	
+	/**
+	 * 块文件写入excel文件
+	 * 设置写入的sheet数，行数，列数和内容，写入的内容默认为List<String[]>,其中String[]为行，list.get(i)为列
+	 * String[]中的null会自动跳过 其中sheet数，行数，列数，都为实际数目，不用减去1
+	 * 当sheetNum设置超出已存在sheet数目时，则为新建sheet写入
+	 * 
+	 * @param rowNum
+	 *            实际行
+	 * @param cellNum
+	 *            实际列
+	 * @param content
+	 */
+	public boolean WriteTestExcel(int rowNum, int cellNum, List<String[]> content) {
+		return WriteTestExcel(null, 1, rowNum, cellNum, content);
+	}
 
 	/**
 	 * 从第一行，第一列开始写
@@ -731,6 +748,21 @@ public class ExcelOperate implements Closeable {
 	 */
 	public boolean WriteExcel(int sheetNum, int rowNum, int cellNum, List<String[]> content) {
 		return WriteExcel(null, sheetNum, rowNum, cellNum, content);
+	}
+	
+	/**
+	 * 块文件写入excel文件
+	 * 设置写入的sheet数，行数，列数和内容，写入的内容默认为List<String[]>,其中String[]为行，list.get(i)为列
+	 * String[]中的null会自动跳过 其中sheet数，行数，列数，都为实际数目，不用减去1
+	 * 当sheetNum设置超出已存在sheet数目时，则为新建sheet写入
+	 * 
+	 * @param sheetNum
+	 * @param rowNum
+	 * @param cellNum
+	 * @param content
+	 */
+	public boolean WriteTestExcel(int sheetNum, int rowNum, int cellNum, List<String[]> content) {
+		return WriteTestExcel(null, sheetNum, rowNum, cellNum, content);
 	}
 
 	/**
@@ -778,6 +810,33 @@ public class ExcelOperate implements Closeable {
 
 		Sheet sheet = getSheet(sheetName, sheetNum);
 		writeExcel(sheet, rowNum, cellNum, content);
+		return true;
+	}
+	
+	/**
+	 * 块文件写入excel文件 设置写入的sheet数或sheetName，两个只要设置一个，默认先设定sheetName
+	 * 行数，列数和内容，写入的内容默认为List<String[]>,其中String[]为行，list.get(i)为列
+	 * String[]中的null会自动跳过 其中sheet数，行数，列数，都为实际数目，不用减去1
+	 * 当sheetNum设置超出已存在sheet数目时，则为新建sheet写入
+	 * 
+	 * @param sheetNum
+	 * @param sheetName
+	 * @param rowNum
+	 *            实际行
+	 * @param cellNum
+	 *            实际列
+	 * @param content
+	 * @return
+	 */
+	private boolean WriteTestExcel(String sheetName, int sheetNum, int rowNum, int cellNum, List<String[]> content) {
+		if ((sheetNum <= -1 && sheetName == null) || rowNum < 0)
+			return false;
+
+		Sheet sheet = getSheet(sheetName, sheetNum);
+		
+		ExcelStyle style = ExcelStyle.getThreeLineTable(content.size(), wb);
+		writeTestExcel(sheet, rowNum, cellNum, content, style);
+		
 		return true;
 	}
 
@@ -841,6 +900,56 @@ public class ExcelOperate implements Closeable {
 				cell.setCellValue(tmpValue);
 			} catch (Exception e) {
 				cell.setCellValue(content);
+			}
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	/**
+	 * 写入list等
+	 * 
+	 * @param sheet
+	 * @param rowNum
+	 *            实际行
+	 * @param cellNum
+	 *            实际列
+	 * @param content
+	 * @return
+	 */
+	private boolean writeTestExcel(Sheet sheet, int rowNum, int cellNum, Iterable<String[]> content, ExcelStyle style) {
+		rowNum--;
+		cellNum--;// 将sheet和行列都还原为零状态
+		if (rowNum < 0)
+			return false;
+		
+		try {
+			int i = 0;
+			for (String[] rowcontent : content) {
+				int writerow = i + rowNum;// 写入的行数
+				Row row = sheet.getRow(writerow);
+				if (row == null) {
+					row = sheet.createRow(writerow);
+				}
+				if (rowcontent == null)
+					continue;
+				for (int j = 0; j < rowcontent.length; j++) // 写入
+				{
+					if (rowcontent[j] == null)
+						continue; // 跳过空值
+					Cell cell = row.createCell((short) (cellNum + j));
+					try {
+						double tmpValue = Double.parseDouble(rowcontent[j]);
+						// cell.setCellType(0);
+						cell.setCellValue(tmpValue);
+					} catch (Exception e) {
+						cell.setCellValue(rowcontent[j]);
+					}
+					style.renderCell(cell, writerow);
+				}
+				i++;
 			}
 			return true;
 		} catch (Exception e) {
