@@ -17,7 +17,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import com.novelbio.base.dataOperate.ExcelStyle.EnumXlsCell;
 import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.fileOperate.FileOperate;
 
@@ -673,6 +672,21 @@ public class ExcelOperate implements Closeable {
 	public boolean WriteExcel(String sheetName, int rowNum, int cellNum, List<String[]> content) {
 		return WriteExcel(sheetName, -1, rowNum, cellNum, content);
 	}
+	
+	/**
+	 * 块文件写入excel文件，并设定sheetName，如果没有该sheetName，那么就新建一个
+	 * 设置写入的sheet名字，行数，列数和内容，写入的内容默认为String[][] String[][]中的null会自动跳过
+	 * 其中sheet数，行数，列数，都为实际数目，不用减去1 当sheetNum设置超出已存在sheet数目时，则为新建sheet写入
+	 * 
+	 * @param sheetName
+	 * @param rowNum
+	 * @param cellNum
+	 * @param content
+	 */
+	public boolean WriteExcel(String sheetName, int rowNum, int cellNum, List<String[]> content, ExcelStyle style) {
+		style.setWorkbook(wb);
+		return WriteExcel(sheetName, -1, rowNum, cellNum, content, style);
+	}
 
 	/**
 	 * 直接写一个表格
@@ -714,9 +728,11 @@ public class ExcelOperate implements Closeable {
 	 * @param cellNum
 	 *            实际列
 	 * @param content
+	 * @param isThreeLineTable 是否是三线表
 	 */
-	public boolean WriteTestExcel(int rowNum, int cellNum, List<String[]> content) {
-		return WriteTestExcel(null, 1, rowNum, cellNum, content);
+	public boolean WriteExcel(int rowNum, int cellNum, List<String[]> content, ExcelStyle style) {
+		style.setWorkbook(wb);
+		return WriteExcel(null, 1, rowNum, cellNum, content, style);
 	}
 
 	/**
@@ -761,8 +777,8 @@ public class ExcelOperate implements Closeable {
 	 * @param cellNum
 	 * @param content
 	 */
-	public boolean WriteTestExcel(int sheetNum, int rowNum, int cellNum, List<String[]> content) {
-		return WriteTestExcel(null, sheetNum, rowNum, cellNum, content);
+	public boolean WriteExcel(int sheetNum, int rowNum, int cellNum, List<String[]> content, ExcelStyle style) {
+		return WriteExcel(null, sheetNum, rowNum, cellNum, content, style);
 	}
 
 	/**
@@ -828,15 +844,13 @@ public class ExcelOperate implements Closeable {
 	 * @param content
 	 * @return
 	 */
-	private boolean WriteTestExcel(String sheetName, int sheetNum, int rowNum, int cellNum, List<String[]> content) {
+	private boolean WriteExcel(String sheetName, int sheetNum, int rowNum, int cellNum, List<String[]> content, ExcelStyle style) {
 		if ((sheetNum <= -1 && sheetName == null) || rowNum < 0)
 			return false;
-
 		Sheet sheet = getSheet(sheetName, sheetNum);
-		
-		ExcelStyle style = ExcelStyle.getThreeLineTable(content.size(), wb);
-		writeTestExcel(sheet, rowNum, cellNum, content, style);
-		
+		// TODO 需要修改，设置冻结行列
+		sheet.createFreezePane(1,  1);
+		writeExcel(sheet, rowNum, cellNum, content, style);
 		return true;
 	}
 
@@ -919,7 +933,7 @@ public class ExcelOperate implements Closeable {
 	 * @param content
 	 * @return
 	 */
-	private boolean writeTestExcel(Sheet sheet, int rowNum, int cellNum, Iterable<String[]> content, ExcelStyle style) {
+	private boolean writeExcel(Sheet sheet, int rowNum, int cellNum, Iterable<String[]> content, ExcelStyle style) {
 		rowNum--;
 		cellNum--;// 将sheet和行列都还原为零状态
 		if (rowNum < 0)
@@ -947,7 +961,9 @@ public class ExcelOperate implements Closeable {
 					} catch (Exception e) {
 						cell.setCellValue(rowcontent[j]);
 					}
-					style.renderCell(cell, writerow);
+					if (style != null) {
+						style.renderCell(cell, writerow, j);
+					}
 				}
 				i++;
 			}

@@ -18,10 +18,10 @@ public class TestExcelOperate extends TestCase {
 		excelOperate.openExcel("/home/novelbio/jpx/test/test.xlsx", true);
 		List<String[]> lsData = new ArrayList<String[]>();
 		String[] data = new String[4];
-		data[0] = "一";
-		data[1] = "二";
-		data[2] = "三";
-		data[3] = "四";
+		data[0] = "one";
+		data[1] = "two";
+		data[2] = "three";
+		data[3] = "four";
 		lsData.add(data);
 		lsData.add(data);
 		lsData.add(data);
@@ -31,9 +31,10 @@ public class TestExcelOperate extends TestCase {
 		lsData.add(data);
 		lsData.add(data);
 		lsData.add(data);
-		lsData.add(data);
-		lsData.add(data);
-		excelOperate.WriteTestExcel( 1, 1, lsData);
+//		excelOperate.WriteExcel(1, 1, lsData);
+		int endRowNum = 7;
+		ExcelStyle style = ExcelStyle.getThreeLineTable(1, endRowNum);
+		excelOperate.WriteExcel(1, 1, lsData, style);
 		excelOperate.close();
 		assertEquals(true, FileOperate.isFileExist("/home/novelbio/jpx/test/test.xlsx"));
 	}
