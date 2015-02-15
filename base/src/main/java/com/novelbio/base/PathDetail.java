@@ -243,4 +243,8 @@ public class PathDetail {
 		return properties.getProperty("hdfsHeadSymbol");
 	}
 	
+	public static String getLogoPath() {
+		return properties.getProperty("logoImgPath");
+	}
+	
 }
