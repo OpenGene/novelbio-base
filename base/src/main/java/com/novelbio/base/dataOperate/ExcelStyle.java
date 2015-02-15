@@ -29,6 +29,15 @@ public class ExcelStyle {
 		BG, BottomBorder, TopBorder, LeftBorder, RightBorder, Font
 	}
 	
+	/** 冻结第几列，譬如excel的首列固定，就设置为1
+	 * 0表示不冻结
+	 */
+	int freezePaneCol = 0;
+	/** 冻结第几列，譬如excel的首行固定，就设置为1
+	 *  0表示不冻结
+	 */
+	int freezenPaneRow = 0;
+	
 	private Workbook wb;
 	
 	/** 表格的标题行的样式 */
@@ -73,6 +82,8 @@ public class ExcelStyle {
 	  */
 	Map<EnumXlsCell, ExcelFont> mapCell_2_Font = new HashMap<>();
 	
+	Map<EnumXlsCell, Boolean> mapCell_2_IsText = new HashMap<>();
+	
 	public ExcelStyle() {
 		for (EnumXlsCell xlsCell : EnumXlsCell.values()) {
 			Map<EnumXlsCellBorder, Short> mapBorder2Color = new HashMap<>();
@@ -83,10 +94,23 @@ public class ExcelStyle {
 			}
 			mapCell_2_Border2Color.put(xlsCell, mapBorder2Color);
 			mapCell_2_Border2Style.put(xlsCell, mapBorder2Style);
+			mapCell_2_IsText.put(xlsCell, false);
 			// 默认字体为Times New Roman
 			ExcelFont normalFont = new ExcelFont();
 			mapCell_2_Font.put(xlsCell, normalFont);
 		}
+	}
+	
+	public void setFreezenPane(int freezenPaneRow, int freezePaneCol) {
+		this.freezenPaneRow = freezenPaneRow;
+		this.freezePaneCol = freezePaneCol;
+	}
+	
+	public int getFreezenPaneRow() {
+		return freezenPaneRow;
+	}
+	public int getFreezePaneCol() {
+		return freezePaneCol;
 	}
 	
 	/** 设置最后一行的行数 */
@@ -123,6 +147,12 @@ public class ExcelStyle {
 		mapCell_2_Font.put(excelCell, font);
 	}
 	
+	/** 设置是否为text，如may5等必须是text才行，excelCell：cell的类型（标题行，奇数行等）
+	 * ，border：边框（上边框，下边框等也包括背景颜色），boolean：是否为text */
+	public void setIsText(EnumXlsCell excelCell, Boolean isText) {
+		mapCell_2_IsText.put(excelCell, isText);
+	}
+	
 	private void setTitleStyle() {
 		setCellStyle(titleLineStyle, EnumXlsCell.titleLine);
 		setCellStyle(evenLineStyle, EnumXlsCell.evenLine);
@@ -135,14 +165,21 @@ public class ExcelStyle {
 	
 	/** 设置表格的样式，style为需要设置的样式，foreGroundColor为单元格的前景色，borderTop为上边框样式， borderBottom为下边框样式 */
 	private void setCellStyle(CellStyle cellStyle, EnumXlsCell excelCell) {
+		//设定字体
 		ExcelFont fontExcel = mapCell_2_Font.get(excelCell);
 		Font font = wb.createFont();
 		fontExcel.fillFont(font);
 		cellStyle.setFont(font);
 		
+		//设定是否为text
+		boolean isText = mapCell_2_IsText.get(excelCell); 
+		if (isText) {
+			DataFormat format = wb.createDataFormat();
+			cellStyle.setDataFormat(format.getFormat("@"));
+		}
+		
 		Map<EnumXlsCellBorder, Short> mapBorder2Color = mapCell_2_Border2Color.get(excelCell);
 		Map<EnumXlsCellBorder, Short> mapBorder2Style = mapCell_2_Border2Style.get(excelCell);
-		
 		for (EnumXlsCellBorder border : mapBorder2Style.keySet()) {
 			short color = mapBorder2Color.get(border);
 			short style = mapBorder2Style.get(border);
@@ -173,14 +210,13 @@ public class ExcelStyle {
 		}
 		// 指定填充模式，不加这行代码，单元格颜色的填充会失效
 		cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
-		DataFormat format = wb.createDataFormat();
-		cellStyle.setDataFormat(format.getFormat("@"));
+
 	}
 
 	/** 渲染单元格，cell为一个单元格对象，rowNum为第几行（用来判断是奇数行偶数行首行或尾行），colNum为第几列 */
 	public void renderCell(Cell cell, int rowNum, int colNum) {
 		CellStyle colStyle = getColStyle(colNum);
-		if (rowNum + 1 > endNum) {
+		if (endNum >= 0 && rowNum + 1 > endNum) {
 			cell.setCellStyle(blankStyle);
 		} else {
 			if (rowNum + 1  == startNum) {
@@ -236,6 +272,7 @@ public class ExcelStyle {
 	/** 获取三线表的样式, startNum：开始的行号，endNum：结束的行号 */
 	public static ExcelStyle getThreeLineTable(int startNum, int endNum) {
 		ExcelStyle excelStyle = new ExcelStyle();
+		excelStyle.setFreezenPane(1, 1);
 		excelStyle.setStartAndEndNum(startNum, endNum);
 		// 设置边框的样式
 		excelStyle.setBorder(EnumXlsCell.titleLine, EnumXlsCellBorder.TopBorder, CellStyle.BORDER_THICK);

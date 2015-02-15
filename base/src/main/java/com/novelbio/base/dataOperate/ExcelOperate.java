@@ -848,8 +848,7 @@ public class ExcelOperate implements Closeable {
 		if ((sheetNum <= -1 && sheetName == null) || rowNum < 0)
 			return false;
 		Sheet sheet = getSheet(sheetName, sheetNum);
-		// TODO 需要修改，设置冻结行列
-		sheet.createFreezePane(1,  1);
+		sheet.createFreezePane(style.getFreezePaneCol(),  style.getFreezenPaneRow());
 		writeExcel(sheet, rowNum, cellNum, content, style);
 		return true;
 	}
