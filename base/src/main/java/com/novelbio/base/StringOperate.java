@@ -153,4 +153,16 @@ public class StringOperate {
 		}
 		return strIso.equals(strText);
 	}
+	
+	/** 处理latex中的特殊字符，例如：如果含有“%”，则替换成“\%”（现实现“_”和“%”） */
+	public static String handleSpecialSign(String str) {
+		String strNew = str;
+		if (str.contains("_")) {
+			strNew = strNew.replace("_", "\\_");
+		}
+		if (str.contains("%")) {
+			strNew = strNew.replace("%", "\\%");
+		}
+		return strNew;
+	}
 }
