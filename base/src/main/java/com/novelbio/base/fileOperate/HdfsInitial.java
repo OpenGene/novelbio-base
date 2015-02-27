@@ -4,8 +4,12 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.AbstractFileSystem;
+import org.apache.hadoop.fs.FileContext;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.UnsupportedFileSystemException;
+import org.apache.hadoop.fs.permission.FsPermission;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
@@ -18,6 +22,7 @@ public class HdfsInitial {
 		
 	static FileSystem fsHDFS;
 	static Configuration conf;
+	static FileContext fileContext;
 	static {
 		initial();
 	}
@@ -30,6 +35,12 @@ public class HdfsInitial {
 		try {
 			fsHDFS = FileSystem.get(conf);
 		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			fileContext = FileContext.getFileContext(conf);
+		} catch (UnsupportedFileSystemException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -45,7 +56,11 @@ public class HdfsInitial {
 	public static FileSystem getFileSystem() {
 		return fsHDFS;
 	}
-
+	
+	public static FileContext getFileContext() {
+		return fileContext;
+	}
+	
 	public static String getHdfsLocalPath() {
 		return PathDetail.getHdfsLocalPath();
 	}

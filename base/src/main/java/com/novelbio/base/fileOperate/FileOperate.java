@@ -27,6 +27,11 @@ import net.sf.samtools.seekablestream.SeekableStreamFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileAlreadyExistsException;
+import org.apache.hadoop.fs.FileContext;
+import org.apache.hadoop.fs.ParentNotDirectoryException;
+import org.apache.hadoop.fs.UnsupportedFileSystemException;
+import org.apache.hadoop.security.AccessControlException;
 import org.apache.log4j.Logger;
 import org.apache.tools.ant.types.FileList.FileName;
 import org.aspectj.weaver.patterns.IfPointcut;
@@ -1606,7 +1611,7 @@ public class FileOperate {
 	 * @param cover 是否覆盖
 	 * @return 返回是否创建成功
 	 */
-	public static boolean linkFile(String rawFile, String linkTo, boolean cover) {
+	public static boolean linkFile(String rawFile, String linkTo, boolean cover) {		
 		if (!FileOperate.isFileExist(rawFile)) {
 			return false;
 		}
@@ -1616,6 +1621,22 @@ public class FileOperate {
 		if (FileOperate.isFileExist(linkTo) && cover) {
 			FileOperate.delFile(linkTo);
 		}
+		rawFile = FileHadoop.convertToHadoop(rawFile);
+		linkTo = FileHadoop.convertToHadoop(linkTo);
+		boolean isRawHdfs = FileHadoop.isHdfs(rawFile);
+		boolean isLinkHdfs = FileHadoop.isHdfs(linkTo);
+		if (isRawHdfs ^ isLinkHdfs) {
+			throw new ExceptionFileNotExist("RawFile And LinkTo File Are Not In Same FileSystem\n, raw File: " 
+					+ rawFile  + "\nLinkTo: " + linkTo);
+		}
+		if (isRawHdfs) {
+			try {
+				HdfsInitial.getFileContext().createSymlink(FileHadoop.getPath(rawFile), FileHadoop.getPath(linkTo), false);
+			} catch (Exception e) {
+				throw new ExceptionFile("could not creat symbolic link on hdfs");
+			}
+		}
+		
 		List<String> lsCmd = new ArrayList<>();
 		lsCmd.add("ln"); lsCmd.add("-s");
 		lsCmd.add(rawFile); lsCmd.add(linkTo);
@@ -1838,7 +1859,7 @@ public class FileOperate {
 	 * 不存在文件也返回true
 	 */
 	public static boolean DeleteFileFolder(String sPath) {
-		if (sPath == null || sPath.trim().equals("")) {
+		if (StringOperate.isRealNull(sPath)) {
 			return true;
 		}
 		File file = getFile(sPath);
@@ -1919,6 +1940,14 @@ public class FileOperate {
 		private static final long serialVersionUID = 8125052068436320509L;
 
 		public ExceptionFileNotExist(String info) {
+			super(info);
+		}
+	}
+	
+	public static class ExceptionFileError extends RuntimeException {
+		private static final long serialVersionUID = 8125052068436320509L;
+
+		public ExceptionFileError(String info) {
 			super(info);
 		}
 	}

@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.apache.log4j.Logger;
 
@@ -73,6 +75,8 @@ public class CmdOperate extends RunProcess<String> {
 	/** 如果选择用list来保存错误输出，最多保存500行的输出信息 */
 	int lineNumErr = 1000;//最多保存500行的输出信息
 	
+	/** 输出本程序正在运行时的参数等信息 */
+	String outRunInfoFileName;
 	
 	/** 设定复制输入输出文件所到的临时文件夹 */
 	public static void setTmpPath(String tmpPath) {
@@ -203,14 +207,23 @@ public class CmdOperate extends RunProcess<String> {
 		cmdPath.setLsCmd(lsCmd);
 	}
 	
-	/** 设定标准输出流，如果是这里指定，则会即时刷新，并且会定时写入是否在运行的信息<br>
+	/** 设定输出信息，默认保存在stdout文件夹下 */
+	public void setOutRunInfoFileName(String outRunInfoFileName) {
+		if (outRunInfoFileName == null) {
+			this.outRunInfoFileName = "";
+		} else {
+			this.outRunInfoFileName = outRunInfoFileName;	
+		}
+	}
+	
+	/** 设定标准输出流，如果是这里指定，则会即时刷新<br>
 	 * 本设置会被cmd中自带的 > 重定向覆盖
 	 * @param stdOutPath
 	 */
 	public void setStdOutPath(String stdOutPath) {
 		this.stdOutPath = stdOutPath;
 	}
-	/** 设定标准错误流，如果是这里指定，则会即时刷新，并且会定时写入是否在运行的信息<br>
+	/** 设定标准错误流，如果是这里指定，则会即时刷新<br>
 	 * 本设置会被cmd中自带的 2> 重定向覆盖
 	 * @param stdErrPath
 	 */
@@ -270,6 +283,10 @@ public class CmdOperate extends RunProcess<String> {
 		if (StringOperate.isRealNull(stdOutPath)) {
 			isStdoutInfo = true;
 			stdOutPath = output + "stdInfo.txt";
+		}
+		
+		if (outRunInfoFileName == null) {
+			outRunInfoFileName = output + "_RunInfo.txt";
 		}
 		cmdPath.addCmdParamOutput(output, isAddToLsCmd);
 	}
@@ -455,6 +472,10 @@ public class CmdOperate extends RunProcess<String> {
 		cmdPath.copyFileIn();
 		String[] cmdRun = cmdPath.getRunCmd();
 		boolean isWriteStdTxt = true, isWriteErrTxt = true;
+		
+		CmdRunInfo cmdRunInfo = new CmdRunInfo();
+		cmdRunInfo.setOutFile(outRunInfoFileName);
+		cmdRunInfo.setProcess(process);
 		if (!StringOperate.isRealNull(cmdPath.getSaveFilePath())) {
 			this.stdOutPath = cmdPath.getSaveFilePath();
 			isWriteStdTxt = false;
@@ -465,17 +486,18 @@ public class CmdOperate extends RunProcess<String> {
 		}
 		
 		process.exec(cmdRun);
-
+		
 		setStdStream(isWriteStdTxt, isWriteStdTxt);
 		setErrorStream(isWriteErrTxt, isWriteErrTxt);
-
 		errorGobbler.start();
 		outputGobbler.start();
-		
+		cmdRunInfo.startWriteRunInfo();
+
 		finishFlag.flag = process.waitFor();
 		outputGobbler.join();
 		errorGobbler.join();
 		closeOutStream(isWriteStdTxt, isWriteErrTxt);
+		cmdRunInfo.setFinish();
 		
 		//不管是否跑成功，都移出文件夹
 		cmdPath.moveFileOut();
@@ -619,6 +641,7 @@ public class CmdOperate extends RunProcess<String> {
 			if (isStdoutInfo) {
 				FileOperate.DeleteFileFolder(stdOutPath);
 			}
+			FileOperate.DeleteFileFolder(outRunInfoFileName);
 		}
 	}
 	
@@ -680,5 +703,55 @@ public class CmdOperate extends RunProcess<String> {
 	static class FinishFlag {
 		Integer flag = null;
 	}
+}
+
+class CmdRunInfo {
+	/** 每分钟写一个信息到文本中，意思该程序还在运行中，主要是针对RNAmapping这种等待时间很长的程序 */
+	private static final int timeTxtWiteTips = 120000;
+	/** 运行进程的pid */
+	IntProcess process;
+	String outFile;
+	Timer timerWriteTips = new Timer();
+	TxtReadandWrite txtWrite;
+			
+	public void setOutFile(String outFile) {
+		this.outFile = outFile;
+	}
+	public void setProcess(IntProcess process) {
+		this.process = process;
+	}
+	public void setFinish() {
+		if (StringOperate.isRealNull(outFile)) {
+			return;
+		}
+		timerWriteTips.cancel();
+		txtWrite.close();
+	}
+	
+	public void startWriteRunInfo() {
+		if (StringOperate.isRealNull(outFile)) {
+			return;
+		}
+		
+		txtWrite = new TxtReadandWrite(outFile, true);
+		timerWriteTips.schedule(new TimerTask() {
+			public void run() {
+				synchronized (this) {
+					try {
+						txtWrite.writefileln(DateUtil.getNowTimeStr() + " Program Is Still Running, This Tip Display " + timeTxtWiteTips/1000 + " seconds per time");
+						List<ProcessInfo> lsProcInfo = process.getLsProcInfo();
+						if (lsProcInfo.isEmpty()) return;
+						
+						txtWrite.writefileln(ProcessInfo.getTitle());
+						for (ProcessInfo processInfo : lsProcInfo) {
+							txtWrite.writefileln(processInfo.toString());
+						}
+					} catch (Exception e) {e.printStackTrace(); }
+					txtWrite.flush();
+				}
+			}
+		}, 1000, timeTxtWiteTips);		
+	}
+	
 }
 

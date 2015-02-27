@@ -19,8 +19,6 @@ public class StreamGobbler extends Thread {
 	private static final Logger logger = Logger.getLogger(StreamGobbler.class);
 	/** 每2000ms刷新一次txt文本，这是因为写入错误行会很慢，刷新就可以做到及时看结果 */
 	private static final int timeTxtFlush = 5000;
-	/** 每分钟写一个信息到文本中，意思该程序还在运行中，主要是针对RNAmapping这种等待时间很长的程序 */
-	private static final int timeTxtWiteTips = 120000;
 	
 	/** 运行进程的pid */
 	IntProcess process;
@@ -142,29 +140,6 @@ public class StreamGobbler extends Thread {
 				}
 			}
 		}, timeTxtFlush, timeTxtFlush);
-		
-		if (isWriteTIPS) {
-			timerWriteTips = new Timer();
-			timerWriteTips.schedule(new TimerTask() {
-				public void run() {
-					if (!isStartWrite) return;
-					
-					synchronized (this) {
-						try {
-							os.write((DateUtil.getNowTimeStr() + " Program Is Still Running, This Tip Display " + timeTxtWiteTips/1000 + " seconds per time" + TxtReadandWrite.ENTER_LINUX).getBytes());
-							List<ProcessInfo> lsProcInfo = process.getLsProcInfo();
-							if (lsProcInfo.isEmpty()) return;
-							
-							os.write((ProcessInfo.getTitle() + TxtReadandWrite.ENTER_LINUX).getBytes());
-							for (ProcessInfo processInfo : lsProcInfo) {
-								os.write((processInfo.toString() + TxtReadandWrite.ENTER_LINUX).getBytes());
-							}
-							os.write(TxtReadandWrite.ENTER_LINUX.getBytes());
-						} catch (Exception e) {e.printStackTrace(); }				
-					}
-				}
-			}, 1000, timeTxtWiteTips);		
-		}
 	}
 	
 	/** 关闭这两个刷新任务 */

@@ -14,6 +14,7 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hdfs.server.namenode.status_jsp;
 
 import com.novelbio.base.PathDetail;
 import com.novelbio.base.StringOperate;
@@ -465,7 +466,17 @@ public class FileHadoop extends File {
 	public static File[] listRoots() {
         return null;
     }
-
+	
+	/**
+	 * 类似 /hdfs:/apps/test 这种文件名
+	 * @param hdfsFile
+	 * @return
+	 */
+	public static Path getPath(String hdfsFile) {
+		hdfsFile = hdfsFile.replace(FileHadoop.getHdfsSymbol(), "");
+		//TODO 以后就应该是
+		return new Path(hdfsFile);
+	}
 
    @Deprecated
     public long getTotalSpace() {

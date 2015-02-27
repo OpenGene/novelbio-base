@@ -6,9 +6,14 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.curator.RetryPolicy;
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.framework.imps.CuratorFrameworkState;
+import org.apache.curator.retry.ExponentialBackoffRetry;
+
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.HttpFetch;
-import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 
 public class PathDetail {
@@ -247,4 +252,14 @@ public class PathDetail {
 		return properties.getProperty("logoImgPath");
 	}
 	
+	//=========   zookeeper ===========================
+	
+	/** 连接到zookeeper server的site */
+	public static String getZookeeperServerSite() {
+		return properties.getProperty("zookeeperSite");
+	}
+	/** 连接到zookeeper server的site */
+	public static String getZookeeperLock() {
+		return properties.getProperty("znodeLock");
+	}
 }
