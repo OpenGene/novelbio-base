@@ -45,7 +45,6 @@ public class StreamGobbler extends Thread {
 
 	
 	Timer timerFlush;
-	Timer timerWriteTips;
 	
 	StreamGobbler(InputStream is, IntProcess process) {
 		this.is = is;
@@ -146,9 +145,6 @@ public class StreamGobbler extends Thread {
 	private void finishFlush() {
 		if (timerFlush != null) {
 			timerFlush.cancel();
-		}
-		if (timerWriteTips != null) {
-			timerWriteTips.cancel();
 		}
 	}
 	

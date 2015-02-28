@@ -721,10 +721,10 @@ class CmdRunInfo {
 		this.process = process;
 	}
 	public void setFinish() {
+		timerWriteTips.cancel();
 		if (StringOperate.isRealNull(outFile)) {
 			return;
 		}
-		timerWriteTips.cancel();
 		txtWrite.close();
 	}
 	
