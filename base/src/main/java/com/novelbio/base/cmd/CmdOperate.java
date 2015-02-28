@@ -711,7 +711,7 @@ class CmdRunInfo {
 	/** 运行进程的pid */
 	IntProcess process;
 	String outFile;
-	Timer timerWriteTips = new Timer();
+	Timer timerWriteTips;
 	TxtReadandWrite txtWrite;
 			
 	public void setOutFile(String outFile) {
@@ -721,7 +721,10 @@ class CmdRunInfo {
 		this.process = process;
 	}
 	public void setFinish() {
-		timerWriteTips.cancel();
+		if (timerWriteTips != null) {
+			timerWriteTips.cancel();
+		}
+		
 		if (StringOperate.isRealNull(outFile)) {
 			return;
 		}
@@ -732,7 +735,7 @@ class CmdRunInfo {
 		if (StringOperate.isRealNull(outFile)) {
 			return;
 		}
-		
+		timerWriteTips = new Timer();
 		txtWrite = new TxtReadandWrite(outFile, true);
 		timerWriteTips.schedule(new TimerTask() {
 			public void run() {
