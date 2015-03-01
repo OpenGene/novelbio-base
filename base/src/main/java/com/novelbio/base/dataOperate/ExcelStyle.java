@@ -9,6 +9,9 @@ import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.junit.experimental.categories.Categories.ExcludeCategory;
+
+import com.novelbio.base.MyBeanUtils;
 
 public class ExcelStyle {
 	
@@ -19,6 +22,8 @@ public class ExcelStyle {
 	public static final short GREY40 = IndexedColors.GREY_40_PERCENT.getIndex();
 	/** 颜色，20%的灰色 */
 	public static final short GREY25 = IndexedColors.GREY_25_PERCENT.getIndex();
+	/** 自动默认的颜色 */
+	public static final short AUTOMATIC =  IndexedColors.AUTOMATIC.getIndex();
 	
 	/** cell类型的枚举，如 titleLine标题行的cell*/
 	enum EnumXlsCell {
@@ -41,21 +46,21 @@ public class ExcelStyle {
 	private Workbook wb;
 	
 	/** 表格的标题行的样式 */
-	private CellStyle titleLineStyle;
+	private ExcelCellStyle titleLineStyle;
 	/** 表格的奇数行样式 */
-	private CellStyle evenLineStyle;
+	private ExcelCellStyle evenLineStyle;
 	/** 表格的偶数行样式 */
-	private CellStyle oddLineStyle;
+	private ExcelCellStyle oddLineStyle;
 	/** 表格的结束行样式 */
-	private CellStyle endLineStyle;
+	private ExcelCellStyle endLineStyle;
 	/** 表格的首列样式 */
-	private CellStyle firstColStyle;
+	private ExcelCellStyle firstColStyle;
 	/** 表格的奇数列样式 */
-	private CellStyle evenColStyle;
+	private ExcelCellStyle evenColStyle;
 	/** 表格的偶数列样式 */
-	private CellStyle oddColStyle;
+	private ExcelCellStyle oddColStyle;
 	/** 空的样式 */
-	private CellStyle blankStyle;
+	private ExcelCellStyle blankStyle;
 	
 	/** 表格开始的行数 */
 	private int startNum;
@@ -113,21 +118,31 @@ public class ExcelStyle {
 		return freezePaneCol;
 	}
 	
-	/** 设置最后一行的行数 */
+	/** 输入的表格有多少行 */
+	protected void setAllLineNum(int allLineNum) {
+		if (endNum < 0) {
+			endNum = allLineNum;
+		}
+	}
+	
+	/** 设置第一行和最后一行的行数，从1开始
+	 * @param startNum
+	 * @param endNum 小于0表示全部行
+	 */
 	public void setStartAndEndNum(int startNum, int endNum) {
 		this.startNum = startNum;
 		this.endNum = endNum;
 	}
 	
 	public void setWorkbook(Workbook workbook) {
-		titleLineStyle = workbook.createCellStyle();
-		evenLineStyle = workbook.createCellStyle();
-		oddLineStyle = workbook.createCellStyle();
-		endLineStyle = workbook.createCellStyle();
-		firstColStyle = workbook.createCellStyle();
-		evenColStyle = workbook.createCellStyle();
-		oddColStyle = workbook.createCellStyle();
-		blankStyle = workbook.createCellStyle(); 
+		titleLineStyle = new ExcelCellStyle(workbook);
+		evenLineStyle = new ExcelCellStyle(workbook);
+		oddLineStyle = new ExcelCellStyle(workbook);
+		endLineStyle = new ExcelCellStyle(workbook);
+		firstColStyle = new ExcelCellStyle(workbook);
+		evenColStyle = new ExcelCellStyle(workbook);
+		oddColStyle = new ExcelCellStyle(workbook);
+		blankStyle = new ExcelCellStyle(workbook);
 		wb = workbook;
 		setTitleStyle();
 	}
@@ -164,12 +179,10 @@ public class ExcelStyle {
 	}
 	
 	/** 设置表格的样式，style为需要设置的样式，foreGroundColor为单元格的前景色，borderTop为上边框样式， borderBottom为下边框样式 */
-	private void setCellStyle(CellStyle cellStyle, EnumXlsCell excelCell) {
+	private void setCellStyle(ExcelCellStyle cellStyle, EnumXlsCell excelCell) {
 		//设定字体
 		ExcelFont fontExcel = mapCell_2_Font.get(excelCell);
-		Font font = wb.createFont();
-		fontExcel.fillFont(font);
-		cellStyle.setFont(font);
+		cellStyle.setExcelFont(fontExcel);
 		
 		//设定是否为text
 		boolean isText = mapCell_2_IsText.get(excelCell); 
@@ -209,30 +222,33 @@ public class ExcelStyle {
 			}
 		}
 		// 指定填充模式，不加这行代码，单元格颜色的填充会失效
-		cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+		cellStyle.getCellStyle().setFillPattern(CellStyle.SOLID_FOREGROUND);
 
 	}
 
 	/** 渲染单元格，cell为一个单元格对象，rowNum为第几行（用来判断是奇数行偶数行首行或尾行），colNum为第几列 */
 	public void renderCell(Cell cell, int rowNum, int colNum) {
-		CellStyle colStyle = getColStyle(colNum);
+		ExcelCellStyle resultStyle = getColStyle(colNum);
 		if (endNum >= 0 && rowNum + 1 > endNum) {
-			cell.setCellStyle(blankStyle);
+			cell.setCellStyle(blankStyle.getCellStyle());
 		} else {
-			if (rowNum + 1  == startNum) {
-				cell.setCellStyle(titleLineStyle);
-			} else if (rowNum + 1 == endNum) {
-				cell.setCellStyle(unionCellStyle(endLineStyle, colStyle));
-			} else if ((rowNum - startNum + 1)%2 == 0) {
-				cell.setCellStyle(unionCellStyle(oddLineStyle, colStyle));
+			if ((rowNum - startNum + 1)%2 == 0) {
+				resultStyle = unionCellStyle(resultStyle, oddLineStyle);
 			} else {
-				cell.setCellStyle(unionCellStyle(evenLineStyle, colStyle));
+				resultStyle = unionCellStyle(resultStyle, evenLineStyle);
 			}
+			if (rowNum + 1  == startNum) {
+				resultStyle = unionCellStyle(resultStyle, titleLineStyle);
+			}
+			if (rowNum + 1 == endNum) {
+				resultStyle = unionCellStyle(resultStyle, endLineStyle);
+			}
+			cell.setCellStyle(resultStyle.getCellStyle());
 		}
 	}
 	
 	/** 根据列号获得所对应的列样式 */
-	private CellStyle getColStyle(int colNum) {
+	private ExcelCellStyle getColStyle(int colNum) {
 		if (colNum == 0) {
 			return firstColStyle;
 		} else if (colNum%2 == 0) {
@@ -243,33 +259,31 @@ public class ExcelStyle {
 	}
 	
 	/** 把cellStyle2里非默认的参数设置进cellStyle1 */
-	private CellStyle unionCellStyle(CellStyle cellStyle1, CellStyle cellStyle2) {
-		CellStyle cellStyle = wb.createCellStyle();
-		cellStyle.cloneStyleFrom(cellStyle1);
-		// 获得cellStyle2样式的参数
-		short foreGroundColor = cellStyle2.getFillForegroundColor();
-		short topBorder = cellStyle2.getBorderTop();
-		short bottomBorder = cellStyle2.getBorderBottom();
-		short leftBorder = cellStyle2.getBorderLeft();
-		short rightBorder = cellStyle2.getBorderRight();
-		short topBorderColor = cellStyle2.getTopBorderColor();
-		short bottomBorderColor = cellStyle2.getBottomBorderColor();
-		short leftBorderColor = cellStyle2.getLeftBorderColor();
-		short rightBorderColor = cellStyle2.getRightBorderColor();
+	public ExcelCellStyle unionCellStyle(ExcelCellStyle styleRaw, ExcelCellStyle styleNew) {
+		ExcelCellStyle cellStyle = new ExcelCellStyle(wb);
+		cellStyle.cloneExcelCellStyle(styleRaw);
 		// 判断cellStyle2样式的参数是不是默认的，如果不是默认的就改变cellStyle1对应的参数
-		if (foreGroundColor != 64) cellStyle.setFillForegroundColor(foreGroundColor);
-		if (topBorder != 0) cellStyle.setBorderTop(topBorder);
-		if (bottomBorder != 0) cellStyle.setBorderBottom(bottomBorder);
-		if (leftBorder != 0) cellStyle.setBorderLeft(leftBorder);
-		if (rightBorder != 0) cellStyle.setBorderRight(rightBorder);
-		if (topBorderColor != 8) cellStyle.setTopBorderColor(topBorderColor);
-		if (bottomBorderColor != 8) cellStyle.setBottomBorderColor(bottomBorderColor);
-		if (leftBorderColor != 8) cellStyle.setLeftBorderColor(leftBorderColor);
-		if (rightBorderColor != 8) cellStyle.setRightBorderColor(rightBorderColor);
+		if (styleNew.getFillForegroundColor() != -1) cellStyle.setFillForegroundColor(styleNew.getFillForegroundColor());
+		if ( styleNew.getBorderTop() != -1) cellStyle.setBorderTop( styleNew.getBorderTop());
+		if (styleNew.getBorderBottom() != -1) cellStyle.setBorderBottom(styleNew.getBorderBottom());
+		if (styleNew.getBorderLeft() != -1) cellStyle.setBorderLeft(styleNew.getBorderLeft());
+		if (styleNew.getBorderRight() != -1) cellStyle.setBorderRight(styleNew.getBorderRight());
+		if (styleNew.getTopBorderColor() != -1) cellStyle.setTopBorderColor(styleNew.getTopBorderColor());
+		if (styleNew.getBottomBorderColor() != -1) cellStyle.setBottomBorderColor(styleNew.getBottomBorderColor());
+		if (styleNew.getLeftBorderColor() != -1) cellStyle.setLeftBorderColor(styleNew.getLeftBorderColor());
+		if (styleNew.getRightBorderColor() != -1) cellStyle.setRightBorderColor(styleNew.getRightBorderColor());
+		if (styleNew.isChangeFont()) cellStyle.setExcelFont(styleNew.getExcelFont());
+		if (styleNew.getDataFormat() != -1) cellStyle.setDataFormat(styleNew.getDataFormat());
+		
 		return cellStyle;
 	}
 
-	/** 获取三线表的样式, startNum：开始的行号，endNum：结束的行号 */
+	/**
+	 * 获取三线表的样式
+	 * @param startNum 开始的行号，从1开始
+	 * @param endNum 结束的行号，从1开始，如果endNum小于0，表示直到结束行
+	 * @return
+	 */
 	public static ExcelStyle getThreeLineTable(int startNum, int endNum) {
 		ExcelStyle excelStyle = new ExcelStyle();
 		excelStyle.setFreezenPane(1, 1);
@@ -279,29 +293,35 @@ public class ExcelStyle {
 		excelStyle.setBorder(EnumXlsCell.titleLine, EnumXlsCellBorder.BottomBorder, CellStyle.BORDER_THICK);
 		excelStyle.setBorder(EnumXlsCell.titleLine, EnumXlsCellBorder.LeftBorder, CellStyle.BORDER_NONE);
 		excelStyle.setBorder(EnumXlsCell.titleLine, EnumXlsCellBorder.RightBorder, CellStyle.BORDER_NONE);
+		
 		excelStyle.setBorder(EnumXlsCell.evenLine, EnumXlsCellBorder.TopBorder, CellStyle.BORDER_NONE);
 		excelStyle.setBorder(EnumXlsCell.evenLine, EnumXlsCellBorder.BottomBorder, CellStyle.BORDER_NONE);
 		excelStyle.setBorder(EnumXlsCell.evenLine, EnumXlsCellBorder.LeftBorder, CellStyle.BORDER_NONE);
 		excelStyle.setBorder(EnumXlsCell.evenLine, EnumXlsCellBorder.RightBorder, CellStyle.BORDER_NONE);
+		
 		excelStyle.setBorder(EnumXlsCell.oddLine, EnumXlsCellBorder.TopBorder, CellStyle.BORDER_NONE);
 		excelStyle.setBorder(EnumXlsCell.oddLine, EnumXlsCellBorder.BottomBorder, CellStyle.BORDER_NONE);
 		excelStyle.setBorder(EnumXlsCell.oddLine, EnumXlsCellBorder.LeftBorder, CellStyle.BORDER_NONE);
 		excelStyle.setBorder(EnumXlsCell.oddLine, EnumXlsCellBorder.RightBorder, CellStyle.BORDER_NONE);
+		
 		excelStyle.setBorder(EnumXlsCell.endLine, EnumXlsCellBorder.TopBorder, CellStyle.BORDER_NONE);
 		excelStyle.setBorder(EnumXlsCell.endLine, EnumXlsCellBorder.BottomBorder, CellStyle.BORDER_THICK);
 		excelStyle.setBorder(EnumXlsCell.endLine, EnumXlsCellBorder.LeftBorder, CellStyle.BORDER_NONE);
 		excelStyle.setBorder(EnumXlsCell.endLine, EnumXlsCellBorder.RightBorder, CellStyle.BORDER_NONE);
+		
 		// 设置颜色，背景颜色和边框颜色
 		excelStyle.setColor(EnumXlsCell.titleLine, EnumXlsCellBorder.BG, WHITE);
 		excelStyle.setColor(EnumXlsCell.titleLine, EnumXlsCellBorder.TopBorder, BLACK);
 		excelStyle.setColor(EnumXlsCell.titleLine, EnumXlsCellBorder.BottomBorder, BLACK);
 		excelStyle.setColor(EnumXlsCell.titleLine, EnumXlsCellBorder.LeftBorder, WHITE);
 		excelStyle.setColor(EnumXlsCell.titleLine, EnumXlsCellBorder.RightBorder, WHITE);
+		
 		excelStyle.setColor(EnumXlsCell.evenLine, EnumXlsCellBorder.BG, GREY25);
 		excelStyle.setColor(EnumXlsCell.evenLine, EnumXlsCellBorder.TopBorder, WHITE);
 		excelStyle.setColor(EnumXlsCell.evenLine, EnumXlsCellBorder.BottomBorder, WHITE);
 		excelStyle.setColor(EnumXlsCell.evenLine, EnumXlsCellBorder.LeftBorder, WHITE);
 		excelStyle.setColor(EnumXlsCell.evenLine, EnumXlsCellBorder.RightBorder, WHITE);
+		
 		excelStyle.setColor(EnumXlsCell.oddLine, EnumXlsCellBorder.BG, WHITE);
 		excelStyle.setColor(EnumXlsCell.oddLine, EnumXlsCellBorder.TopBorder, WHITE);
 		excelStyle.setColor(EnumXlsCell.oddLine, EnumXlsCellBorder.BottomBorder, WHITE);
@@ -309,12 +329,6 @@ public class ExcelStyle {
 		excelStyle.setColor(EnumXlsCell.oddLine, EnumXlsCellBorder.RightBorder, WHITE);
 		// 判断最后一行是奇数行还是偶数行
 		// 总行数
-		int allRow = endNum - startNum + 1;
-		if (allRow%2 == 0) {
-			excelStyle.setColor(EnumXlsCell.endLine, EnumXlsCellBorder.BG, GREY25);
-		} else {
-			excelStyle.setColor(EnumXlsCell.endLine, EnumXlsCellBorder.BG, WHITE);
-		}
 		excelStyle.setColor(EnumXlsCell.endLine, EnumXlsCellBorder.TopBorder, WHITE);
 		excelStyle.setColor(EnumXlsCell.endLine, EnumXlsCellBorder.BottomBorder, BLACK);
 		excelStyle.setColor(EnumXlsCell.endLine, EnumXlsCellBorder.LeftBorder, WHITE);
@@ -324,13 +338,197 @@ public class ExcelStyle {
 		ExcelFont fontTitle = new ExcelFont();
 		fontTitle.setBoldweight(Font.BOLDWEIGHT_BOLD);
 		excelStyle.setFont(EnumXlsCell.titleLine, fontTitle);
-		
 		return excelStyle;
+	}
+	
+	protected ExcelCellStyle getTitleLineStyle() {
+		return titleLineStyle;
+	}
+	protected void setTitleLineStyle(ExcelCellStyle titleLineStyle) {
+		this.titleLineStyle = titleLineStyle;
+	}
+	protected ExcelCellStyle getEvenLineStyle() {
+		return evenLineStyle;
+	}
+	protected void setEvenLineStyle(ExcelCellStyle evenLineStyle) {
+		this.evenLineStyle = evenLineStyle;
+	}
+	protected ExcelCellStyle getOddLineStyle() {
+		return oddLineStyle;
+	}
+	protected void setOddLineStyle(ExcelCellStyle oddLineStyle) {
+		this.oddLineStyle = oddLineStyle;
+	}
+	protected ExcelCellStyle getEndLineStyle() {
+		return endLineStyle;
+	}
+	protected void setEndLineStyle(ExcelCellStyle endLineStyle) {
+		this.endLineStyle = endLineStyle;
+	}
+	protected ExcelCellStyle getFirstColStyle() {
+		return firstColStyle;
+	}
+	protected void setFirstColStyle(ExcelCellStyle firstColStyle) {
+		this.firstColStyle = firstColStyle;
+	}
+	protected ExcelCellStyle getEvenColStyle() {
+		return evenColStyle;
+	}
+	protected void setEvenColStyle(ExcelCellStyle evenColStyle) {
+		this.evenColStyle = evenColStyle;
+	}
+	protected ExcelCellStyle getOddColStyle() {
+		return oddColStyle;
+	}
+	protected void setOddColStyle(ExcelCellStyle oddColStyle) {
+		this.oddColStyle = oddColStyle;
 	}
 
 }
 
-class ExcelFont {
+class ExcelCellStyle {
+	CellStyle cellStyle;
+	ExcelFont excelFont;
+	Font font;
+	short colorBG = -1;
+	short colorTopBorder = -1;
+	short colorBottomBorder = -1;
+	short colorRightBorder = -1;
+	short colorLeftBorder = -1;
+	short topBorder = -1;
+	short bottomBorder = -1;
+	short rightBorder = -1;
+	short leftBorder = -1;
+	short dataFormat = -1;
+	
+	public ExcelCellStyle(Workbook wb) {
+		cellStyle = wb.createCellStyle();
+		font = wb.createFont();
+	}
+	
+	public void setExcelFont(ExcelFont excelFont) {
+		if (excelFont == null) return;
+		
+		this.excelFont = excelFont;
+		excelFont.fillFont(font);
+		cellStyle.setFont(font);
+	}
+	
+	public boolean isChangeFont() {
+		return excelFont == null? false: true;
+	}
+	
+	public Font getFont() {
+		return font;
+	}
+	
+	public ExcelFont getExcelFont() {
+		return excelFont;
+	}
+	
+	public CellStyle getCellStyle() {
+		return cellStyle;
+	}
+	
+	public void cloneExcelCellStyle(ExcelCellStyle excelCellStyle) {
+//		MyBeanUtils.copyNotNullProperties(excelCellStyle, this);
+		cellStyle.cloneStyleFrom(excelCellStyle.getCellStyle());
+		this.bottomBorder = excelCellStyle.bottomBorder;
+		this.colorBG = excelCellStyle.colorBG;
+		this.colorBottomBorder = excelCellStyle.colorBottomBorder;
+		this.colorLeftBorder = excelCellStyle.colorLeftBorder;
+		this.colorRightBorder = excelCellStyle.colorRightBorder;
+		this.colorTopBorder = excelCellStyle.colorTopBorder;
+		this.excelFont = excelCellStyle.excelFont.clone();
+		excelFont.fillFont(this.font);
+		this.leftBorder = excelCellStyle.leftBorder;
+		this.rightBorder = excelCellStyle.rightBorder;
+		this.topBorder = excelCellStyle.topBorder;		
+	}
+	
+	public void setDataFormat(short dataFormat) {
+		this.dataFormat = dataFormat;
+		cellStyle.setDataFormat(dataFormat);
+	}
+	public short getDataFormat() {
+		return dataFormat;
+	}
+	
+	public void setLeftBorderColor(short color) {
+		this.colorLeftBorder = color;
+		cellStyle.setLeftBorderColor(color);
+	}
+	public short getLeftBorderColor() {
+		return colorLeftBorder;
+	}
+
+	public void setRightBorderColor(short color) {
+		this.colorRightBorder = color;
+		cellStyle.setRightBorderColor(color);
+	}
+	public short getRightBorderColor() {
+		return colorRightBorder;
+	}
+
+	public void setTopBorderColor(short color) {
+		this.colorTopBorder = color;
+		cellStyle.setTopBorderColor(color);
+	}
+	public short getTopBorderColor() {
+		return colorTopBorder;
+	}
+
+	public void setBottomBorderColor(short color) {
+		this.colorBottomBorder = color;
+		cellStyle.setBottomBorderColor(color);
+	}
+	public short getBottomBorderColor() {
+		return colorBottomBorder;
+	}
+
+	public void setFillForegroundColor(short bg) {
+		this.colorBG = bg;
+		cellStyle.setFillForegroundColor(bg);
+	}
+	public short getFillForegroundColor() {
+		return colorBG;
+	}
+
+	public void setBorderLeft(short border) {
+		this.leftBorder = border;
+		cellStyle.setBorderLeft(border);
+	}
+	public short getBorderLeft() {
+		return leftBorder;
+	}
+
+	public void setBorderRight(short border) {
+		this.rightBorder = border;
+		cellStyle.setBorderRight(border);
+	}
+	public short getBorderRight() {
+		return rightBorder;
+	}
+
+	public void setBorderTop(short border) {
+		this.topBorder = border;
+		cellStyle.setBorderTop(border);
+	}
+	public short getBorderTop() {
+		return topBorder;
+	}
+
+	public void setBorderBottom(short border) {
+		this.bottomBorder = border;
+		cellStyle.setBorderBottom(border);
+	}
+	public short getBorderBottom() {
+		return bottomBorder;
+	}
+
+}
+
+class ExcelFont implements Cloneable {
 	/** 如 宋体，Times New Roman */
 	String fontName = "Times New Roman";
 	/** 颜色 */
@@ -341,7 +539,7 @@ class ExcelFont {
 	public void setFontName(String fontName) {
 		this.fontName = fontName;
 	}
- 
+
 	public void setColor(short color) {
 		this.color = color;
 	}
@@ -356,4 +554,13 @@ class ExcelFont {
 		font.setBoldweight(boldweight);
 	}
 	
+	public ExcelFont clone() {
+		try {
+			return (ExcelFont) super.clone();
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
 }

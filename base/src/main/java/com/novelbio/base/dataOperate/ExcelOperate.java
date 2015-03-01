@@ -684,7 +684,9 @@ public class ExcelOperate implements Closeable {
 	 * @param content
 	 */
 	public boolean WriteExcel(String sheetName, int rowNum, int cellNum, List<String[]> content, ExcelStyle style) {
-		style.setWorkbook(wb);
+		if (style != null) {
+			style.setWorkbook(wb);
+		}
 		return WriteExcel(sheetName, -1, rowNum, cellNum, content, style);
 	}
 
@@ -848,7 +850,10 @@ public class ExcelOperate implements Closeable {
 		if ((sheetNum <= -1 && sheetName == null) || rowNum < 0)
 			return false;
 		Sheet sheet = getSheet(sheetName, sheetNum);
-		sheet.createFreezePane(style.getFreezePaneCol(),  style.getFreezenPaneRow());
+		if (style != null) {
+			sheet.createFreezePane(style.getFreezePaneCol(),  style.getFreezenPaneRow());
+			style.setAllLineNum(rowNum + content.size() - 1);
+		}
 		writeExcel(sheet, rowNum, cellNum, content, style);
 		return true;
 	}
