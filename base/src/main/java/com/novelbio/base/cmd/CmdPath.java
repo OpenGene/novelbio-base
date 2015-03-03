@@ -43,10 +43,20 @@ public class CmdPath {
 	/** 输入文件夹对应的输出文件夹，可以将输入文件夹里的文件直接复制到输出文件夹中 */
 	Map<String, String> mapPath2TmpPath = new HashMap<>();
 	
+	/** 存储stdout是否为临时文件 */
+	boolean isSaveFileTmp = true;
 	/** 截获标准输出流的输出文件名 */
 	String saveFilePath = null;
+	/** 输出文件是否为txt，如果命令中含有 >，则认为输出的可能不是txt，为二进制 */
+	boolean isJustDisplayStd = false;
+	
+	/** 存储stderr是否为临时文件 */
+	boolean isSaveErrTmp = true;
 	/** 截获标准错误流的错误文件名 */
 	String saveErrPath = null;
+	/** 输出错误文件是否为txt，如果命令中含有 2>，则认为输出的可能不是txt，为二进制 */
+	boolean isJustDisplayErr = false;
+	
 	
 	/** 是否已经生成了临时文件夹，生成一次就够了 */
 	boolean isGenerateTmpPath = false;
@@ -67,6 +77,27 @@ public class CmdPath {
 		if (!StringOperate.isRealNull(param)) {
 			lsCmd.add(param);
 		}
+	}
+	
+	public void setJustDisplayStd(boolean isJustDisplayStd) {
+		this.isJustDisplayStd = isJustDisplayStd;
+	}
+	public void setJustDisplayErr(boolean isJustDisplayErr) {
+		this.isJustDisplayErr = isJustDisplayErr;
+	}
+	/** 输出文件是否为txt格式的
+	 * 如果命令中含有 2>，则认为输出的可能不是txt，为二进制
+	 * @return
+	 */
+	public boolean isJustDisplayErr() {
+		return isJustDisplayErr;
+	}
+	/** 输出的err文件是否为txt格式的
+	 * 如果命令中含有 >，则认为输出的可能不是txt，为二进制
+	 * @return
+	 */
+	public boolean isJustDisplayStd() {
+		return isJustDisplayStd;
 	}
 	
 	/** 是否将hdfs的路径，改为本地路径，<b>默认为true</b><br>
@@ -148,13 +179,52 @@ public class CmdPath {
 		}
 	}
 	
+	public void setSaveFilePath(String saveFilePath, boolean isSaveFileTmp) {
+		this.saveFilePath = saveFilePath;
+		this.isSaveFileTmp = isSaveFileTmp;
+	}
+	public String getSaveStdPath() {
+		return saveFilePath;
+	}
+	protected String getSaveStdTmp() {
+		if (saveFilePath == null) {
+			return null;
+		}
+		if (isSaveFileTmp) {
+			return FileOperate.changeFileSuffix(saveFilePath, "_tmp", null);
+		} else {
+			return saveFilePath;
+		}
+	}
+	
+
+	public void setSaveErrPath(String saveErrPath, boolean isSaveErrTmp) {
+		this.saveErrPath = saveErrPath;
+		this.isSaveErrTmp = isSaveErrTmp;
+	}
 	public String getSaveErrPath() {
 		return saveErrPath;
 	}
-	public String getSaveFilePath() {
-		return saveFilePath;
+	protected String getSaveErrTmp() {
+		if (saveErrPath == null) {
+			return null;
+		}
+		if (isSaveErrTmp) {
+			return FileOperate.changeFileSuffix(saveErrPath, "_tmp", null);
+		} else {
+			return saveErrPath;
+		}
 	}
-
+	
+	public void moveResultFile() {
+		if (isSaveFileTmp && getSaveStdTmp() != null) {
+			FileOperate.moveFile(true, getSaveStdTmp(), saveFilePath);
+		}
+		if (isSaveErrTmp && getSaveErrPath() != null) {
+			FileOperate.moveFile(true, getSaveErrTmp(), saveErrPath);
+		}
+	}
+	
 	/** 返回执行的具体cmd命令，不会将文件路径删除，仅给相对路径 */
 	public String getCmdExeStr() {
 		return getCmdExeStrModify();
@@ -282,11 +352,15 @@ public class CmdPath {
 			tmpCmd = convertToTmpPath(stdOut, errOut, tmpCmd);
 			
 			if (stdOut) {
-				saveFilePath = tmpCmd;
+				if (StringOperate.isRealNull(saveFilePath)) {
+					saveFilePath = tmpCmd;
+				}
 				stdOut = false;
 				continue;
 			} else if (errOut) {
-				saveErrPath = tmpCmd;
+				if (StringOperate.isRealNull(saveErrPath)) {
+					saveErrPath = tmpCmd;
+				}
 				errOut = false;
 				continue;
 			}

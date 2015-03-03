@@ -38,14 +38,10 @@ public class CmdOperate extends RunProcess<String> {
 	/** 临时文件在文件夹 */
 	String scriptFold = "";
 	
-	/** 标准输出流保存的路径 */
-	String stdOutPath;
 	/** 是否产生标准输出信息的文件，只有在将输出文件写入临时文件夹的情况
 	 * 下才会产生标准输出流信息文件，目的是给用户反馈目前的软件进度 */
 	boolean isStdoutInfo = false;
-	
-	/** 标准错误流保存的路径 */
-	String stdErrPath;
+
 	/** 是否产生标准错误信息的文件，只有在将输出文件写入临时文件夹的情况
 	 * 下才会产生标准错误流信息文件，目的是给用户反馈目前的软件进度 */
 	boolean isStderrInfo = false;
@@ -216,21 +212,31 @@ public class CmdOperate extends RunProcess<String> {
 		}
 	}
 	
-	/** 设定标准输出流，如果是这里指定，则会即时刷新<br>
+	/**
+	 *  设定标准输出流，如果是这里指定，则会即时刷新<br>
 	 * 本设置会被cmd中自带的 > 重定向覆盖
 	 * @param stdOutPath
+	 * @param isSaveTmp 是否先保存为临时文件，等结束后再修改回来。如果只是随便看看结果就设置为false
 	 */
-	public void setStdOutPath(String stdOutPath) {
-		this.stdOutPath = stdOutPath;
+	public void setStdOutPath(String stdOutPath, boolean isSaveTmp) {
+		cmdPath.setSaveFilePath(stdOutPath, isSaveTmp);
 	}
 	/** 设定标准错误流，如果是这里指定，则会即时刷新<br>
 	 * 本设置会被cmd中自带的 2> 重定向覆盖
 	 * @param stdErrPath
+	 * @param isSaveTmp 是否先保存为临时文件，等结束后再修改回来。如果只是随便看看结果就设置为false
 	 */
-	public void setStdErrPath(String stdErrPath) {
-		this.stdErrPath = stdErrPath;
+	public void setStdErrPath(String stdErrPath, boolean isSaveTmp) {
+		cmdPath.setSaveErrPath(stdErrPath, isSaveTmp);
 	}
-
+	/** 设定标准错误流，如果是这里指定，则会即时刷新<br>
+	 * 本设置会被cmd中自带的 2> 重定向覆盖
+	 * @param stdErrPath
+	 * @param isSaveTmp 是否先保存为临时文件，等结束后再修改回来。如果只是随便看看结果就设置为false
+	 */
+	public void setRunInfoFile(String outRunInfoFileName) {
+		this.outRunInfoFileName = outRunInfoFileName;
+	}
 	/** 如果为null就不加入 */
 	public void addCmdParam(String param) {
 		if (!StringOperate.isRealNull(param)) {
@@ -276,13 +282,15 @@ public class CmdOperate extends RunProcess<String> {
 	 * @param output
 	 */
 	public void addCmdParamOutput(String output, boolean isAddToLsCmd) {
-		if (StringOperate.isRealNull(stdErrPath)) {
+		if (StringOperate.isRealNull(cmdPath.getSaveErrPath())) {
 			isStderrInfo = true;
-			stdErrPath = output + "errorInfo.txt";
+			cmdPath.setSaveErrPath(output + "errorInfo.txt", false);
+			cmdPath.setJustDisplayErr(true);
 		}
-		if (StringOperate.isRealNull(stdOutPath)) {
+		if (StringOperate.isRealNull(cmdPath.getSaveStdPath())) {
 			isStdoutInfo = true;
-			stdOutPath = output + "stdInfo.txt";
+			cmdPath.setSaveFilePath(output + "stdInfo.txt", false);
+			cmdPath.setJustDisplayStd(true);
 		}
 		
 		if (outRunInfoFileName == null) {
@@ -471,24 +479,15 @@ public class CmdOperate extends RunProcess<String> {
 		finishFlag = new FinishFlag();
 		cmdPath.copyFileIn();
 		String[] cmdRun = cmdPath.getRunCmd();
-		boolean isWriteStdTxt = true, isWriteErrTxt = true;
 		
 		CmdRunInfo cmdRunInfo = new CmdRunInfo();
 		cmdRunInfo.setOutFile(outRunInfoFileName);
 		cmdRunInfo.setProcess(process);
-		if (!StringOperate.isRealNull(cmdPath.getSaveFilePath())) {
-			this.stdOutPath = cmdPath.getSaveFilePath();
-			isWriteStdTxt = false;
-		}
-		if (!StringOperate.isRealNull(cmdPath.getSaveErrPath())) {
-			this.stdErrPath = cmdPath.getSaveErrPath();
-			isWriteErrTxt = false;
-		}
 		
 		process.exec(cmdRun);
 		
-		setStdStream(isWriteStdTxt, isWriteStdTxt);
-		setErrorStream(isWriteErrTxt, isWriteErrTxt);
+		setStdStream();
+		setErrorStream();
 		errorGobbler.start();
 		outputGobbler.start();
 		cmdRunInfo.startWriteRunInfo();
@@ -496,7 +495,7 @@ public class CmdOperate extends RunProcess<String> {
 		finishFlag.flag = process.waitFor();
 		outputGobbler.join();
 		errorGobbler.join();
-		closeOutStream(isWriteStdTxt, isWriteErrTxt);
+		closeOutStream();
 		cmdRunInfo.setFinish();
 		
 		//不管是否跑成功，都移出文件夹
@@ -505,10 +504,68 @@ public class CmdOperate extends RunProcess<String> {
 		cmdPath.deleteTmpFile();
 	}
 	
+	/** 是否将std写入外部指定的文件中，而不是写入cmd中的文件，同时会定时--约2秒， 刷新 输出文件<p>
+	 * 使用场景：cmd命令在std上会有标准输出和错误输出信息，那么我们希望将输出信息写入一个文本，<br>
+	 * 因为标准输出和错误输出的信息量一般不多，所以写入很长时间也不一定会刷新，那么我们这里就会<br>
+	 * 定时的刷新文本，以保证能及时看到输出信息结果
+	 * @param isWriteStdTxt 是否是写入文本并需要定时刷新
+	 * @param isWriteStdTips 是否需要每隔几分钟写一小段话以表示程序还在运行中
+	 */
+	private void setStdStream() {
+		String outPath = cmdPath.getSaveStdTmp(); 
+		outputGobbler = new StreamGobbler(process.getStdOut(), process);
+		if (!getCmdInStdStream) {
+			if (outPath != null) {
+				FileOperate.createFolders(FileOperate.getPathName(outPath));
+				//标准输出流不能被关闭，从txt拿流是因为如果输出写为.gz，txt会给流套上gz流的壳
+				TxtReadandWrite txtWrite = new TxtReadandWrite(outPath, true);
+				outputGobbler.setOutputStream(txtWrite.getOutputStream(), cmdPath.isJustDisplayStd());
+				if (cmdPath.isJustDisplayStd() && lsOutInfo != null) {
+					outputGobbler.setLsInfo(lsOutInfo, lineNumStd, false);
+				}
+			} else if (lsOutInfo != null) {
+				outputGobbler.setLsInfo(lsOutInfo, lineNumStd, false);
+			} else {
+				outputGobbler.setOutputStream(System.out, false);
+			}
+		} else {
+			outputGobbler.setGetInputStream(true);
+		}
+	}
+	
+	/** 是否将err写入外部指定的文件中，而不是写入cmd中的文件，同时会定时--约2秒， 刷新 输出文件<p>
+	 * 使用场景：cmd命令在std上会有标准输出和错误输出信息，那么我们希望将输出信息写入一个文本，<br>
+	 * 因为标准输出和错误输出的信息量一般不多，所以写入很长时间也不一定会刷新，那么我们这里就会<br>
+	 * 定时的刷新文本，以保证能及时看到输出信息结果
+	 * @param isWriteErrTxt 是否是写入文本并需要定时刷新
+	 * @param isWriteErrTips 是否需要每隔几分钟写一小段话以表示程序还在运行中
+	 */
+	private void setErrorStream() {
+		String errPath = cmdPath.getSaveErrTmp();
+		errorGobbler = new StreamGobbler(process.getStdErr(), process);
+		if (!getCmdInErrStream) {
+			if (errPath != null) {
+				FileOperate.createFolders(FileOperate.getPathName(errPath));
+				//标准输出流不能被关闭
+				TxtReadandWrite txtWrite = new TxtReadandWrite(errPath, true);
+				errorGobbler.setOutputStream(txtWrite.getOutputStream(), cmdPath.isJustDisplayErr());
+				if (cmdPath.isJustDisplayErr() && lsErrorInfo != null) {
+					errorGobbler.setLsInfo(lsErrorInfo, lineNumErr, false);
+				}
+			} else if (lsErrorInfo != null) {
+				errorGobbler.setLsInfo(lsErrorInfo, lineNumErr, true);
+			} else {
+				errorGobbler.setOutputStream(System.err, false);
+			}
+		} else {
+			errorGobbler.setGetInputStream(true);
+		}
+	}
+	
 	/** 关闭输出流 */
-	private void closeOutStream(boolean isWriteStdTxt, boolean isWriteErrTxt) {
-		if (!getCmdInStdStream && stdOutPath != null) {
-			if (isWriteStdTxt) {
+	private void closeOutStream() {
+		if (!getCmdInStdStream) {
+			if (cmdPath.isJustDisplayStd()) {
 				if (isFinishedNormal()) {
 					outputGobbler.close(DateUtil.getNowTimeStr() + " Task Finish Normally");
 				} else {
@@ -519,8 +576,8 @@ public class CmdOperate extends RunProcess<String> {
 			}
 		}
 		
-		if (!getCmdInErrStream && stdErrPath != null) {
-			if (isWriteErrTxt) {
+		if (!getCmdInErrStream) {
+			if (cmdPath.isJustDisplayErr()) {
 				if(isFinishedNormal()) {
 					errorGobbler.close("Task Finish Normally");
 				} else {
@@ -532,7 +589,6 @@ public class CmdOperate extends RunProcess<String> {
 		}
 	}
 	
-	
 	/** 必须等程序启动后才能获得
 	 * 得到 输入给cmd 的 output流，可以往里面写东西
 	 */
@@ -542,63 +598,7 @@ public class CmdOperate extends RunProcess<String> {
 		}
 		return process.getStdIn();
 	}
-	
-	/** 是否将err写入外部指定的文件中，而不是写入cmd中的文件，同时会定时--约2秒， 刷新 输出文件<p>
-	 * 使用场景：cmd命令在std上会有标准输出和错误输出信息，那么我们希望将输出信息写入一个文本，<br>
-	 * 因为标准输出和错误输出的信息量一般不多，所以写入很长时间也不一定会刷新，那么我们这里就会<br>
-	 * 定时的刷新文本，以保证能及时看到输出信息结果
-	 * @param isWriteErrTxt 是否是写入文本并需要定时刷新
-	 * @param isWriteErrTips 是否需要每隔几分钟写一小段话以表示程序还在运行中
-	 */
-	private void setErrorStream(boolean isWriteErrTxt, boolean isWriteErrTips) {
-		errorGobbler = new StreamGobbler(process.getStdErr(), process);
-		if (!getCmdInErrStream) {
-			if (stdErrPath != null) {
-				FileOperate.createFolders(FileOperate.getPathName(stdErrPath));
-				//标准输出流不能被关闭
-				TxtReadandWrite txtWrite = new TxtReadandWrite(stdErrPath, true);
-				errorGobbler.setOutputStream(txtWrite.getOutputStream(), isWriteErrTxt, isWriteErrTips);
-				if (isWriteErrTxt && lsErrorInfo != null) {
-					errorGobbler.setLsInfo(lsErrorInfo, lineNumErr, false);
-				}
-			} else if (lsErrorInfo != null) {
-				errorGobbler.setLsInfo(lsErrorInfo, lineNumErr, true);
-			} else {
-				errorGobbler.setOutputStream(System.err, false, false);
-			}
-		} else {
-			errorGobbler.setGetInputStream(true);
-		}
-	}
 
-	/** 是否将std写入外部指定的文件中，而不是写入cmd中的文件，同时会定时--约2秒， 刷新 输出文件<p>
-	 * 使用场景：cmd命令在std上会有标准输出和错误输出信息，那么我们希望将输出信息写入一个文本，<br>
-	 * 因为标准输出和错误输出的信息量一般不多，所以写入很长时间也不一定会刷新，那么我们这里就会<br>
-	 * 定时的刷新文本，以保证能及时看到输出信息结果
-	 * @param isWriteStdTxt 是否是写入文本并需要定时刷新
-	 * @param isWriteStdTips 是否需要每隔几分钟写一小段话以表示程序还在运行中
-	 */
-	private void setStdStream(boolean isWriteStdTxt, boolean isWriteStdTips) {
-		outputGobbler = new StreamGobbler(process.getStdOut(), process);
-		if (!getCmdInStdStream) {
-			if (stdOutPath != null) {
-				FileOperate.createFolders(FileOperate.getPathName(stdOutPath));
-				//标准输出流不能被关闭
-				TxtReadandWrite txtWrite = new TxtReadandWrite(stdOutPath, true);
-				outputGobbler.setOutputStream(txtWrite.getOutputStream(), isWriteStdTxt, isWriteStdTips);
-				if (isWriteStdTxt && lsOutInfo != null) {
-					outputGobbler.setLsInfo(lsOutInfo, lineNumStd, false);
-				}
-			} else if (lsOutInfo != null) {
-				outputGobbler.setLsInfo(lsOutInfo, lineNumStd, false);
-			} else {
-				outputGobbler.setOutputStream(System.out, false, false);
-			}
-		} else {
-			outputGobbler.setGetInputStream(true);
-		}
-	}
-	
 	/** 运行，出错会抛出异常
 	 * @param info 输入异常的信息，譬如软件名，类似
 	 * bwa error: 这种，后面会附上具体运行的代码等
@@ -606,6 +606,9 @@ public class CmdOperate extends RunProcess<String> {
 	public void runWithExp(String info) {
 		run();
 		if (!isFinishedNormal()) {
+			if (!StringOperate.isRealNull(info) && !info.endsWith("\n")) {
+				info = info + "\n";
+			}
 			throw new ExceptionCmd(info, this);
 		}
 	}
@@ -635,11 +638,12 @@ public class CmdOperate extends RunProcess<String> {
 		}
 		
 		if (isFinishedNormal()) {
+			cmdPath.moveResultFile();
 			if (isStderrInfo) {
-				FileOperate.DeleteFileFolder(stdErrPath);
+				FileOperate.DeleteFileFolder(cmdPath.getSaveErrPath());
 			}
 			if (isStdoutInfo) {
-				FileOperate.DeleteFileFolder(stdOutPath);
+				FileOperate.DeleteFileFolder(cmdPath.getSaveStdPath());
 			}
 			FileOperate.DeleteFileFolder(outRunInfoFileName);
 		}

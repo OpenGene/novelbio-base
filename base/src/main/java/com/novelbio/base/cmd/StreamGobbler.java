@@ -39,9 +39,7 @@ public class StreamGobbler extends Thread {
 	boolean isStartWrite = false;
 	
 	/** 是否按照写入txt的格式来写入流 */
-	boolean isWriteToTxt = false;
-	/** 如果写入txt，是否写入提示信息，譬如每2分钟写入一个信息表示现在程序正在运行中 */
-	boolean isWriteTIPS = false;
+	boolean isJustDisplay = false;
 
 	
 	Timer timerFlush;
@@ -54,14 +52,12 @@ public class StreamGobbler extends Thread {
 	 *  指定一个out流，cmd的输出流就会定向到该流中<br>
 	 * 该方法和{@link #setGetInputStream(boolean)} 冲突
 	 * @param os 输出流
-	 * @param isWriteToTxt 是否按照写入txt的格式来写输出流，并且定时刷新
-	 * @param isWriteTIPS 当
+	 * @param isJustDisplay 是否仅用来展示。展示用的会以txt的格式来写输出流，并且定时刷新
 	 * true则表示会从输入流中逐行读取，然后写入 os，并且会定时刷新os，以保证能够及时看到输出文件中的内容
 	 */
-	public void setOutputStream(OutputStream os, boolean isWriteToTxt, boolean isWriteTIPS) {
+	public void setOutputStream(OutputStream os, boolean isJustDisplay) {
 		this.os = os;
-		this.isWriteToTxt = isWriteToTxt;
-		this.isWriteTIPS = isWriteTIPS;
+		this.isJustDisplay = isJustDisplay;
 	}
 
 	
@@ -88,7 +84,7 @@ public class StreamGobbler extends Thread {
 			if (os == null) {
 				exhaustInStream(is);
 			} else {
-				if (isWriteToTxt) {
+				if (isJustDisplay) {
 					initialTxtFlush();
 					
 					writeToTxt(is, os);
@@ -238,7 +234,7 @@ public class StreamGobbler extends Thread {
 	 * 如果本输出流没有东西，就不会把文字写进去
 	 *  */
 	public synchronized void close(String finishInfo) {
-		if (isWriteToTxt && isWriteTIPS) {
+		if (isJustDisplay) {
 			try {
 				if (isStartWrite) {
 					os.write((DateUtil.getNowTimeStr() + " " + finishInfo).getBytes());
