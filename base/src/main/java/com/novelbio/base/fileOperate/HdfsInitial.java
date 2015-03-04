@@ -27,7 +27,7 @@ public class HdfsInitial {
 		initial();
 	}
 	
-	private static void initial() {		
+	private static void initial() {
 		IntHdfsBaseHolder hdfsBase = new HdfsBaseHolderHadoop2();
 		((HdfsBaseHolderHadoop2)hdfsBase).setCorexml(PathDetail.getHdpCoreXml());
 		((HdfsBaseHolderHadoop2)hdfsBase).setHdfsxml(PathDetail.getHdpHdfsXml());

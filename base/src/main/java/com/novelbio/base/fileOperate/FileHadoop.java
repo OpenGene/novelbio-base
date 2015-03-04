@@ -391,7 +391,7 @@ public class FileHadoop extends File {
 		try {
 			String path = dest.getPath();
 			if (FileHadoop.isHdfs(path) || FileHadoop.isHdfs(path.substring(1, path.length()-2))) {
-				path = path.replace(HdfsInitial.getSymbol(), "");//TODO 也可以是 "hdfs:/"
+				path = path.replace(getHdfsSymbol(), "");//TODO 也可以是 "hdfs:/"
 			}
 			return fsHDFS.rename(dst, new Path(path));
 		} catch (IOException e) {
@@ -405,7 +405,7 @@ public class FileHadoop extends File {
 	public static String convertToHadoop(String hdfsPath) {
 		hdfsPath = FileOperate.removeSplashHead(hdfsPath, true);
 		if (hdfsPath.toLowerCase().startsWith(HdfsInitial.getHdfsLocalPath().toLowerCase())) {
-			hdfsPath = hdfsPath.replace(HdfsInitial.getHdfsLocalPath(), HdfsInitial.getSymbol());
+			hdfsPath = hdfsPath.replace(HdfsInitial.getHdfsLocalPath(), getHdfsSymbol());
 		}
 		return hdfsPath;
 	}
@@ -426,7 +426,7 @@ public class FileHadoop extends File {
 	 * 用{@link com.novelbio.base.fileOperate.FileHadoop#getHdfsSymbol()}替换<br>
 	 * 文件名前添加的HDFS的头，末尾没有"/" */
 	public static String getHdfsSymbol() {
-		return HdfsInitial.getSymbol();
+		return PathDetail.getHdpHdfsHeadSymbol();
 	}
 	
 	/** 
@@ -437,7 +437,7 @@ public class FileHadoop extends File {
 	 * @return
 	 */
 	public static String addHdfsHeadSymbol(String path) {
-		return HdfsInitial.getSymbol() + path;
+		return getHdfsSymbol() + path;
 	}
 	
 	/** 
@@ -456,10 +456,10 @@ public class FileHadoop extends File {
 			return false;
 		}
 		fileName = fileName.toLowerCase();
-		if (StringOperate.isRealNull(HdfsInitial.getSymbol())) {
+		if (StringOperate.isRealNull(getHdfsSymbol())) {
 			return false;
 		}
-		return fileName.startsWith(HdfsInitial.getSymbol()) ? true : false;
+		return fileName.startsWith(getHdfsSymbol()) ? true : false;
 	}
 
 	@Deprecated

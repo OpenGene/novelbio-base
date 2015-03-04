@@ -196,7 +196,6 @@ public class CmdPath {
 			return saveFilePath;
 		}
 	}
-	
 
 	public void setSaveErrPath(String saveErrPath, boolean isSaveErrTmp) {
 		this.saveErrPath = saveErrPath;
@@ -373,9 +372,13 @@ public class CmdPath {
 		return realCmd;
 	}
 	
-	/** 将cmd中需要定位到临时文件夹的信息修改过来，譬如
+	/**
+	 *  将cmd中需要定位到临时文件夹的信息修改过来，譬如
 	 * -output=/hdfs:/test.txt 修改为
 	 * -output=/home/novelbio/test.txt
+	 * @param stdOut
+	 * @param errOut
+	 * @param tmpCmd
 	 * @return
 	 */
 	private String convertToTmpPath(boolean stdOut, boolean errOut, String tmpCmd) {
