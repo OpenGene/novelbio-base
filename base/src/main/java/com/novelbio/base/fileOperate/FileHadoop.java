@@ -404,8 +404,8 @@ public class FileHadoop extends File {
 	/** 把 /media/nbfs这种改成hdfs的形式，如果不是/media/hdfs这种，就不要动 */
 	public static String convertToHadoop(String hdfsPath) {
 		hdfsPath = FileOperate.removeSplashHead(hdfsPath, true);
-		if (hdfsPath.toLowerCase().startsWith(HdfsInitial.getHdfsLocalPath().toLowerCase())) {
-			hdfsPath = hdfsPath.replace(HdfsInitial.getHdfsLocalPath(), getHdfsSymbol());
+		if (hdfsPath.toLowerCase().startsWith(getHdfsLocalPath().toLowerCase())) {
+			hdfsPath = hdfsPath.replace(getHdfsLocalPath(), getHdfsSymbol());
 		}
 		return hdfsPath;
 	}
@@ -444,7 +444,7 @@ public class FileHadoop extends File {
 	 * 用{@link com.novelbio.base.fileOperate.FileHadoop#getHdfsLocalPath()}替换<br>
 	 * hdfs挂载在本地硬盘的路径 */
 	public static String getHdfsLocalPath() {
-		return HdfsInitial.getHdfsLocalPath();
+		return PathDetail.getHdfsLocalPath();
 	}
 	
 	public static FileSystem getHadoopFileSystem() {

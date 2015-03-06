@@ -124,17 +124,9 @@ public class FileOperate {
 	 * @param pathAndName 文件路径及名称
 	 * @return
 	 */
-	public static boolean writeObjectToFile(Object object,String fileName){
-		OutputStream fs = null;
+	public static boolean writeObjectToFile(Object object,String fileName) {
+		OutputStream fs = getOutputStream(fileName, true);
 		try {
-			File file = getFile(fileName);
-			file.createNewFile();
-			if (file instanceof FileHadoop) {
-				FileHadoop fileHadoop = (FileHadoop) file;
-				fs = fileHadoop.getOutputStreamNew(true);
-			}else {
-				fs = new FileOutputStream(file,false);
-			}
 			SerializeKryo kryo =new SerializeKryo();
 			fs.write(kryo.write(object));
 			fs.flush();
@@ -153,16 +145,7 @@ public class FileOperate {
 	public static Object readFileAsObject(String fileName) {
 		InputStream fs = null;
 		try {
-			File file = getFile(fileName);
-			if (!file.exists()) {
-				return null;
-			}
-			if (file instanceof FileHadoop) {
-				FileHadoop fileHadoop = (FileHadoop) file;
-				fs = fileHadoop.getInputStream();
-			}else {
-				fs = new FileInputStream(file);
-			}
+			fs = getInputStream(fileName);
 			SerializeKryo kryo =new SerializeKryo();
 			return kryo.read(IOUtils.toByteArray(fs));
 		} catch (Exception e) {
@@ -943,12 +926,12 @@ public class FileOperate {
 				FileHadoop fileHadoop = (FileHadoop) file;
 				FSDataOutputStream fsHdfs = fileHadoop.getOutputStreamNew(cover);
 				fs = new OutputStreamHdfs(fsHdfs);
-			}else {
+			} else {
 				fs = new FileOutputStream(file, !cover);
 			}
 
 			return fs;
-		}catch(Exception e) {
+		} catch(Exception e) {
 			logger.error("get output stream error: " + filePath + "   is cover: " + cover, e);
 			e.printStackTrace();
 			return null;
@@ -1873,7 +1856,25 @@ public class FileOperate {
 		}
 		return true;
 	}
-
+	/**
+	 * 根据路径删除指定的目录或文件，无论存在与否
+	 * 
+	 * @param sPath
+	 *            要删除的目录或文件
+	 * @return 删除成功返回 true，否则返回 false
+	 * 不存在文件也返回true
+	 */
+	public static boolean DeleteFileFolder(File file) {
+		// 判断目录或文件是否存在
+		if (file.exists()) {
+			if (file.isDirectory()) {
+				return deleteDirectory(file);
+			} else {
+				return file.delete();
+			}
+		}
+		return true;
+	}
 	/**
 	 * 添加文件分割符
 	 * 
