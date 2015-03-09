@@ -1,14 +1,7 @@
 
-import java.util.ArrayList;
-import java.util.List;
+import org.apache.curator.framework.CuratorFramework;
 
-import com.novelbio.base.PathDetail;
-import com.novelbio.base.cmd.CmdOperate;
-import com.novelbio.base.dataOperate.TxtReadandWrite;
-import com.novelbio.base.fileOperate.FileHadoop;
-
-import org.apache.hadoop.yarn.applications.distributedshell.ApplicationMaster;
-import org.springframework.util.MultiValueMap;  
+import com.novelbio.base.curator.CuratorNBC;
 /**
  * Assumes mapr installed in /opt/mapr
  * 
@@ -26,25 +19,7 @@ import org.springframework.util.MultiValueMap;
  */
 public class MapRTest {
 	public static void main(String args[]) throws Exception {
-		TxtReadandWrite txtRead = new TxtReadandWrite("/home/novelbio/software/hadoop/etc/hadoop/core-site.xml");
-		TxtReadandWrite txtWrite = new TxtReadandWrite("/hdfs:/nbCloud/testFile", true);
-		txtWrite.writefileln("setstgfsaerae");
-		for (String content : txtRead.readlines()) {
-			txtWrite.writefileln(content);
-		}
-		txtRead.close();
-//		txtWrite.close();
-		
-		List<String> lsCmd = new ArrayList<String>();
-		lsCmd.add("ifconfig");
-		
-		CmdOperate cmdOperate = new CmdOperate(lsCmd);
-		cmdOperate.setGetLsStdOut();
-		cmdOperate.run();
-		for (String string : cmdOperate.getLsStdOut()) {
-			txtWrite.writefileln(string);
-		}
-		txtWrite.flush();
-		txtWrite.close();
+		CuratorFramework client = CuratorNBC.getClient();
+		client.create().forPath("/novelbiosss");
 	}
 }
