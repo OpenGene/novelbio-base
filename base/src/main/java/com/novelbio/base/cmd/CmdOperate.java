@@ -217,17 +217,21 @@ public class CmdOperate extends RunProcess<String> {
 	 * 本设置会被cmd中自带的 > 重定向覆盖
 	 * @param stdOutPath
 	 * @param isSaveTmp 是否先保存为临时文件，等结束后再修改回来。如果只是随便看看结果就设置为false
+	 * @param isDelete 完成后是否删除输出文件
 	 */
-	public void setStdOutPath(String stdOutPath, boolean isSaveTmp) {
+	public void setStdOutPath(String stdOutPath, boolean isSaveTmp, boolean isDelete) {
 		cmdPath.setSaveFilePath(stdOutPath, isSaveTmp);
+		this.isStdoutInfo = isDelete;
 	}
 	/** 设定标准错误流，如果是这里指定，则会即时刷新<br>
 	 * 本设置会被cmd中自带的 2> 重定向覆盖
 	 * @param stdErrPath
 	 * @param isSaveTmp 是否先保存为临时文件，等结束后再修改回来。如果只是随便看看结果就设置为false
+	 * @param isDelete 完成后是否删除输出文件
 	 */
-	public void setStdErrPath(String stdErrPath, boolean isSaveTmp) {
+	public void setStdErrPath(String stdErrPath, boolean isSaveTmp, boolean isDelete) {
 		cmdPath.setSaveErrPath(stdErrPath, isSaveTmp);
+		this.isStderrInfo = isDelete;
 	}
 	/** 设定标准错误流，如果是这里指定，则会即时刷新<br>
 	 * 本设置会被cmd中自带的 2> 重定向覆盖
@@ -702,6 +706,10 @@ public class CmdOperate extends RunProcess<String> {
 		}
 		
 		return input;
+	}
+	
+	public static String getCmdTmpPath() {
+		return CmdPath.tmpPath;
 	}
 	
 	static class FinishFlag {
