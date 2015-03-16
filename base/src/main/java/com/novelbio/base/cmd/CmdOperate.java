@@ -761,6 +761,7 @@ class CmdRunInfo {
 						for (ProcessInfo processInfo : lsProcInfo) {
 							txtWrite.writefileln(processInfo.toString());
 						}
+						txtWrite.flush();
 					} catch (Exception e) {e.printStackTrace(); }
 					txtWrite.flush();
 				}

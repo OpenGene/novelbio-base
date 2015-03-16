@@ -43,4 +43,13 @@ public class CuratorNBC {
 	public static InterProcessMutex getInterProcessMutex(String path) {
 		return new InterProcessMutex(getClient(), FileOperate.addSep(PathDetail.getZookeeperLock()) + path);
 	}
+	
+	public static void deleteInterProcessMutexPath(String path) {
+		try {
+			getClient().delete().forPath(FileOperate.addSep(PathDetail.getZookeeperLock()) + path);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }
