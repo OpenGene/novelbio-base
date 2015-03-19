@@ -21,14 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package net.sf.samtools;
+package htsjdk.samtools;
 
-import net.sf.samtools.util.BinaryCodec;
-import net.sf.samtools.util.BlockCompressedOutputStream;
+import htsjdk.samtools.util.BinaryCodec;
+import htsjdk.samtools.util.BlockCompressedOutputStream;
 
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.OutputStream;
+
+import com.novelbio.base.StringOperate;
 
 /**
  * Concrete implementation of SAMFileWriter for writing gzipped BAM files.
@@ -70,7 +72,10 @@ public class BAMFileWriter extends SAMFileWriterImpl {
         outputBinaryCodec.setOutputFileName(fileName);
     }
     //新添加的方法
-    public BAMFileWriter(final OutputStream os, final String fileName, final int compressionLevel) {
+    public BAMFileWriter(final OutputStream os, String fileName, final int compressionLevel) {
+    if (StringOperate.isRealNull(fileName)) {
+		fileName = null;
+	}
         blockCompressedOutputStream = new BlockCompressedOutputStream(os, fileName, compressionLevel);
         outputBinaryCodec = new BinaryCodec(new DataOutputStream(blockCompressedOutputStream));
         outputBinaryCodec.setOutputFileName(fileName);

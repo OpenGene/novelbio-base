@@ -21,17 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package net.sf.samtools;
+package htsjdk.samtools;
+
+import htsjdk.samtools.util.BlockCompressedOutputStream;
+import htsjdk.samtools.util.IOUtil;
+import htsjdk.samtools.util.Md5CalculatingOutputStream;
+import htsjdk.samtools.util.RuntimeIOException;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-
-import net.sf.samtools.util.BlockCompressedOutputStream;
-import net.sf.samtools.util.IOUtil;
-import net.sf.samtools.util.Md5CalculatingOutputStream;
-import net.sf.samtools.util.RuntimeIOException;
 
 import com.novelbio.base.fileOperate.FileOperate;
 
@@ -168,6 +168,28 @@ public class SAMFileWriterFactory {
         }
     }
 
+    /**
+    *
+    * Create a BAMFileWriter that is ready to receive SAMRecords.
+    * @param header entire header. Sort order is determined by the sortOrder property of this arg.
+    * @param presorted if true, SAMRecords must be added to the SAMFileWriter in order that agrees with header.sortOrder.
+    * @param outputFile where to write the output.
+    * @param compressionLevel Override default compression level with the given value, between 0 (fastest) and 9 (smallest).
+    */
+   //新添加的方法
+   public SAMFileWriter makeBAMWriter(final SAMFileHeader header, final boolean presorted, OutputStream outStream,
+                                      final int compressionLevel) {      	
+       final BAMFileWriter ret = createMd5File
+               ? new BAMFileWriter(new Md5CalculatingOutputStream(outStream,
+               		""), "", compressionLevel)
+               : new BAMFileWriter(outStream, "", compressionLevel);
+       if (this.tmpDir!=null) ret.setTempDirectory(this.tmpDir);
+       initializeBAMWriter(ret, header, presorted, createIndex);
+
+       if (this.useAsyncIo) return new AsyncSAMFileWriter(ret, this.asyncOutputBufferSize);
+       else return ret;
+   }
+    
     private void initializeBAMWriter(final BAMFileWriter writer, final SAMFileHeader header, final boolean presorted, final boolean createIndex) {
         writer.setSortOrder(header.getSortOrder(), presorted);
         if (maxRecordsInRam != null) {

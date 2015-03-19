@@ -1,5 +1,7 @@
 package com.novelbio.base.dataOperate;
 
+import htsjdk.samtools.seekablestream.SeekableStream;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.Closeable;
@@ -14,8 +16,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.zip.GZIPInputStream;
-
-import net.sf.samtools.seekablestream.SeekableStream;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;

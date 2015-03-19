@@ -366,9 +366,14 @@
   			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>net.sf</groupId>
-			<artifactId>picard</artifactId>
-			<version>1.63</version>
+  			<groupId>org.broadinstitute</groupId>
+  			<artifactId>picard</artifactId>
+  			<version>1.128</version>
+		</dependency>
+		<dependency>
+  			<groupId>org.broadinstitute</groupId>
+  			<artifactId>picard-lib</artifactId>
+ 			<version>1.128</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.data</groupId>
@@ -477,11 +482,21 @@
 			<artifactId>cglib</artifactId>
 			<version>3.0</version>
 		</dependency>
-		<dependency>
-			<groupId>com.novelbio</groupId>
-			<artifactId>sam</artifactId>
-			<version>1.113</version>
-		</dependency>
+      <dependency>
+         <groupId>org.broadinstitute</groupId>           
+         <artifactId>htsjdk</artifactId>
+         <version>1.120-SNAPSHOT</version>
+         <exclusions>
+                    <!-- The jdk15 classfier seems to throw off the normal dependency resolution,
+                    leading to both 6.8 and 5.0-jdk15 on the classpath, then leading to an old
+                    version testng loading, as seen by the super old TestNG4751Configurator.
+                    -->
+         <exclusion>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+         </exclusion>
+         </exclusions>
+     </dependency>
 		<dependency>
 			<groupId>org.powermock</groupId>
 			<artifactId>powermock-api-mockito</artifactId>

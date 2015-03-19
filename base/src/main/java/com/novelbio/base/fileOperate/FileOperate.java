@@ -1,5 +1,9 @@
 package com.novelbio.base.fileOperate;
 
+import htsjdk.samtools.seekablestream.ISeekableStreamFactory;
+import htsjdk.samtools.seekablestream.SeekableStream;
+import htsjdk.samtools.seekablestream.SeekableStreamFactory;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
@@ -10,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.lang.reflect.Proxy;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -18,23 +21,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
-import net.sf.samtools.seekablestream.ISeekableStreamFactory;
-import net.sf.samtools.seekablestream.SeekableFileStream;
-import net.sf.samtools.seekablestream.SeekableHDFSstream;
-import net.sf.samtools.seekablestream.SeekableStream;
-import net.sf.samtools.seekablestream.SeekableStreamFactory;
-
 import org.apache.commons.io.IOUtils;
-import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileAlreadyExistsException;
-import org.apache.hadoop.fs.FileContext;
-import org.apache.hadoop.fs.ParentNotDirectoryException;
-import org.apache.hadoop.fs.UnsupportedFileSystemException;
-import org.apache.hadoop.security.AccessControlException;
 import org.apache.log4j.Logger;
-import org.apache.tools.ant.types.FileList.FileName;
-import org.aspectj.weaver.patterns.IfPointcut;
 
 import com.novelbio.base.SerializeKryo;
 import com.novelbio.base.StringOperate;

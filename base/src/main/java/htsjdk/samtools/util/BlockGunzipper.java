@@ -21,16 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package net.sf.samtools.util;
+package htsjdk.samtools.util;
+
+import htsjdk.samtools.SAMFormatException;
+import htsjdk.samtools.util.BlockCompressedStreamConstants;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.zip.CRC32;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
-
-import net.sf.samtools.SAMFormatException;
-import net.sf.samtools.util.BlockCompressedStreamConstants;
 // 没有改动
 /**
  * Alternative to GZIPInputStream, for decompressing GZIP blocks that are already loaded into a byte[].
