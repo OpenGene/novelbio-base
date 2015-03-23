@@ -88,7 +88,7 @@ class TxtWrite implements Closeable {
 		} else if (txtTtype == TXTtype.Gzip) {
 			outputStream = new BufferedOutputStream(new GZIPOutputStream(outputStreamRaw, TxtReadandWrite.bufferLen), TxtReadandWrite.bufferLen);
 		} else if (txtTtype == TXTtype.Bzip2) {
-			outputStream = new BufferedOutputStream(new BZip2CompressorOutputStream(outputStreamRaw, TxtReadandWrite.bufferLen), TxtReadandWrite.bufferLen);
+			outputStream = new BufferedOutputStream(new BZip2CompressorOutputStream(outputStreamRaw), TxtReadandWrite.bufferLen);
 		} else if (txtTtype == TXTtype.Zip) {
 			zipOutputStream = new ZipArchiveOutputStream(outputStreamRaw);
 			ZipArchiveEntry entry = new ZipArchiveEntry(FileOperate.getFileNameSep(txtfile)[0]);

@@ -55,9 +55,9 @@ public class TxtReadandWrite implements Closeable {
 		public static TXTtype getTxtType(String fileName) {
 			TXTtype txtTtype = null;
 			fileName = fileName.toLowerCase().trim();
-			if (fileName.endsWith(".gz")) {
+			if (fileName.endsWith(".gz") || fileName.endsWith("gzip")) {
 				txtTtype = TXTtype.Gzip;
-			} else if (fileName.endsWith(".bz2")) {
+			} else if (fileName.endsWith(".bz2") || fileName.endsWith("bzip2")) {
 				txtTtype = TXTtype.Bzip2;
 			} else if (fileName.endsWith("zip")) {
 				txtTtype = TXTtype.Zip;

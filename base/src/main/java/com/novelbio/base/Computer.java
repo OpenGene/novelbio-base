@@ -107,7 +107,7 @@ public class Computer implements Serializable {
 		String ip = "";
 		List<String> lsIp = new ArrayList<String>();
 		List<String> lsCmd = new ArrayList<>();
-		lsCmd.add("ifconfig");
+		lsCmd.add("/sbin/ifconfig");
 		CmdOperate cmdOperate = new CmdOperate(lsCmd);
 		cmdOperate.setGetLsStdOut();
 		cmdOperate.run();
