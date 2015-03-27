@@ -10,5 +10,10 @@ public enum EnumProcessStatus {
 	/** 僵死状态 */
 	Z,
 	/** 停止或跟踪状态 */
-	T
+	T,
+	/** 退出状态，进程即将被销毁 */
+	X,
+	
+	unKnown
+	
 }

@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.novelbio.base.dataStructure.ArrayOperate;
 
@@ -14,6 +16,7 @@ import com.novelbio.base.dataStructure.ArrayOperate;
  *
  */
 public class ProcessInfo {
+	private static final Logger logger = Logger.getLogger(ProcessInfo.class);
 	/** cpu使用百分比 */
 	double cpuUsage;
 	/** 内存使用百分比 */
@@ -28,6 +31,7 @@ public class ProcessInfo {
 	int ppid;
 	/** 进程状态 */
 	EnumProcessStatus status;
+	String processStatus;
 	/** 运行时间，单位为毫秒 */
 	long runtime;
 
@@ -55,7 +59,13 @@ public class ProcessInfo {
 			} else if (title.equals("%MEM")) {
 				memUsage = Double.parseDouble(info);
 			} else if (title.equals("S")) {
-				status = EnumProcessStatus.valueOf(info);
+				processStatus = info;
+				try {
+					status = EnumProcessStatus.valueOf(info);
+				} catch (Exception e) {
+					logger.error("find unknown process status: " + status);
+					status = EnumProcessStatus.unKnown;
+				}				
 			} else if (title.equals("COMMAND")) {
 				cmdName = info;
 			} else if (title.equals("PPID")) {
@@ -144,7 +154,11 @@ public class ProcessInfo {
 		lsResult.add(ppid + "");
 		lsResult.add(cpuUsage + "");
 		lsResult.add(memUsage + "");
-		lsResult.add(status + "");
+		if (status == EnumProcessStatus.unKnown) {
+			lsResult.add(processStatus + "needToCheck");
+		} else {
+			lsResult.add(status + "");
+		}
 		lsResult.add(runtime + "");
 		lsResult.add(cmdName);
 		return ArrayOperate.cmbString(lsResult.toArray(new String[0]), "\t");
@@ -195,6 +209,7 @@ public class ProcessInfo {
 
 		CmdOperate cmdOperate = new CmdOperate(lsCmd);
 		cmdOperate.setGetLsStdOut();
+		cmdOperate.setNeedLog(false);
 		cmdOperate.run();
 		List<String> lsStd = cmdOperate.getLsStdOut();
 		return getLsPid(lsStd, pid, isGetChild);

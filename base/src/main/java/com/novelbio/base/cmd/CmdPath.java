@@ -419,6 +419,10 @@ public class CmdPath {
 	 * @param isDelFile 如果出错是否删除原来的文件
 	 */
 	public void moveFileOut() {
+		if (!mapPath2TmpPath.isEmpty()) {
+			logger.info("start move files");
+		}
+		
 		for (String outPath : mapPath2TmpPath.keySet()) {
 			String outTmpPath = mapPath2TmpPath.get(outPath);
 			
@@ -428,9 +432,10 @@ public class CmdPath {
 				if (setInput.contains(filePathResult) && FileOperate.isFileExistAndBigThanSize(filePathResult, 0)) {
 					continue;
 				}
+				logger.info("move file from  " + filePath + "  to  " + filePathResult);
 				boolean isSucess = FileOperate.moveFile(true, filePath, filePathResult);
 				if (!isSucess) {
-					logger.error("cannot copy " + filePath + " to " + filePathResult);
+					logger.error("cannot move file from  " + filePath + " to " + filePathResult);
 					throw new ExceptionCmd("cannot copy " + filePath + " to " + filePathResult);
 				}
 			}
@@ -440,7 +445,11 @@ public class CmdPath {
 	
 	/** 删除中间文件，会把临时的input文件也删除 */
 	public void deleteTmpFile() {
+		if (!mapPath2TmpPath.isEmpty()) {
+			logger.info("start delete files");
+		}
 		for (String tmpPath : mapPath2TmpPath.values()) {
+			logger.info("delete file: " + tmpPath);
 			FileOperate.DeleteFileFolder(tmpPath);
 		}
 	}

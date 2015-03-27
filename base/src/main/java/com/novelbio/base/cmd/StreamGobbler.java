@@ -18,7 +18,7 @@ import com.novelbio.base.dataOperate.TxtReadandWrite;
 public class StreamGobbler extends Thread {
 	private static final Logger logger = Logger.getLogger(StreamGobbler.class);
 	/** 每2000ms刷新一次txt文本，这是因为写入错误行会很慢，刷新就可以做到及时看结果 */
-	private static final int timeTxtFlush = 5000;
+	private static final int timeTxtFlush = 1000;
 	
 	/** 运行进程的pid */
 	IntProcess process;
@@ -220,8 +220,10 @@ public class StreamGobbler extends Thread {
 	public synchronized void close() {
 		//不用关闭输入流，因为process会自动关闭该流
 		try {
-			os.flush();
-			os.close();
+			if (os != System.out) {
+				os.flush();
+				os.close();	
+			}
 		} catch (Exception e) { }
 	}
 	/** 

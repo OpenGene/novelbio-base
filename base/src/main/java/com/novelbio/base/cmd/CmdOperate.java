@@ -31,7 +31,8 @@ import com.novelbio.base.multithread.RunProcess;
  */
 public class CmdOperate extends RunProcess<String> {
 	private static final Logger logger = Logger.getLogger(CmdOperate.class);
-
+	/** 一般都需要打印日志的，除非像 ps -ef 类似的工作就不需要打印日志 */
+	boolean needLog = true;
 	/** 进程 */
 	IntProcess process;
 	
@@ -203,6 +204,10 @@ public class CmdOperate extends RunProcess<String> {
 		cmdPath.setLsCmd(lsCmd);
 	}
 	
+	protected void setNeedLog(boolean isNeedLog) {
+		this.needLog = isNeedLog;
+	}
+	
 	/** 设定输出信息，默认保存在stdout文件夹下 */
 	public void setOutRunInfoFileName(String outRunInfoFileName) {
 		if (outRunInfoFileName == null) {
@@ -217,20 +222,22 @@ public class CmdOperate extends RunProcess<String> {
 	 * 本设置会被cmd中自带的 > 重定向覆盖
 	 * @param stdOutPath
 	 * @param isSaveTmp 是否先保存为临时文件，等结束后再修改回来。如果只是随便看看结果就设置为false
-	 * @param isDelete 完成后是否删除输出文件
+	 * @param isDelete 完成后是否删除输出文件, 如果需要删除文件，则认为该文件只是展示信息使用，会采用txt模式输出
 	 */
 	public void setStdOutPath(String stdOutPath, boolean isSaveTmp, boolean isDelete) {
 		cmdPath.setSaveFilePath(stdOutPath, isSaveTmp);
+		cmdPath.setJustDisplayErr(isDelete);
 		this.isStdoutInfo = isDelete;
 	}
 	/** 设定标准错误流，如果是这里指定，则会即时刷新<br>
 	 * 本设置会被cmd中自带的 2> 重定向覆盖
 	 * @param stdErrPath
 	 * @param isSaveTmp 是否先保存为临时文件，等结束后再修改回来。如果只是随便看看结果就设置为false
-	 * @param isDelete 完成后是否删除输出文件
+	 * @param isDelete 完成后是否删除输出文件, 如果需要删除文件，则认为该文件只是展示信息使用，会采用txt模式输出
 	 */
 	public void setStdErrPath(String stdErrPath, boolean isSaveTmp, boolean isDelete) {
 		cmdPath.setSaveErrPath(stdErrPath, isSaveTmp);
+		cmdPath.setJustDisplayErr(isDelete);
 		this.isStderrInfo = isDelete;
 	}
 	/** 设定标准错误流，如果是这里指定，则会即时刷新<br>
@@ -497,14 +504,19 @@ public class CmdOperate extends RunProcess<String> {
 		cmdRunInfo.startWriteRunInfo();
 
 		finishFlag.flag = process.waitFor();
+		
+		if (needLog) logger.info("finish running cmd, finish flag is: " + finishFlag.flag);
+		
 		outputGobbler.join();
 		errorGobbler.join();
+		
+		if (needLog) logger.info("close out stream");
+		
 		closeOutStream();
 		cmdRunInfo.setFinish();
-		
+
 		//不管是否跑成功，都移出文件夹
 		cmdPath.moveFileOut();
-		
 		cmdPath.deleteTmpFile();
 	}
 	
@@ -575,7 +587,7 @@ public class CmdOperate extends RunProcess<String> {
 				} else {
 					outputGobbler.close(DateUtil.getNowTimeStr() + " Task Finish AbNormally");
 				}
-			} else {
+			} else if(cmdPath.getSaveStdPath() != null) {
 				outputGobbler.close();
 			}
 		}
@@ -587,7 +599,7 @@ public class CmdOperate extends RunProcess<String> {
 				} else {
 					errorGobbler.close("Task Finish AbNormally");
 				}
-			} else {
+			} else if(cmdPath.getSaveErrPath() != null) {
 				errorGobbler.close();
 			}
 		}
@@ -627,7 +639,8 @@ public class CmdOperate extends RunProcess<String> {
 	@Override
 	protected void running() {
 		String cmd = "";
-		logger.info("实际运行命令: " + getCmdExeStr());
+		String realCmd = getCmdExeStr();
+		logger.info("run cmd: " + realCmd);
 		DateUtil dateTime = new DateUtil();
 		dateTime.setStartTime();
 		try {
@@ -718,6 +731,7 @@ public class CmdOperate extends RunProcess<String> {
 }
 
 class CmdRunInfo {
+	private static final Logger logger = Logger.getLogger(CmdRunInfo.class);
 	/** 每分钟写一个信息到文本中，意思该程序还在运行中，主要是针对RNAmapping这种等待时间很长的程序 */
 	private static final int timeTxtWiteTips = 120000;
 	/** 运行进程的pid */
@@ -734,6 +748,7 @@ class CmdRunInfo {
 	}
 	public void setFinish() {
 		if (timerWriteTips != null) {
+			logger.info("stop RunInfo timer");
 			timerWriteTips.cancel();
 		}
 		
