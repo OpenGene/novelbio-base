@@ -300,7 +300,15 @@ public class FileHadoop extends File {
 		return files;
 	}
 	
-    public FileHadoop[] listFiles(FilenameFilter filter) {
+	public boolean canWrite() {
+		return true;
+	}
+	
+	public boolean canRead() {
+		return true;
+	}
+
+	public FileHadoop[] listFiles(FilenameFilter filter) {
         FileHadoop ss[] = listFiles();
         if (ss == null) return null;
         ArrayList<FileHadoop> files = new ArrayList<>();

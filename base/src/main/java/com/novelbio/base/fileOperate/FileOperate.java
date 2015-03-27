@@ -885,9 +885,13 @@ public class FileOperate {
 		return bea;
 	}
 	
-	public static SeekableStream getInputStreamSeekable(String filePath) throws IOException {
+	public static SeekableStream getInputStreamSeekable(String filePath) throws FileNotFoundException {
 		ISeekableStreamFactory seekableStreamFactory = SeekableStreamFactory.getInstance();
-		return seekableStreamFactory.getStreamFor(filePath);
+		try {
+			return seekableStreamFactory.getStreamFor(filePath);
+		} catch (Exception e) {
+			throw new FileNotFoundException("cannot file file: " + filePath);
+		}
 	}
 	
 	public static InputStream getInputStream(String filePath) throws IOException {
@@ -898,12 +902,16 @@ public class FileOperate {
         }
 	}
 	
-	public static InputStream getInputStream(File file) throws IOException {
+	public static InputStream getInputStream(File file) throws FileNotFoundException {
 		 if (file instanceof FileHadoop) {
 			 return ((FileHadoop)file).getInputStream();
        } else {
        	return new FileInputStream(file);
        }
+	}
+	
+	public static OutputStream getOutputStream(String filePath) {
+		return getOutputStream(filePath, true);
 	}
 	
 	public static OutputStream getOutputStream(String filePath, boolean cover) {
@@ -924,6 +932,10 @@ public class FileOperate {
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	public static OutputStream getOutputStream(File file) {
+		return getOutputStream(file, true);
 	}
 	
 	public static OutputStream getOutputStream(File file, boolean cover) {

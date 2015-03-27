@@ -71,7 +71,7 @@ public class SeekableStreamFactory{
             return getStreamFor(url.toExternalForm());
         }
 
-        public SeekableStream getStreamFor(final String path) throws IOException {
+        public SeekableStream getStreamFor(final String path) throws IOException{
             // todo -- add support for SeekableBlockInputStream
 
             if (path.startsWith("http:") || path.startsWith("https:")) {
