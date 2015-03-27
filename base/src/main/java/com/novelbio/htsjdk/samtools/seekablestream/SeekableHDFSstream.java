@@ -1,7 +1,6 @@
-package htsjdk.samtools.seekablestream;
+package com.novelbio.htsjdk.samtools.seekablestream;
 
 import java.io.IOException;
-
 
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.log4j.Logger;

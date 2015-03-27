@@ -1,7 +1,5 @@
 package com.novelbio.base.dataOperate;
 
-import htsjdk.samtools.seekablestream.SeekableStream;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.Closeable;
@@ -25,6 +23,7 @@ import org.apache.log4j.Logger;
 import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
 import com.novelbio.base.dataStructure.PatternOperate;
 import com.novelbio.base.fileOperate.FileOperate;
+import com.novelbio.htsjdk.samtools.seekablestream.SeekableStream;
 
 class TxtRead implements Closeable {
 	private static final Logger logger = Logger.getLogger(TxtRead.class);

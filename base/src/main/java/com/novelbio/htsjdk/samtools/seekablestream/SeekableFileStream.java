@@ -15,9 +15,12 @@
  * BE ADVISED, SHALL HAVE OTHER REASON TO KNOW, OR IN FACT SHALL KNOW OF THE POSSIBILITY OF THE
  * FOREGOING.
  */
-package htsjdk.samtools.seekablestream;
+package com.novelbio.htsjdk.samtools.seekablestream;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;

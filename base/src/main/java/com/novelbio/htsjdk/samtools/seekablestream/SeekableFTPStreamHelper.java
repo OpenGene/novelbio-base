@@ -16,16 +16,16 @@
  * SHALL KNOW OF THE POSSIBILITY OF THE FOREGOING.
  */
 
-package htsjdk.samtools.seekablestream;
-
-import htsjdk.samtools.util.ftp.FTPClient;
-import htsjdk.samtools.util.ftp.FTPReply;
-import htsjdk.samtools.util.ftp.FTPUtils;
+package com.novelbio.htsjdk.samtools.seekablestream;
 
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+
+import com.novelbio.htsjdk.samtools.util.ftp.FTPClient;
+import com.novelbio.htsjdk.samtools.util.ftp.FTPReply;
+import com.novelbio.htsjdk.samtools.util.ftp.FTPUtils;
 
 /**
  * @author jrobinso

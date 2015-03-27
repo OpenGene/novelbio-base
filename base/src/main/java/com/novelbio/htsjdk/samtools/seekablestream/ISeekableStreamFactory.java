@@ -1,4 +1,4 @@
-package htsjdk.samtools.seekablestream;
+package com.novelbio.htsjdk.samtools.seekablestream;
 
 import java.io.IOException;
 import java.net.URL;

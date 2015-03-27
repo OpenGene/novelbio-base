@@ -1,9 +1,5 @@
 package com.novelbio.base.fileOperate;
 
-import htsjdk.samtools.seekablestream.ISeekableStreamFactory;
-import htsjdk.samtools.seekablestream.SeekableStream;
-import htsjdk.samtools.seekablestream.SeekableStreamFactory;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
@@ -31,6 +27,9 @@ import com.novelbio.base.cmd.CmdOperate;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.dataStructure.PatternOperate;
 import com.novelbio.base.dataStructure.PatternOperate.PatternUnit;
+import com.novelbio.htsjdk.samtools.seekablestream.ISeekableStreamFactory;
+import com.novelbio.htsjdk.samtools.seekablestream.SeekableStream;
+import com.novelbio.htsjdk.samtools.seekablestream.SeekableStreamFactory;
 
 public class FileOperate {
 	private static Logger logger = Logger.getLogger(FileOperate.class);

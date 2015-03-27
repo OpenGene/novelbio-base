@@ -21,9 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package htsjdk.samtools.seekablestream;
-
-import htsjdk.samtools.util.HttpUtils;
+package com.novelbio.htsjdk.samtools.seekablestream;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -31,6 +29,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.Proxy;
 import java.net.URL;
+
+import com.novelbio.htsjdk.samtools.util.HttpUtils;
 
 /**
  * @author jrobinso
