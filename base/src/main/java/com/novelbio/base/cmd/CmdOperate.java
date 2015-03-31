@@ -314,7 +314,7 @@ public class CmdOperate extends RunProcess<String> {
 	 * 如将 /hdfs:/fseresr 改为 /media/hdfs/fseresr<br>
 	 * 只有类似varscan这种我们修改了代码，让其兼容hdfs的程序才不需要修改
 	 */
-	public void set(boolean isConvertHdfs2Loc) {
+	public void setIsConvertHdfsToLocal(boolean isConvertHdfs2Loc) {
 		cmdPath.setConvertHdfs2Loc(isConvertHdfs2Loc);
 	}
 	

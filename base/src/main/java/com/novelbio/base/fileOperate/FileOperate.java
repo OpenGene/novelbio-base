@@ -90,6 +90,32 @@ public class FileOperate {
 	 * @param filePath
 	 * @return
 	 */
+	public static File getFile(String filePathParent, String name) {
+		if (!StringOperate.isRealNull(filePathParent.trim())) {
+			filePathParent = FileOperate.addSep(filePathParent);
+		}
+		String path = filePathParent + name;
+		return getFile(path);
+	}
+	
+	/**
+	 * 根据不同的文件类型得到File
+	 * @param filePath
+	 * @return
+	 */
+	public static File getFile(File fileParent, String name) {
+		if (fileParent instanceof FileHadoop) {
+			return new FileHadoop(FileOperate.addSep(fileParent.getAbsolutePath()) + name);
+		} else {
+			return new File(fileParent, name);
+		}
+	}
+	
+	/**
+	 * 根据不同的文件类型得到File
+	 * @param filePath
+	 * @return
+	 */
 	public static File getFile(String filePath) {
 		File file = null;
 		boolean isHdfs = FileHadoop.isHdfs(filePath);
@@ -934,27 +960,21 @@ public class FileOperate {
 		}
 	}
 
-	public static OutputStream getOutputStream(File file) {
+	public static OutputStream getOutputStream(File file) throws FileNotFoundException {
 		return getOutputStream(file, true);
 	}
 	
-	public static OutputStream getOutputStream(File file, boolean cover) {
-		try {
-			OutputStream fs = null;
-			if (file instanceof FileHadoop) {
-				FileHadoop fileHadoop = (FileHadoop) file;
-				FSDataOutputStream fsHdfs = fileHadoop.getOutputStreamNew(cover);
-				fs = new OutputStreamHdfs(fsHdfs);
-			}else {
-				fs = new FileOutputStream(file, !cover);
-			}
-
-			return fs;
-		}catch(Exception e) {
-			logger.error("get output stream error: " + file.getAbsolutePath() + "   is cover: " + cover, e);
-			e.printStackTrace();
-			return null;
+	public static OutputStream getOutputStream(File file, boolean cover) throws FileNotFoundException {
+		OutputStream fs = null;
+		if (file instanceof FileHadoop) {
+			FileHadoop fileHadoop = (FileHadoop) file;
+			FSDataOutputStream fsHdfs = fileHadoop.getOutputStreamNew(cover);
+			fs = new OutputStreamHdfs(fsHdfs);
+		}else {
+			fs = new FileOutputStream(file, !cover);
 		}
+
+		return fs;
 	}
 	
 	public static boolean copyFileFolder(String oldPathFile, String newPathFile, boolean cover) {

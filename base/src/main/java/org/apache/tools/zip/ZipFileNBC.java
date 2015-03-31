@@ -33,9 +33,9 @@ import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 import java.util.zip.ZipException;
 
-import org.apache.tools.zip.RandomFileInt.RandomFileFactory;
-
 import com.novelbio.base.fileOperate.FileOperate;
+import com.novelbio.base.fileOperate.RandomFileInt;
+import com.novelbio.base.fileOperate.RandomFileInt.RandomFileFactory;
 
 /**
  * 修正apache的ZipFile类，让其兼容hdfs上的zip文件

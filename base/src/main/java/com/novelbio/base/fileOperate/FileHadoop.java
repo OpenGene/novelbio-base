@@ -14,7 +14,6 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hdfs.server.namenode.status_jsp;
 
 import com.novelbio.base.PathDetail;
 import com.novelbio.base.StringOperate;
@@ -31,35 +30,34 @@ public class FileHadoop extends File {
 	}
 	
 	/**
-	 * 输入另一个fileHadoop的内容，仅获得其配置信息，不获得其具体文件名
-	 * @param fileHadoop
+	 * initial a FileHadoop object from the path<br>
+	 * @param hdfsFilePath like "/hdfs:/your/path/htsjdk.jar"  <br>
+	 *  "/hdfs:" is the "hdfsHeadSymbol" in configure file src/java/hdfs/config.properties 
 	 * @throws IOException 
 	 */
 	public FileHadoop(String hdfsFilePath) {
 		super(hdfsFilePath = copeToHdfsHeadSymbol(hdfsFilePath));
 		this.fsHDFS = HdfsInitial.getFileSystem();
 		hdfsFilePath = hdfsFilePath.replace(FileHadoop.getHdfsSymbol(), "");
-		//TODO 以后就应该是
 		dst = new Path(hdfsFilePath);
 		this.fileName = hdfsFilePath;
 		init();
 	}
 	
 	/**
-	 * 输入另一个fileHadoop的内容，仅获得其配置信息，不获得其具体文件名
-	 * @param fileHadoop
-	 * @throws IOException 
+	 * 
+	 * @param fileName like "/hdfs:/your/path"  <br>
+	 *  "/hdfs:" is the "hdfsHeadSymbol" in configure file src/java/hdfs/config.properties 
+	 * @param path
 	 */
 	public FileHadoop(String fileName, Path path) {
 		super(copeToHdfsHeadSymbol(fileName));
 		this.fsHDFS = HdfsInitial.getFileSystem();
-		//TODO 以后就应该是
 		dst = path;
 		this.fileName = fileName;
 		init();
 	}
 	
-	/** 初始化 */
 	private void init() {
 		try{
 			if(fileStatus != null)
@@ -67,7 +65,9 @@ public class FileHadoop extends File {
 			if (fsHDFS.exists(dst)) {
 				fileStatus = fsHDFS.getFileStatus(dst);
 			}
-		} catch(Exception e) { }
+		} catch(Exception e) { 
+			e.printStackTrace();
+		}
 	}
 	
 	private static String copeToHdfsHeadSymbol(String hdfsFilePath) {
@@ -91,9 +91,8 @@ public class FileHadoop extends File {
 	}
 	
 	/**
-	 * <b>如果本方法长时间卡死，清check /etc/hosts中是否配置了相关的yarn-master</b><br>
-	 * 根据文件产生一个流
-	 * @param overwrite  false：如果文件不存在，则返回nulll
+	 * get OutputStream from the file
+	 * @param overwrite  whether to overwrite the exist file
 	 * @return
 	 */
 	public FSDataOutputStream getOutputStreamNew(boolean overwrite) {
@@ -137,11 +136,6 @@ public class FileHadoop extends File {
 		return DateUtil.date2String(new Date(fileStatus.getModificationTime()), DateUtil.PATTERN_DATETIME);
 	}
 	
-	/**
-	 * 找到上级文件全路径
-	 * @param fileName
-	 * @return
-	 */
 	@Override
 	public String getParent() {
 		try {
@@ -151,9 +145,7 @@ public class FileHadoop extends File {
 		}
 	}
 	
-	/**
-	 * 是不是目录
-	 */
+
 	@Override
 	public boolean isDirectory() {
 		if(fileStatus == null){
@@ -164,17 +156,11 @@ public class FileHadoop extends File {
 				return false;
 			}
 		} else {
-			//TODO hadoop2
 			return fileStatus.isDirectory();
-			//mapr
-//			return fileStatus.isDir();
 		}
 			
 	}
-	/**
-	 * 存不存在此文件
-	 * @return
-	 */
+
 	@Override
 	public boolean exists() {
 		if(fileStatus == null) {
@@ -189,20 +175,17 @@ public class FileHadoop extends File {
 	public String getAbsolutePath() {
 		return copeToHdfsHeadSymbol(fileName);
 	}
-	@Deprecated
+	
     public FileHadoop getAbsoluteFile() {
         String absPath = getAbsolutePath();
         return new FileHadoop(absPath);
     }
+	
 	@Deprecated
 	public FileHadoop getCanonicalFile() throws IOException {
 		return new FileHadoop(getCanonicalPath());
 	}
 	
-	/**
-	 * 列出子文件名，相对文件名
-	 * @return
-	 */
 	@Override
 	public String[] list() {
 		FileStatus[] childrenFileStatus;
@@ -249,7 +232,7 @@ public class FileHadoop extends File {
 		 throw new ExceptionFile("No support method");
 	}
 	
-	/** 出错返回 -1000 */
+	/** if error, return 0 */
 	@Override
 	public long lastModified() {
 		return fileStatus == null? 0 : fileStatus.getModificationTime();
@@ -272,11 +255,10 @@ public class FileHadoop extends File {
 			return false;
 		}
 	}
-	/** 无法使用 */
-	@Deprecated
-	 public void deleteOnExit() {
-		 throw new ExceptionFile("No support method");
-	 }
+
+	public void deleteOnExit() {
+		DeleteOnExitHookHadoop.add(getAbsolutePath());
+	}
 	@Override
 	public FileHadoop[] listFiles() {
 		FileStatus[] childrenFileStatus;
@@ -365,7 +347,9 @@ public class FileHadoop extends File {
     }
     @Deprecated
     public boolean setWritable(boolean writable, boolean ownerOnly) {
-    	 throw new ExceptionFile("No support method");
+    	return true;
+    	
+//    	 throw new ExceptionFile("No support method");
     }
     @Deprecated
     public boolean setWritable(boolean writable) {
@@ -373,7 +357,8 @@ public class FileHadoop extends File {
     }
     @Deprecated
     public boolean setReadable(boolean readable, boolean ownerOnly) {
-    	 throw new ExceptionFile("No support method");
+    	return true;
+//    	 throw new ExceptionFile("No support method");
     }
     @Deprecated
     public boolean setReadable(boolean readable) {
@@ -391,15 +376,13 @@ public class FileHadoop extends File {
     	 throw new ExceptionFile("No support method");
     }
     
-	/**
-	 * 未测试
-	 */
+    //TODO need test
 	@Override
 	public boolean renameTo(File dest) {
 		try {
 			String path = dest.getPath();
 			if (FileHadoop.isHdfs(path) || FileHadoop.isHdfs(path.substring(1, path.length()-2))) {
-				path = path.replace(getHdfsSymbol(), "");//TODO 也可以是 "hdfs:/"
+				path = path.replace(getHdfsSymbol(), "");
 			}
 			return fsHDFS.rename(dst, new Path(path));
 		} catch (IOException e) {

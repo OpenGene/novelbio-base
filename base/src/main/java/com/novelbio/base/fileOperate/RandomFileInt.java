@@ -1,4 +1,4 @@
-package org.apache.tools.zip;
+package com.novelbio.base.fileOperate;
 
 import java.io.EOFException;
 import java.io.File;
@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import org.apache.hadoop.fs.FSDataInputStream;
-
-import com.novelbio.base.fileOperate.FileHadoop;
 
 public interface RandomFileInt {
 	public void seek(long site) throws IOException;
@@ -19,13 +17,13 @@ public interface RandomFileInt {
 	
 	public void close() throws IOException;
 	public void readFully(byte[] signatureBytes) throws IOException;
-	
+	public void readFully(byte[] mBuffer, int i, int readLength) throws IOException;
 	public long length() throws IOException;
 	public int read() throws IOException; 
 	public int skipBytes(int n) throws IOException;
 	
 	public static class RandomFileFactory {
-		/** 根据是fileHadoop还是本地文件，初始化相应的对象 */
+		/** return corresponding object by judge the input fileName is FileHadoop or local file */
 		public static RandomFileInt createInstance(String fileName) {
 			try {
 				if (FileHadoop.isHdfs(fileName)) {
@@ -39,7 +37,7 @@ public interface RandomFileInt {
 		
 			return null;
 		}
-		/** 根据是fileHadoop还是本地文件，初始化相应的对象 */
+		
 		public static RandomFileInt createInstance(File file) {
 			try {
 				if (file instanceof FileHadoop) {
@@ -74,6 +72,7 @@ class RandomFileHdfs implements RandomFileInt {
 	}
 	
 	public RandomFileHdfs(FileHadoop file) throws IOException {
+		fileHadoop = file;
 		fsDataInputStream = file.getInputStream();
 	}
 	
