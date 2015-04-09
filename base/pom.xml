@@ -550,13 +550,13 @@
 		<repository>
 			<id>my-nexus-releases</id>
 			<name>Internal Releases</name>
-			<url>http://192.168.0.104:8081/nexus/content/repositories/releases</url>
+			<url>http://erp.novelbio.com:8081/nexus/content/repositories/releases</url>
 		</repository>
 		<!-- use the following if you ARE using a snapshot version. -->
 		<snapshotRepository>
 			<id>my-nexus-releases</id>
 			<name>Internal Releases</name>
-			<url>http://192.168.0.104:8081/nexus/content/repositories/snapshots</url>
+			<url>http://erp.novelbio.com:8081/nexus/content/repositories/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 </project>
