@@ -48,7 +48,16 @@ public class OutputStreamHdfs extends OutputStream {
      * @exception  IOException  if an I/O error occurs.
      */
     public void close() throws IOException {
-    	osHdfs.hflush();
+    	try {
+    		osHdfs.hsync();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    	try {
+    	 	osHdfs.hflush();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
     	osHdfs.close();
     }
 
