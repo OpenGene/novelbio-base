@@ -383,7 +383,8 @@ public class HttpFetch implements Closeable {
 		if (!querySucess) {
 			return false;
 		}
-		OutputStream out = FileOperate.getOutputStream(fileName, true);
+		String tmp = FileOperate.changeFileSuffix(fileName, "_tmp", null);
+		OutputStream out = FileOperate.getOutputStream(tmp, true);
 		byte[] b = new byte[BUFFER];
 		int len = 0;
 		while ((len = instream.read(b)) != -1) {
@@ -393,6 +394,7 @@ public class HttpFetch implements Closeable {
 		out.flush();
 		out.close();
 		out = null;
+		FileOperate.moveFile(true, tmp, fileName);
 		return true;
 	}
 	/** 默认重试2次的query */
@@ -510,7 +512,7 @@ public class HttpFetch implements Closeable {
 	
 	public void close() {
 		closeStream();
-		httpclient = null;
+//		httpclient = null;
 	}
 	public static void ressetCM() {
 		if (cm != null) {
