@@ -6,8 +6,12 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 /** 本地版的cmd进程 */
 public class ProcessCmd implements IntProcess {
+	private static final Logger logger = Logger.getLogger(ProcessCmd.class);
+	
 	Process process;
 	
 	/** 第一个执行 */
@@ -43,11 +47,15 @@ public class ProcessCmd implements IntProcess {
 			List<ProcessInfo> lsProc = ProcessInfo.getLsPid(pid, true);
 			//倒着关闭，因为后面是子进程，前面是父进程，先关闭子进程
 			for (int i = lsProc.size() - 1; i >= 0; i--) {
-				Runtime.getRuntime().exec("kill -9 " + lsProc.get(i).getPid()).waitFor();
+				ProcessInfo processInfo = lsProc.get(i);
+				logger.info("kill pid " + processInfo.getPid() + " program " + processInfo.getCmdName());
+				Runtime.getRuntime().exec("kill -9 " + processInfo.getPid()).waitFor();
 			}
-		//	process.destroy();// 无法杀死线程
 		//	process = null;
 		}
+		
+		//在西安测试可以杀死bwa的cmd命令 20150511
+		//	process.destroy();// 无法杀死线程
 	}
 	
 	@Override

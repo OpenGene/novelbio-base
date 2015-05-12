@@ -74,7 +74,7 @@ public class CmdOperate extends RunProcess<String> {
 	
 	/** 输出本程序正在运行时的参数等信息 */
 	String outRunInfoFileName;
-	
+	CmdRunInfo cmdRunInfo;
 	/** 设定复制输入输出文件所到的临时文件夹 */
 	public static void setTmpPath(String tmpPath) {
 		CmdPath.setTmpPath(tmpPath);
@@ -491,7 +491,7 @@ public class CmdOperate extends RunProcess<String> {
 		cmdPath.copyFileIn();
 		String[] cmdRun = cmdPath.getRunCmd();
 		
-		CmdRunInfo cmdRunInfo = new CmdRunInfo();
+		cmdRunInfo = new CmdRunInfo();
 		cmdRunInfo.setOutFile(outRunInfoFileName);
 		cmdRunInfo.setProcess(process);
 		
@@ -696,9 +696,15 @@ public class CmdOperate extends RunProcess<String> {
 
 	/** 终止线程，在循环中添加 */
 	public void threadStop() {
+		if (cmdRunInfo == null) {
+			cmdRunInfo.setFinish();
+			cmdRunInfo = null;
+		}
+		
 		if (process != null && process.isCmdStarted()) {
 			try {
 				process.stopProcess();
+				process = null;
 			} catch (Exception e) {
 				logger.error("stop thread error:\n" + getCmdExeStr(), e);
 			}
