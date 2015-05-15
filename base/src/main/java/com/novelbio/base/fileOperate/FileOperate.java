@@ -961,17 +961,18 @@ public class FileOperate {
 	}
 
 	public static OutputStream getOutputStream(File file) throws FileNotFoundException {
-		return getOutputStream(file, true);
+		return getOutputStream(file, false);
 	}
 	
-	public static OutputStream getOutputStream(File file, boolean cover) throws FileNotFoundException {
+	public static OutputStream getOutputStream(File file, boolean append) throws FileNotFoundException {
+		boolean cover = !append;
 		OutputStream fs = null;
 		if (file instanceof FileHadoop) {
 			FileHadoop fileHadoop = (FileHadoop) file;
 			FSDataOutputStream fsHdfs = fileHadoop.getOutputStreamNew(cover);
 			fs = new OutputStreamHdfs(fsHdfs);
 		}else {
-			fs = new FileOutputStream(file, !cover);
+			fs = new FileOutputStream(file, append);
 		}
 
 		return fs;
