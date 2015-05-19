@@ -35,26 +35,26 @@ public class FileHadoop extends File {
 	 *  "/hdfs:" is the "hdfsHeadSymbol" in configure file src/java/hdfs/config.properties 
 	 * @throws IOException 
 	 */
+	public FileHadoop(String fileName, FileStatus fileStatus) {
+		super(copeToHdfsHeadSymbol(fileName));
+		this.fsHDFS = HdfsInitial.getFileSystem();
+		dst = fileStatus.getPath();
+		this.fileName = fileName;
+		this.fileStatus = fileStatus;
+	}
+	
+	/**
+	 * initial a FileHadoop object from the path<br>
+	 * @param hdfsFilePath like "/hdfs:/your/path/htsjdk.jar"  <br>
+	 *  "/hdfs:" is the "hdfsHeadSymbol" in configure file src/java/hdfs/config.properties 
+	 * @throws IOException 
+	 */
 	public FileHadoop(String hdfsFilePath) {
 		super(hdfsFilePath = copeToHdfsHeadSymbol(hdfsFilePath));
 		this.fsHDFS = HdfsInitial.getFileSystem();
 		hdfsFilePath = hdfsFilePath.replace(FileHadoop.getHdfsSymbol(), "");
 		dst = new Path(hdfsFilePath);
 		this.fileName = hdfsFilePath;
-		init();
-	}
-	
-	/**
-	 * 
-	 * @param fileName like "/hdfs:/your/path"  <br>
-	 *  "/hdfs:" is the "hdfsHeadSymbol" in configure file src/java/hdfs/config.properties 
-	 * @param path
-	 */
-	public FileHadoop(String fileName, Path path) {
-		super(copeToHdfsHeadSymbol(fileName));
-		this.fsHDFS = HdfsInitial.getFileSystem();
-		dst = path;
-		this.fileName = fileName;
 		init();
 	}
 	
@@ -277,7 +277,7 @@ public class FileHadoop extends File {
 		}
 		for (int i = 0; i < childrenFileStatus.length; i++) {
 			Path childPath = childrenFileStatus[i].getPath();
-			files[i] = new FileHadoop(FileOperate.addSep(fileName) + childPath.getName(), childPath);
+			files[i] = new FileHadoop(FileOperate.addSep(fileName) + childPath.getName(), childrenFileStatus[i]);
 		}
 		return files;
 	}

@@ -112,10 +112,12 @@ public class FileOperate {
 	}
 	
 	/**
-	 * 根据不同的文件类型得到File
+	 * 根据不同的文件类型得到File.<br/><br/>
+	 * 比较耗时,非必须不建议使用.
 	 * @param filePath
 	 * @return
 	 */
+	@Deprecated
 	public static File getFile(String filePath) {
 		File file = null;
 		boolean isHdfs = FileHadoop.isHdfs(filePath);
@@ -328,21 +330,14 @@ public class FileOperate {
 		}
 		if (file.isFile()) {
 			long size = file.length();
-			if (size == 0 && file instanceof FileHadoop) {
-				return getFileSizeLong(FileHadoop.convertToLocalPath( file.getAbsolutePath()));
-			}
+//			if (size == 0 && file instanceof FileHadoop) {
+//				return getFileSizeLong(FileHadoop.convertToLocalPath( file.getAbsolutePath()));
+//			}
 			return size;
 		} else if (file.isDirectory()) {
-			ArrayList<String[]> lsFileName = getFoldFileName( file.getAbsolutePath());
-			for (String[] strings : lsFileName) {
-				String fileName = null;
-				// 获得文件名
-				if (strings[1].equals("")) {
-					fileName = addSep( file.getAbsolutePath()) + strings[0];
-				} else {
-					fileName = addSep( file.getAbsolutePath()) + strings[0] + "." + strings[1];
-				}
-				totalsize = totalsize + getFileSizeLong(fileName);
+			List<File> lsFile = getFoldFileLs(file);
+			for (File fileSub : lsFile) {
+				totalsize = totalsize + getFileSizeLong(fileSub);
 			}
 			return totalsize;
 		} else {
@@ -544,7 +539,7 @@ public class FileOperate {
 		}
 		FileFilterNBC fileFilterNBC = new FileFilterNBC(filename, suffix);
 		List<File> lsFilenames = new ArrayList<>();
-
+		
 		if (!file.exists()) {// 没有文件，则返回空
 			return new ArrayList<>();
 		}
@@ -557,6 +552,7 @@ public class FileOperate {
 		}
 		
 		File[] result = file.listFiles(fileFilterNBC);
+		
 		for (File file2 : result) {
 			lsFilenames.add(file2);
 		}
