@@ -22,6 +22,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.CommonConfigurationKeys;
@@ -35,6 +36,7 @@ import org.apache.hadoop.util.Shell.ShellCommandExecutor;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.hadoop.yarn.api.ApplicationConstants;
 import org.apache.hadoop.yarn.api.records.ContainerId;
+import org.apache.hadoop.yarn.api.records.Resource;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.factory.providers.RecordFactoryProvider;
 import org.apache.hadoop.yarn.server.nodemanager.containermanager.container.Container;
@@ -72,6 +74,9 @@ public class DockerContainerExecutor extends ContainerExecutor {
       .getLog(DockerContainerExecutor.class);
   public static final String DOCKER_CONTAINER_EXECUTOR_SCRIPT = "docker_container_executor";
   public static final String DOCKER_CONTAINER_EXECUTOR_SESSION_SCRIPT = "docker_container_executor_session";
+
+  /** docker 相关的挂载代码 */
+  public static final String DOCKER_CONTAINER_MOUNT = "docker_container_mount";
 
   // This validates that the image is a proper docker image and would not crash docker.
   public static final String DOCKER_IMAGE_PATTERN = "^(([\\w\\.-]+)(:\\d+)*\\/)?[\\w\\.:-]+$";
@@ -190,10 +195,13 @@ public class DockerContainerExecutor extends ContainerExecutor {
         new Path(containerWorkDir, ContainerLaunch.FINAL_CONTAINER_TOKENS_FILE);
     lfs.util().copy(nmPrivateTokensPath, tokenDst);
 
-
+    String cpuMemLimit = getCpuMem(container);
 
     String localDirMount = toMount(localDirs);
     String logDirMount = toMount(logDirs);
+    
+   String mountCustomer = getMountPath2IsRw(container);
+    
     String containerWorkDirMount = toMount(Collections.singletonList(containerWorkDir.toUri().getPath()));
     StringBuilder commands = new StringBuilder();
     String commandStr = commands.append(dockerExecutor)
@@ -203,9 +211,11 @@ public class DockerContainerExecutor extends ContainerExecutor {
         .append("--rm --net=host")
         .append(" ")
         .append(" --name " + containerIdStr)
+        .append(cpuMemLimit)
         .append(localDirMount)
         .append(logDirMount)
         .append(containerWorkDirMount)
+        .append(mountCustomer)
         .append(" ")
         .append(containerImageName)
         .toString();
@@ -276,13 +286,34 @@ public class DockerContainerExecutor extends ContainerExecutor {
     }
     return 0;
   }
-
+  
+  private String getMountPath2IsRw(Container container) {
+	  StringBuilder builder = new StringBuilder();
+	  String mountInfo = container.getLaunchContext().getEnvironment().get(DOCKER_CONTAINER_MOUNT);
+	  if (mountInfo == null) mountInfo = "";
+	  
+	  String[] ss = mountInfo.trim().split(";");
+	  for (String pathFrom_to_rw : ss) {
+		  if (pathFrom_to_rw.equals("")) continue;
+		  builder.append(" -v " + pathFrom_to_rw.trim() );
+	  }
+	  return builder.toString();
+  }
+  
+  private String getCpuMem(Container container) {
+	  Resource resource = container.getResource();
+	  int cpu = resource.getVirtualCores() *10;
+	  if (cpu == 0) cpu = 5;
+	  int mem = resource.getMemory();
+	 return " -c " + cpu + " -m " + mem + "m ";
+  }
   @Override
   public void writeLaunchEnv(OutputStream out, Map<String, String> environment, Map<Path, List<String>> resources, List<String> command) throws IOException {
     ContainerLaunch.ShellScriptBuilder sb = ContainerLaunch.ShellScriptBuilder.create();
 
     Set<String> exclusionSet = new HashSet<String>();
     exclusionSet.add(YarnConfiguration.NM_DOCKER_CONTAINER_EXECUTOR_IMAGE_NAME);
+    exclusionSet.add(DOCKER_CONTAINER_MOUNT);
     exclusionSet.add(ApplicationConstants.Environment.HADOOP_YARN_HOME.name());
     exclusionSet.add(ApplicationConstants.Environment.HADOOP_COMMON_HOME.name());
     exclusionSet.add(ApplicationConstants.Environment.HADOOP_HDFS_HOME.name());
