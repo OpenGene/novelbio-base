@@ -1917,7 +1917,7 @@ public class FileOperate {
 		if (path.equals("/") || path.equals("\\")) {
 			return path;
 		}
-		if (path.endsWith(File.separator)) {
+		while (path.endsWith(File.separator)) {
 			path = path.substring(0, path.length() - 1);
 		}
 		return path;
