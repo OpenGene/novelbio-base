@@ -384,7 +384,7 @@ public class HttpFetch implements Closeable {
 			return false;
 		}
 		String tmp = FileOperate.changeFileSuffix(fileName, "_tmp", null);
-		OutputStream out = FileOperate.getOutputStream(tmp, true);
+		OutputStream out = FileOperate.getOutputStream(tmp);
 		byte[] b = new byte[BUFFER];
 		int len = 0;
 		while ((len = instream.read(b)) != -1) {

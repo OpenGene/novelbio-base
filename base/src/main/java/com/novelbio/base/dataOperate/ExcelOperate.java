@@ -1490,7 +1490,7 @@ public class ExcelOperate implements Closeable {
 		}finally{
 			try {
 				out.close();
-			} catch (IOException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}

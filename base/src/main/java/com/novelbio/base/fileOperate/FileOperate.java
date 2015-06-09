@@ -141,7 +141,7 @@ public class FileOperate {
 	 * @return
 	 */
 	public static boolean writeObjectToFile(Object object,String fileName) {
-		OutputStream fs = getOutputStream(fileName, true);
+		OutputStream fs = getOutputStream(fileName);
 		try {
 			SerializeKryo kryo =new SerializeKryo();
 			fs.write(kryo.write(object));
@@ -933,24 +933,24 @@ public class FileOperate {
 	}
 	
 	public static OutputStream getOutputStream(String filePath) {
-		return getOutputStream(filePath, true);
+		return getOutputStream(filePath, false);
 	}
 	
-	public static OutputStream getOutputStream(String filePath, boolean cover) {
+	public static OutputStream getOutputStream(String filePath, boolean append) {
 		try {
 			File file =  getFile(filePath);
 			OutputStream fs = null;
 			if (file instanceof FileHadoop) {
 				FileHadoop fileHadoop = (FileHadoop) file;
-				FSDataOutputStream fsHdfs = fileHadoop.getOutputStreamNew(cover);
+				FSDataOutputStream fsHdfs = fileHadoop.getOutputStreamNew(!append);
 				fs = new OutputStreamHdfs(fsHdfs);
 			} else {
-				fs = new FileOutputStream(file, !cover);
+				fs = new FileOutputStream(file, append);
 			}
 
 			return fs;
 		} catch(Exception e) {
-			logger.error("get output stream error: " + filePath + "   is cover: " + cover, e);
+			logger.error("get output stream error: " + filePath + "   is append: " + append, e);
 			e.printStackTrace();
 			return null;
 		}
@@ -1938,7 +1938,7 @@ public class FileOperate {
 			return 0;
 		}
 		
-		OutputStream os = FileOperate.getOutputStream(outPath, true);
+		OutputStream os = FileOperate.getOutputStream(outPath);
 		if (isOutputGzip) {
 			os =  new GZIPOutputStream(os, TxtReadandWrite.bufferLen);
 		}

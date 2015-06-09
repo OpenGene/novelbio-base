@@ -294,7 +294,7 @@ public class FileAppender extends WriterAppender {
     reset();
     OutputStream ostream = null;
     if (FileOperate.isFileExist(fileName)) {
-    	ostream = FileOperate.getOutputStream(fileName, !append);
+    	ostream = FileOperate.getOutputStream(fileName, append);
 	} else {
 		FileOperate.createFolders(FileOperate.getPathName(fileName));
         ostream = new FileOutputStream(fileName, !append);

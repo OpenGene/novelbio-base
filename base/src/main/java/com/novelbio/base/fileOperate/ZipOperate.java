@@ -59,7 +59,7 @@ public class  ZipOperate {
             //输出文件路径信息 
             logger.info(outPath); 
              
-            OutputStream out = FileOperate.getOutputStream(outPath, true); 
+            OutputStream out = FileOperate.getOutputStream(outPath); 
             byte[] buf1 = new byte[1024]; 
             int len; 
             while((len=in.read(buf1))>0){ 
@@ -90,7 +90,7 @@ public class  ZipOperate {
     	 */
     	public static void zip(File inputFile, String zipOutName) throws Exception {
     		logger.info("start zip file: " + zipOutName);
-    		OutputStream outFileStream = FileOperate.getOutputStream(zipOutName, true);
+    		OutputStream outFileStream = FileOperate.getOutputStream(zipOutName);
     		ZipOutputStream out = new ZipOutputStream(outFileStream);
     		zip(out, inputFile, "");
     		logger.info("zip done");

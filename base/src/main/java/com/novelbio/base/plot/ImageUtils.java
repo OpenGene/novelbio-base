@@ -184,7 +184,7 @@ public class ImageUtils {
 		OutputStream out = null;
 		String outName = null;
 		try {
-			out = FileOperate.getOutputStream(outputFile,true);
+			out = FileOperate.getOutputStream(outputFile);
 			// Handle jpg without transparency.
 			if (ext.toLowerCase().equals("jpg") || ext.toLowerCase().equals("jpeg")) {
 				try {
