@@ -1,5 +1,6 @@
 package com.novelbio.base.cmd;
 
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -200,6 +201,20 @@ public class ProcessInfo {
 		return lsResult;
 	}
 	
+	/** 获得当前正在运行的java程序的pid */
+	public static int getPidThis() {
+		String name = ManagementFactory.getRuntimeMXBean().getName();  
+		// get pid  
+		String pid = name.split("@")[0];  
+		return Integer.parseInt(pid);
+	}
+	
+	/** 获得当前正在运行的java程序，以及其子pid
+	 * 考虑用于container获取每个java程序所使用的资源
+	 */
+	public static List<ProcessInfo> getLsPid(boolean isGetChild) {
+		return getLsPid(getPidThis(), isGetChild);
+	}
 	
 	public static List<ProcessInfo> getLsPid(int pid, boolean isGetChild) {
 		List<String> lsCmd = new ArrayList<>();

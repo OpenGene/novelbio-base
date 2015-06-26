@@ -107,7 +107,6 @@ public class ImageUtils {
 	
 	/** 获取tiff格式图片的BufferedImage，需传入图片的全路经 */
 	private final static BufferedImage readTiffBufferedImage(String tiffImagePath) throws IOException {
-			
 		File file =  FileOperate.getFile(tiffImagePath);
 		SeekableStream seekableStream = new FileSeekableStream(file);
 		ParameterBlock parameterBlock = new ParameterBlock();

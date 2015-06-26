@@ -113,11 +113,9 @@ public class FileOperate {
 	
 	/**
 	 * 根据不同的文件类型得到File.<br/><br/>
-	 * 比较耗时,非必须不建议使用.
 	 * @param filePath
 	 * @return
 	 */
-	@Deprecated
 	public static File getFile(String filePath) {
 		File file = null;
 		boolean isHdfs = FileHadoop.isHdfs(filePath);
