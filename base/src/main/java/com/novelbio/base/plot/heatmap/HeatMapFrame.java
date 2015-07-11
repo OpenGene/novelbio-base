@@ -83,7 +83,8 @@ class HeatMapFrame extends JFrame
 			}
 		}
         
-        panel = new PlotHeatMap(data,data2, true, customGradient,customGradient2);
+        panel = new PlotHeatMap(data,data2, customGradient,customGradient2);
+        panel.setUseGraphicsYAxis(useGraphicsYAxis);
         panel.setRange(2, 80, 2, 80);
 //        data = panel.generatePyramidData(100);
 //        panel.setRange(10, 30);

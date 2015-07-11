@@ -1,48 +1,30 @@
 package com.novelbio.base.plot;
 
-import java.awt.AlphaComposite;
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Transparency;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Iterator;
-
-import javax.imageio.IIOImage;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageWriteParam;
-import javax.imageio.ImageWriter;
-import javax.imageio.stream.FileImageOutputStream;
-import javax.imageio.stream.ImageOutputStream;
-import javax.swing.JPanel;
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
 
 import org.apache.log4j.Logger;
 
 import com.novelbio.base.fileOperate.FileOperate;
 
-import de.erichseifert.gral.graphics.DrawingContext;
-
 public abstract  class PlotNBC{
 
-	Logger logger = Logger.getLogger(PlotNBC.class);
+	private static final Logger logger = Logger.getLogger(PlotNBC.class);
 	boolean painted = false;
+	protected Color bg = new Color(255, 255, 255, 0);
+	protected Color fg = Color.black;
+	/** 透明度 */
+	protected boolean alpha = true;
 	
-	/**
-	 *	最后生成的bufferedImage
-	 */
+	/** 最后生成的bufferedImage */
 	protected BufferedImage bufferedImage;
+	
 	public BufferedImage getBufferedImage() {
 		return bufferedImage;
 	}
-	protected Color bg = new Color(255, 255, 255, 0);
-	protected Color fg = Color.black;
+
 
     public void setFg(Color fg) {
 		this.fg = fg;
@@ -70,10 +52,7 @@ public abstract  class PlotNBC{
     	painted = true;
     	draw(width,heigh);
     }
-	/**
-	 * 透明度
-	 */
-	protected boolean alpha = true;
+
 	/**
 	 * 设定是否透明，默认透明
 	 * @param alpha
@@ -119,16 +98,12 @@ public abstract  class PlotNBC{
 		if (!painted) {
 			drawData(Width, Height);
 		}
-		logger.error("p1");
 		String filename = FileOperate.getFileNameSep(outputFileName)[1];
 		if (filename.equals("")) {
 			outputFileName = FileOperate.changeFileSuffix(outputFileName, null, "png");
 		}
-		logger.error("p2");
     	BufferedImage bufferedImageResult = paintGraphicOut(bufferedImage, fg, alpha, Width, Height);
-    	logger.error("p3");
     	saveGraphic(bufferedImageResult, outputFileName, 1.0f);
-    	logger.error("p4");
 	}
     
     protected static void saveGraphic(BufferedImage chart, String outputFile, float quality) {

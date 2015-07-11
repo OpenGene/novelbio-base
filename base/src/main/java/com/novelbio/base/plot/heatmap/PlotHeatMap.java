@@ -5,7 +5,12 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
+import com.novelbio.base.dataStructure.ArrayOperate;
+import com.novelbio.base.dataStructure.MathComput;
 import com.novelbio.base.plot.PlotNBC;
 import com.novelbio.base.plot.java.HeatChartDataInt;
 
@@ -66,9 +71,6 @@ import com.novelbio.base.plot.java.HeatChartDataInt;
  */
 
 public class PlotHeatMap extends PlotNBC {
-    /**
-	 * 
-	 */
 	private static final long serialVersionUID = 9078068936831031727L;
 	
 	private double[][] data;
@@ -81,7 +83,9 @@ public class PlotHeatMap extends PlotNBC {
     private double xMax;
     private double yMin;
     private double yMax;
-
+    
+    private List<String> lsYTicks = new ArrayList<>();
+    
     private String title;
     private String xAxis;
     private String yAxis;
@@ -92,7 +96,16 @@ public class PlotHeatMap extends PlotNBC {
     private boolean drawLegend = false;
     private boolean drawXTicks = false;
     private boolean drawYTicks = false;
-
+    
+  double minData1 = Double.MIN_VALUE;
+  double maxData1 = Double.MAX_VALUE;
+  double minData2 = Double.MIN_VALUE;
+  double maxData2 = Double.MAX_VALUE;
+    
+    /**If true, the data will be displayed with the y=0
+     *  row at the top of the screen. If false, the data will be displayed with the y=0 row
+     *   at the bottom of the screen.*/
+    boolean useGraphicsYAxis = true;
     private Color[] colors;
     private Color[] colors2;
             
@@ -111,26 +124,19 @@ public class PlotHeatMap extends PlotNBC {
 	public PlotHeatMap(java.util.List<? extends HeatChartDataInt> lsHeatChartDataInts,boolean useGraphicsYAxis, Color[] colors) {
 		super();
 		data = copeHeatChartDataInt(lsHeatChartDataInts);
-        updateGradient(colors,data, useGraphicsYAxis);
-
-//        this.setPreferredSize(new Dimension(60+data.length, 60+data[0].length));
-//        this.setDoubleBuffered(true);
-//        drawData();
+		this.useGraphicsYAxis = useGraphicsYAxis;
+		this.colors = (Color[]) colors.clone();
 	}
 	/**
 	 * 给定实现HeatChart接口的数据集，然后画图
 	 * 自动将HeatChartDataInts中的title设置给xvalue
 	 * 注意list中所有数据的维度应该一致
 	 * @param lsHeatChartDataInts data
-
 	 */
-	public PlotHeatMap(java.util.List<? extends HeatChartDataInt> lsHeatChartDataInts, Color[] colors) {
+	public PlotHeatMap(List<? extends HeatChartDataInt> lsHeatChartDataInts, Color[] colors) {
 		super();
 		data = copeHeatChartDataInt(lsHeatChartDataInts);
-        updateGradient(colors,data, false);
-//        this.setPreferredSize(new Dimension(60+data.length, 60+data[0].length));
-//        this.setDoubleBuffered(true);
-//        drawData();
+		this.colors = (Color[]) colors.clone();
 	}
 	/**
 	 * 给定实现HeatChart接口的数据集，然后画图
@@ -138,26 +144,45 @@ public class PlotHeatMap extends PlotNBC {
 	 * 注意list中所有数据的维度应该一致
 	 * @param lsHeatChartDataInts
 	 */
-	public PlotHeatMap(java.util.List<? extends HeatChartDataInt> lsHeatChartDataInts,java.util.List<? extends HeatChartDataInt> lsHeatChartDataInts2,
+	public PlotHeatMap(List<? extends HeatChartDataInt> lsHeatChartDataInts, List<? extends HeatChartDataInt> lsHeatChartDataInts2,
 			boolean useGraphicsYAxis, Color[] colors, Color[] colors2) {
 		super();
 		data = copeHeatChartDataInt(lsHeatChartDataInts);
 		data2 = copeHeatChartDataInt(lsHeatChartDataInts2);
-        updateGradient(colors,data, useGraphicsYAxis);
-        updateGradient2(colors2,data2, useGraphicsYAxis);
-//        this.setPreferredSize(new Dimension(60+data.length, 60+data[0].length));
-//        this.setDoubleBuffered(true);
-//        drawData();
+		this.useGraphicsYAxis = useGraphicsYAxis;
+		this.colors = (Color[]) colors.clone();
+		this.colors2 = (Color[]) colors2.clone();
 	}
 
-	private double[][] copeHeatChartDataInt(java.util.List<? extends HeatChartDataInt> lsHeatChartDataInts) {
-		double[][] data = new double[lsHeatChartDataInts.size()][lsHeatChartDataInts.get(0).getDouble().length];
+	private double[][] copeHeatChartDataInt(List<? extends HeatChartDataInt> lsHeatChartDataInts) {
+		setYTicks(lsHeatChartDataInts);
+		
+		double[][] dataRaw = new double[lsHeatChartDataInts.size()][lsHeatChartDataInts.get(0).getDouble().length];
 		for (int i = 0; i < lsHeatChartDataInts.size(); i++) {
 			HeatChartDataInt heatChartDataInt = lsHeatChartDataInts.get(i);
-			data[i] = heatChartDataInt.getDouble();
+			dataRaw[i] = heatChartDataInt.getDouble();
+		}
+		
+		double[][] data = new double[dataRaw[0].length][dataRaw.length];
+		for (int i = 0; i < data.length; i++) {
+			for (int j = 0; j < data[i].length; j++) {
+				data[i][j] = dataRaw[j][i];
+			}
 		}
 		return data;
 	}
+	
+	private void setYTicks(List<? extends HeatChartDataInt> lsHeatChartDataInts) {
+		lsYTicks.clear();
+		for (HeatChartDataInt heatChartDataInt : lsHeatChartDataInts) {
+	        lsYTicks.add(heatChartDataInt.getName());
+        }
+	}
+	
+	/** 设定y轴的坐标信息 */
+	public void setLsYTicks(List<String> lsYTicks) {
+	    this.lsYTicks = lsYTicks;
+    }
     
     /**
      * @param data The data to display, must be a complete array (non-ragged)
@@ -167,44 +192,11 @@ public class PlotHeatMap extends PlotNBC {
     public PlotHeatMap(double[][] data, boolean useGraphicsYAxis, Color[] colors)
     {
         super();
-
-        updateGradient(colors,data, useGraphicsYAxis);
-
-//        this.setPreferredSize(new Dimension(60+data.length, 60+data[0].length));
-//        this.setDoubleBuffered(true);
-
-//        this.bg = Color.white;
-//        this.fg = Color.black;
-        
-        // this is the expensive function that draws the data plot into a 
-        // BufferedImage. The data plot is then cheaply drawn to the screen when
-        // needed, saving us a lot of time in the end.
-//        drawData();
+        this.data = data;
+        this.useGraphicsYAxis = useGraphicsYAxis;
+        this.colors = (Color[]) colors.clone();
     }
     
-    /**
-     * @param data The data to display, must be a complete array (non-ragged)
-     * @param useGraphicsYAxis If true, the data will be displayed with the y=0 row at the top of the screen. If false, the data will be displayed with they=0 row at the bottom of the screen.
-     * @param colors A variable of the type Color[]. See also {@link #createMultiGradient} and {@link #createGradient}.
-     */
-    public PlotHeatMap(double[][] data, double[][] data2, boolean useGraphicsYAxis, Color[] colors, Color[] colors2)
-    {
-        super();
-
-        updateGradient(colors,data, useGraphicsYAxis);
-        updateGradient2(colors2, data2, useGraphicsYAxis);
-
-//        this.setPreferredSize(new Dimension(60+data.length, 60+data[0].length));
-//        this.setDoubleBuffered(true);
-
-//        this.bg = Color.white;
-//        this.fg = Color.black;
-        
-        // this is the expensive function that draws the data plot into a 
-        // BufferedImage. The data plot is then cheaply drawn to the screen when
-        // needed, saving us a lot of time in the end.
-//        drawData();
-    }
     /**
      * @param data The data to display, must be a complete array (non-ragged)
      * @param useGraphicsYAxis If true, the data will be displayed with the y=0 row at the top of the screen. If false, the data will be displayed with they=0 row at the bottom of the screen.
@@ -212,191 +204,103 @@ public class PlotHeatMap extends PlotNBC {
      */
     public PlotHeatMap(double[][] data, double[][] data2, Color[] colors, Color[] colors2) {
         super();
-
-        updateGradient(colors,data, false);
-        updateGradient2(colors2, data2, false);
-
-//        this.setPreferredSize(new Dimension(60+data.length, 60+data[0].length));
-//        this.setDoubleBuffered(true);
-
-//        this.bg = Color.white;
-//        this.fg = Color.black;
-        
-        // this is the expensive function that draws the data plot into a 
-        // BufferedImage. The data plot is then cheaply drawn to the screen when
-        // needed, saving us a lot of time in the end.
-//        drawData();
+        this.data = data;
+        this.data2 = data;
+        this.colors = (Color[]) colors.clone();
+        this.colors2 = (Color[]) colors2.clone();
+    }
+    
+    /**
+     * <b>默认是true</b><br><br>
+     * If true, the data will be displayed with the y=0
+     *  row at the top of the screen. If false, the data will be displayed with the y=0 row
+     *   at the bottom of the screen.*/
+    public void setUseGraphicsYAxis(boolean useGraphicsYAxis) {
+	    this.useGraphicsYAxis = useGraphicsYAxis;
     }
     /**
      * Specify the coordinate bounds for the map. Only used for the axis labels, which must be enabled seperately. Calls repaint() when finished.
      * @param xMin The lower bound of x-values, used for axis labels
      * @param xMax The upper bound of x-values, used for axis labels
      */
-    public void setCoordinateBounds(double xMin, double xMax, double yMin, double yMax)
-    {
-        this.xMin = xMin;
-        this.xMax = xMax;
-        this.yMin = yMin;
-        this.yMax = yMax;
-    }
-
-    /**
-     * Specify the coordinate bounds for the X-range. Only used for the axis labels, which must be enabled seperately. Calls repaint() when finished.
-     * @param xMin The lower bound of x-values, used for axis labels
-     * @param xMax The upper bound of x-values, used for axis labels
-     */
-    public void setXCoordinateBounds(double xMin, double xMax)
-    {
+    public void setCoordinateBounds(double xMin, double xMax) {
         this.xMin = xMin;
         this.xMax = xMax;
     }
-    
-    /**
-     * Specify the coordinate bounds for the X Min. Only used for the axis labels, which must be enabled seperately. Calls repaint() when finished.
-     * @param xMin The lower bound of x-values, used for axis labels
-     */
-    public void setXMinCoordinateBounds(double xMin)
-    {
-        this.xMin = xMin;
-    }
-    
-    /**
-     * Specify the coordinate bounds for the X Max. Only used for the axis labels, which must be enabled seperately. Calls repaint() when finished.
-     * @param xMax The upper bound of x-values, used for axis labels
-     */
-    public void setXMaxCoordinateBounds(double xMax)
-    {
-        this.xMax = xMax;
-    }
-
     /**
      * Specify the coordinate bounds for the Y-range. Only used for the axis labels, which must be enabled seperately. Calls repaint() when finished.
      * @param yMin The lower bound of y-values, used for axis labels
      * @param yMax The upper bound of y-values, used for axis labels
      */
-    public void setYCoordinateBounds(double yMin, double yMax)
-    {
+    public void setYCoordinateBounds(double yMin, double yMax) {
         this.yMin = yMin;
         this.yMax = yMax;
     }
     
     /**
-     * Specify the coordinate bounds for the Y Min. Only used for the axis labels, which must be enabled seperately. Calls repaint() when finished.
-     * @param yMin The lower bound of Y-values, used for axis labels
-     */
-    public void setYMinCoordinateBounds(double yMin)
-    {
-        this.yMin = yMin;
-    }
-    
-    /**
-     * Specify the coordinate bounds for the Y Max. Only used for the axis labels, which must be enabled seperately. Calls repaint() when finished.
-     * @param yMax The upper bound of y-values, used for axis labels
-     */
-    public void setYMaxCoordinateBounds(double yMax)
-    {
-        this.yMax = yMax;
-    }
-
-    /**
-     * Updates the title. Calls repaint() when finished.
+     * Updates the title
+     * @param drawTitle Specifies if the title should be drawn
      * @param title The new title
      */
-    public void setTitle(String title)
-    {
+    public void setTitle(boolean drawTitle, String title) {
+    	this.drawTitle = drawTitle;
         this.title = title;
     }
 
     /**
-     * Updates the state of the title. Calls repaint() when finished.
+     * Updates the state of the title
      * @param drawTitle Specifies if the title should be drawn
      */
-    public void setDrawTitle(boolean drawTitle)
-    {
+    public void setDrawTitle(boolean drawTitle) {
         this.drawTitle = drawTitle;
     }
 
     /**
-     * Updates the X-Axis title. Calls repaint() when finished.
+     * Updates the X-Axis title.
+     * @param drawXAxisTitle Specifies if the X-Axis title should be drawn
      * @param xAxisTitle The new X-Axis title
      */
-    public void setXAxisTitle(String xAxisTitle)
-    {
+    public void setXAxisTitle(boolean drawXAxisTitle, String xAxisTitle) {
+    	this.drawXTitle = drawXAxisTitle;
         this.xAxis = xAxisTitle;
     }
 
     /**
-     * Updates the state of the X-Axis Title. Calls repaint() when finished.
-     * @param drawXAxisTitle Specifies if the X-Axis title should be drawn
-     */
-    public void setDrawXAxisTitle(boolean drawXAxisTitle)
-    {
-        this.drawXTitle = drawXAxisTitle;
-    }
-
-    /**
-     * Updates the Y-Axis title. Calls repaint() when finished.
+     * Updates the Y-Axis title
+     * @param drawYAxisTitle Specifies if the Y-Axis title should be drawn
      * @param yAxisTitle The new Y-Axis title
      */
-    public void setYAxisTitle(String yAxisTitle)
-    {
+    public void setYAxisTitle(boolean drawYAxisTitle, String yAxisTitle) {
+    	this.drawYTitle = drawYAxisTitle;
         this.yAxis = yAxisTitle;
     }
 
     /**
-     * Updates the state of the Y-Axis Title. Calls repaint() when finished.
-     * @param drawYAxisTitle Specifies if the Y-Axis title should be drawn
-     */
-    public void setDrawYAxisTitle(boolean drawYAxisTitle)
-    {
-        this.drawYTitle = drawYAxisTitle;
-    }
-
-
-    /**
-     * Updates the state of the legend. Calls repaint() when finished.
+     * Updates the state of the legend
      * @param drawLegend Specifies if the legend should be drawn
      */
-    public void setDrawLegend(boolean drawLegend)
-    {
+    public void setDrawLegend(boolean drawLegend) {
         this.drawLegend = drawLegend;
     }
 
     /**
-     * Updates the state of the X-Axis ticks. Calls repaint() when finished.
+     * Updates the state of the X-Axis ticks
      * @param drawXTicks Specifies if the X-Axis ticks should be drawn
-     */
-    public void setDrawXTicks(boolean drawXTicks)
-    {
-        this.drawXTicks = drawXTicks;
-    }
-
-    /**
-     * Updates the state of the Y-Axis ticks. Calls repaint() when finished.
      * @param drawYTicks Specifies if the Y-Axis ticks should be drawn
      */
-    public void setDrawYTicks(boolean drawYTicks)
-    {
+    public void setDrawXYTicks(boolean drawXTicks, boolean drawYTicks) {
+        this.drawXTicks = drawXTicks;
         this.drawYTicks = drawYTicks;
     }
 
     /**
-     * Updates the gradient used to display the data. Calls drawData() and 
-     * repaint() when finished.
+     * Updates the gradient used to display the data
      * @param colors A variable of type Color[]
      * @param data The data to display, must be a complete array (non-ragged)
      * @param useGraphicsYAxis If true, the data will be displayed with the y=0 row at the top of the screen. If false, the data will be displayed with the y=0 row at the bottom of the screen.
      */
-    public void updateGradient(Color[] colors, double[][] data, boolean useGraphicsYAxis) {
-    	this.data = updateDataPr(data, useGraphicsYAxis);
-        this.colors = (Color[]) colors.clone();
-
-        if (data != null)
-        {
-        	dataColorIndices = updateDataColors(data,minData1, maxData1);
-
-//            drawData();
-        }
+    public void updateGradient1(Color[] colors) {
+    	this.colors = (Color[]) colors.clone();
     }
     
     /**
@@ -407,17 +311,8 @@ public class PlotHeatMap extends PlotNBC {
      * @param data The data to display, must be a complete array (non-ragged)
      * @param useGraphicsYAxis If true, the data will be displayed with the y=0 row at the top of the screen. If false, the data will be displayed with the y=0 row at the bottom of the screen.
      */
-    public void updateGradient2(Color[] colors2, double[][] data2, boolean useGraphicsYAxis)
-    {
-    	this.data2 = updateDataPr(data2, useGraphicsYAxis);
+    public void updateGradient2(Color[] colors2) {
         this.colors2 = (Color[]) colors2.clone();
-
-        if (data2 != null)
-        {
-        	dataColorIndices2 = updateDataColors(data2, minData2,maxData2);
-
-//            drawData2();
-        }
     }
     
     /**
@@ -426,7 +321,7 @@ public class PlotHeatMap extends PlotNBC {
      * assigns a color index to each data point, stored in the dataColorIndices
      * array, which is used by the drawData() method to plot the points.
      */
-    private int[][] updateDataColors(double[][] data, double min, double max)
+    private int[][] updateDataColors(double[][] data, Color[] colors, double min, double max)
     {
         //We need to find the range of the data values,
         // in order to assign proper colors.
@@ -435,7 +330,7 @@ public class PlotHeatMap extends PlotNBC {
 
         // dataColorIndices is the same size as the data array
         // It stores an int index into the color array
-       int[][]  dataColorIndices = new int[data.length][data[0].length];    
+       int[][]  dataColorIndices = new int[data.length][data[0].length];
 
         //assign a Color to each data point
         for (int x = 0; x < data.length; x++)
@@ -458,40 +353,33 @@ public class PlotHeatMap extends PlotNBC {
         }
         return dataColorIndices;
     }
-    double minData1 = Double.MIN_VALUE;
-    double maxData1 = Double.MAX_VALUE;
-    double minData2 = Double.MIN_VALUE;
-    double maxData2 = Double.MAX_VALUE;
-    public void setRange(double mindata1, double maxdata1, double mindata2, double maxdata2)
-    {
+    
+
+    public void setRange(double mindata1, double maxdata1, double mindata2, double maxdata2) {
     	this.minData1 = mindata1;
     	this.maxData1 = maxdata1;
     	this.minData2 = mindata2;
     	this.maxData2 = maxdata2;
-    	dataColorIndices = updateDataColors(data, mindata1, maxdata1);
-        if (data2 != null)
-        {
-        	dataColorIndices2 = updateDataColors(data2, minData2, maxdata2);
-//            drawData2();
-//            repaint();
-        }
-        else {
-//			drawData();
-//			repaint();
-		}
     }
     /**
      * 设定画图的数据范围
      * @param mindata1
      * @param maxdata1
      */
-    public void setRange(double mindata1, double maxdata1)
-    {
+    public void setRange(double mindata1, double maxdata1) {
     	this.minData1 = mindata1;
     	this.maxData1 = maxdata1;
-    	dataColorIndices = updateDataColors(data, minData1, maxData1);
-
     }
+    /**
+     * 设定画图的数据范围
+     * @param mindata2
+     * @param maxdata2
+     */
+    public void setRange2(double mindata2, double maxdata2) {
+    	this.minData2 = mindata2;
+    	this.maxData2 = maxdata2;
+    }
+    
     /**
      * 设定最小值和最大值，如果最小值为Double.MIN_VALUE，则设定为矩阵中的最小值
      * 如果最大值为Double.MAX_VALUE，则设定为矩阵中的最大值
@@ -662,14 +550,20 @@ public class PlotHeatMap extends PlotNBC {
      * This function should be called whenever the data or the gradient changes.
      */
     protected void draw(int width, int heigh) {
+    	data = updateDataPr(data, useGraphicsYAxis);
+    	dataColorIndices = updateDataColors(data, colors, minData1, maxData1);
+    	if (data2 != null) {
+    		data2 = updateDataPr(data2, useGraphicsYAxis); 
+    		dataColorIndices2 = updateDataColors(data2, colors, minData2, maxData2);
+    	}
+    	
     	int imageType = (alpha ? BufferedImage.TYPE_4BYTE_ABGR : BufferedImage.TYPE_3BYTE_BGR);
     	bufferedImage = new BufferedImage(data.length,data[0].length, imageType);
     	if (data2 != null) {
 			drawData2(bufferedImage, new Dimension(1,1));
-		}
-    	else {
+    	} else {
     		drawData(bufferedImage, new Dimension(1,1));
-		}
+    	}
 //    	graphics = bufferedImage.createGraphics();
     	addPicInfo( width, heigh);
 //    	bufferedImage = GraphicCope.rotateImage(bufferedImage, 90);
@@ -750,8 +644,22 @@ public class PlotHeatMap extends PlotNBC {
          // drawImage method scales that up to fit our current window size. This
          // is very fast, and is much faster than the previous version, which 
          // redrew the data plot each time we had to repaint the screen.
+         int yLenMax = 0;
+         
+        String[] yTicks = getYticks();
+        
+         if (useGraphicsYAxis) {
+        	 ArrayOperate.convertArray(yTicks);
+        }
+         if (yTicks.length != 0) {
+	        List<Integer> lsLength = new ArrayList<>();
+	        for (String yTick : yTicks) {
+	            lsLength.add(yTick.length());
+            }
+	        yLenMax = (int) MathComput.median(lsLength, 90) * 5;
+        }
          g2d.drawImage(bufferedImage,
-                       31, 31,
+        		 yLenMax + 31, 31,
                        width - 30,
                        height - 30,
                        0, 0,
@@ -762,7 +670,7 @@ public class PlotHeatMap extends PlotNBC {
  		
          // border
          g2d.setColor(fg);
-         g2d.drawRect(30, 30, width - 60, height - 60);
+         g2d.drawRect(yLenMax + 30, 30, width - 60 - yLenMax, height - 60);
          
          // title
          if (drawTitle && title != null)
@@ -771,25 +679,39 @@ public class PlotHeatMap extends PlotNBC {
          }
 
          // axis ticks - ticks start even with the bottom left coner, end very close to end of line (might not be right on)
-         int numXTicks = (width - 60) / 50;
+         int numXTicks = (width - 60 - yLenMax) / 50;
          int numYTicks = (height - 60) / 50;
-
+         if (numYTicks > yTicks.length/3) {
+        	 numYTicks = yTicks.length;
+         }
          String label = "";
          DecimalFormat df = new DecimalFormat("##.##");
-
+         int ticksLen = 4;
          // Y-Axis ticks
          if (drawYTicks)
          {
              int yDist = (int) ((height - 60) / (double) numYTicks); //distance between ticks
              for (int y = 0; y <= numYTicks; y++)
              {
-                 g2d.drawLine(26, height - 30 - y * yDist, 30, height - 30 - y * yDist);
-                 label = df.format(((y / (double) numYTicks) * (yMax - yMin)) + yMin);
+                 g2d.drawLine(30 - ticksLen + yLenMax, height - 30 - y * yDist, 30 + yLenMax, height - 30 - y * yDist);
+                 if (y == numYTicks) {
+                	 continue;
+                 }
+                 
+                 if (yTicks.length != 0) {
+                	 int num = (int) ((double)y/(numYTicks-1) * (yTicks.length - 1)) ;
+                 	 label = yTicks[num];
+                } else {
+                    label = df.format(((y / (double) (numYTicks-1)) * (yMax - yMin)) + yMin);
+                }
                  int labelY = height - 30 - y * yDist - 4 * label.length();
                  //to get the text to fit nicely, we need to rotate the graphics
-                 g2d.rotate(Math.PI / 2);
-                 g2d.drawString(label, labelY, -14);
-                 g2d.rotate( -Math.PI / 2);
+//                 g2d.rotate(Math.PI / 2);
+//                 g2d.drawString(label, labelY, -14);
+//                 g2d.rotate( -Math.PI / 2);
+                 if (y < numYTicks) {
+                	 g2d.drawString(label, 2 , labelY);
+                 }
              }
          }
 
@@ -806,12 +728,12 @@ public class PlotHeatMap extends PlotNBC {
          // X-Axis ticks
          if (drawXTicks)
          {
-             int xDist = (int) ((width - 60) / (double) numXTicks); //distance between ticks
+             int xDist = (int) ((width - 60-yLenMax) / (double) numXTicks); //distance between ticks
              for (int x = 0; x <= numXTicks; x++)
              {
-                 g2d.drawLine(30 + x * xDist, height - 30, 30 + x * xDist, height - 26);
+                 g2d.drawLine(30 + yLenMax + x * xDist, height - 30, 30 + yLenMax + x * xDist, height - 26);
                  label = df.format(((x / (double) numXTicks) * (xMax - xMin)) + xMin);
-                 int labelX = (31 + x * xDist) - 4 * label.length();
+                 int labelX = (31 + yLenMax + x * xDist) - 4 * label.length();
                  g2d.drawString(label, labelX, height - 14);
              }
          }
@@ -837,4 +759,14 @@ public class PlotHeatMap extends PlotNBC {
          bufferedImage = buf;
     }
  
+    private String[] getYticks() {
+        String[] yTicks = lsYTicks.toArray(new String[0]);
+        if (yTicks.length == 0 && data[0].length <= 30) {
+	        yTicks = new String[30];
+	        for (int i = 0; i < yTicks.length; i++) {
+	            yTicks[i] = i+"";
+            }
+        }
+        return yTicks;
+    }
 }
