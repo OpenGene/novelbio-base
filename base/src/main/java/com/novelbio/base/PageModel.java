@@ -7,6 +7,11 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 
+/**
+ * easyui datagrid 页面返回模型
+ * @author novelbio
+ *
+ */
 public class PageModel {
 	/** 当前页 */
 	private int page = 1;

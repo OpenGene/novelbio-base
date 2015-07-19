@@ -49,16 +49,20 @@ public class OutputStreamHdfs extends OutputStream {
      */
     public void close() throws IOException {
     	try {
-    		osHdfs.hsync();
+			if (osHdfs != null) {
+				osHdfs.hsync();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-    	try {
-    	 	osHdfs.hflush();
-		} catch (Exception e) {
-			e.printStackTrace();
+		if (osHdfs != null) {
+			try {
+				osHdfs.hflush();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			osHdfs.close();
 		}
-    	osHdfs.close();
     }
 
 

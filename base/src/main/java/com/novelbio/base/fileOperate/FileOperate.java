@@ -1572,8 +1572,7 @@ public class FileOperate {
 		for (int i = 0; i < files.length; i++) {
 			if (files[i].isDirectory()) // 如果子文件是文件夹，则递归调用本函数，精彩的用法！！
 			{
-				ok = moveFoldFile(files[i].getPath(),
-						newfolderfile + files[i].getName(), prix, cover);
+				ok = moveFoldFile(files[i].getPath(), newfolderfile + files[i].getName(), prix, cover);
 				// 成功，删除原文件
 				if (ok) {
 					files[i].delete();
@@ -1590,8 +1589,7 @@ public class FileOperate {
 				fnew.delete();
 			}
 			if (!files[i].renameTo(fnew)) {
-				if (copyFile(files[i].getAbsolutePath(),
-						fnew.getAbsolutePath(), cover))
+				if (copyFile(files[i].getAbsolutePath(), fnew.getAbsolutePath(), cover))
 					files[i].delete();
 				else {
 					ok = false;
@@ -1656,11 +1654,16 @@ public class FileOperate {
 		}
 		
 		File file = getFile(fileName);
+		/**
+		 * modify by fans.fan 150709 一句话的逻辑,写的好复杂.修改一下.
 		if (file.exists() && !file.isDirectory()) {// 没有文件，则返回空
 			return true;
 		} else {
 			return false;
 		}
+		 */
+		return file.exists() && !file.isDirectory();
+		//end by fans.fan
 	}
 	
 	/**

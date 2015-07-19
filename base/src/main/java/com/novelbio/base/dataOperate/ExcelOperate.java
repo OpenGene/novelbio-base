@@ -27,9 +27,6 @@ import com.novelbio.base.fileOperate.FileOperate;
  * 本类似乎无法获得最大列的数目,这里可以考虑采用一维数目不同的二维数组，这个实现可以考虑用foreach来遍历 本代码原始作者 caihua ，
  * Zong Jie修改
  */
-
-
-
 public class ExcelOperate implements Closeable {
 	public static final int EXCEL2003 = 2003;
 	public static final int EXCEL2007 = 2007;
@@ -44,7 +41,6 @@ public class ExcelOperate implements Closeable {
 	int versionXls = 0;
 	/** 设定NBC的excel风格 */
 	private boolean isNBCExcel = false;
-	private boolean isNewFile = false;
 	public ExcelOperate() {
 	}
 
@@ -53,18 +49,15 @@ public class ExcelOperate implements Closeable {
 	CellStyle styleTitle = null;
 	CellStyle nostyle = null;
 	/**
-	 * 打开excel，没有就新建excel2003
+	 * 打开excel,没有就新建excel2003.但指定文件所在的文件夹是必须存在的.
 	 * 
 	 * @param imputfilename
 	 */
-	
-	
 	public ExcelOperate(String imputfilename) {
 		String suffix = FileOperate.getFileNameSep(imputfilename)[1].toLowerCase();
 		boolean isexcel2007 = suffix.equals("xlsx") ? true : false;
 		openExcel(imputfilename, isexcel2007);
 	}
-	
 	
 	public void setNBCExcel(boolean isNBCExcel) {
 		this.isNBCExcel = isNBCExcel;
@@ -173,10 +166,9 @@ public class ExcelOperate implements Closeable {
 			return newExcelOpen(imputfilename, excel2007);
 		}
 		try {
-			versionXls = isExcelVesrsion(filename);
+			versionXls = isExcelVersion(filename);
 		} catch (Exception e) {
-			//versionXls = EXCEL_NO_FILE;
-			return newExcelOpen(imputfilename, excel2007);
+			versionXls = EXCEL_NO_FILE;
 		}
 		wb = null;
 		sheet = null;
@@ -197,12 +189,12 @@ public class ExcelOperate implements Closeable {
 		return newExcelOpen(filenameinput, excel2007);
 	}
 
-	public boolean newExcelOpen(String filenameinput, boolean excel2007) {
+	public boolean newExcelOpen(String filenameinput, boolean isExcel2007) {
 		filename = filenameinput;
-		if (!excel2007) {
-			versionXls = EXCEL2003;
-		} else {
+		if (isExcel2007) {
 			versionXls = EXCEL2007;
+		} else {
+			versionXls = EXCEL2003;
 		}
 		return initialExcel(true);
 	}
@@ -230,10 +222,11 @@ public class ExcelOperate implements Closeable {
 		} else {
 			InputStream fos;
 			fos = FileOperate.getInputStream(filename);
-			if (versionXls == EXCEL2003)
+			if (versionXls == EXCEL2003){
 				wb = new HSSFWorkbook(fos);
-			else if (versionXls == EXCEL2007)
+			} else if (versionXls == EXCEL2007){
 				wb = new XSSFWorkbook(fos);
+			}
 			sheet = wb.getSheetAt(0);
 			fos.close();
 		}
@@ -1487,11 +1480,7 @@ public class ExcelOperate implements Closeable {
 			return false;
 		OutputStream out = null;
 		try {
-			if(!isNewFile){
-				out = FileOperate.getOutputStream(filename, true);
-			}else{
-				out=FileOperate.getOutputStream(filename);
-			}
+			out = FileOperate.getOutputStream(filename, true);
 			wb.write(out);
 			out.close();
 			return true;
@@ -1501,16 +1490,12 @@ public class ExcelOperate implements Closeable {
 			return false;
 		}finally{
 			try {
-				if(out!=null){
-					out.close();
-				}
+				out.close();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
-	
-
 
 	/**
 	 * 输入文件名 保存excel文件，另存为
@@ -1545,12 +1530,6 @@ public class ExcelOperate implements Closeable {
 		sheet = null;
 	}
 	
-	
-
-	public void setNewFile(boolean isNewFile) {
-		this.isNewFile = isNewFile;
-	}
-
 	/**
 	 * 行颜色对象
 	 * @author novelbio
