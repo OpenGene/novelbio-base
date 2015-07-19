@@ -27,6 +27,9 @@ import com.novelbio.base.fileOperate.FileOperate;
  * 本类似乎无法获得最大列的数目,这里可以考虑采用一维数目不同的二维数组，这个实现可以考虑用foreach来遍历 本代码原始作者 caihua ，
  * Zong Jie修改
  */
+
+
+
 public class ExcelOperate implements Closeable {
 	public static final int EXCEL2003 = 2003;
 	public static final int EXCEL2007 = 2007;
@@ -41,6 +44,7 @@ public class ExcelOperate implements Closeable {
 	int versionXls = 0;
 	/** 设定NBC的excel风格 */
 	private boolean isNBCExcel = false;
+	private boolean isNewFile = false;
 	public ExcelOperate() {
 	}
 
@@ -53,11 +57,14 @@ public class ExcelOperate implements Closeable {
 	 * 
 	 * @param imputfilename
 	 */
+	
+	
 	public ExcelOperate(String imputfilename) {
 		String suffix = FileOperate.getFileNameSep(imputfilename)[1].toLowerCase();
 		boolean isexcel2007 = suffix.equals("xlsx") ? true : false;
 		openExcel(imputfilename, isexcel2007);
 	}
+	
 	
 	public void setNBCExcel(boolean isNBCExcel) {
 		this.isNBCExcel = isNBCExcel;
@@ -166,9 +173,10 @@ public class ExcelOperate implements Closeable {
 			return newExcelOpen(imputfilename, excel2007);
 		}
 		try {
-			versionXls = isExcelVersion(filename);
+			versionXls = isExcelVesrsion(filename);
 		} catch (Exception e) {
-			versionXls = EXCEL_NO_FILE;
+			//versionXls = EXCEL_NO_FILE;
+			return newExcelOpen(imputfilename, excel2007);
 		}
 		wb = null;
 		sheet = null;
@@ -1479,7 +1487,11 @@ public class ExcelOperate implements Closeable {
 			return false;
 		OutputStream out = null;
 		try {
-			out = FileOperate.getOutputStream(filename, true);
+			if(!isNewFile){
+				out = FileOperate.getOutputStream(filename, true);
+			}else{
+				out=FileOperate.getOutputStream(filename);
+			}
 			wb.write(out);
 			out.close();
 			return true;
@@ -1489,12 +1501,16 @@ public class ExcelOperate implements Closeable {
 			return false;
 		}finally{
 			try {
-				out.close();
+				if(out!=null){
+					out.close();
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
+	
+
 
 	/**
 	 * 输入文件名 保存excel文件，另存为
@@ -1529,6 +1545,12 @@ public class ExcelOperate implements Closeable {
 		sheet = null;
 	}
 	
+	
+
+	public void setNewFile(boolean isNewFile) {
+		this.isNewFile = isNewFile;
+	}
+
 	/**
 	 * 行颜色对象
 	 * @author novelbio
