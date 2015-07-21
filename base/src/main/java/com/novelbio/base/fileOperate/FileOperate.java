@@ -17,6 +17,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.log4j.Logger;
@@ -1954,6 +1956,46 @@ public class FileOperate {
 		return outputLen;
 	}
 	
+	/**
+	 * 将文件写入到response的输出流.即下载文件.
+	 * @param response
+	 * @param tempFilePath	文件路径和文件名.如:/home/novelbio/tmp/abc.xls
+	 * @param tempFileName	文件名.如:abc.xls
+	 */
+	public static void downloadFile(HttpServletResponse response, String tempFilePath, String tempFileName) {
+		InputStream is = null;
+		OutputStream os = null;
+		try {
+			response.setHeader("Content-Disposition", "attachment;fileName=" + new String(tempFileName.getBytes("utf-8"), "ISO8859-1"));
+			is = getInputStream(tempFilePath);
+			os = response.getOutputStream();
+			byte[] b = new byte[1024];
+			int length;
+			while ((length = is.read(b)) > 0) {
+				os.write(b, 0, length);
+			}
+			response.flushBuffer();
+			os.flush();
+		} catch (Exception e) {
+			logger.error("", e);
+		} finally{
+			if (os != null) {
+				try {
+					os.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			if(is != null){
+				try {
+					is.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
 	
 	public static class ExceptionFileNotExist extends RuntimeException {
 		private static final long serialVersionUID = 8125052068436320509L;
@@ -1970,4 +2012,5 @@ public class FileOperate {
 			super(info);
 		}
 	}
+	
 }

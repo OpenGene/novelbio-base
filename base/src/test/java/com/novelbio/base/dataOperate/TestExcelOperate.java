@@ -1,12 +1,16 @@
 package com.novelbio.base.dataOperate;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import com.novelbio.base.PathDetail;
 import com.novelbio.base.dataOperate.ExcelStyle.EnumXlsCellBorder;
 import com.novelbio.base.fileOperate.FileOperate;
 
@@ -69,9 +73,15 @@ public class TestExcelOperate extends TestCase {
 				excelOperate.close();
 			}
 		}
-		
 		assertTrue(FileOperate.getFileSizeLong(tempFilePath) > 0);
-
+	}
+	
+	public void testPath(){
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-ddhhmmss");
+		String tempFileName  = PathDetail.getTmpPath() +FileOperate.getSepPath()+ dateFormat.format(new Date()) +"resultFileTMP.xls";	
+	
+		System.out.println("path = " + tempFileName);
+		
 	}
 	
 }
