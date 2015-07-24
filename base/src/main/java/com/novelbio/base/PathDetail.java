@@ -24,6 +24,8 @@ public class PathDetail {
 	static String tmpPath;
 	static String tmpHdfsPath;
 	static String rworkspaceTmp;
+	/**存放用户头像的路径*/
+	static String avatarHdfsPath;
 	
 	static {
 		initial();
@@ -36,14 +38,23 @@ public class PathDetail {
 			properties.load(in);
 		} catch (IOException e1) {
 			e1.printStackTrace();
+			throw new RuntimeException(e1);
 		} finally{
 			try {
-				in.close();
+				if(in != null){
+					in.close();
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 		tmpHdfsPath = properties.getProperty("tmpHdfsPath");
+		avatarHdfsPath = properties.getProperty("avatarHdfsPath");
+	}
+	
+	
+	public static String getAvatarHdfsPath(){
+		return avatarHdfsPath;
 	}
 	
 	/** 返回jar所在的路径 */
