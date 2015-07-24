@@ -227,11 +227,11 @@ public class MD5generate {
 	 * 提供一个MD5多次加密方法
 	 */
 	public static String getMD5String(String origString, int times) {
-		String md5 = getMD5String(origString);
-		for (int i = 0; i < times - 1; i++) {
+		String md5 = origString;
+		for (int i = 0; i < times; i++) {
 			md5 = getMD5String(md5);
 		}
-		return getMD5String(md5);
+		return md5;
 	}
 	/**
 	 * 密码验证方法
