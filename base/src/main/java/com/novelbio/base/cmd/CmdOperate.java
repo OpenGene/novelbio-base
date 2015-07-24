@@ -56,8 +56,8 @@ public class CmdOperate extends RunProcess<String> {
 	LinkedList<String> lsOutInfo;
 	/** 出错输出的信息 */
 	LinkedList<String> lsErrorInfo = new LinkedList<>();
-	StreamGobbler errorGobbler;
-	StreamGobbler outputGobbler;
+	StreamOut errorGobbler;
+	StreamOut outputGobbler;
 	
 	/** 是否需要获取cmd的标准输出流 */
 	boolean getCmdInStdStream = false;
@@ -529,7 +529,7 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	private void setStdStream() {
 		String outPath = cmdPath.getSaveStdTmp(); 
-		outputGobbler = new StreamGobbler(process.getStdOut(), process);
+		outputGobbler = new StreamOut(process.getStdOut(), process);
 		if (!getCmdInStdStream) {
 			if (outPath != null) {
 				FileOperate.createFolders(FileOperate.getPathName(outPath));
@@ -558,7 +558,7 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	private void setErrorStream() {
 		String errPath = cmdPath.getSaveErrTmp();
-		errorGobbler = new StreamGobbler(process.getStdErr(), process);
+		errorGobbler = new StreamOut(process.getStdErr(), process);
 		if (!getCmdInErrStream) {
 			if (errPath != null) {
 				FileOperate.createFolders(FileOperate.getPathName(errPath));
@@ -696,10 +696,7 @@ public class CmdOperate extends RunProcess<String> {
 
 	/** 终止线程，在循环中添加 */
 	public void threadStop() {
-		if (cmdRunInfo == null) {
-			cmdRunInfo.setFinish();
-			cmdRunInfo = null;
-		}
+		stopRunInfo();
 		
 		if (process != null && process.isCmdStarted()) {
 			try {
@@ -708,6 +705,13 @@ public class CmdOperate extends RunProcess<String> {
 			} catch (Exception e) {
 				logger.error("stop thread error:\n" + getCmdExeStr(), e);
 			}
+		}
+	}
+	
+	private void stopRunInfo() {
+		if (cmdRunInfo == null) {
+			cmdRunInfo.setFinish();
+			cmdRunInfo = null;
 		}
 	}
 
@@ -734,6 +738,7 @@ public class CmdOperate extends RunProcess<String> {
 	static class FinishFlag {
 		Integer flag = null;
 	}
+
 }
 
 class CmdRunInfo {

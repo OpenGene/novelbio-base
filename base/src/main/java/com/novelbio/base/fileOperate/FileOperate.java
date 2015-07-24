@@ -34,7 +34,7 @@ import com.novelbio.htsjdk.samtools.seekablestream.SeekableStream;
 import com.novelbio.htsjdk.samtools.seekablestream.SeekableStreamFactory;
 
 public class FileOperate {
-	private static Logger logger = Logger.getLogger(FileOperate.class);
+	private static final Logger logger = Logger.getLogger(FileOperate.class);
 	static boolean isWindowsOS = false;
 	static{
 		    String osName = System.getProperty("os.name");

@@ -29,7 +29,7 @@ public class PathDetail {
 		initial();
 	}
 	private static void initial() {
-		String configPath = FileOperate.isWindows() ? "configWindows.properties" : "config.properties";
+		String configPath = "config.properties";
 		InputStream in = PathDetail.class.getClassLoader().getResourceAsStream(configPath);
 		properties = new Properties();
 		try {

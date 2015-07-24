@@ -992,8 +992,7 @@ public class MathComput {
 	 * @param max true 选择权重最大的，min选择权重最小的
 	 * @return
 	 */
-	private static double[] getBigestWeight(List<double[]> lsNum, boolean max)
-	{
+	private static double[] getBigestWeight(List<double[]> lsNum, boolean max) {
 		double[] result = null;
 		if (max) {
 			double big = Double.MIN_VALUE;

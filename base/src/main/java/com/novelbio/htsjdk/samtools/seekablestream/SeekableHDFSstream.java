@@ -41,6 +41,10 @@ public class SeekableHDFSstream extends SeekableStream {
 		fsDataInputStream.seek(position);
 	}
 	
+	public int available() throws IOException {
+		return fsDataInputStream.available();
+	}
+	
 	@Override
 	public int read(byte[] buffer, int offset, int length) throws IOException {
 		return fsDataInputStream.read(buffer, offset, length);
