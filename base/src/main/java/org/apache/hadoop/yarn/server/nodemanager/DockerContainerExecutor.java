@@ -23,6 +23,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
+import org.apache.commons.lang.math.RandomUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.CommonConfigurationKeys;
@@ -61,7 +62,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.net.InetSocketAddress;
-
 import static org.apache.hadoop.fs.CreateFlag.CREATE;
 import static org.apache.hadoop.fs.CreateFlag.OVERWRITE;
 
@@ -341,9 +341,9 @@ public class DockerContainerExecutor extends ContainerExecutor {
     PrintStream ps = null;
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      pout = new PrintStream(out);
+      pout = new PrintStream(out, false, "UTF-8");
       if (LOG.isDebugEnabled()) {
-        ps = new PrintStream(baos);
+        ps = new PrintStream(baos, false, "UTF-8");
         sb.write(ps);
       }
       sb.write(pout);
@@ -357,7 +357,7 @@ public class DockerContainerExecutor extends ContainerExecutor {
       }
     }
     if (LOG.isDebugEnabled()) {
-      LOG.debug("Script: " + baos.toString());
+      LOG.debug("Script: " + baos.toString("UTF-8"));
     }
   }
 
@@ -471,7 +471,7 @@ public class DockerContainerExecutor extends ContainerExecutor {
 
       try {
         out = lfs.create(wrapperScriptPath, EnumSet.of(CREATE, OVERWRITE));
-        pout = new PrintStream(out);
+        pout = new PrintStream(out, false, "UTF-8");
         writeLocalWrapperScript(launchDst, pidFile, pout);
       } finally {
         IOUtils.cleanup(LOG, pout, out);
@@ -529,7 +529,7 @@ public class DockerContainerExecutor extends ContainerExecutor {
       PrintStream pout = null;
       try {
         out = lfs.create(sessionScriptPath, EnumSet.of(CREATE, OVERWRITE));
-        pout = new PrintStream(out);
+        pout = new PrintStream(out, false, "UTF-8");
         // We need to do a move as writing to a file is not atomic
         // Process reading a file being written to may get garbled data
         // hence write pid to tmp file first followed by a mv
@@ -767,8 +767,7 @@ public class DockerContainerExecutor extends ContainerExecutor {
 
     // make probability to pick a directory proportional to
     // the available space on the directory.
-    Random r = new Random();
-    long randomPosition = Math.abs(r.nextLong()) % totalAvailable;
+    long randomPosition = RandomUtils.nextLong() % totalAvailable;
     int dir = 0;
     // skip zero available space directory,
     // because totalAvailable is greater than 0 and randomPosition
