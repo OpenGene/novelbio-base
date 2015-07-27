@@ -1,5 +1,6 @@
 package com.novelbio.base.cmd;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import com.novelbio.base.PathDetail;
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
+import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.dataStructure.PatternOperate;
 import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
@@ -56,6 +58,9 @@ public class CmdOperate extends RunProcess<String> {
 	LinkedList<String> lsOutInfo;
 	/** 出错输出的信息 */
 	LinkedList<String> lsErrorInfo = new LinkedList<>();
+	
+	/** 标准输入到cmd命令的流，一个cmd命令一般只有这一个流 */
+	StreamIn streamIn;
 	StreamOut errorGobbler;
 	StreamOut outputGobbler;
 	
@@ -75,6 +80,7 @@ public class CmdOperate extends RunProcess<String> {
 	/** 输出本程序正在运行时的参数等信息 */
 	String outRunInfoFileName;
 	CmdRunInfo cmdRunInfo;
+	
 	/** 设定复制输入输出文件所到的临时文件夹 */
 	public static void setTmpPath(String tmpPath) {
 		CmdPath.setTmpPath(tmpPath);
@@ -217,6 +223,21 @@ public class CmdOperate extends RunProcess<String> {
 		}
 	}
 	
+	/** 标准输入到cmd命令的流，一个cmd命令一般只有这一个流 */
+	public void setStreamIn(StreamIn streamIn) {
+		this.streamIn = streamIn;
+	}
+	/** 设定本cmd命令的标准输入文件，该文件会通过标准输入流输入cmd命令 */
+	public void setInputFile(String inputFile) {
+		this.streamIn = new StreamIn();
+		streamIn.setInputFile(inputFile);
+	}
+	/** 设定本cmd命令的标准输入文件，该文件会通过标准输入流输入cmd命令 */
+	public void setInputFile(File inputFile) {
+		this.streamIn = new StreamIn();
+		streamIn.setInputFile(inputFile);
+	}
+	
 	/**
 	 *  设定标准输出流，如果是这里指定，则会即时刷新<br>
 	 * 本设置会被cmd中自带的 > 重定向覆盖
@@ -343,12 +364,26 @@ public class CmdOperate extends RunProcess<String> {
 	
 	/** 返回执行的具体cmd命令，会将文件路径删除，仅给相对路径 */
 	public String getCmdExeStrModify() {
-		return cmdPath.getCmdExeStrModify();
+		String[] resultCmd = cmdPath.getCmdExeStrModify();
+		replaceInputStreamFile(resultCmd);
+		return ArrayOperate.cmbString(resultCmd, " ");
 	}
 	
 	/** 返回执行的具体cmd命令，实际cmd命令 */
 	public String getCmdExeStrReal() {
-		return cmdPath.getCmdExeStrReal();
+		String[] resultCmd = cmdPath.getCmdExeStrReal();
+		replaceInputStreamFile(resultCmd);
+		return ArrayOperate.cmbString(resultCmd, " ");
+	}
+	
+	private void replaceInputStreamFile(String[] resultCmd) {
+		if (streamIn != null && !StringOperate.isRealNull(streamIn.getInputFile())) {
+			for (int i = 0; i < resultCmd.length; i++) {
+				if (resultCmd[i].equals("-")) {
+					resultCmd[i] = streamIn.getInputFile();
+				}
+			}
+		}
 	}
 	
 	/** 是否获得cmd的标准输出流
@@ -497,8 +532,13 @@ public class CmdOperate extends RunProcess<String> {
 		
 		process.exec(cmdRun);
 		
+		Thread threadInStream = setAndGetInStream();
+		if (threadInStream != null) {
+			threadInStream.start();
+		}
 		setStdStream();
 		setErrorStream();
+		
 		errorGobbler.start();
 		outputGobbler.start();
 		cmdRunInfo.startWriteRunInfo();
@@ -507,6 +547,10 @@ public class CmdOperate extends RunProcess<String> {
 		
 		if (needLog) logger.info("finish running cmd, finish flag is: " + finishFlag.flag);
 		
+		//这几个感觉跟cmd是直接绑定的，如果cmd关闭了似乎这几个都会自动停止
+		if (threadInStream != null) {
+			threadInStream.join();
+		}
 		outputGobbler.join();
 		errorGobbler.join();
 		
@@ -518,6 +562,13 @@ public class CmdOperate extends RunProcess<String> {
 		//不管是否跑成功，都移出文件夹
 		cmdPath.moveFileOut();
 		cmdPath.deleteTmpFile();
+	}
+	
+	private Thread setAndGetInStream() {
+		if (streamIn == null) return null;
+		streamIn.setProcess(process);
+		Thread threadStreamIn = new Thread(streamIn);
+		return threadStreamIn;
 	}
 	
 	/** 是否将std写入外部指定的文件中，而不是写入cmd中的文件，同时会定时--约2秒， 刷新 输出文件<p>
@@ -646,6 +697,12 @@ public class CmdOperate extends RunProcess<String> {
 		try {
 			doInBackgroundB();
 		} catch (Exception e) {
+			try {
+				if (streamIn != null) streamIn.threadStop();
+				
+			} catch (Exception e2) {
+				// TODO: handle exception
+			}
 			e.printStackTrace();
 			logger.error("cmd cannot executed correctly: " + cmd);
 		}

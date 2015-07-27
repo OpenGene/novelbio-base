@@ -19,7 +19,7 @@ import com.novelbio.base.dataOperate.TxtReadandWrite;
 public class StreamOut extends Thread {
 	private static final Logger logger = Logger.getLogger(StreamOut.class);
 	/** 每2000ms刷新一次txt文本，这是因为写入错误行会很慢，刷新就可以做到及时看结果 */
-	private static final int timeTxtFlush = 1000;
+	private static final int timeTxtFlush = 2000;
 	
 	/** 运行进程的pid */
 	IntProcess process;
@@ -85,17 +85,13 @@ public class StreamOut extends Thread {
 			if (os == null) {
 				exhaustInStream(is);
 			} else {
+				initialTxtFlush();
 				if (isJustDisplay) {
-					initialTxtFlush();
-					
 					writeToTxt(is, os);
-					
-					finishFlush();
-					
 				} else {
 					copyLarge(is, os);
 				}
-
+				finishFlush();
 			}
 			isFinished = true;
 		}
@@ -175,15 +171,6 @@ public class StreamOut extends Thread {
 		}
 	}
 	
-	/** 往stdErr或stdOut中输出结束信息，表示程序运行完毕了
-	 * 只有当{@link #setOutputStream(OutputStream, boolean, boolean)}的后两项
-	 * isWriteToTxt和isWriteTIPS都设定为True的时候才会写入信息<br>
-	 * <b>并且写完后就会关闭流</b>
-	 *  */
-	protected void writeFinishToTxt(String finishInfo) {
-		
-	}
-	
 	private static final int EOF = -1;
   /**
     * Copies bytes from a large (over 2GB) <code>InputStream</code> to an
@@ -201,12 +188,14 @@ public class StreamOut extends Thread {
     * @throws IOException if an I/O error occurs
     * @since 2.2
     */
-	public static long copyLarge(final InputStream input, final OutputStream output) {
+	private long copyLarge(final InputStream input, final OutputStream output) {
 		try {
 			byte[] buffer = new byte[1024 * 4];
 			long count = 0;
 			int n = 0;
 			while (EOF != (n = input.read(buffer))) {
+				//说明流中有东西
+				if (!isStartWrite) isStartWrite = true;
 				output.write(buffer, 0, n);
 				count += n;
 			}
@@ -214,7 +203,6 @@ public class StreamOut extends Thread {
 		} catch (Exception e) {
 			throw new RuntimeException("copy info error", e);
 		}
-
 	}
 	
 	/** 关闭输出流 */

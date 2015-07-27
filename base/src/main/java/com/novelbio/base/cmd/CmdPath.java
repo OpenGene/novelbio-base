@@ -225,23 +225,23 @@ public class CmdPath {
 	}
 	
 	/** 返回执行的具体cmd命令，不会将文件路径删除，仅给相对路径 */
-	public String getCmdExeStr() {
+	public String[] getCmdExeStr() {
 		return getCmdExeStrModify();
 	}
 	
 	/** 返回执行的具体cmd命令，会将文件路径删除，仅给相对路径 */
-	public String getCmdExeStrModify() {
+	public String[] getCmdExeStrModify() {
 		generateTmPath();
 		return getCmdModify(generateRunCmd(false));
 	}
 	
 	/** 返回执行的具体cmd命令，实际cmd命令 */
-	public String getCmdExeStrReal() {
+	public String[] getCmdExeStrReal() {
 		generateTmPath();
-		return ArrayOperate.cmbString(generateRunCmd(false), " ");
+		return generateRunCmd(false);
 	}
 
-	public static String getCmdModify(String[] cmdArray) {
+	public static String[] getCmdModify(String[] cmdArray) {
 		StringBuilder strBuilder = new StringBuilder();
 		for (String cmdTmp : cmdArray) {
 			String[] subcmd = cmdTmp.split("=");
@@ -252,7 +252,7 @@ public class CmdPath {
 				strBuilder.append(FileOperate.getFileName(subcmd[i]));
 			}
 		}
-		return strBuilder.toString().trim();
+		return strBuilder.toString().trim().split(" ");
 	}
 	/** 在cmd运行前，将输入文件拷贝到临时文件夹下 */
 	public void copyFileIn() {
