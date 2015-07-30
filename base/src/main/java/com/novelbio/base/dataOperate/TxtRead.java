@@ -541,7 +541,7 @@ class TxtRead implements Closeable {
 				bufread.close();
 				bufread = null;
 			}
-			if (inputStream != null) {
+			if (!isStream && inputStream != null) {
 				inputStream.close();
 				inputStream = null;
 			}

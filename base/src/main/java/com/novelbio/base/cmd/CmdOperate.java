@@ -224,7 +224,7 @@ public class CmdOperate extends RunProcess<String> {
 	}
 	
 	/** 标准输入到cmd命令的流，一个cmd命令一般只有这一个流 */
-	public void setStreamIn(StreamIn streamIn) {
+	public void setInputStream(StreamIn streamIn) {
 		this.streamIn = streamIn;
 	}
 	/** 设定本cmd命令的标准输入文件，该文件会通过标准输入流输入cmd命令 */
@@ -566,7 +566,7 @@ public class CmdOperate extends RunProcess<String> {
 	
 	private Thread setAndGetInStream() {
 		if (streamIn == null) return null;
-		streamIn.setProcess(process);
+		streamIn.setProcessInStream(process.getStdIn());
 		Thread threadStreamIn = new Thread(streamIn);
 		return threadStreamIn;
 	}

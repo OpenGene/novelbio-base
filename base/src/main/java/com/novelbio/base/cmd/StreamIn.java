@@ -16,9 +16,9 @@ import com.novelbio.base.multithread.RunProcess;
  */
 public class StreamIn extends RunProcess<Integer> {
 	File inputFile;
-	
+	protected InputStream inStream;
 	/** 输入cmd的流 */
-	OutputStream processInStream;
+	protected OutputStream processInStream;
 	
 	public void setInputFile(String inputFile) {
 		this.inputFile = FileOperate.getFile(inputFile);
@@ -26,33 +26,34 @@ public class StreamIn extends RunProcess<Integer> {
 	public void setInputFile(File inputFile) {
 		this.inputFile = inputFile;
 	}
-	protected String getInputFile() {
+	public String getInputFile() {
 		if (inputFile != null) {
 			return inputFile.getAbsolutePath();
 		}
 		return null;
 	}
+	public void setInStream(InputStream inStream) {
+		this.inStream = inStream;
+	}
 	
-	
-	protected void setProcess(IntProcess process) {
-		this.processInStream = process.getStdIn();
+	public void setProcessInStream(OutputStream processInStream) {
+		this.processInStream = processInStream;
 	}
 
 	@Override
 	protected void running() {
-		InputStream insStream = null;
 		try {
-			insStream = FileOperate.getInputStream(inputFile);
+			inStream = FileOperate.getInputStream(inputFile);
 		} catch (IOException e) {
 			throw new ExceptionFileInputError("input file may not exist: " + inputFile, e);
 		}
 		try {
-			copyLarge(insStream, processInStream);
+			copyLarge(inStream, processInStream);
 		} catch (Exception e) {
 			throw new ExceptionCmd("cmdError", e);
 		} finally {
 			try {
-				insStream.close();
+				inStream.close();
 				processInStream.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
