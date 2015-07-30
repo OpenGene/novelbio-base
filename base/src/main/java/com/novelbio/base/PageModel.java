@@ -22,13 +22,26 @@ public class PageModel {
 	/** 排序方式 desc acs */
 	private String order = Sort.Direction.ASC.toString();
 	
+	/** 返回当前页，默认为1 */
 	public int getPage() {
 		return page;
 	}
-	/** 默认为1 */
+	
+	/** 返回上一页*/
+	public int getPrevPage() {
+		return (page - 1) < 1 ? 1 : page-1;
+	}
+	
+	/** 返回下一页*/
+	public int getNextPage() {
+		return page + 1;
+	}
+	
 	public void setPage(int page) {
 		this.page = page;
 	}
+	
+	
 	public void addPage() {
 		page++;
 	}
