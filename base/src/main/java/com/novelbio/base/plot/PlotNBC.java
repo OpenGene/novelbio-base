@@ -123,7 +123,9 @@ public abstract  class PlotNBC{
     	if (bufferedImage == null) {
 			return null;
 		}
-    	if (bufferedImage.getWidth() == Width && bufferedImage.getHeight() == Height) {
+    	if (bufferedImage.getWidth() == Width && bufferedImage.getHeight() == Height
+    			|| (Width == 0 && Height == 0)
+    			) {
 			return bufferedImage;
 		}
     	BufferedImage bufferedImageResult = ImageUtils.resizeImage(bufferedImage, Width, Height);

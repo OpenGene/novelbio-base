@@ -20,7 +20,7 @@ public class ExcelTxtRead {
 	 * 指定excel/txt文件，以及需要读取的列和行
 	 *  不将第一列空位或者null的行删除
 	 * @param excelFile 待读取的excel文件
-	 * @param columnID 待读取的列，int[]中间是读取的第几列，读取结果会按照指定的列的顺序给出
+	 * @param columnID 待读取的列，int[]中间是读取的第几列，读取结果会按照指定的列的顺序给出, 从1开始计数
 	 * @param rowStart
 	 * @param rowEnd 如果rowEnd<1，则一直读到sheet1文件结尾
 	 * @return 
