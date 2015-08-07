@@ -431,20 +431,18 @@ public class ArrayOperate {
 		if (lsInfo.size() == 0) {
 			return null;
 		}
-		ArrayList<Double> lsResult = new ArrayList<Double>();
+		int longestLen = 0;
 		for (double[] ds : lsInfo) {
-			for (int i = 0; i < ds.length; i++) {
-				if (i < lsResult.size()) {
-					lsResult.set(i, lsResult.get(i) + ds[i]);
-				} else {
-					lsResult.add(ds[i]);
-				}
+			if (longestLen < ds.length) {
+				longestLen = ds.length;
 			}
 		}
 
-		double[] result = new double[lsResult.size()];
-		for (int i = 0; i < result.length; i++) {
-			result[i] = lsResult.get(i);
+		double[] result = new double[longestLen];
+		for (double[] ds : lsInfo) {
+			for (int i = 0; i < ds.length; i++) {
+				result[i] = result[i] + ds[i];
+			}
 		}
 		return result;
 	}
@@ -459,15 +457,22 @@ public class ArrayOperate {
 		if (lsInfo.size() == 0) {
 			return null;
 		}
-		List<Integer> lsResult = new ArrayList<Integer>();
+		
+		int longestLen = 0;
+		for (double[] ds : lsInfo) {
+			if (longestLen < ds.length) {
+				longestLen = ds.length;
+			}
+		}
+		int[] result = new int[longestLen];
 		for (double[] ds : lsInfo) {
 			for (int i = 0; i < ds.length; i++) {
-				if (i < lsResult.size()) {
-					lsResult.set(i, lsResult.get(i) +1);
-				} else {
-					lsResult.add(1);
-				}
+				result[i] = result[i] + 1;
 			}
+		}
+		List<Integer> lsResult = new ArrayList<>();
+		for (int i : result) {
+			lsResult.add(i);
 		}
 		return lsResult;
 	}
