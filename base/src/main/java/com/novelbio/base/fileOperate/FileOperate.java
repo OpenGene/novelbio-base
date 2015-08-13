@@ -1967,6 +1967,7 @@ public class FileOperate {
 		OutputStream os = null;
 		try {
 			response.setHeader("Content-Disposition", "attachment;fileName=" + new String(tempFileName.getBytes("utf-8"), "ISO8859-1"));
+			//TODO 这里有一个潜在bug.当文件tempFilePath不存在时,is会是null.导致这里报空指针错误,待修改. add by fans.fan 150812
 			is = getInputStream(tempFilePath);
 			os = response.getOutputStream();
 			byte[] b = new byte[1024];
