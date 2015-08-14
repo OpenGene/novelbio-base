@@ -413,7 +413,11 @@ public class CmdOperate extends RunProcess<String> {
 	public void setGetLsStdOut() {
 		lsOutInfo = new LinkedList<>();
 	}
-
+	
+	/** 默认不启用，将错误信息输出到标准错误流 */
+	public void setPutErrToStderr() {
+		lsErrorInfo = null;
+	}
 	/** 需要获得多少行错误输出流 */
 	public void setGetLsErrOut(int lineNum) {
 		this.lineNumErr = lineNum;
