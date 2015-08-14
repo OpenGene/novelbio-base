@@ -62,7 +62,6 @@ public class MyBeanUtils extends org.springframework.beans.BeanUtils {
 		Class<?> actualEditable = target.getClass();
 		PropertyDescriptor[] targetPds = getPropertyDescriptors(actualEditable);
 		for (PropertyDescriptor targetPd : targetPds) {
-			System.out.println(targetPd.getName());
 			if (targetPd.getWriteMethod() != null) {
 				PropertyDescriptor sourcePd = getPropertyDescriptor(source.getClass(), targetPd.getName());
 				if (sourcePd != null && sourcePd.getReadMethod() != null) {
