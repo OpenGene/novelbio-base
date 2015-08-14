@@ -1648,7 +1648,7 @@ public class FileOperate {
 	 * 
 	 * @param fileName
 	 *            如果为null, 直接返回false
-	 * @return
+	 * @return 文件存在,返回true.否则,返回false
 	 */
 	public static boolean isFileExist(String fileName) {
 		if (fileName == null || fileName.trim().equals("")) {
@@ -1965,9 +1965,14 @@ public class FileOperate {
 	public static void downloadFile(HttpServletResponse response, String tempFilePath, String tempFileName) {
 		InputStream is = null;
 		OutputStream os = null;
+		//add by fans.fan 如果文件不存在.往下执行会报空指针错误.添加判断处理. 150814
+		if (!isFileExist(tempFilePath)) {
+			logger.warn("download file is not exist.file=" + tempFilePath);
+			return ;
+		}
+		//end by fans.fan 
 		try {
 			response.setHeader("Content-Disposition", "attachment;fileName=" + new String(tempFileName.getBytes("utf-8"), "ISO8859-1"));
-			//TODO 这里有一个潜在bug.当文件tempFilePath不存在时,is会是null.导致这里报空指针错误,待修改. add by fans.fan 150812
 			is = getInputStream(tempFilePath);
 			os = response.getOutputStream();
 			byte[] b = new byte[1024];
