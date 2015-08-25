@@ -13,14 +13,13 @@ import java.util.TimerTask;
 
 import org.apache.log4j.Logger;
 
-import com.novelbio.base.PathDetail;
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.dataStructure.PatternOperate;
-import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
+import com.novelbio.base.multithread.RunGetInfo;
 import com.novelbio.base.multithread.RunProcess;
 
 /**
@@ -86,59 +85,10 @@ public class CmdOperate extends RunProcess<String> {
 		CmdPath.setTmpPath(tmpPath);
 	}
 	
-	public CmdOperate()  {}
-	/**
-	 * 直接运行，不写入文本
-	 * @param cmd
-	 */
-	public CmdOperate(String cmd) {
+	public CmdOperate() {
 		process = new ProcessCmd();
-		String[] cmds = cmd.trim().split(" ");
-		for (String string : cmds) {
-			if (string.trim().equals("")) {
-				continue;
-			}
-			cmdPath.addCmdParam(string);
-		}
 	}
 
-	/**
-	 * 初始化后直接开新线程即可 先写入Shell脚本，再运行
-	 * 
-	 * @param cmd
-	 *            输入命令
-	 * @param cmdWriteInFileName
-	 *            将命令写入的文本
-	 */
-	@Deprecated
-	public CmdOperate(String cmd, String cmdWriteInFileName) {
-		process = new ProcessCmd();
-		setCmdFile(cmd, cmdWriteInFileName);
-	}
-	/**
-	 * 将cmd写入哪个文本，然后执行，如果初始化输入了cmdWriteInFileName, 就不需要这个了
-	 * 
-	 * @param cmd
-	 */
-	@Deprecated
-	private void setCmdFile(String cmd, String cmdWriteInFileName) {
-		String newCmd = null;
-		for(String text : cmd.trim().split(" ")){
-			if (newCmd == null) {
-				newCmd = FileHadoop.convertToLocalPath(text);
-			}else {
-				newCmd += " " + FileHadoop.convertToLocalPath(text);
-			}
-		}
-		logger.info(newCmd);
-		String cmd1SH = PathDetail.getTmpPath() + cmdWriteInFileName.replace("\\", "/") + DateUtil.getDateAndRandom() + ".sh";
-		TxtReadandWrite txtCmd1 = new TxtReadandWrite(cmd1SH, true);
-		txtCmd1.writefile(newCmd);
-		txtCmd1.close();
-		cmdPath.clearLsCmd();
-		cmdPath.addCmdParam("sh");
-		cmdPath.addCmdParam(cmd1SH);
-	}
 	public CmdOperate(List<String> lsCmd) {
 		process = new ProcessCmd();
 		cmdPath.setLsCmd(lsCmd);
@@ -209,7 +159,9 @@ public class CmdOperate extends RunProcess<String> {
 		((ProcessRemote)process).setKeyFile(keyFile);
 		cmdPath.setLsCmd(lsCmd);
 	}
-	
+	public void setLsCmd(List<String> lsCmd) {
+		cmdPath.setLsCmd(lsCmd);
+	}
 	protected void setNeedLog(boolean isNeedLog) {
 		this.needLog = isNeedLog;
 	}
@@ -572,6 +524,7 @@ public class CmdOperate extends RunProcess<String> {
 		if (streamIn == null) return null;
 		streamIn.setProcessInStream(process.getStdIn());
 		Thread threadStreamIn = new Thread(streamIn);
+		threadStreamIn.setDaemon(true);
 		return threadStreamIn;
 	}
 	
@@ -585,6 +538,7 @@ public class CmdOperate extends RunProcess<String> {
 	private void setStdStream() {
 		String outPath = cmdPath.getSaveStdTmp(); 
 		outputGobbler = new StreamOut(process.getStdOut(), process);
+		outputGobbler.setDaemon(true);
 		if (!getCmdInStdStream) {
 			if (outPath != null) {
 				FileOperate.createFolders(FileOperate.getPathName(outPath));
@@ -614,6 +568,7 @@ public class CmdOperate extends RunProcess<String> {
 	private void setErrorStream() {
 		String errPath = cmdPath.getSaveErrTmp();
 		errorGobbler = new StreamOut(process.getStdErr(), process);
+		errorGobbler.setDaemon(true);
 		if (!getCmdInErrStream) {
 			if (errPath != null) {
 				FileOperate.createFolders(FileOperate.getPathName(errPath));
@@ -779,6 +734,11 @@ public class CmdOperate extends RunProcess<String> {
 	/** 添加引号，一般是文件路径需要添加引号 **/
 	public static String addQuot(String pathName) {
 		return "\"" + pathName + "\"";
+	}
+	
+	/** 添加引号，一般是文件路径需要添加引号 **/
+	public static String addQuotSingle(String pathName) {
+		return "'" + pathName + "'";
 	}
 	
 	/** 将输入的被引号--包括英文的单引号和双引号--包围的path信息修改为相对路径 */

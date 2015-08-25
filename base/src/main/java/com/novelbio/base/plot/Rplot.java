@@ -1,9 +1,12 @@
 package com.novelbio.base.plot;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import com.novelbio.base.PathDetail;
+import com.novelbio.base.cmd.CmdOperate;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.fileOperate.FileOperate;
 
@@ -142,11 +145,12 @@ public class Rplot {
 	 * @throws Exception
 	 */
 	private static int rscript(String scriptPath) throws IOException, InterruptedException {
-		//这个就是相对路径，必须在当前文件夹下运行
-		String command= PathDetail.getRscriptWithSpace() + scriptPath;
-		Runtime   r=Runtime.getRuntime();
-		Process p = r.exec(command);
-		p.waitFor();
+		List<String> lsCmd = new ArrayList<>();
+		lsCmd.add(PathDetail.getRscript());
+		lsCmd.add(scriptPath);
+		
+		CmdOperate cmdOperate = new CmdOperate(lsCmd);
+		cmdOperate.runWithExp();
 		return 1;
 	}
 }

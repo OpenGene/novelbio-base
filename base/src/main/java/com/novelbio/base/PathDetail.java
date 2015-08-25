@@ -6,12 +6,6 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.curator.RetryPolicy;
-import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.CuratorFrameworkFactory;
-import org.apache.curator.framework.imps.CuratorFrameworkState;
-import org.apache.curator.retry.ExponentialBackoffRetry;
-
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.HttpFetch;
 import com.novelbio.base.fileOperate.FileOperate;
@@ -19,13 +13,11 @@ import com.novelbio.base.fileOperate.FileOperate;
 public class PathDetail {
 	/** 临时文件夹中的文件保留若干天 */
 	static final int tmpFileRemainDay = 6;
-	static Properties properties;
-	static String rworkspace;
-	static String tmpPath;
-	static String tmpHdfsPath;
-	static String rworkspaceTmp;
-	/**存放用户头像的路径*/
-	static String avatarHdfsPath;
+	private static Properties properties;
+	private static String rworkspace;
+	private static String tmpPath;
+	private static String tmpHdfsPath;
+	private static String rworkspaceTmp;
 	
 	static {
 		initial();
@@ -49,12 +41,6 @@ public class PathDetail {
 			}
 		}
 		tmpHdfsPath = properties.getProperty("tmpHdfsPath");
-		avatarHdfsPath = properties.getProperty("avatarHdfsPath");
-	}
-	
-	
-	public static String getAvatarHdfsPath(){
-		return avatarHdfsPath;
 	}
 	
 	/** 返回jar所在的路径 */
@@ -112,6 +98,11 @@ public class PathDetail {
 	/** 内部自动加空格 */
 	public static String getRscriptWithSpace() {
 		return properties.getProperty("R_SCRIPT") + " ";
+	}
+	
+	/** hadoop Streaming的jar包 */
+	public static String getHdpStreamingJar() {
+		return properties.getProperty("hadoopStreamingJar");
 	}
 	
 	/** 内部不加空格 */

@@ -400,6 +400,21 @@ public class FileHadoop extends File {
 		}
 		return hdfsPath;
 	}
+	
+	/** 把 /media/nbfs这种改成hdfs的形式，如果不是/media/hdfs这种，就不要动 */
+	public static String removeHadoopSymbol(String hdfsPath) {
+		return hdfsPath.replaceFirst(getHdfsSymbol(), "");
+	}
+	
+	/** 把 /media/nbfs和/hdfs:/这种改成 hdfs:/ 这种可以被hadoop识别的形式 */
+	public static String convertToHdfsPath(String hdfsPath) {
+		hdfsPath = convertToHadoop(hdfsPath);
+		if (hdfsPath.startsWith(getHdfsSymbol())) {
+			hdfsPath = hdfsPath.replaceFirst(getHdfsSymbol(), "hdfs:");
+        }
+		return hdfsPath;
+	}
+	
 	/** 
 	* 把hdfs的路径转换成本地路径，前提是hdfs已经挂载至本地，并且是带有hdfs头的类型
 	*/

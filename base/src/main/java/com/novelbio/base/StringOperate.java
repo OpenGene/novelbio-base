@@ -1,7 +1,6 @@
 package com.novelbio.base;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 

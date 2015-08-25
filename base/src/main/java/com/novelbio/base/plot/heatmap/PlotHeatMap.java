@@ -166,7 +166,11 @@ public class PlotHeatMap extends PlotNBC {
 		double[][] data = new double[dataRaw[0].length][dataRaw.length];
 		for (int i = 0; i < data.length; i++) {
 			for (int j = 0; j < data[i].length; j++) {
-				data[i][j] = dataRaw[j][i];
+				try {
+					data[i][j] = dataRaw[j][i];
+                } catch (Exception e) {
+                	data[i][j] = dataRaw[j][i];                }
+			
 			}
 		}
 		return data;
