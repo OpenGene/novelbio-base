@@ -78,7 +78,7 @@ public class TestExcelOperate extends TestCase {
 	
 	public void testPath(){
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-ddhhmmss");
-		String tempFileName  = PathDetail.getTmpPath() +FileOperate.getSepPath()+ dateFormat.format(new Date()) +"resultFileTMP.xls";	
+		String tempFileName  = PathDetail.getTmpPathWithSep() +FileOperate.getSepPath()+ dateFormat.format(new Date()) +"resultFileTMP.xls";	
 	
 		System.out.println("path = " + tempFileName);
 		

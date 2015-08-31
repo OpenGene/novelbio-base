@@ -1908,7 +1908,13 @@ public class FileOperate {
 		}
 		return path;
 	}
-
+	
+	public static void validateFileName(String fileName) {
+		if (fileName.contains("\\") || fileName.contains("/") || fileName.contains("*")) {
+			throw new ExceptionFile(fileName + " fileName error, cannot contain: \\ / *");
+        }
+	}
+	
 	/**
 	 * 删除文件分割符
 	 * 

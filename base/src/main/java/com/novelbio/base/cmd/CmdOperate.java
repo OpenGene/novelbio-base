@@ -13,13 +13,13 @@ import java.util.TimerTask;
 
 import org.apache.log4j.Logger;
 
+import com.novelbio.base.PathDetail;
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.dataStructure.PatternOperate;
 import com.novelbio.base.fileOperate.FileOperate;
-import com.novelbio.base.multithread.RunGetInfo;
 import com.novelbio.base.multithread.RunProcess;
 
 /**
@@ -80,6 +80,9 @@ public class CmdOperate extends RunProcess<String> {
 	String outRunInfoFileName;
 	CmdRunInfo cmdRunInfo;
 	
+	/** 将cmd写入sh文件的具体文件 */
+	String cmd1SH;
+	
 	/** 设定复制输入输出文件所到的临时文件夹 */
 	public static void setTmpPath(String tmpPath) {
 		CmdPath.setTmpPath(tmpPath);
@@ -88,7 +91,45 @@ public class CmdOperate extends RunProcess<String> {
 	public CmdOperate() {
 		process = new ProcessCmd();
 	}
+	
+	/**
+	 * 初始化后直接开新线程即可 先写入Shell脚本，再运行。
+	 * 一般用不到，只有当直接运行cmd会失败时才考虑使用该方法。
+	 * 目前遇到的情况是直接跑hadoop streaming程序会出错，采用该方法跑
+	 * 就不会出错了
+	 * 
+	 * @param cmd
+	 *            输入命令
+	 * @param cmdWriteInFileName
+	 *            将命令写入的文本
+	 */
+	public CmdOperate(String cmd, String cmdWriteInFileName) {
+		process = new ProcessCmd();
+		FileOperate.validateFileName(cmdWriteInFileName);
+		setCmdFile(cmd, cmdWriteInFileName);
+	}
+	/**
+	 * 将cmd写入哪个文本，然后执行，如果初始化输入了cmdWriteInFileName, 就不需要这个了
+	 * 
+	 * @param cmd
+	 */
+	private void setCmdFile(String cmd, String cmdWriteInFileName) {
+		logger.info(cmd);
+		while (true) {
+			cmd1SH = CmdPath.tmpPath + cmdWriteInFileName.replace("\\", "/") + DateUtil.getDateAndRandom() + ".sh";
+			if (!FileOperate.isFileExist(cmd1SH)) {
+				break;
+            }
+        }
+		TxtReadandWrite txtCmd1 = new TxtReadandWrite(cmd1SH, true);
+		txtCmd1.writefile(cmd);
+		txtCmd1.close();
+		cmdPath.clearLsCmd();
+		cmdPath.addCmdParam("sh");
+		cmdPath.addCmdParam(cmd1SH);
+	}
 
+	
 	public CmdOperate(List<String> lsCmd) {
 		process = new ProcessCmd();
 		cmdPath.setLsCmd(lsCmd);
@@ -644,6 +685,9 @@ public class CmdOperate extends RunProcess<String> {
 		if (!isFinishedNormal()) {
 			throw new ExceptionCmd(this);
 		}
+		if (FileOperate.isFileExist(cmd1SH)) {
+			FileOperate.DeleteFileFolder(cmd1SH);
+        }
 	}
 	
 	@Override

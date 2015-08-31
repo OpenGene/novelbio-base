@@ -109,15 +109,16 @@ public class PathDetail {
 	public static String getRscript() {
 		return properties.getProperty("R_SCRIPT");
 	}
+	
 	/** 一个大的能容纳一些中间过程的文件夹 */
-	public static String getTmpPath() {
+	public static String getTmpPathWithOutSep() {
 		if (tmpPath == null) {
 			synchronized (properties) {
 				tmpPath = properties.getProperty("TMPpath");
 				if (FileOperate.createFolders(tmpPath)) {
 //					file.setReadable(true, false);
 //					file.setWritable(true, false);
-					System.setProperty("java.io.tmpdir", tmpPath);
+//					System.setProperty("java.io.tmpdir", tmpPath);
 				} else {
 					tmpPath = System.getProperty("java.io.tmpdir");
 				}
@@ -125,6 +126,11 @@ public class PathDetail {
 		}
 
 		return tmpPath;
+	}
+	
+	/** 一个大的能容纳一些中间过程的文件夹 */
+	public static String getTmpPathWithSep() {
+		return FileOperate.addSep(getTmpPathWithOutSep());
 	}
 	
 	public static void cleanTmpPath() {
@@ -174,7 +180,7 @@ public class PathDetail {
 	
 	/** 在tmp文件夹下新建一个随机文件名的临时文件夹，注意每次返回的都不一样 */
 	public static String getTmpPathRandom() {
-		String tmpPath = FileOperate.addSep(getTmpPath()) + "tmp" + DateUtil.getDateAndRandom();
+		String tmpPath = getTmpPathWithSep() + "tmp" + DateUtil.getDateAndRandom();
 		if (!FileOperate.createFolders(tmpPath)) {
 			tmpPath = null;
 		}
@@ -183,7 +189,7 @@ public class PathDetail {
 	
 	/** 在tmp文件夹下新建一个随机文件名的临时文件夹，注意每次返回的都不一样，最后有“/” */
 	public static String getTmpPathRandomWithSep(String prefix) {
-		String tmpPath = FileOperate.addSep(getTmpPath()) + prefix + DateUtil.getDateAndRandom() + FileOperate.getSepPath();
+		String tmpPath = getTmpPathWithSep() + prefix + DateUtil.getDateAndRandom() + FileOperate.getSepPath();
 		if (!FileOperate.createFolders(tmpPath)) {
 			tmpPath = null;
 		}

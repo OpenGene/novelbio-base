@@ -25,9 +25,9 @@ import com.novelbio.base.fileOperate.FileOperate;
  */
 public class CmdPath {
 	private static final Logger logger = Logger.getLogger(CmdPath.class);
-	static String tmpPath = PathDetail.getTmpPath();
+	static String tmpPath = PathDetail.getTmpPathWithSep();
 	
-	List<String> lsCmd;
+	List<String> lsCmd = new ArrayList<>();
 	
 	boolean isRedirectInToTmp = false;
 	boolean isRedirectOutToTmp = false;
@@ -383,7 +383,7 @@ public class CmdPath {
 	 */
 	private String convertToTmpPath(boolean stdOut, boolean errOut, String tmpCmd) {
 		if (tmpCmd.contains("=")) {
-			String[] tmpCmd2Path = tmpCmd.split("=");
+			String[] tmpCmd2Path = tmpCmd.split("=", 2);
 			tmpCmd = tmpCmd2Path[0] + "=" + convertToTmpPath(stdOut, errOut, tmpCmd2Path[1]);
 			return tmpCmd;
 		} else {
