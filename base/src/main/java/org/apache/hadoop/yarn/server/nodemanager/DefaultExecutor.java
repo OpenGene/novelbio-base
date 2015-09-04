@@ -65,15 +65,7 @@ public class DefaultExecutor implements IntExecutor {
   public DefaultExecutor(	ContainerExecutorImpt containerExecutor) {
 	  this.containerExecutor = containerExecutor;
   }
-  
-  protected void copyFile(Path src, Path dst, String owner) throws IOException {
-	  containerExecutor.lfs.util().copy(src, dst);
-  }
-  
-  protected void setScriptExecutable(Path script, String owner) throws IOException {
-	  containerExecutor.lfs.setPermission(script, ContainerExecutor.TASK_LAUNCH_SCRIPT_PERMISSION);
-  }
-
+ 
   public void init() throws IOException {
     // nothing to do or verify here
   }
@@ -112,12 +104,12 @@ public class DefaultExecutor implements IntExecutor {
     // copy container tokens to work dir
     Path tokenDst =
       new Path(containerWorkDir, ContainerLaunch.FINAL_CONTAINER_TOKENS_FILE);
-    copyFile(nmPrivateTokensPath, tokenDst, user);
+    containerExecutor.copyFile(nmPrivateTokensPath, tokenDst, user);
 
     // copy launch script to work dir
     Path launchDst =
         new Path(containerWorkDir, ContainerLaunch.CONTAINER_SCRIPT);
-    copyFile(nmPrivateContainerScriptPath, launchDst, user);
+    containerExecutor.copyFile(nmPrivateContainerScriptPath, launchDst, user);
 
     // Create new local launch wrapper script
     LocalWrapperScriptBuilder sb = getLocalWrapperScriptBuilder(
@@ -147,8 +139,8 @@ public class DefaultExecutor implements IntExecutor {
     // fork script
     Shell.CommandExecutor shExec = null;
     try {
-      setScriptExecutable(launchDst, user);
-      setScriptExecutable(sb.getWrapperScriptPath(), user);
+    	containerExecutor.setScriptExecutable(launchDst, user);
+    	containerExecutor.setScriptExecutable(sb.getWrapperScriptPath(), user);
 
       shExec = buildCommandExecutor(sb.getWrapperScriptPath().toString(),
           containerIdStr, user, pidFile, container.getResource(),

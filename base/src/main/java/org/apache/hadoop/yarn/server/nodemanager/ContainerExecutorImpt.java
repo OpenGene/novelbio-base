@@ -94,10 +94,10 @@ public class ContainerExecutorImpt extends ContainerExecutor {
 
 	private boolean isDockerExecutor(Container container) {
 		String isUseDocker = container.getLaunchContext().getEnvironment().get(DockerExecutor.USE_DOCKER_EXECUTOR);
-		if (isUseDocker == null || !isUseDocker.toLowerCase().equals("true") || !isUseDocker.toLowerCase().equals("t")) {
-			return false;
+		if (isUseDocker != null && (isUseDocker.toLowerCase().equals("true") || isUseDocker.toLowerCase().equals("t"))) {
+			return true;
 		}
-		return true;
+		return false;
 	}
 
 	@Override
