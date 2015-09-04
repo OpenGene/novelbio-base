@@ -315,7 +315,6 @@ public class WindowsSecureContainerExecutor extends DefaultContainerExecutor {
      */
     private static class ElevatedRawLocalFilesystem extends RawLocalFileSystem {
       
-      @Override
       protected boolean mkOneDirWithMode(Path path, File p2f,
           FsPermission permission) throws IOException {
         if (LOG.isDebugEnabled()) {
@@ -358,7 +357,6 @@ public class WindowsSecureContainerExecutor extends DefaultContainerExecutor {
         Native.Elevated.chown(p, username, groupname);
       }
       
-      @Override
       protected OutputStream createOutputStreamWithMode(Path f, boolean append,
           FsPermission permission) throws IOException {
         if (LOG.isDebugEnabled()) {

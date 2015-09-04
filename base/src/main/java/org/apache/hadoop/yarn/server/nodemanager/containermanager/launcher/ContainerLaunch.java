@@ -269,7 +269,7 @@ public class ContainerLaunch implements Callable<Integer> {
           localResources, nmPrivateClasspathJarDir);
         
         // Write out the environment
-        exec.writeLaunchEnv(containerScriptOutStream, environment, localResources,
+        exec.writeLaunchEnv(container, containerScriptOutStream, environment, localResources,
             launchContext.getCommands());
         
         // /////////// End of writing out container-script
@@ -416,7 +416,7 @@ public class ContainerLaunch implements Callable<Integer> {
           ? Signal.TERM
           : Signal.KILL;
 
-        boolean result = exec.signalContainer(user, processId, signal);
+        boolean result = exec.signalContainer(container, container.getUser(), processId, signal);
 
         LOG.debug("Sent signal " + signal + " to pid " + processId
           + " as user " + user
@@ -427,7 +427,10 @@ public class ContainerLaunch implements Callable<Integer> {
           new DelayedProcessKiller(container, user,
               processId, sleepDelayBeforeSigKill, Signal.KILL, exec).start();
         }
-      }
+      } else {
+          new DelayedProcessKiller(container, container.getUser(),
+                  processId, sleepDelayBeforeSigKill, Signal.KILL, exec).start();
+            }
     } catch (Exception e) {
       String message =
           "Exception when trying to cleanup container " + containerIdStr

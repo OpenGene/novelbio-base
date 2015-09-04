@@ -345,17 +345,17 @@ public class LinuxContainerExecutor extends ContainerExecutor {
   }
 
   @Override
-  public int reacquireContainer(String user, ContainerId containerId)
+  public int reacquireContainer(Container container)
       throws IOException, InterruptedException {
     try {
-      return super.reacquireContainer(user, containerId);
+      return super.reacquireContainer(container);
     } finally {
-      resourcesHandler.postExecute(containerId);
+      resourcesHandler.postExecute(container.getContainerId());
     }
   }
 
   @Override
-  public boolean signalContainer(String user, String pid, Signal signal)
+  public boolean signalContainer(Container container, String user, String pid, Signal signal)
       throws IOException {
 
     verifyUsernamePattern(user);
@@ -434,10 +434,10 @@ public class LinuxContainerExecutor extends ContainerExecutor {
   }
   
   @Override
-  public boolean isContainerProcessAlive(String user, String pid)
+  public boolean isContainerProcessAlive(Container container, String user, String pid)
       throws IOException {
     // Send a test signal to the process as the user to see if it's alive
-    return signalContainer(user, pid, Signal.NULL);
+    return signalContainer(container, user, pid, Signal.NULL);
   }
 
   public void mountCgroups(List<String> cgroupKVs, String hierarchy)

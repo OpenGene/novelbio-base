@@ -144,14 +144,14 @@ public abstract class ContainerExecutor implements Configurable {
       String user, String appId, Path containerWorkDir, 
       List<String> localDirs, List<String> logDirs) throws IOException;
 
-  public abstract boolean signalContainer(String user, String pid,
+  public abstract boolean signalContainer(Container container, String user, String pid,
       Signal signal)
       throws IOException;
 
   public abstract void deleteAsUser(String user, Path subDir, Path... basedirs)
       throws IOException, InterruptedException;
 
-  public abstract boolean isContainerProcessAlive(String user, String pid)
+  public abstract boolean isContainerProcessAlive(Container container, String user, String pid)
       throws IOException;
 
   /**
@@ -164,8 +164,11 @@ public abstract class ContainerExecutor implements Configurable {
    * @throws IOException
    * @throws InterruptedException 
    */
-  public int reacquireContainer(String user, ContainerId containerId)
+  public int reacquireContainer(Container container)
       throws IOException, InterruptedException {
+	  String user = container.getUser();
+	  ContainerId containerId = container.getContainerId();
+			  
     Path pidPath = getPidFilePath(containerId);
     if (pidPath == null) {
       LOG.warn(containerId + " is not active, returning terminated error");
@@ -179,7 +182,7 @@ public abstract class ContainerExecutor implements Configurable {
     }
 
     LOG.info("Reacquiring " + containerId + " with pid " + pid);
-    while(isContainerProcessAlive(user, pid)) {
+    while(isContainerProcessAlive(container, user, pid)) {
       Thread.sleep(1000);
     }
 
@@ -210,7 +213,7 @@ public abstract class ContainerExecutor implements Configurable {
     }
   }
 
-  public void writeLaunchEnv(OutputStream out, Map<String, String> environment, Map<Path, List<String>> resources, List<String> command) throws IOException{
+  public void writeLaunchEnv(Container container, OutputStream out, Map<String, String> environment, Map<Path, List<String>> resources, List<String> command) throws IOException{
     ContainerLaunch.ShellScriptBuilder sb = ContainerLaunch.ShellScriptBuilder.create();
     if (environment != null) {
       for (Map.Entry<String,String> env : environment.entrySet()) {
@@ -472,7 +475,7 @@ public abstract class ContainerExecutor implements Configurable {
     public void run() {
       try {
         Thread.sleep(delay);
-        containerExecutor.signalContainer(user, pid, signal);
+        containerExecutor.signalContainer(container, container.getUser(), pid, signal);
       } catch (InterruptedException e) {
         return;
       } catch (IOException e) {
