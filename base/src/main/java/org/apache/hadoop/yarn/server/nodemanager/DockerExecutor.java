@@ -264,7 +264,7 @@ public class DockerExecutor implements IntExecutor {
 	 return " -c " + cpu + " -m " + mem + "m ";
   }
 
-  public void writeLaunchEnv(Container container, OutputStream out, Map<String, String> environment, Map<Path, List<String>> resources, List<String> command) throws IOException {
+  public void writeLaunchEnv(OutputStream out, Map<String, String> environment, Map<Path, List<String>> resources, List<String> command) throws IOException {
     ContainerLaunch.ShellScriptBuilder sb = ContainerLaunch.ShellScriptBuilder.create();
 
     Set<String> exclusionSet = new HashSet<String>();
@@ -359,22 +359,11 @@ public class DockerExecutor implements IntExecutor {
   @VisibleForTesting
   public static boolean containerIsAliveForContainerId(String containerId) throws IOException {
     try {
-		ShellCommandExecutor shellCommandExecutor = new ShellCommandExecutor(new String[]{"docker","ps"});
+		ShellCommandExecutor shellCommandExecutor = new ShellCommandExecutor(new String[]{"docker","top", containerId});
 		shellCommandExecutor.execute();
-		String result = shellCommandExecutor.getOutput();
-		for (String content : result.split("\n")) {
-			if (content.startsWith("CONTAINER")) {
-				continue;
-            }
-			String[] ss = content.trim().split(" ");
-			String thisContainerId = ss[ss.length - 1];
-			if (containerId.equals(thisContainerId)) {
-				return true;
-            }
-        }
-		return false;
+		return true;
     } catch (Shell.ExitCodeException e) {
-    	 return false;
+    	return false;
     }
   }
   

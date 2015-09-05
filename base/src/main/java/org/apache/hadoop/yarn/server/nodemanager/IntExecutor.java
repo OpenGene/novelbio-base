@@ -17,7 +17,7 @@ public interface IntExecutor {
 	                             String userName, String appId, Path containerWorkDir,
 	                             List<String> localDirs, List<String> logDirs) throws IOException;
 
-	  public void writeLaunchEnv(Container container, OutputStream out, Map<String, String> environment, 
+	  public void writeLaunchEnv(OutputStream out, Map<String, String> environment, 
 			  Map<Path, List<String>> resources, List<String> command) throws IOException;
 
 

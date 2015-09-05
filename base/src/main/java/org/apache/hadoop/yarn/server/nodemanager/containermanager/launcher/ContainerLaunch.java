@@ -269,7 +269,7 @@ public class ContainerLaunch implements Callable<Integer> {
           localResources, nmPrivateClasspathJarDir);
         
         // Write out the environment
-        exec.writeLaunchEnv(container, containerScriptOutStream, environment, localResources,
+        exec.writeLaunchEnv(containerScriptOutStream, environment, localResources,
             launchContext.getCommands());
         
         // /////////// End of writing out container-script

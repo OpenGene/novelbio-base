@@ -60,30 +60,35 @@ public class ContainerExecutorImpt extends ContainerExecutor {
 		doc.init();
 	}
 
-	public void writeLaunchEnv(Container container, OutputStream out, Map<String, String> environment, Map<Path, List<String>> resources,
+	public void writeLaunchEnv(OutputStream out, Map<String, String> environment, Map<Path, List<String>> resources,
 	        List<String> command) throws IOException {
-		getExecutorByContainer(container).writeLaunchEnv(container, out, environment, resources, command);
+		LOG.debug("write launchEnv");
+		getExecutorByEnvironment(environment).writeLaunchEnv(out, environment, resources, command);
 	}
 
 	@Override
 	public int launchContainer(Container container, Path nmPrivateContainerScriptPath, Path nmPrivateTokensPath, String user, String appId,
 	        Path containerWorkDir, List<String> localDirs, List<String> logDirs) throws IOException {
+		LOG.debug("launchContainer " + container.getContainerId().toString());
 		return getExecutorByContainer(container).launchContainer(container, nmPrivateContainerScriptPath, nmPrivateTokensPath, user, appId,
 		        containerWorkDir, localDirs, logDirs);
 	}
 
 	@Override
 	public boolean signalContainer(Container container, String user, String pid, Signal signal) throws IOException {
+		LOG.debug("signalContainer " + container.getContainerId().toString());
 		return getExecutorByContainer(container).signalContainer(container, user, pid, signal);
 	}
 
 	@Override
 	public boolean isContainerProcessAlive(Container container, String user, String pid) throws IOException {
-		return getExecutorByContainer(container).isContainerProcessAlive(container, user, pid);
+		boolean isAlive = getExecutorByContainer(container).isContainerProcessAlive(container, user, pid);
+		LOG.debug("isContainerProcessAlive " + container.getContainerId().toString() + " " + isAlive);
+		return isAlive;
 	}
 
 	private IntExecutor getExecutorByContainer(Container container) {
-		if (isDockerExecutor(container)) {
+		if (isDockerExecutor(container.getLaunchContext().getEnvironment())) {
 			LOG.info("container " + container.toString() + "Use docker container executor");
 			return doc;
 		} else {
@@ -91,15 +96,30 @@ public class ContainerExecutorImpt extends ContainerExecutor {
 			return def;
 		}
 	}
-
-	private boolean isDockerExecutor(Container container) {
+	private IntExecutor getExecutorByEnvironment(Map<String, String> environment) {
+		if (isDockerExecutor(environment)) {
+			LOG.info("Use docker container executor by read from environment");
+			return doc;
+		} else {
+			LOG.info("Use docker container executor by read from environment");
+			return def;
+		}
+	}
+	
+	private static boolean isDockerExecutor(Map<String, String> environment) {
+		String isUseDocker = environment.get(DockerExecutor.USE_DOCKER_EXECUTOR);
+		if (isUseDocker != null && (isUseDocker.toLowerCase().equals("true") || isUseDocker.toLowerCase().equals("t"))) {
+			return true;
+		}
+		return false;
+	}
+	public static boolean isDockerExecutor(Container container) {
 		String isUseDocker = container.getLaunchContext().getEnvironment().get(DockerExecutor.USE_DOCKER_EXECUTOR);
 		if (isUseDocker != null && (isUseDocker.toLowerCase().equals("true") || isUseDocker.toLowerCase().equals("t"))) {
 			return true;
 		}
 		return false;
 	}
-
 	@Override
 	public void deleteAsUser(String user, Path subDir, Path... baseDirs) throws IOException, InterruptedException {
 		if (baseDirs == null || baseDirs.length == 0) {

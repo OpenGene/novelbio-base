@@ -309,7 +309,7 @@ public class DockerContainerExecutor extends ContainerExecutor {
 	 return " -c " + cpu + " -m " + mem + "m ";
   }
   @Override
-  public void writeLaunchEnv(Container container, OutputStream out, Map<String, String> environment, Map<Path, List<String>> resources, List<String> command) throws IOException {
+  public void writeLaunchEnv(OutputStream out, Map<String, String> environment, Map<Path, List<String>> resources, List<String> command) throws IOException {
     ContainerLaunch.ShellScriptBuilder sb = ContainerLaunch.ShellScriptBuilder.create();
 
     Set<String> exclusionSet = new HashSet<String>();
