@@ -325,14 +325,14 @@ public class DockerExecutor implements IntExecutor {
   public boolean signalContainer(Container container, String user, String pid, Signal signal)
     throws IOException {
     if (LOG.isDebugEnabled()) {
-      LOG.debug("Sending signal " + signal.getValue() + " to pid " + pid
+      LOG.debug("Sending signal " + signal.getValue() + " to container " + container.getContainerId().toString()
         + " as user " + user);
     }
     if (!containerIsAliveForContainerId(container.getContainerId())) {
       return false;
     }
     try {
-      killContainer(container, pid, signal);
+      killContainer(container, signal);
     } catch (IOException e) {
       if (!containerIsAliveForContainerId(container.getContainerId())) {
         return false;
@@ -367,6 +367,32 @@ public class DockerExecutor implements IntExecutor {
     }
   }
   
+  public static String getPid(String containerId) throws IOException {
+	  ShellCommandExecutor shellCommandExecutor = new ShellCommandExecutor(new String[]{"docker","top", containerId});
+	  try {
+		  shellCommandExecutor.execute();
+	  } catch (Exception e) {
+		  return null;
+	  }
+
+	  String outString = shellCommandExecutor.getOutput();
+	  String pid = null;
+	  for (String content : outString.split("\n")) {
+		  if (content.startsWith("UID")) {
+			  continue;
+		  }
+		  String[] ss = content.split(" ");
+		  for (int i = 1; i < ss.length; i++) {
+			  String info = ss[i].trim();
+			  if (info != null && !info.trim().equals("")) {
+				  pid = info;
+				  break;
+			  }
+		  }
+	  }
+	  return pid;
+  }
+  
   @VisibleForTesting
   @Deprecated
   public static boolean containerIsAlive(String pid) throws IOException {
@@ -389,12 +415,12 @@ public class DockerExecutor implements IntExecutor {
    * @param signal signal to send
    * (for logging).
    */
-  protected void killContainer(Container container, String pid, Signal signal) throws IOException {
+  private void killContainer(Container container, Signal signal) throws IOException {
 	  ShellCommandExecutor shellExe = null;
 	  if (signal == Signal.KILL) {
 		  shellExe = new ShellCommandExecutor(new String[]{"docker","kill", container.getContainerId().toString()});
 	  } else if (signal == Signal.TERM) {
-		  shellExe = new ShellCommandExecutor(new String[]{"docker","stop", container.getContainerId().toString()});
+		  shellExe = new ShellCommandExecutor(new String[]{"docker","stop", "--time=2" ,container.getContainerId().toString()});
 	} else if (signal == Signal.QUIT) {
 		 shellExe = new ShellCommandExecutor(new String[]{"docker","stop", container.getContainerId().toString()});
 	} else {

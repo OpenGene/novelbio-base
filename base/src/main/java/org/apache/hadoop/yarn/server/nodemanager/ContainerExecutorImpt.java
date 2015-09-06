@@ -18,6 +18,7 @@
 
 package org.apache.hadoop.yarn.server.nodemanager;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,9 +34,12 @@ import org.apache.hadoop.fs.FileContext;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.UnsupportedFileSystemException;
 import org.apache.hadoop.fs.permission.FsPermission;
+import org.apache.hadoop.yarn.api.records.ContainerId;
 import org.apache.hadoop.yarn.factory.providers.RecordFactoryProvider;
 import org.apache.hadoop.yarn.server.nodemanager.containermanager.container.Container;
+import org.apache.hadoop.yarn.server.nodemanager.containermanager.launcher.ContainerLaunch;
 import org.apache.hadoop.yarn.server.nodemanager.containermanager.localizer.ContainerLocalizer;
+import org.apache.hadoop.yarn.server.nodemanager.util.ProcessIdFileReader;
 
 public class ContainerExecutorImpt extends ContainerExecutor {
 	private static final Log LOG = LogFactory.getLog(ContainerExecutorImpt.class);
@@ -60,6 +65,90 @@ public class ContainerExecutorImpt extends ContainerExecutor {
 		doc.init();
 	}
 
+	  /**
+	   * Get the process-identifier for the container
+	   * 
+	   * @param containerID
+	   * @return the processid of the container if it has already launched,
+	   *         otherwise return null
+	   */
+	  public String getProcessId(ContainerId containerID) {
+		  String pid = null;
+		  Path pidFile = pidFiles.get(containerID);
+		  if (pidFile == null) {
+	  	   // This container isn't even launched yet.
+			  return pid;
+		  }
+		  try {
+			  pid = ProcessIdFileReader.getProcessId(pidFile);
+		  } catch (IOException e) {
+			  LOG.error("Got exception reading pid from pid-file " + pidFile, e);
+		  }
+		  if (pid == null) {
+			  try {
+				  pid = DockerExecutor.getPid(containerID.toString());
+			  } catch (Exception e) {
+				  LOG.error("Got exception reading pid from docker " + containerID.getContainerId(), e);
+            }
+		  }
+		  return pid;
+	  }
+	  
+	  /**
+	   * Recover an already existing container. This is a blocking call and returns
+	   * only when the container exits.  Note that the container must have been
+	   * activated prior to this call.
+	   * @param user the user of the container
+	   * @param containerId The ID of the container to reacquire
+	   * @return The exit code of the pre-existing container
+	   * @throws IOException
+	   * @throws InterruptedException 
+	   */
+	  public int reacquireContainer(Container container)
+	      throws IOException, InterruptedException {
+		  String user = container.getUser();
+		  ContainerId containerId = container.getContainerId();
+				  
+	    Path pidPath = getPidFilePath(containerId);
+	    if (pidPath == null) {
+	      LOG.warn(containerId + " is not active, returning terminated error");
+	      return ExitCode.TERMINATED.getExitCode();
+	    }
+
+	    String pid = null;
+	    pid = ProcessIdFileReader.getProcessId(pidPath);
+	    LOG.info("Reacquiring " + containerId + " with pid " + pid);
+	    while(isContainerProcessAlive(container, user, pid)) {
+	      Thread.sleep(1000);
+	    }
+
+	    // wait for exit code file to appear
+	    String exitCodeFile = ContainerLaunch.getExitCodeFile(pidPath.toString());
+	    File file = new File(exitCodeFile);
+	    final int sleepMsec = 100;
+	    int msecLeft = 2000;
+	    while (!file.exists() && msecLeft >= 0) {
+	      if (!isContainerActive(containerId)) {
+	        LOG.info(containerId + " was deactivated");
+	        return ExitCode.TERMINATED.getExitCode();
+	      }
+	      
+	      Thread.sleep(sleepMsec);
+	      
+	      msecLeft -= sleepMsec;
+	    }
+	    if (msecLeft < 0) {
+	      throw new IOException("Timeout while waiting for exit code from "
+	          + containerId);
+	    }
+
+	    try {
+	      return Integer.parseInt(FileUtils.readFileToString(file).trim());
+	    } catch (NumberFormatException e) {
+	      throw new IOException("Error parsing exit code from pid " + pid, e);
+	    }
+	  }
+	  
 	public void writeLaunchEnv(OutputStream out, Map<String, String> environment, Map<Path, List<String>> resources,
 	        List<String> command) throws IOException {
 		LOG.debug("write launchEnv");

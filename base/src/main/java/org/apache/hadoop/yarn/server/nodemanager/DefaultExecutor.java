@@ -353,7 +353,10 @@ public class DefaultExecutor implements IntExecutor {
 
   public boolean isContainerProcessAlive(Container container, String user, String pid)
       throws IOException {
-    return containerIsAlive(pid);
+	  if (pid == null) {
+		  throw new IOException("Unable to determine pid for " + container.getContainerId());
+	  }
+	  return containerIsAlive(pid);
   }
 
   /**

@@ -59,7 +59,9 @@ import org.apache.hadoop.yarn.server.nodemanager.ContainerExecutor;
 import org.apache.hadoop.yarn.server.nodemanager.ContainerExecutor.DelayedProcessKiller;
 import org.apache.hadoop.yarn.server.nodemanager.ContainerExecutor.ExitCode;
 import org.apache.hadoop.yarn.server.nodemanager.ContainerExecutor.Signal;
+import org.apache.hadoop.yarn.server.nodemanager.ContainerExecutorImpt;
 import org.apache.hadoop.yarn.server.nodemanager.Context;
+import org.apache.hadoop.yarn.server.nodemanager.DockerExecutor;
 import org.apache.hadoop.yarn.server.nodemanager.LocalDirsHandlerService;
 import org.apache.hadoop.yarn.server.nodemanager.containermanager.ContainerManagerImpl;
 import org.apache.hadoop.yarn.server.nodemanager.containermanager.application.Application;
@@ -402,7 +404,7 @@ public class ContainerLaunch implements Callable<Integer> {
       // else if shell is still active, get it from the shell
       String processId = null;
       if (pidFilePath != null) {
-        processId = getContainerPid(pidFilePath);
+        processId = getContainerPid(container, pidFilePath);
       }
 
       // kill process
@@ -427,12 +429,9 @@ public class ContainerLaunch implements Callable<Integer> {
           new DelayedProcessKiller(container, user,
               processId, sleepDelayBeforeSigKill, Signal.KILL, exec).start();
         }
-      } else {
-          new DelayedProcessKiller(container, container.getUser(),
-                  processId, sleepDelayBeforeSigKill, Signal.KILL, exec).start();
-            }
+      }
     } catch (Exception e) {
-      String message =
+    	String message =
           "Exception when trying to cleanup container " + containerIdStr
               + ": " + StringUtils.stringifyException(e);
       LOG.warn(message);
@@ -455,8 +454,11 @@ public class ContainerLaunch implements Callable<Integer> {
    * @return Process ID
    * @throws Exception
    */
-  private String getContainerPid(Path pidFilePath) throws Exception {
-    String containerIdStr = 
+  private String getContainerPid(Container container, Path pidFilePath) throws Exception {
+	  if (exec instanceof ContainerExecutorImpt && ContainerExecutorImpt.isDockerExecutor(container)) {
+		  return container.getContainerId().toString();
+	  }
+	  String containerIdStr = 
         ConverterUtils.toString(container.getContainerId());
     String processId = null;
     LOG.debug("Accessing pid for container " + containerIdStr

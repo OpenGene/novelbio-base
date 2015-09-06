@@ -58,7 +58,7 @@ public abstract class ContainerExecutor implements Configurable {
 
   private Configuration conf;
 
-  private ConcurrentMap<ContainerId, Path> pidFiles =
+  protected ConcurrentMap<ContainerId, Path> pidFiles =
       new ConcurrentHashMap<ContainerId, Path>();
 
   private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
