@@ -60,6 +60,12 @@ public class DateUtil {
 	     Random random = new Random(System.currentTimeMillis());
 		return new Date().getTime() + "_" + random.nextInt();
 	}
+	
+	/**
+	 * 获取当前时间.格式yyyy-MM-dd HH:mm:ss
+	 * @date 2015年9月14日
+	 * @return
+	 */
 	public static String getNowTimeStr() {
 		return DateUtil.date2String(new Date(), DateUtil.PATTERN_DATETIME);
 	}
@@ -213,4 +219,5 @@ public class DateUtil {
 	     Date currentDate = new Date(); //得到当前系统时间
 	     return formatDate.format(currentDate); //将日期时间格式化
 	}
+	
 }
