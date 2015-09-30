@@ -13,7 +13,6 @@ import java.util.TimerTask;
 
 import org.apache.log4j.Logger;
 
-import com.novelbio.base.PathDetail;
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
@@ -74,7 +73,7 @@ public class CmdOperate extends RunProcess<String> {
 	/** 如果选择用list来保存结果输出，最多保存500行的输出信息 */
 	int lineNumStd = 1000;
 	/** 如果选择用list来保存错误输出，最多保存500行的输出信息 */
-	int lineNumErr = 1000;//最多保存500行的输出信息
+	int lineNumErr = 5000;//最多保存5000行的输出信息
 	
 	/** 输出本程序正在运行时的参数等信息 */
 	String outRunInfoFileName;
@@ -134,7 +133,11 @@ public class CmdOperate extends RunProcess<String> {
 		process = new ProcessCmd();
 		cmdPath.setLsCmd(lsCmd);
 	}
-
+	public CmdOperate(String ip, String user, List<String> lsCmd, String idrsa) {
+		process = new ProcessRemote(ip, user);
+		((ProcessRemote)process).setKeyFile(idrsa);
+		cmdPath.setLsCmd(lsCmd);
+	}
 	/**
 	 * 远程登录的方式运行cmd命令，<b>cmd命令运行完毕后会断开连接</b>
 	 * @param ip
@@ -617,7 +620,7 @@ public class CmdOperate extends RunProcess<String> {
 				TxtReadandWrite txtWrite = new TxtReadandWrite(errPath, true);
 				errorGobbler.setOutputStream(txtWrite.getOutputStream(), cmdPath.isJustDisplayErr());
 				if (cmdPath.isJustDisplayErr() && lsErrorInfo != null) {
-					errorGobbler.setLsInfo(lsErrorInfo, lineNumErr, false);
+					errorGobbler.setLsInfo(lsErrorInfo, lineNumErr, true);
 				}
 			} else if (lsErrorInfo != null) {
 				errorGobbler.setLsInfo(lsErrorInfo, lineNumErr, true);
@@ -707,7 +710,7 @@ public class CmdOperate extends RunProcess<String> {
 				// TODO: handle exception
 			}
 			e.printStackTrace();
-			logger.error("cmd cannot executed correctly: " + cmd);
+			logger.error("cmd cannot executed correctly: " + cmd, e);
 		}
 		runTime = dateTime.getElapseTime();
 		if (process instanceof ProcessRemote) {

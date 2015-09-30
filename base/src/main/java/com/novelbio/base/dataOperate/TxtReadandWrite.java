@@ -25,10 +25,14 @@ import java.util.Map.Entry;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 
+import com.hadoop.compression.lzo.DistributedLzoIndexer;
 import com.novelbio.base.dataStructure.ArrayOperate;
+import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
+import com.novelbio.base.fileOperate.HdfsInitial;
 
 /**
  * 新建read没关系
@@ -47,7 +51,7 @@ public class TxtReadandWrite implements Closeable {
 	}
 	
 	public static enum TXTtype{
-		Gzip, Bzip2, Zip, Txt;
+		Gzip, Bzip2, Zip, Txt, Lzo;
 		/**
 		 * 根据文件后缀判断文件的类型，是gz还是txt等
 		 * @return
@@ -61,6 +65,8 @@ public class TxtReadandWrite implements Closeable {
 				txtTtype = TXTtype.Bzip2;
 			} else if (fileName.endsWith("zip")) {
 				txtTtype = TXTtype.Zip;
+			} else if (fileName.endsWith("lzo")) {
+				txtTtype = TXTtype.Lzo;
 			} else {
 				txtTtype = TXTtype.Txt;
 			}
@@ -713,6 +719,22 @@ public class TxtReadandWrite implements Closeable {
 		txtOut.close();
 	}
 	
+	public static void indexLzo(String inputFile) throws Exception {
+		if(!FileHadoop.isHdfs(inputFile)) {
+			return;
+		}
+		String inputFileHdfs = FileHadoop.convertToHadoop(inputFile);
+		FileOperate.DeleteFileFolder(inputFileHdfs + ".index");
+
+		inputFile = FileHadoop.convertToHdfsPath(inputFile);
+		DistributedLzoIndexer lzoIndexer = new DistributedLzoIndexer();
+		Configuration indexConf = HdfsInitial.getConf();
+		indexConf.set("io.compression.codecs",
+				"com.hadoop.compression.lzo.LzopCodec");
+		lzoIndexer.setConf(indexConf);
+		
+		lzoIndexer.run(new String[]{inputFile});
+	}
 }
 ////大文件排
  class TestCountWords {  
@@ -775,7 +797,7 @@ public class TxtReadandWrite implements Closeable {
        }  
    }
      
-   class CountWords implements Runnable {  
+   class CountWords implements Runnable {
          
        private FileChannel fc;  
        private FileLock fl;  

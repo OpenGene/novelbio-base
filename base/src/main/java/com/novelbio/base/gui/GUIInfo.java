@@ -74,10 +74,6 @@ public class GUIInfo extends javax.swing.JPanel  implements Runnable {
 				btnClose.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 //						 stopRunning();
-						String cmd = "Rscript /media/winD/fedora/gitNovelbio/Novelbio-Bioinformatics-Analysis-Platform/target/rscript/tmp/TopGO_2012-09-09040524123.R";
-						CmdOperate cmdOperate = new CmdOperate(cmd);
-						Thread thread = new Thread(cmdOperate);
-						thread.start();
 						while (true) {
 							try {
 								Thread.sleep(1000);

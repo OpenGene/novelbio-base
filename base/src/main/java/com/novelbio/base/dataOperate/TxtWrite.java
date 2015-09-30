@@ -13,15 +13,19 @@ import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
-import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.io.compress.CompressionOutputStream;
 import org.apache.log4j.Logger;
 
+import com.hadoop.compression.lzo.LzopCodec;
 import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
+import com.novelbio.base.fileOperate.ExceptionFile;
 import com.novelbio.base.fileOperate.FileOperate;
+import com.novelbio.base.fileOperate.HdfsInitial;
 
 class TxtWrite implements Closeable {
 	private static Logger logger = Logger.getLogger(TxtReadandWrite.class);
-		
+	
+	TXTtype txtTtype;
 	String txtfile;
 	File file;
 	BufferedOutputStream outputStream;
@@ -82,7 +86,7 @@ class TxtWrite implements Closeable {
 		} else {
 			outputStreamRaw = FileOperate.getOutputStream(txtfile, append);
 		}
-		TXTtype txtTtype = TXTtype.getTxtType(txtfile);
+		txtTtype = TXTtype.getTxtType(txtfile);
 		if (txtTtype == TXTtype.Txt) {
 			outputStream = new BufferedOutputStream(outputStreamRaw, TxtReadandWrite.bufferLen);
 		} else if (txtTtype == TXTtype.Gzip) {
@@ -94,6 +98,11 @@ class TxtWrite implements Closeable {
 			ZipArchiveEntry entry = new ZipArchiveEntry(FileOperate.getFileNameSep(txtfile)[0]);
 			zipOutputStream.putArchiveEntry(entry);
 			outputStream = new BufferedOutputStream(zipOutputStream, TxtReadandWrite.bufferLen);
+		} else if (txtTtype == TXTtype.Lzo) {
+			LzopCodec lzo = new LzopCodec();
+			lzo.setConf(HdfsInitial.getConf());
+			CompressionOutputStream outputStreamCmp =lzo.createOutputStream(outputStreamRaw);
+			outputStream = new BufferedOutputStream(outputStreamCmp);
 		}
 	}
 
@@ -462,6 +471,14 @@ class TxtWrite implements Closeable {
 		 flush();
 		 try { outputStream.close(); } catch (Exception e) {}
 		try { zipOutputStream.closeArchiveEntry(); } catch (Exception e) { }
+		if (txtTtype == TXTtype.Lzo) {
+			try {
+				TxtReadandWrite.indexLzo(getFileName());
+			} catch (Exception e) {
+				throw new ExceptionFile("cannot make lzo index for file " + getFileName(), e);
+			}
+			
+		}
 	}
 	
 }

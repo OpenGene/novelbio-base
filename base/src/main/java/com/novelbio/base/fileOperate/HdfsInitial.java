@@ -44,7 +44,11 @@ public class HdfsInitial {
 			e.printStackTrace();
 		}
 	}
-
+	
+	public static Configuration getConf() {
+		return conf;
+	}
+	
 	public static String getSymbol() {
 		return PathDetail.getHdpHdfsHeadSymbol();
 	}
@@ -66,7 +70,7 @@ public class HdfsInitial {
 	}
 	
 	
-	static interface IntHdfsBaseHolder {
+	public static interface IntHdfsBaseHolder {
 		Configuration getConf();
 	}
 	
@@ -83,7 +87,7 @@ public class HdfsInitial {
 		}
 	}
 	
-	static class HdfsBaseHolderHadoop2 implements IntHdfsBaseHolder {
+	public static class HdfsBaseHolderHadoop2 implements IntHdfsBaseHolder {
 		String hdfsxml;
 		String corexml;
 		Configuration conf;

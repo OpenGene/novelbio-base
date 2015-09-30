@@ -33,7 +33,11 @@ public class ProcessRemote implements IntProcess {
 		this.usr = usr;
 		this.psword = pwd;
 	}
-	
+	public ProcessRemote(String ip, String usr) {
+		this.ip = ip;
+		this.usr = usr;
+	}
+
 	public void setKey(char[] key) {
 		this.key = key;
 	}

@@ -150,9 +150,12 @@ public class FtpFetch {
 		}
         for(FTPFile ff : lsAllFiles){  
             if(ff.getName().equals(ftpFileName)){  
-                File localFile = new File(savePath + ff.getName());  
+            	String saveFileName = savePath + ff.getName();
+            	String saveFileTmp = FileOperate.changeFileSuffix(saveFileName, "_tmp", null);
+                File localFile = new File(saveFileTmp);
 				try {
 					ftp.download(ff.getName(), localFile);
+					FileOperate.moveFile(true, saveFileTmp, saveFileName);
 					return true;
 				} catch (Exception e) {
 					// TODO Auto-generated catch block

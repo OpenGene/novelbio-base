@@ -458,7 +458,7 @@ public class FileHadoop extends File {
 	}
 	
 	public static boolean isHdfs(String fileName) {
-		if (fileName == null || fileName.equals("")) {
+		if (StringOperate.isRealNull(fileName)) {
 			return false;
 		}
 		fileName = fileName.toLowerCase();

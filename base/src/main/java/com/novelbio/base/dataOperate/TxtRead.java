@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -20,9 +21,12 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.log4j.Logger;
 
+import com.hadoop.compression.lzo.LzopCodec;
 import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
 import com.novelbio.base.dataStructure.PatternOperate;
+import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
+import com.novelbio.base.fileOperate.HdfsInitial;
 import com.novelbio.htsjdk.samtools.seekablestream.SeekableStream;
 
 class TxtRead implements Closeable {
@@ -585,6 +589,10 @@ class TxtRead implements Closeable {
 			inputStream = new BufferedInputStream(new GZIPInputStream(inputStreamRaw, TxtReadandWrite.bufferLen), TxtReadandWrite.bufferLen);
 		} else if (txtType == TXTtype.Bzip2) {
 			inputStream = new BufferedInputStream(new BZip2CompressorInputStream(inputStreamRaw), TxtReadandWrite.bufferLen);
+		} else if (txtType == TXTtype.Lzo) {
+		    LzopCodec lzo = new LzopCodec();
+			lzo.setConf(HdfsInitial.getConf());   
+			inputStream = lzo.createInputStream(inputStreamRaw);   
 		}
 	}
 	

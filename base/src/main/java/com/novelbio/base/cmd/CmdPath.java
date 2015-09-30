@@ -262,7 +262,10 @@ public class CmdPath {
 		
 		for (String inFile : setInput) {
 			String inTmpName = mapName2TmpName.get(inFile);
+			logger.info("copy input file from " + inFile + " to " + inTmpName);
 			FileOperate.copyFileFolder(inFile, inTmpName, true);
+			logger.info("finish copy " + inFile + " to " + inTmpName);
+			logger.info(inTmpName + " size is " + FileOperate.getFileSizeLong(inTmpName));
 		}
 	}
 	

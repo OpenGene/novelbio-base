@@ -174,7 +174,7 @@ public class DockerExecutor implements IntExecutor {
         .append(" ")
         .append(containerImageName)
         .toString();
-    String dockerPidScript = "`" + dockerExecutor + " inspect --format {{.State.Pid}} " + containerIdStr + "`";
+    String dockerPidScript = "";// "`" + dockerExecutor + " inspect --format {{.State.Pid}} " + containerIdStr + "`";
     // Create new local launch wrapper script
     LocalWrapperScriptBuilder sb =
       new UnixLocalWrapperScriptBuilder(containerWorkDir, commandStr, dockerPidScript);
