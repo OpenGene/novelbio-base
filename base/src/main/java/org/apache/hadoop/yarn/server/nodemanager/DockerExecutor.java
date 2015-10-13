@@ -420,9 +420,9 @@ public class DockerExecutor implements IntExecutor {
 	  if (signal == Signal.KILL) {
 		  shellExe = new ShellCommandExecutor(new String[]{"docker","kill", container.getContainerId().toString()});
 	  } else if (signal == Signal.TERM) {
-		  shellExe = new ShellCommandExecutor(new String[]{"docker","stop", "--time=2" ,container.getContainerId().toString()});
+		  shellExe = new ShellCommandExecutor(new String[]{"docker","kill", container.getContainerId().toString()});
 	} else if (signal == Signal.QUIT) {
-		 shellExe = new ShellCommandExecutor(new String[]{"docker","stop", container.getContainerId().toString()});
+		 shellExe = new ShellCommandExecutor(new String[]{"docker","kill", container.getContainerId().toString()});
 	} else {
 		return;
 	}
