@@ -55,19 +55,20 @@ public class FileHadoop extends File {
 		hdfsFilePath = hdfsFilePath.replace(FileHadoop.getHdfsSymbol(), "");
 		dst = new Path(hdfsFilePath);
 		this.fileName = hdfsFilePath;
-		init();
+		try {
+			init();
+		} catch (Exception e) {
+			throw new ExceptionHdfsFileConnection("cannot initial file with " + hdfsFilePath, e);
+		}
 	}
 	
-	private void init() {
-		try{
-			if(fileStatus != null)
-				return;
-			if (fsHDFS.exists(dst)) {
-				fileStatus = fsHDFS.getFileStatus(dst);
-			}
-		} catch(Exception e) { 
-			e.printStackTrace();
-		}
+	private void init() throws IOException {
+		if(fileStatus != null)
+			return;
+		if (fsHDFS.exists(dst)) {
+			fileStatus = fsHDFS.getFileStatus(dst);
+		}	
+	
 	}
 	
 	private static String copeToHdfsHeadSymbol(String hdfsFilePath) {

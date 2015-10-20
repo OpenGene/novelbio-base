@@ -1059,8 +1059,7 @@ public class FileOperate {
 				return false;
 			}
 		} catch (Exception e) {
-			logger.error("复制单个文件操作出错");
-			return false;
+			throw new ExceptionFile("copy file error" , e);
 		}
 	}
 	/**
@@ -1131,8 +1130,7 @@ public class FileOperate {
 				}
 			}
 		} catch (Exception e) {
-			logger.error("复制整个文件夹内容操作出错", e);
-			return false;
+			throw new ExceptionFile("copy fold error", e);
 		}
 		return true;
 	}
