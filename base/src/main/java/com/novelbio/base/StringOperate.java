@@ -70,7 +70,8 @@ public class StringOperate {
 			return 0;
 		return 1 - (float) compare(str, target) / Math.max(str.length(), target.length());
 	}
-
+	
+	/** 注意，这个方法会将String值为字符串为 "null" 的返回为true */
 	public static boolean isRealNull(String string) {
 		if (string == null) {
 			return true;

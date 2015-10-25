@@ -406,17 +406,6 @@
    			<version>261</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.hadoop</groupId>
-			<artifactId>hadoop-mapreduce-client-core</artifactId>
-			<version>2.6.0</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>snappy-java</artifactId>
-					<groupId>org.xerial.snappy</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.curator</groupId>
 			<artifactId>curator-recipes</artifactId>
 			<version>2.1.0-incubating</version>
@@ -435,6 +424,17 @@
 				<exclusion>
 					<artifactId>guava</artifactId>
 					<groupId>com.google.guava</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-mapreduce-client-core</artifactId>
+			<version>2.6.0</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>snappy-java</artifactId>
+					<groupId>org.xerial.snappy</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -463,6 +463,7 @@
 			<artifactId>hadoop-yarn-server-resourcemanager</artifactId>
 			<version>2.6.0</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-mapreduce-client-common</artifactId>
