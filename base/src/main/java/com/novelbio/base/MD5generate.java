@@ -117,7 +117,8 @@ public class MD5generate {
 		
 		if(step == 0) {  
 			MappedByteBuffer byteBuffer = ch.map(FileChannel.MapMode.READ_ONLY, 0,file.length());
-			messageDigest.update(byteBuffer);  
+			messageDigest.update(byteBuffer);
+			in.close();
 			return bufferToHex(messageDigest.digest());  
 		}
          
@@ -127,7 +128,8 @@ public class MD5generate {
 			startPosition+=maxSize;  
 		}
          
-		if(startPosition==file.length()) {  
+		if(startPosition==file.length()) {
+			in.close();
 			return bufferToHex(messageDigest.digest());  
 		}
    
@@ -154,6 +156,33 @@ public class MD5generate {
 		String str = Base64.encodeBase64String(b);
 		return getMD5String("data:;base64," + str);  
 	}
+	
+	/**
+	 * 根据文件全路径获得全文件的md5值
+	 * @param fileName
+	 * @return
+	 * @throws IOException
+	 */
+	//TODO 效果一般待修正
+	public static String getNBCFileMd5(String fileName) throws IOException {
+		long maxSize = 1024*1024*5;//100;
+		long fileLength = 0;
+		fileLength = FileOperate.getFileSizeLong(fileName);
+		maxSize = (maxSize > fileLength ? fileLength : maxSize);
+		
+		if(FileHadoop.isHdfs(fileName))
+			fileName = FileHadoop.convertToLocalPath(fileName);
+		File file = new File(fileName);
+		FileInputStream in = new FileInputStream(file);  
+		FileChannel ch = in.getChannel();  
+		
+		MappedByteBuffer byteBuffer = ch.map(FileChannel.MapMode.READ_ONLY, 0, maxSize);
+		messageDigest.update(byteBuffer);
+		in.close();
+		return bufferToHex(messageDigest.digest());  
+	
+	}
+	
 	
 	public static String getMD5String(String s) {
 		try {

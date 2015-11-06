@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.novelbio.base.PathDetail;
 import com.novelbio.base.StringOperate;
@@ -24,7 +25,7 @@ import com.novelbio.base.fileOperate.FileOperate;
  *
  */
 public class CmdPath {
-	private static final Logger logger = Logger.getLogger(CmdPath.class);
+	private static final Logger logger = LoggerFactory.getLogger(CmdPath.class);
 	static String tmpPath = PathDetail.getTmpPathWithSep();
 	
 	List<String> lsCmd = new ArrayList<>();
@@ -262,10 +263,10 @@ public class CmdPath {
 		
 		for (String inFile : setInput) {
 			String inTmpName = mapName2TmpName.get(inFile);
-			logger.info("copy input file from " + inFile + " to " + inTmpName);
+			logger.info("copy input file from {} to {}", inFile, inTmpName);
 			FileOperate.copyFileFolder(inFile, inTmpName, true);
-			logger.info("finish copy " + inFile + " to " + inTmpName);
-			logger.info(inTmpName + " size is " + FileOperate.getFileSizeLong(inTmpName));
+			logger.info("finish copy {} to {}, size is {}", inFile, inTmpName);
+			logger.info("{} size is {}", inTmpName, FileOperate.getFileSizeLong(inTmpName));
 		}
 	}
 	
@@ -388,6 +389,14 @@ public class CmdPath {
 		if (tmpCmd.contains("=")) {
 			String[] tmpCmd2Path = tmpCmd.split("=", 2);
 			tmpCmd = tmpCmd2Path[0] + "=" + convertToTmpPath(stdOut, errOut, tmpCmd2Path[1]);
+			return tmpCmd;
+		} else if (tmpCmd.contains(",")) {
+			String[] tmpCmd2Path = tmpCmd.split(",");
+			String[] tmpResult = new String[tmpCmd2Path.length];
+			for (int i = 0; i < tmpCmd2Path.length; i++) {
+				tmpResult[i] = convertToTmpPath(stdOut, errOut, tmpCmd2Path[i]);  
+            }
+			tmpCmd = ArrayOperate.cmbString(tmpResult, ",");
 			return tmpCmd;
 		} else {
 			if ((isRedirectInToTmp && setInput.contains(tmpCmd))

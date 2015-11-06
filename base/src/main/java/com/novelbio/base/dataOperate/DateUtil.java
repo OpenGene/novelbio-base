@@ -102,20 +102,20 @@ public class DateUtil {
 		return date2String(date, pattern);
 	}
 	
-	/**
-	 * 
-	 * 描述:把日历弄的日期转成String <br>
-	 * 作者 : gaozhu <br>
-	 * 日期 : 2012-11-16 <br>
-	 * 参数: 
-	 * 返回值 String
-	 * 异常
-	 */
-	public static String calendar2String(Calendar calendar){
-		return calendar.get(Calendar.YEAR)+"-"
-				+calendar.get(Calendar.MONTH)+"-"
-				+(calendar.get(Calendar.DATE)<10?("0"+calendar.get(Calendar.DATE)):(calendar.get(Calendar.DATE)));
-	}
+//	/**
+//	 * 
+//	 * 描述:把日历弄的日期转成String <br>
+//	 * 作者 : gaozhu <br>
+//	 * 日期 : 2012-11-16 <br>
+//	 * 参数: 
+//	 * 返回值 String
+//	 * 异常
+//	 */
+//	public static String calendar2String(Calendar calendar){
+//		return calendar.get(Calendar.YEAR)+"-"
+//				+calendar.get(Calendar.MONTH)+"-"
+//				+(calendar.get(Calendar.DATE)<10?("0"+calendar.get(Calendar.DATE)):(calendar.get(Calendar.DATE)));
+//	}
 	
 	/**
 	 * String转date
