@@ -1053,13 +1053,8 @@ public class MathComput {
 				}
 				 if (o1== null)return 1;
 			 	 if (o2 == null)return -1;
-	
-				if (o1[1] < o2[1])
-					return -1;
-				else if (o1[1] == o2[1])
-					return 0;
-				else
-					return 1;
+			 	 
+			 	 return o1[1].compareTo(o2[1]);
 			}
 		});
 		double[] ordenedPvalues = new double[lsPvalue.size()];
