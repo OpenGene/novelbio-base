@@ -150,11 +150,7 @@ public class FileOperate {
 		} catch (Exception e) {
 			return false;// TODO: handle exception
 		} finally{
-			try {
-				fs.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			closeOs(fs);
 		}
 	}
 	
@@ -166,16 +162,11 @@ public class FileOperate {
 			return kryo.read(IOUtils.toByteArray(fs));
 		} catch (Exception e) {
 			e.printStackTrace();
-			return null;// TODO: handle exception
 		} finally{
-			try {
-				if(fs != null)
-					fs.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			closeIs(fs);
 		}
 		
+		return null;// TODO: handle exception
 	}
 	
 	/**
@@ -828,6 +819,7 @@ public class FileOperate {
 		} catch (Exception e) {
 			logger.error(e.toString());
 		}
+		//XXX 不明白为什么要sleep,待确定.
 		try { Thread.sleep(500); } catch (InterruptedException e) { }
 		return bea;
 	}
@@ -1992,23 +1984,38 @@ public class FileOperate {
 		} catch (Exception e) {
 			logger.error("", e);
 		} finally{
-			if (os != null) {
-				try {
-					os.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			if(is != null){
-				try {
-					is.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+			closeIs(is);
+			closeOs(os);
 		}
 	}
 	
+	/**
+	 * 关闭输入流
+	 * @date 2015年11月24日
+	 * @param is
+	 */
+	public static void closeIs(InputStream is){
+		try {
+			if (is != null) {
+				is.close();
+			}
+		} catch (Exception e) {
+		}
+	}
+	
+	/**
+	 * 关闭输出流
+	 * @date 2015年11月24日
+	 * @param os
+	 */
+	public static void closeOs(OutputStream os){
+		try {
+			if (os != null) {
+				os.close();
+			}
+		} catch (Exception e) {
+		}
+	}
 	
 	public static class ExceptionFileNotExist extends RuntimeException {
 		private static final long serialVersionUID = 8125052068436320509L;

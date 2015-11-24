@@ -119,6 +119,7 @@ public class DateUtil {
 	
 	/**
 	 * String转date
+	 * 传入yyyy-MM-dd格式,返回的long型时间 是0时0分0秒 
 	 * @param date
 	 * @param pattern
 	 * @return

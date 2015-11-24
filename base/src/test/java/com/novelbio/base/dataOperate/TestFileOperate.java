@@ -1,5 +1,7 @@
 package com.novelbio.base.dataOperate;
 
+import org.junit.Test;
+
 import com.novelbio.base.fileOperate.FileOperate;
 
 import junit.framework.TestCase;
@@ -30,6 +32,11 @@ public class TestFileOperate extends TestCase {
 		t = FileOperate.getFileSizeLong("/media/nbfs/nbCloud/public/AllProject/project_550a6f82e4b0b3b73a8e211e/task_559a3fb7e4b0095074afad32/other_result");
 		System.out.println(t);
 		System.out.println(t / 1024 / 1024 / 1024.0);
-		
+	}
+	
+	@Test
+	public void testDelFile(){
+		boolean isdel = FileOperate.delFile("/home/novelbio/abc.xls");
+		System.out.println(isdel);
 	}
 }
