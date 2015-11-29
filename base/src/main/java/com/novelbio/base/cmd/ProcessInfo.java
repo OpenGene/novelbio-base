@@ -224,6 +224,7 @@ public class ProcessInfo {
 //		ps -eo pid,ppid,user,%cpu,%mem,s,vsize,comm,user,time
 
 		CmdOperate cmdOperate = new CmdOperate(lsCmd);
+		cmdOperate.setTerminateWriteTo(false);
 		cmdOperate.setGetLsStdOut();
 		cmdOperate.setNeedLog(false);
 		cmdOperate.run();

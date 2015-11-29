@@ -263,10 +263,10 @@ public class CmdPath {
 		
 		for (String inFile : setInput) {
 			String inTmpName = mapName2TmpName.get(inFile);
-			logger.info("copy input file from {} to {}", inFile, inTmpName);
+			logger.debug("copy input file from {} to {}", inFile, inTmpName);
 			FileOperate.copyFileFolder(inFile, inTmpName, true);
-			logger.info("finish copy {} to {}, size is {}", inFile, inTmpName);
-			logger.info("{} size is {}", inTmpName, FileOperate.getFileSizeLong(inTmpName));
+			logger.debug("finish copy {} to {}, size is {}", inFile, inTmpName);
+			logger.debug("{} size is {}", inTmpName, FileOperate.getFileSizeLong(inTmpName));
 		}
 	}
 	
@@ -458,10 +458,10 @@ public class CmdPath {
 	/** 删除中间文件，会把临时的input文件也删除 */
 	public void deleteTmpFile() {
 		if (!mapPath2TmpPath.isEmpty()) {
-			logger.info("start delete files");
+			logger.debug("start delete files");
 		}
 		for (String tmpPath : mapPath2TmpPath.values()) {
-			logger.info("delete file: " + tmpPath);
+			logger.debug("delete file: " + tmpPath);
 			FileOperate.DeleteFileFolder(tmpPath);
 		}
 	}
