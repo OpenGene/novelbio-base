@@ -150,6 +150,7 @@ public class Rplot {
 		lsCmd.add(scriptPath);
 		
 		CmdOperate cmdOperate = new CmdOperate(lsCmd);
+		cmdOperate.setOutToTerminate(false);
 		cmdOperate.runWithExp();
 		return 1;
 	}

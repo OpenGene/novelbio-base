@@ -33,7 +33,7 @@ public class StreamOut extends Thread {
 	boolean getInputStream = false;
 
 	/** 如果将输出信息写入lsInfo中，是否还将这些信息打印到控制台 */
-	boolean isSysout = false;
+	boolean isToTermiate = true;
 
 	//==================定时刷新，以表示程序正在运行中============================	
 	/** 流中是否有信息，没信息就不刷新 */
@@ -42,12 +42,22 @@ public class StreamOut extends Thread {
 	/** 是否按照写入txt的格式来写入流 */
 	boolean isJustDisplay = false;
 
+	/** true 写入std中，false写入err中 */
+	boolean isStd = true;
 	
 	Timer timerFlush;
 	
-	StreamOut(InputStream is, IntProcess process) {
+	/**
+	 * @param is 从cmd获取的输出流
+	 * @param process 
+	 * @param isSysout 是否打印到控制台
+	 * @param isStd 是打印到标准输出还是错误输出
+	 */
+	StreamOut(InputStream is, IntProcess process, boolean isToTermiate, boolean isStd) {
 		this.is = is;
 		this.process = process;
+		this.isToTermiate = isToTermiate;
+		this.isStd = isStd;
 	}
 	/**
 	 *  指定一个out流，cmd的输出流就会定向到该流中<br>
@@ -68,10 +78,13 @@ public class StreamOut extends Thread {
 	public void setGetInputStream(boolean getInputStream) {
 		this.getInputStream = getInputStream;
 	}
-	public void setLsInfo(LinkedList<String> lsInfo, int linNum, boolean isSysout) {
+	/** 将输出结果保存在 lsInfo中
+	 * @param lsInfo
+	 * @param linNum 保存多少行
+	 */
+	public void setLsInfo(LinkedList<String> lsInfo, int linNum) {
 		this.lsInfo = lsInfo;
 		this.lineNum = linNum;
-		this.isSysout = isSysout;
 	}
 	public boolean isFinished() {
 		return isFinished;
@@ -110,8 +123,13 @@ public class StreamOut extends Thread {
 					if (i > lineNum) {
 						lsInfo.poll();
 					}
-					if (isSysout) {
-						logger.info(line);
+					if (isToTermiate) {
+						if (isStd) {
+							System.out.println(line);
+						} else {
+							System.err.println(line);
+						}
+						
 					}
 				}
 			}
@@ -156,8 +174,12 @@ public class StreamOut extends Thread {
 						lsInfo.poll();
 					}	
 				}
-				if (isSysout) {
-					logger.info(line);
+				if (isToTermiate) {
+					if (isStd) {
+						System.out.println(line);
+					} else {
+						System.err.println(line);
+					}
 				}
 				//说明流中有东西
 				if (!isStartWrite) isStartWrite = true;

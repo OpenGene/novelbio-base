@@ -39,15 +39,14 @@ public class CmdOperate extends RunProcess<String> {
 	/** 临时文件在文件夹 */
 	String scriptFold = "";
 	
+	//TODO ========在使用docker之后，这两个可以考虑不用了========
 	/** 是否产生标准输出信息的文件，只有在将输出文件写入临时文件夹的情况
 	 * 下才会产生标准输出流信息文件，目的是给用户反馈目前的软件进度 */
 	boolean isStdoutInfo = false;
-
 	/** 是否产生标准错误信息的文件，只有在将输出文件写入临时文件夹的情况
 	 * 下才会产生标准错误流信息文件，目的是给用户反馈目前的软件进度 */
 	boolean isStderrInfo = false;
-	/**输出文件的名字 */
-	Set<String> setOutfile = new HashSet<>();
+	//====================================================
 	
 	/** 结束标志，0表示正常退出 */
 	FinishFlag finishFlag;
@@ -61,6 +60,8 @@ public class CmdOperate extends RunProcess<String> {
 	StreamIn streamIn;
 	StreamOut errorGobbler;
 	StreamOut outputGobbler;
+	/** 是否将本该输出到控制台的结果依然写入控制台 */
+	boolean isOutToTerminate = true;
 	
 	/** 是否需要获取cmd的标准输出流 */
 	boolean getCmdInStdStream = false;
@@ -107,6 +108,16 @@ public class CmdOperate extends RunProcess<String> {
 		FileOperate.validateFileName(cmdWriteInFileName);
 		setCmdFile(cmd, cmdWriteInFileName);
 	}
+	
+	/** 是否将本该输出到控制台的结果依然写入控制台，一般在运行长时间任务的时候，
+	 * 譬如 tophat等，需要写入控制台，如果一些譬如获得version之类的命令，就不需要
+	 * 往控制台写了
+	 * @param isOutToTerminate 默认是true
+	 */
+	public void setOutToTerminate(boolean isOutToTerminate) {
+		this.isOutToTerminate = isOutToTerminate;
+	}
+	
 	/**
 	 * 将cmd写入哪个文本，然后执行，如果初始化输入了cmdWriteInFileName, 就不需要这个了
 	 * 
@@ -243,7 +254,7 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	public void setStdOutPath(String stdOutPath, boolean isSaveTmp, boolean isDelete) {
 		cmdPath.setSaveFilePath(stdOutPath, isSaveTmp);
-		cmdPath.setJustDisplayErr(isDelete);
+		cmdPath.setJustDisplayStd(isDelete);
 		this.isStdoutInfo = isDelete;
 	}
 	/** 设定标准错误流，如果是这里指定，则会即时刷新<br>
@@ -581,7 +592,7 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	private void setStdStream() {
 		String outPath = cmdPath.getSaveStdTmp(); 
-		outputGobbler = new StreamOut(process.getStdOut(), process);
+		outputGobbler = new StreamOut(process.getStdOut(), process, isOutToTerminate, true);
 		outputGobbler.setDaemon(true);
 		if (!getCmdInStdStream) {
 			if (outPath != null) {
@@ -590,10 +601,10 @@ public class CmdOperate extends RunProcess<String> {
 				TxtReadandWrite txtWrite = new TxtReadandWrite(outPath, true);
 				outputGobbler.setOutputStream(txtWrite.getOutputStream(), cmdPath.isJustDisplayStd());
 				if (cmdPath.isJustDisplayStd() && lsOutInfo != null) {
-					outputGobbler.setLsInfo(lsOutInfo, lineNumStd, false);
+					outputGobbler.setLsInfo(lsOutInfo, lineNumStd);
 				}
 			} else if (lsOutInfo != null) {
-				outputGobbler.setLsInfo(lsOutInfo, lineNumStd, false);
+				outputGobbler.setLsInfo(lsOutInfo, lineNumStd);
 			} else {
 				outputGobbler.setOutputStream(System.out, false);
 			}
@@ -611,7 +622,7 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	private void setErrorStream() {
 		String errPath = cmdPath.getSaveErrTmp();
-		errorGobbler = new StreamOut(process.getStdErr(), process);
+		errorGobbler = new StreamOut(process.getStdErr(), process, isOutToTerminate, false);
 		errorGobbler.setDaemon(true);
 		if (!getCmdInErrStream) {
 			if (errPath != null) {
@@ -620,10 +631,10 @@ public class CmdOperate extends RunProcess<String> {
 				TxtReadandWrite txtWrite = new TxtReadandWrite(errPath, true);
 				errorGobbler.setOutputStream(txtWrite.getOutputStream(), cmdPath.isJustDisplayErr());
 				if (cmdPath.isJustDisplayErr() && lsErrorInfo != null) {
-					errorGobbler.setLsInfo(lsErrorInfo, lineNumErr, true);
+					errorGobbler.setLsInfo(lsErrorInfo, lineNumErr);
 				}
 			} else if (lsErrorInfo != null) {
-				errorGobbler.setLsInfo(lsErrorInfo, lineNumErr, true);
+				errorGobbler.setLsInfo(lsErrorInfo, lineNumErr);
 			} else {
 				errorGobbler.setOutputStream(System.err, false);
 			}
@@ -834,6 +845,7 @@ class CmdRunInfo {
 		if (StringOperate.isRealNull(outFile)) {
 			return;
 		}
+		txtWrite.writefileln("stop get running info");
 		txtWrite.close();
 	}
 	

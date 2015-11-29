@@ -108,6 +108,7 @@ public class Computer implements Serializable {
 		List<String> lsCmd = new ArrayList<>();
 		lsCmd.add("/sbin/ifconfig");
 		CmdOperate cmdOperate = new CmdOperate(lsCmd);
+		cmdOperate.setOutToTerminate(false);
 		cmdOperate.setGetLsStdOut();
 		cmdOperate.run();
 		PatternOperate patternOperate = new PatternOperate("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}", false);
