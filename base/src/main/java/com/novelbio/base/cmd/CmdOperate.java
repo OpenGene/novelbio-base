@@ -114,7 +114,7 @@ public class CmdOperate extends RunProcess<String> {
 	 * 往控制台写了
 	 * @param isOutToTerminate 默认是true
 	 */
-	public void setOutToTerminate(boolean isOutToTerminate) {
+	public void setTerminateWriteTo(boolean isOutToTerminate) {
 		this.isOutToTerminate = isOutToTerminate;
 	}
 	
