@@ -172,7 +172,7 @@ public class StreamOut extends Thread {
 					i++;
 					if (i > lineNum) {
 						lsInfo.poll();
-					}	
+					}
 				}
 				if (isToTermiate) {
 					if (isStd) {

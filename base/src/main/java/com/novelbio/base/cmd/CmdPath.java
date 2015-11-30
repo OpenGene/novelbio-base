@@ -345,9 +345,11 @@ public class CmdPath {
 			if (redirectStdErr) {
 				if (tmpCmd.equals(">")) {
 					stdOut = true;
+					setJustDisplayStd(false);
 					continue;
 				} else if (tmpCmd.equals("2>")) {
 					errOut = true;
+					setJustDisplayErr(false);
 					continue;
 				}
 			}

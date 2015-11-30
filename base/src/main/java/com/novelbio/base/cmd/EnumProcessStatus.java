@@ -14,6 +14,14 @@ public enum EnumProcessStatus {
 	/** 退出状态，进程即将被销毁 */
 	X,
 	
-	unKnown
+	unKnown;
+	
+	/** 可以输入 linux 中ps的STAT状态，如RI等
+	 * @param processStatus
+	 * @return
+	 */
+	public static EnumProcessStatus getValueOf(String processStatus) {
+		return EnumProcessStatus.valueOf(processStatus.toCharArray()[0] + "");
+	}
 	
 }

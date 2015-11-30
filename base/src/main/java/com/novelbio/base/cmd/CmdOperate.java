@@ -313,6 +313,9 @@ public class CmdOperate extends RunProcess<String> {
 	}
 	/**
 	 * 添加文件输出参数，配合{@link #setRedirectOutToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
+	 * 由于是需要先将输入文件保存到临时文件夹，等程序结束后再拷贝回实际文件夹，所以应该不是从std走文件了，
+	 * 所以在这里把 setJustDisplayErr 和 setJustDisplayStd都设置为true<br>
+	 * 本参数不影响 {@link #getStreamStd()} 和 {@link #getStreamErr()} 方法
 	 * @param output 输出文件的哪个参数
 	 * @param isAddToLsCmd 是否加入参数list<br>
 	 * true: 作为一个参数加入lscmd<br>

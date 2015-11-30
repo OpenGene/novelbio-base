@@ -62,7 +62,7 @@ public class ProcessInfo {
 			} else if (title.equals("S")) {
 				processStatus = info;
 				try {
-					status = EnumProcessStatus.valueOf(info);
+					status = EnumProcessStatus.valueOf(info.toCharArray()[0] + "");
 				} catch (Exception e) {
 					logger.error("find unknown process status: " + status);
 					status = EnumProcessStatus.unKnown;
