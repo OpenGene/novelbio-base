@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -53,14 +52,6 @@ public class ExcelOperate implements Closeable {
 	 * excel 2003 或者 excel 2007 .0代表文件不存在.
 	 */
 	private int version = 0;
-	
-	/*
-	 * TODO 同isNBCExcel.有定义但从未使用.先注释掉.
-	private CellStyle styleSingle = null;
-	private CellStyle styleDouble = null;
-	private CellStyle styleTitle = null;
-	private CellStyle nostyle = null;
-	 */
 	
 	/**
 	 * 判断是否为excel
@@ -180,10 +171,6 @@ public class ExcelOperate implements Closeable {
 			throw new RuntimeException(e);
 		}
 	
-//		styleSingle = wb.createCellStyle();
-//		styleDouble =  wb.createCellStyle();
-//		styleTitle =  wb.createCellStyle();
-//		nostyle = wb.createCellStyle();
 	}
 
 
@@ -302,8 +289,9 @@ public class ExcelOperate implements Closeable {
 	 * @return
 	 */
 	public ArrayList<String[]> readLsExcel() {
-		return readLsExcel(0, 1,  1,  -1, -1);
+		return readLsExcel(1, 1,  1,  -1, -1);
 	}
+	
 	/**
 	 * 读取默认sheet的指定块的内容,如果中间有空行，则一并读取<br/>
 	 * 
@@ -340,7 +328,6 @@ public class ExcelOperate implements Closeable {
 		sheet = wb.getSheetAt(sheetNum);
 		return readLsExcel(sheetNum + 1, rowStartNum, columnStartNum, rowEndNum, columnEndNum);
 	}
-
 
 	/**
 	 * 读取指定块的内容,同时将焦点放到该sheet上,返回arrayList如果中间有空行，则跳过<br/>
@@ -542,7 +529,10 @@ public class ExcelOperate implements Closeable {
 	
 	/**
 	 * 从第一行，第一列开始写
-	 * @throws IOException 
+	 * 
+	 * @date 2015年12月3日
+	 * @param sheetNum	实际sheet顺序号,从1开始
+	 * @param content
 	 */
 	public void writeExcel(int sheetNum,List<String[]> content) {
 		writeExcel(sheetNum, 1, 1, content);
@@ -568,13 +558,6 @@ public class ExcelOperate implements Closeable {
 	 * @param content			内容
 	 * @param style				样式
 	 * @throws IOException 
-	 */
-	/**
-	 * @date 2015年12月3日
-	 * @param rowNum
-	 * @param cellNum
-	 * @param content
-	 * @throws IOException
 	 */
 	public void writeExcel(int rowNum, int cellNum, List<String[]> content, ExcelStyle style) {
 		if (style != null) {
@@ -635,6 +618,7 @@ public class ExcelOperate implements Closeable {
 	
 	/**
 	 * 块文件写入excel文件 
+	 * 
 	 * @param sheetNum		sheet顺序号,从1开始计数.指定的sheetNum不存在,则自动新建
 	 * @param rowNum			行号,从1开始计数
 	 * @param cellNum			列号,从1开始计数
@@ -656,6 +640,7 @@ public class ExcelOperate implements Closeable {
 	
 	/**
 	 * 往excel写入数据.
+	 * 
 	 * @param sheet				sheet页
 	 * @param rowNum 			实际行,从1开始
 	 * @param cellNum 			实际列,从1开始
@@ -726,7 +711,7 @@ public class ExcelOperate implements Closeable {
 	}
 	
 	/**
-	 * 设置写入的sheet顺序号.没有则创建.
+	 * 根据sheet顺序号获取Sheet.没有则创建.
 	 * 
 	 * @param sheetNum 	没有设为小于1
 	 * @return
@@ -735,8 +720,9 @@ public class ExcelOperate implements Closeable {
 		sheetNum--;
 		Sheet sheet = null;
 		if (sheetNum >= 0) {
-			sheet = wb.getSheetAt(sheetNum);
-			if (sheet == null) {
+			try {
+				sheet = wb.getSheetAt(sheetNum);
+			} catch (Exception e) {
 				sheet = wb.createSheet("sheet" + (getSheetCount() + 1));// 新建sheet
 			}
 		}
@@ -767,8 +753,6 @@ public class ExcelOperate implements Closeable {
 	
 	@Override
 	public void close() {
-		
-		
 		if (wb != null) {
 			try {
 				wb.close();
@@ -781,87 +765,4 @@ public class ExcelOperate implements Closeable {
 		}
 	}
 	
-	/**
-	 * 行颜色对象
-	 * @author novelbio
-	 */
-	public static class RowBGColorNBC {
-		private int rowNum = 1;
-		private Short color = IndexedColors.WHITE.getIndex();
-		/**
-		 * 改变excel一行的背景颜色
-		 * @param rowNum 行号，从1开始
-		 * @param color 例如<b>IndexedColors.ORANGE.getIndex()<b>等等
-		 */
-		public RowBGColorNBC(int rowNum,Short color) {
-			this.rowNum = rowNum;
-			this.color = color;
-		}
-		
-		public Short getColor() {
-			return color;
-		}
-		
-		public int getRowNum() {
-			return rowNum;
-		}
-	}
-	
-	/**
-	 * 列颜色对象
-	 * @author novelbio
-	 */
-	public static class ColBGColorNBC {
-		private int colNum = 1;
-		private Short color = IndexedColors.WHITE.getIndex();
-		/**
-		 * 改变excel一行的背景颜色
-		 * @param colNum 列号，从1开始
-		 * @param color 例如<b>IndexedColors.ORANGE.getIndex()<b>等等
-		 */
-		public ColBGColorNBC(int colNum,Short color) {
-			this.colNum = colNum;
-			this.color = color;
-		}
-		
-		public Short getColor() {
-			return color;
-		}
-		
-		public int getColNum() {
-			return colNum;
-		}
-	}
-	
-	/**
-	 * 单元格颜色对象
-	 * @author novelbio
-	 */
-	public static class CellBGColorNBC {
-		private int rowNum = 1;
-		private int colNum = 1;
-		private Short color = IndexedColors.WHITE.getIndex();
-		/**
-		 * 改变excel一行的背景颜色
-		 * @param rowNum colNum 行号，列号 从1开始
-		 * @param color 例如<b>IndexedColors.ORANGE.getIndex()<b>等等
-		 */
-		public CellBGColorNBC(int rowNum,int colNum,Short color) {
-			this.rowNum = rowNum;
-			this.colNum = colNum;
-			this.color = color;
-		}
-		
-		public Short getColor() {
-			return color;
-		}
-		
-		public int getRowNum() {
-			return rowNum;
-		}
-		
-		public int getColNum() {
-			return colNum;
-		}
-	}
 }

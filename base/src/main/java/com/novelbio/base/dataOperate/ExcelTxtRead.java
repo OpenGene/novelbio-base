@@ -43,7 +43,7 @@ public class ExcelTxtRead {
 
 		if (ExcelOperate.isExcel(excelFile)) {
 			ExcelOperate excelOperate = new ExcelOperate(excelFile);
-			lsResultTmp = excelOperate.ReadLsExcel(rowStart, rowEnd, columnID);//(rowStartNum, columnStartNum, rowEndNum, columnEndNum);//readExcel(excelFile, columnID, rowStart, rowEnd);
+			lsResultTmp = excelOperate.readLsExcel(rowStart, rowEnd, columnID);//(rowStartNum, columnStartNum, rowEndNum, columnEndNum);//readExcel(excelFile, columnID, rowStart, rowEnd);
 		}
 		else {
 			TxtReadandWrite txtRead = new TxtReadandWrite(excelFile, false);
@@ -150,7 +150,7 @@ public class ExcelTxtRead {
 		ArrayList<String[]> ls1=null;
 		if (ExcelOperate.isExcel(excelFile)) {
 			ExcelOperate excel = new ExcelOperate(excelFile);
-			ls1 = excel.ReadLsExcel(sheetNum, firstlinels1, 1, -1,-1);
+			ls1 = excel.readLsExcel(sheetNum, firstlinels1, 1, -1,-1);
 			excel.close();
 			return ls1;
 		}
@@ -177,7 +177,7 @@ public class ExcelTxtRead {
 		ArrayList<String[]> ls1=null;
 		if (ExcelOperate.isExcel(excelFile)) {
 			ExcelOperate excel = new ExcelOperate(excelFile);
-			ls1 = excel.ReadLsExcel(rowStart, colStart, rowEnd, colEnd);
+			ls1 = excel.readLsExcel(rowStart, colStart, rowEnd, colEnd);
 			excel.close();
 			return ls1;
 		}
@@ -212,7 +212,7 @@ public class ExcelTxtRead {
 		ArrayList<String[]> ls1=null;
 		if (ExcelOperate.isExcel(excelFile)) {
 			ExcelOperate excel = new ExcelOperate(excelFile);
-			ls1 = excel.ReadLsExcel(sheetNum, rowStart, colStart, rowEnd, colEnd);
+			ls1 = excel.readLsExcel(sheetNum, rowStart, colStart, rowEnd, colEnd);
 			excel.close();
 			return ls1;
 		}
@@ -251,9 +251,9 @@ public class ExcelTxtRead {
 		if (ExcelOperate.isExcel(excelFile)) {
 			ExcelOperate excel = new ExcelOperate(excelFile);
 			if (sheetName == null || sheetName.equals("")) {
-				ls1 = excel.ReadLsExcel(rowStart, colStart, rowEnd, colEnd);
+				ls1 = excel.readLsExcel(rowStart, colStart, rowEnd, colEnd);
 			} else {
-				ls1 = excel.ReadLsExcel(sheetName, rowStart, colStart, rowEnd, colEnd);
+				ls1 = excel.readLsExcel(sheetName, rowStart, colStart, rowEnd, colEnd);
 			}
 			excel.close();
 			return ls1;
@@ -278,7 +278,7 @@ public class ExcelTxtRead {
 		ArrayList<String[]> ls1=null;
 		if (ExcelOperate.isExcel(excelTxtFile)) {
 			ExcelOperate excel = new ExcelOperate(excelTxtFile);
-			excel.WriteExcel(1, 1, lsContent);
+			excel.writeExcel(1, 1, lsContent);
 			excel.close();
 			return ls1;
 		}
