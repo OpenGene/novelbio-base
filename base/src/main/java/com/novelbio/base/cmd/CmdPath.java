@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.xpath.operations.Bool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -233,7 +234,8 @@ public class CmdPath {
 	/** 返回执行的具体cmd命令，会将文件路径删除，仅给相对路径 */
 	public String[] getCmdExeStrModify() {
 		generateTmPath();
-		return getCmdModify(generateRunCmd(false));
+		ConvertCmdGetFileName convertGetFileName = new ConvertCmdGetFileName();
+		return convertGetFileName.convertCmd(generateRunCmd(false));
 	}
 	
 	/** 返回执行的具体cmd命令，实际cmd命令 */
@@ -242,19 +244,6 @@ public class CmdPath {
 		return generateRunCmd(false);
 	}
 
-	public static String[] getCmdModify(String[] cmdArray) {
-		StringBuilder strBuilder = new StringBuilder();
-		for (String cmdTmp : cmdArray) {
-			String[] subcmd = cmdTmp.split("=");
-			strBuilder.append(" ");
-			strBuilder.append(FileOperate.getFileName(subcmd[0]));
-			for (int i = 1; i < subcmd.length; i++) {
-				strBuilder.append("=");
-				strBuilder.append(FileOperate.getFileName(subcmd[i]));
-			}
-		}
-		return strBuilder.toString().trim().split(" ");
-	}
 	/** 在cmd运行前，将输入文件拷贝到临时文件夹下 */
 	public void copyFileIn() {
 		generateTmPath();
@@ -341,6 +330,15 @@ public class CmdPath {
 		List<String> lsReal = new ArrayList<>();
 		boolean stdOut = false;
 		boolean errOut = false;
+		
+		ConvertCmdTmp convertCmdTmp = new ConvertCmdTmp(isRedirectInToTmp, isRedirectOutToTmp, setInput, setOutput, mapName2TmpName);
+		ConvertCmd convertCmdHdfs2Local = new ConvertCmd() {
+			@Override
+			String convert(String subCmd) {
+				return FileHadoop.convertToLocalPath(subCmd);
+			}
+		};
+		
 		for (String tmpCmd : lsCmd) {
 			if (redirectStdErr) {
 				if (tmpCmd.equals(">")) {
@@ -353,8 +351,8 @@ public class CmdPath {
 					continue;
 				}
 			}
-			
-			tmpCmd = convertToTmpPath(stdOut, errOut, tmpCmd);
+			convertCmdTmp.setStdInOut(stdOut, errOut);
+			tmpCmd = convertCmdTmp.convertSubCmd(tmpCmd);
 			
 			if (stdOut) {
 				if (StringOperate.isRealNull(saveFilePath)) {
@@ -370,7 +368,7 @@ public class CmdPath {
 				continue;
 			}
 			if (isConvertHdfs2Loc) {
-				tmpCmd = convertToLocalCmd(tmpCmd);
+				tmpCmd = convertCmdHdfs2Local.convertSubCmd(tmpCmd);
 			}
 			lsReal.add(tmpCmd);
 		}
@@ -378,52 +376,6 @@ public class CmdPath {
 		return realCmd;
 	}
 	
-	/**
-	 *  将cmd中需要定位到临时文件夹的信息修改过来，譬如
-	 * -output=/hdfs:/test.txt 修改为
-	 * -output=/home/novelbio/test.txt
-	 * @param stdOut
-	 * @param errOut
-	 * @param tmpCmd
-	 * @return
-	 */
-	private String convertToTmpPath(boolean stdOut, boolean errOut, String tmpCmd) {
-		if (tmpCmd.contains("=")) {
-			String[] tmpCmd2Path = tmpCmd.split("=", 2);
-			tmpCmd = tmpCmd2Path[0] + "=" + convertToTmpPath(stdOut, errOut, tmpCmd2Path[1]);
-			return tmpCmd;
-		} else if (tmpCmd.contains(",")) {
-			String[] tmpCmd2Path = tmpCmd.split(",");
-			String[] tmpResult = new String[tmpCmd2Path.length];
-			for (int i = 0; i < tmpCmd2Path.length; i++) {
-				tmpResult[i] = convertToTmpPath(stdOut, errOut, tmpCmd2Path[i]);  
-            }
-			tmpCmd = ArrayOperate.cmbString(tmpResult, ",");
-			return tmpCmd;
-		} else {
-			if ((isRedirectInToTmp && setInput.contains(tmpCmd))
-					|| 
-					(!errOut && !stdOut && isRedirectOutToTmp && setOutput.contains(tmpCmd))) {
-				tmpCmd = mapName2TmpName.get(tmpCmd);
-			}
-			return tmpCmd;
-		}
-	}
-	
-	/** 将cmd中的hdfs路径改为本地路径 */
-	private static String convertToLocalCmd(String tmpCmd) {
-		String[] subcmd = tmpCmd.split("=");
-		subcmd[0] = FileHadoop.convertToLocalPath(subcmd[0]);
-		for (int i = 1; i < subcmd.length; i++) {
-			subcmd[i] = FileHadoop.convertToLocalPath(subcmd[i]);
-		}
-		String result = subcmd[0];
-		for (int i = 1; i < subcmd.length; i++) {
-			result = result + "=" + subcmd[i];
-		}
-		return result;
-	}
-		
 	/**
 	 * 将tmpPath文件夹中的内容全部移动到resultPath中
 	 * notmove是不需要移动的文件名
@@ -475,4 +427,135 @@ public class CmdPath {
 		mapName2TmpName.clear();
 		mapPath2TmpPath.clear();
 	}
+	
+	//============================================================
+	//============================================================
+	public static abstract class ConvertCmd {
+		abstract String convert(String subCmd);
+		
+		public String convertCmd(String cmd) {
+			if (StringOperate.isRealNull(cmd)) {
+				return cmd;
+			}
+			String[] ss = cmd.split(" ");
+			List<String> lsCmd = new ArrayList<>();
+			for (String subCmd : ss) {
+				String subModify = convertSubCmd(subCmd);
+				if (StringOperate.isRealNull(subModify)) {
+					continue;
+				}
+				lsCmd.add(subModify);
+			}
+			return ArrayOperate.cmbString(lsCmd.toArray(new String[0]), " ");
+		}
+		
+		public String[] convertCmd(String[] cmd) {
+			if (cmd == null || cmd.length == 0) {
+				return cmd;
+			}
+			List<String> lsCmd = new ArrayList<>();
+			for (String subCmd : cmd) {
+				String subModify = convertSubCmd(subCmd);
+				if (StringOperate.isRealNull(subModify)) {
+					continue;
+				}
+				lsCmd.add(subModify);
+			}
+			return lsCmd.toArray(new String[0]);
+		}
+		
+		/**
+		 *  将cmd中需要定位到临时文件夹的信息修改过来，譬如
+		 * -output=/hdfs:/test.txt 修改为
+		 * -output=/home/novelbio/test.txt
+		 * @param stdOut
+		 * @param errOut
+		 * @param tmpCmd
+		 * @return
+		 */
+		protected String convertSubCmd(String tmpCmd) {
+			tmpCmd = tmpCmd.trim();
+			if (tmpCmd.contains("=")) {
+				String[] tmpCmd2Path = tmpCmd.split("=", 2);
+				tmpCmd = tmpCmd2Path[0] + "=" + convertSubCmd(tmpCmd2Path[1]);
+				return tmpCmd;
+			} else if (tmpCmd.contains(",")) {
+				String[] tmpCmd2Path = tmpCmd.split(",");
+				String[] tmpResult = new String[tmpCmd2Path.length];
+				for (int i = 0; i < tmpCmd2Path.length; i++) {
+					tmpResult[i] = convertSubCmd(tmpCmd2Path[i]);  
+	            }
+				tmpCmd = ArrayOperate.cmbString(tmpResult, ",");
+				return tmpCmd;
+			} else if (tmpCmd.contains(";")) {
+				String[] tmpCmd2Path = tmpCmd.split(";");
+				String[] tmpResult = new String[tmpCmd2Path.length];
+				for (int i = 0; i < tmpCmd2Path.length; i++) {
+					tmpResult[i] = convertSubCmd(tmpCmd2Path[i]);  
+	            }
+				tmpCmd = ArrayOperate.cmbString(tmpResult, ";");
+				return tmpCmd;
+			}
+			
+			if (tmpCmd.startsWith("\"") && tmpCmd.endsWith("\"")) {
+				tmpCmd = tmpCmd.substring(1, tmpCmd.length() - 1);
+				tmpCmd = convert(tmpCmd);
+				tmpCmd = CmdOperate.addQuot(tmpCmd);
+			} else if (tmpCmd.startsWith("\'") && tmpCmd.endsWith("\'")) {
+				tmpCmd = tmpCmd.substring(1, tmpCmd.length() - 1);
+				tmpCmd = convert(tmpCmd);
+				tmpCmd = CmdOperate.addQuotSingle(tmpCmd);
+			} else {
+				tmpCmd = convert(tmpCmd);
+			}
+			return tmpCmd;
+		}
+	}
+
+
+	public static class ConvertCmdTmp extends ConvertCmd {
+		boolean stdOut;
+		boolean errOut;
+		
+		boolean isRedirectOutToTmp;
+		boolean isRedirectInToTmp;
+		Set<String> setInput;
+		Set<String> setOutput;
+		Map<String, String> mapName2TmpName;
+		
+		public ConvertCmdTmp(boolean isRedirectInToTmp, boolean isRedirectOutToTmp, Set<String> setInput, Set<String> setOutput, Map<String, String> mapName2TmpName) {
+			this.isRedirectInToTmp = isRedirectInToTmp;
+			this.isRedirectOutToTmp = isRedirectOutToTmp;
+			this.setInput = setInput;
+			this.setOutput = setOutput;
+			this.mapName2TmpName = mapName2TmpName;
+		}
+		
+		public void setStdInOut(boolean stdOut, boolean errOut) {
+			this.stdOut = stdOut;
+			this.errOut = errOut;
+		}
+		
+		@Override
+		String convert(String subCmd) {
+			if ((isRedirectInToTmp && setInput.contains(subCmd))
+					|| 
+					(!errOut && !stdOut && isRedirectOutToTmp && setOutput.contains(subCmd))) {
+				subCmd = mapName2TmpName.get(subCmd);
+			}
+			return subCmd;
+		}
+		
+	}
+
+	public static class ConvertCmdGetFileName extends ConvertCmd {
+		
+		@Override
+		String convert(String subCmd) {
+			return FileOperate.getFileName(subCmd);
+		}
+		
+	}
 }
+
+

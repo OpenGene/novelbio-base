@@ -55,13 +55,9 @@ public class TestExcelOperate extends TestCase {
 	public void testCreateExecl(){
 		//需写入的excel文件所在文件夹必须是存在的.不然就不会写入文件.
 		String tempFilePath = "/home/novelbio/tmp/1234.xls";
-		try {
-			ExcelOperate excelOperate= new ExcelOperate(tempFilePath);
-			excelOperate.writeExcel(new ArrayList<String[]>());
-			excelOperate.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		ExcelOperate excelOperate= new ExcelOperate(tempFilePath);
+		excelOperate.writeExcel(new ArrayList<String[]>());
+		excelOperate.close();
 		assertTrue(FileOperate.isFileExist(tempFilePath));
 	}
 
@@ -72,14 +68,10 @@ public class TestExcelOperate extends TestCase {
 		String[] data = new String[]{"one","two","three","four"};
 		lsExcelData.add(data);
 		
-		try {
-			ExcelOperate excelOperate = new ExcelOperate(tempFilePath);
-			excelOperate.setNBCExcel(true);
-			excelOperate.writeExcel(1, 1, lsExcelData);
-			excelOperate.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		ExcelOperate excelOperate = new ExcelOperate(tempFilePath);
+		excelOperate.writeExcel(1, 1, lsExcelData);
+		excelOperate.close();
+		
 		assertTrue(FileOperate.getFileSizeLong(tempFilePath) > 0);
 	}
 	

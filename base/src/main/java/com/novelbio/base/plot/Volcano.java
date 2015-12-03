@@ -54,7 +54,7 @@ public class Volcano {
 	 */
 
 	public void test() {
-		List<List<String>> lsls = ExcelTxtRead.readLsExcelTxtls("/home/novelbio/桌面/test/hyy/VvsC.xls", 1);
+		List<String[]> lsls = ExcelTxtRead.readLsExcelTxt("/home/novelbio/桌面/test/hyy/VvsC.xls", 1);
 		Volcano volcano = new Volcano();
 		volcano.setMaxX(5);
 		volcano.setMinX(-5);
@@ -66,14 +66,14 @@ public class Volcano {
 		plotScatter.saveToFile("/home/novelbio/桌面/test/hyy/VvsC.png", 2000, 2000);	
 	}
 
-	public void setLogFC2Pvalue(List<List<String>> lslsExcel, int colLogFC, int colPvalue) {
+	public void setLogFC2Pvalue(List<String[]> lslsExcel, int colLogFC, int colPvalue) {
 		// 这里不需要--
 		// colLogFC--; colPvalue--;
 		lsLogFC2Pvalue = new ArrayList<double[]>();
-		for (List<String> list : lslsExcel) {
+		for (String[] list : lslsExcel) {
 			try {
-				double logFC = Double.parseDouble(list.get(colLogFC));
-				double pvalue = Double.parseDouble(list.get(colPvalue));
+				double logFC = Double.parseDouble(list[colLogFC]);
+				double pvalue = Double.parseDouble(list[colPvalue]);
 				double[] xy = new double[] { logFC, pvalue };
 				lsLogFC2Pvalue.add(xy);
 			} catch (Exception e) {

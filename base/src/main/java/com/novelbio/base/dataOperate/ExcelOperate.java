@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataStructure.ArrayOperate;
+import com.novelbio.base.fileOperate.ExceptionFile;
 import com.novelbio.base.fileOperate.FileOperate;
 
 /**
@@ -52,12 +53,6 @@ public class ExcelOperate implements Closeable {
 	 * excel 2003 或者 excel 2007 .0代表文件不存在.
 	 */
 	private int version = 0;
-	
-	/** 
-	 * 设定NBC的excel风格 
-	 * TODO 这个写文件时,没用到,但很多任务都有设置这个参数.待具体分析. add by fans.fan 151202
-	 */
-	private boolean isNBCExcel = false;
 	
 	/*
 	 * TODO 同isNBCExcel.有定义但从未使用.先注释掉.
@@ -134,7 +129,7 @@ public class ExcelOperate implements Closeable {
 	 * <b>使用完需调用close方法关闭相关对象</b>
 	 * @param imputfilename 文件路径和名称
 	 */
-	public ExcelOperate(String imputfilename) {
+	public ExcelOperate(String imputfilename) {		
 		String suffix = FileOperate.getFileNameSep(imputfilename)[1].toLowerCase();
 		version = suffix.equals("xlsx") ? EXCEL2007 : EXCEL2003;
 		initialExcel(imputfilename);
@@ -146,7 +141,7 @@ public class ExcelOperate implements Closeable {
 	 * @param imputfilename 文件路径和名称
 	 * @param isExcel2003
 	 */
-	public ExcelOperate(String imputfilename, boolean isExcel2003) {
+	public ExcelOperate(String imputfilename, boolean isExcel2003) {		
 		version = isExcel2003 ? EXCEL2003 : EXCEL2007;
 		initialExcel(imputfilename);
 	}
@@ -299,7 +294,16 @@ public class ExcelOperate implements Closeable {
 	public ArrayList<String[]> readLsExcelSheet(int sheetNum) {
 		return readLsExcel(sheetNum, 1,  1,  -1, -1);
 	}
-
+	
+	/**
+	 * 指定sheet顺序号,读取该sheet全部内容.
+	 * 
+	 * @param sheetNum			sheet页顺序号,从1开始,
+	 * @return
+	 */
+	public ArrayList<String[]> readLsExcel() {
+		return readLsExcel(0, 1,  1,  -1, -1);
+	}
 	/**
 	 * 读取默认sheet的指定块的内容,如果中间有空行，则一并读取<br/>
 	 * 
@@ -532,7 +536,7 @@ public class ExcelOperate implements Closeable {
 	 * 从第一个sheet开始写
 	 * @throws IOException 
 	 */
-	public void writeExcel(List<String[]> content) throws IOException{
+	public void writeExcel(List<String[]> content) {
 		writeExcel(0, content);
 	}
 	
@@ -540,7 +544,7 @@ public class ExcelOperate implements Closeable {
 	 * 从第一行，第一列开始写
 	 * @throws IOException 
 	 */
-	public void writeExcel(int sheetNum,List<String[]> content) throws IOException{
+	public void writeExcel(int sheetNum,List<String[]> content) {
 		writeExcel(sheetNum, 1, 1, content);
 	}
 
@@ -552,7 +556,7 @@ public class ExcelOperate implements Closeable {
 	 * @param content
 	 * @throws IOException 
 	 */
-	public void writeExcel(int rowNum, int cellNum, List<String[]> content) throws IOException {
+	public void writeExcel(int rowNum, int cellNum, List<String[]> content) {
 		writeExcel(1, rowNum, cellNum, content);
 	}
 
@@ -572,7 +576,7 @@ public class ExcelOperate implements Closeable {
 	 * @param content
 	 * @throws IOException
 	 */
-	public void writeExcel(int rowNum, int cellNum, List<String[]> content, ExcelStyle style) throws IOException {
+	public void writeExcel(int rowNum, int cellNum, List<String[]> content, ExcelStyle style) {
 		if (style != null) {
 			style.setWorkbook(wb);
 		}
@@ -589,7 +593,7 @@ public class ExcelOperate implements Closeable {
 	 * @param content			写入内容.
 	 * @throws IOException 
 	 */
-	public void writeExcel(int sheetNum, int rowNum, int colNum, List<String[]> content) throws IOException {
+	public void writeExcel(int sheetNum, int rowNum, int colNum, List<String[]> content) {
 		writeExcel(sheetNum, rowNum, colNum, content, null);
 	}
 	
@@ -603,7 +607,7 @@ public class ExcelOperate implements Closeable {
 	 * @param content			写入内容.
 	 * @throws IOException 
 	 */
-	public void writeExcel(String sheetName, int rowNum, int colNum, List<String[]> content) throws IOException {
+	public void writeExcel(String sheetName, int rowNum, int colNum, List<String[]> content) {
 		writeExcel(sheetName, rowNum, colNum, content, null);
 	}
 	
@@ -617,7 +621,7 @@ public class ExcelOperate implements Closeable {
 	 * @param style				样式
 	 * @throws IOException
 	 */
-	public void writeExcel(String sheetName, int rowNum, int cellNum, List<String[]> content, ExcelStyle style) throws IOException {
+	public void writeExcel(String sheetName, int rowNum, int cellNum, List<String[]> content, ExcelStyle style) {
 		if (StringOperate.isRealNull(sheetName) || rowNum < 0){
 			throw new RuntimeException("sheetName or rowNum error,please check. sheetName=" + sheetName + ",rowNum=" + rowNum);
 		}
@@ -638,7 +642,7 @@ public class ExcelOperate implements Closeable {
 	 * @param style				样式
 	 * @throws IOException
 	 */
-	public void writeExcel(int sheetNum, int rowNum, int cellNum, List<String[]> content, ExcelStyle style) throws IOException {
+	public void writeExcel(int sheetNum, int rowNum, int cellNum, List<String[]> content, ExcelStyle style) {
 		if (sheetNum <= -1 || rowNum < 0){
 			throw new RuntimeException("rowNum error,please check. rowNum=" + rowNum);
 		}
@@ -660,7 +664,7 @@ public class ExcelOperate implements Closeable {
 	 * @return
 	 * @throws IOException 
 	 */
-	private void writeExcel(Sheet sheet, int rowNum, int cellNum, Iterable<String[]> content, ExcelStyle style) throws IOException {
+	private void writeExcel(Sheet sheet, int rowNum, int cellNum, Iterable<String[]> content, ExcelStyle style) {
 		rowNum--;
 		cellNum--;// 将sheet和行列都还原为零状态
 		if (rowNum < 0){
@@ -694,18 +698,12 @@ public class ExcelOperate implements Closeable {
 			}
 			i++;
 		}
+		try {
+			save();
+		} catch (Exception e) {
+			throw new ExceptionFile("cannot save excelfile " + filename);
+		}
 		
-		save();
-	}
-
-	/**
-	 * 设定NBC的excel风格 <br/>
-	 * TODO 这个写文件时,没用到这个参数,但很多任务都有设置这个参数.待具体分析. <br/>
-	 * fans.fan添加注释. 151202
-	 * @param isNBCExcel
-	 */
-	public void setNBCExcel(boolean isNBCExcel) {
-		this.isNBCExcel = isNBCExcel;
 	}
 
 	/**
@@ -744,32 +742,6 @@ public class ExcelOperate implements Closeable {
 		}
 		return sheet;
 	}
-
-//	private void setNBCCellStyle(short color,CellStyle style) {
-//		style.setFillForegroundColor(color);//设置前景色
-//		style.setBorderBottom(CellStyle.BORDER_THIN);
-//		style.setBorderLeft(CellStyle.BORDER_THIN);
-//		style.setBorderRight(CellStyle.BORDER_THIN);
-//		style.setBorderTop(CellStyle.BORDER_THIN);
-//		style.setBottomBorderColor(IndexedColors.WHITE.getIndex());
-//		style.setTopBorderColor(IndexedColors.WHITE.getIndex());
-//		style.setLeftBorderColor(IndexedColors.WHITE.getIndex());
-//		style.setRightBorderColor(IndexedColors.WHITE.getIndex());
-//		style.setFillPattern(CellStyle.SOLID_FOREGROUND);
-//	}
-	
-//	private void setCellNoStyle(short color,CellStyle style) {
-//		style.setFillForegroundColor(color);//设置前景色
-//		style.setBorderBottom(CellStyle.NO_FILL);
-//		style.setBorderLeft(CellStyle.NO_FILL);
-//		style.setBorderRight(CellStyle.NO_FILL);
-//		style.setBorderTop(CellStyle.NO_FILL);
-//		style.setBottomBorderColor(CellStyle.NO_FILL);
-//		style.setTopBorderColor(CellStyle.NO_FILL);
-//		style.setLeftBorderColor(CellStyle.NO_FILL);
-//		style.setRightBorderColor(CellStyle.NO_FILL);
-//		style.setFillPattern(CellStyle.NO_FILL);
-//	}
 	
 	/**
 	 * 保存excel文件，使用以前的文件名
@@ -795,6 +767,8 @@ public class ExcelOperate implements Closeable {
 	
 	@Override
 	public void close() {
+		
+		
 		if (wb != null) {
 			try {
 				wb.close();
