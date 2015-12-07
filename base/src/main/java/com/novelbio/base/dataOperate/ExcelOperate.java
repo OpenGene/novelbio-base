@@ -10,6 +10,7 @@ import java.util.List;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -45,7 +46,7 @@ public class ExcelOperate implements Closeable {
 	
 	private Workbook wb;
 	private Sheet sheet;
-	private int sheetNum = 0; // 第sheetnum个工作表
+//	private int sheetNum = 0; // 第sheetnum个工作表
 	private String filename = "";
 	
 	/** 
@@ -140,27 +141,25 @@ public class ExcelOperate implements Closeable {
 	private void initialExcel(String filePathAndName) {
 		filename = filePathAndName;
 		if (version != EXCEL2003 && version != EXCEL2007){
-			throw new RuntimeException("excel version error.please check it. filename=" + filePathAndName);
+			throw new ExceptionNbcExcel("excel version error.please check it. filename=" + filePathAndName);
 		}
 		
-		sheetNum = 0;
 		try {
 			if (FileOperate.isFileExist(filePathAndName)) {
 				InputStream is = FileOperate.getInputStream(filename);
-				if (version == EXCEL2003){
+				if (version == EXCEL2003) {
 					wb = new HSSFWorkbook(is);
-				} else if (version == EXCEL2007){
+				} else if (version == EXCEL2007) {
 					wb = new XSSFWorkbook(is);
 				}
 				sheet = wb.getSheetAt(0);
 				FileOperate.closeIs(is);
 			} else {
-				if (version == EXCEL2003){
+				if (version == EXCEL2003) {
 					wb = new HSSFWorkbook();
-				} else if (version == EXCEL2007){
+				} else if (version == EXCEL2007) {
 					wb = new XSSFWorkbook();
 				}
-				wb.createSheet("sheet1");
 //				OutputStream os = FileOperate.getOutputStream(filename, false);
 //				wb.write(os);  
 //				FileOperate.closeOs(os);
@@ -168,7 +167,7 @@ public class ExcelOperate implements Closeable {
 		} catch (Exception e) {
 			logger.error("initialExcel error.", e);
 			//TODO 这里主要是不想显式的往外声明抛出异常,所以改为RuntimeException,是否合适,待考虑.
-			throw new RuntimeException(e);
+			throw new ExceptionNbcExcel("initialExcel error " + filename, e);
 		}
 	
 	}
@@ -204,7 +203,7 @@ public class ExcelOperate implements Closeable {
 
 	/**
 	 * 获得列数.<br/>
-	 * 获得默认sheetNum的前20行最长的列数
+	 * 获得第一个sheetNum的前20行最长的列数
 	 * 
 	 * @param sheetNum 	指定实际sheet数,从1开始
 	 * @param rowNum   	指定实际行数,从1开始
@@ -213,7 +212,7 @@ public class ExcelOperate implements Closeable {
 	public int getColCount() {
 		int maxColNum = 0;
 		for (int i = 0; i < 20; i++) {
-			int tmpColCount = getColCount(this.sheetNum + 1, i);
+			int tmpColCount = getColCount(1, i);
 			if (tmpColCount > maxColNum)
 				maxColNum = tmpColCount;
 		}
@@ -303,10 +302,11 @@ public class ExcelOperate implements Closeable {
 	 * @return ArrayList<String[]><br/>如果行数超过文件实际行数，则多出来的数组设置为null<br/>
 	 */
 	public ArrayList<String[]> readLsExcel(int rowStartNum, int rowEndNum, int[] columnNum) {
+		int sheetNum = 0;
 		if (sheet != null) {
 			sheetNum = wb.getSheetIndex(sheet);
 		}
-		return readLsExcel(this.sheetNum + 1, rowStartNum, rowEndNum, columnNum);
+		return readLsExcel(sheetNum + 1, rowStartNum, rowEndNum, columnNum);
 	}
 
 	/**
@@ -321,7 +321,7 @@ public class ExcelOperate implements Closeable {
 	 * @return  如果行数超过文件实际行数，则多出来的数组设置为null<br/>
 	 */
 	public ArrayList<String[]> readLsExcel(String sheetName, int rowStartNum, int columnStartNum, int rowEndNum, int columnEndNum) {
-		sheetNum = wb.getSheetIndex(sheetName);
+		int sheetNum = wb.getSheetIndex(sheetName);
 		if (sheetNum < 0) {
 			sheetNum = 0;
 		}
@@ -340,6 +340,7 @@ public class ExcelOperate implements Closeable {
 	 * @return 如果行数超过文件实际行数，则多出来的数组设置为null<br/>
 	 */
 	public ArrayList<String[]> readLsExcel(int rowStartNum, int columnStartNum, int rowEndNum, int columnEndNum) {
+		int sheetNum = 0;
 		if (sheet != null) {
 			sheetNum = wb.getSheetIndex(sheet);
 		}
@@ -603,14 +604,10 @@ public class ExcelOperate implements Closeable {
 	 */
 	public void writeExcel(String sheetName, int rowNum, int cellNum, List<String[]> content, ExcelStyle style) {
 		if (StringOperate.isRealNull(sheetName) || rowNum < 0){
-			throw new RuntimeException("sheetName or rowNum error,please check. sheetName=" + sheetName + ",rowNum=" + rowNum);
+			throw new ExceptionNbcExcel("sheetName or rowNum error,please check. sheetName=" + sheetName + ",rowNum=" + rowNum);
 		}
 		Sheet sheet = getSheet(sheetName);
-		if (style != null) {
-			style.setWorkbook(wb);
-			sheet.createFreezePane(style.getFreezePaneCol(),  style.getFreezenPaneRow());
-			style.setAllLineNum(rowNum + content.size() - 1);
-		}
+		logger.info(wb.getSheetIndex(sheet) + "");
 		writeExcel(sheet, rowNum, cellNum, content, style);
 	}
 	
@@ -626,14 +623,9 @@ public class ExcelOperate implements Closeable {
 	 */
 	public void writeExcel(int sheetNum, int rowNum, int cellNum, List<String[]> content, ExcelStyle style) {
 		if (sheetNum <= -1 || rowNum < 0){
-			throw new RuntimeException("rowNum error,please check. rowNum=" + rowNum);
+			throw new ExceptionNbcExcel("rowNum error,please check. rowNum=" + rowNum);
 		}
-		Sheet sheet = getSheet(sheetNum);
-		if (style != null) {
-			style.setWorkbook(wb);
-			sheet.createFreezePane(style.getFreezePaneCol(),  style.getFreezenPaneRow());
-			style.setAllLineNum(rowNum + content.size() - 1);
-		}
+
 		writeExcel(sheet, rowNum, cellNum, content, style);
 	}
 	
@@ -648,11 +640,23 @@ public class ExcelOperate implements Closeable {
 	 * @return
 	 * @throws IOException 
 	 */
-	private void writeExcel(Sheet sheet, int rowNum, int cellNum, Iterable<String[]> content, ExcelStyle style) {
+	private void writeExcel(Sheet sheet, int rowNum, int cellNum, List<String[]> content, ExcelStyle style) {
+		if (style != null) {
+			style.setWorkbook(wb);
+			sheet.createFreezePane(style.getFreezePaneCol(),  style.getFreezenPaneRow());
+			//TODO 这里如果rowNum > 1 则需要商榷
+			style.setAllLineNum(rowNum + content.size() - 1);
+			
+			if(!style.isCanAddStyle(content.get(0).length)) {
+				style = null;
+			}
+			
+		}
+		
 		rowNum--;
 		cellNum--;// 将sheet和行列都还原为零状态
 		if (rowNum < 0){
-			throw new RuntimeException("rowNum is error. rowNum=" + rowNum);
+			throw new ExceptionNbcExcel("rowNum is error. rowNum=" + rowNum);
 		}
 		
 		if (content == null) {
@@ -668,11 +672,10 @@ public class ExcelOperate implements Closeable {
 			}
 			if (rowcontent == null)
 				continue;
-			for (int j = 0; j < rowcontent.length; j++) // 写入
-			{
+			for (int j = 0; j < rowcontent.length; j++) {
 				if (rowcontent[j] == null)
 					continue; // 跳过空值
-				Cell cell = row.createCell((short) (cellNum + j));
+				Cell cell = row.getCell((short) (cellNum + j), Row.CREATE_NULL_AS_BLANK);
 				try {
 					double tmpValue = Double.parseDouble(rowcontent[j]);
 					// cell.setCellType(0);
@@ -691,9 +694,61 @@ public class ExcelOperate implements Closeable {
 		} catch (Exception e) {
 			throw new ExceptionFile("cannot save excelfile " + filename);
 		}
-		
 	}
 
+	/**
+	 * 往excel写入数据.
+	 * 
+	 * @param sheet				sheet页
+	 * @param rowNum 			实际行,从1开始
+	 * @param cellNum 			实际列,从1开始
+	 * @param content			写入内容
+	 * @param style				样式
+	 * @return
+	 * @throws IOException 
+	 */
+	public void setRowStyle(String sheetName, int startRow, int endRow, ExcelStyle style) {
+		setRowStyle(getSheet(sheetName), startRow, endRow, style);
+	}
+	/**
+	 * 往excel写入数据.
+	 * 
+	 * @param sheet				sheet页
+	 * @param rowNum 			实际行,从1开始
+	 * @param cellNum 			实际列,从1开始
+	 * @param content			写入内容
+	 * @param style				样式
+	 * @return
+	 * @throws IOException 
+	 */
+	private void setRowStyle(Sheet sheet, int startRow, int endRow, ExcelStyle style) {
+		if (style != null) {
+			style.setWorkbook(wb);
+			sheet.createFreezePane(style.getFreezePaneCol(),  style.getFreezenPaneRow());
+			style.setAllLineNum(endRow - startRow + 1);
+		}
+		
+		startRow--;
+		endRow--;// 将sheet和行列都还原为零状态
+		if (startRow < 0){
+			throw new ExceptionNbcExcel("rowNum is error. rowNum=" + startRow);
+		}
+		
+		for (int i = startRow; i <= endRow; i++) {
+			Row row = sheet.getRow(i);
+			if (row == null) {
+				continue;
+			}
+			if (style != null) {
+				style.renderRow(row, i);
+			}
+		}
+		try {
+			save();
+		} catch (Exception e) {
+			throw new ExceptionFile("cannot save excelfile " + filename);
+		}
+	}
 	/**
 	 * 设置写入的sheetName,没有则创建.
 	 * 
@@ -701,13 +756,11 @@ public class ExcelOperate implements Closeable {
 	 * @return
 	 */
 	private Sheet getSheet(String sheetName) {
-		sheetNum--;
 		Sheet sheet = null;
 		if (sheetName != null) {
 			sheet = wb.getSheet(sheetName);
 			if (sheet == null) {
 				sheet = wb.createSheet(sheetName);
-				sheetNum = wb.getSheetIndex(sheetName);
 			}
 		}
 		return sheet;
@@ -738,7 +791,7 @@ public class ExcelOperate implements Closeable {
 	 */
 	private void save() throws IOException {
 		if (filename == ""){
-			throw new RuntimeException("filename is null");
+			throw new ExceptionNbcExcel("filename is null");
 		}
 		OutputStream os = null;
 		try {
@@ -757,9 +810,8 @@ public class ExcelOperate implements Closeable {
 	public void close() {
 		if (wb != null) {
 			try {
-//				wb.close();
-				wb = null;
-			} catch (Exception e) {
+				wb.close();
+			} catch (Throwable e) {
 				e.printStackTrace();
 			}
 		}

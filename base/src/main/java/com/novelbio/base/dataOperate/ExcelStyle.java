@@ -8,6 +8,7 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.experimental.categories.Categories.ExcludeCategory;
 
@@ -123,6 +124,17 @@ public class ExcelStyle {
 		if (endNum < 0) {
 			endNum = allLineNum;
 		}
+	}
+	
+	/** excel2007 目前最多只能加64000个cell
+	 * @param rowLen 每一行的长度
+	 * @return
+	 */
+	public boolean isCanAddStyle(int rowLen) {
+		if (rowLen * (endNum - startNum) > 60000) {
+			return false;
+		}
+		return true;
 	}
 	
 	/** 设置第一行和最后一行的行数，从1开始
@@ -244,6 +256,27 @@ public class ExcelStyle {
 				resultStyle = unionCellStyle(resultStyle, endLineStyle);
 			}
 			cell.setCellStyle(resultStyle.getCellStyle());
+		}
+	}
+	
+	/** 渲染单元格，cell为一个单元格对象，rowNum为第几行（用来判断是奇数行偶数行首行或尾行），colNum为第几列 */
+	public void renderRow(Row row, int rowNum) {
+		ExcelCellStyle resultStyle = getColStyle(2);
+		if (endNum >= 0 && rowNum + 1 > endNum) {
+			row.setRowStyle(blankStyle.getCellStyle());
+		} else {
+			if ((rowNum - startNum + 1)%2 == 0) {
+				resultStyle = unionCellStyle(resultStyle, oddLineStyle);
+			} else {
+				resultStyle = unionCellStyle(resultStyle, evenLineStyle);
+			}
+			if (rowNum + 1  == startNum) {
+				resultStyle = unionCellStyle(resultStyle, titleLineStyle);
+			}
+			if (rowNum + 1 == endNum) {
+				resultStyle = unionCellStyle(resultStyle, endLineStyle);
+			}
+			row.setRowStyle(resultStyle.getCellStyle());
 		}
 	}
 	

@@ -187,9 +187,9 @@ public class HttpFetch implements Closeable {
 			schemeRegistry.register(new Scheme("https", 443, SSLSocketFactory.getSocketFactory()));
 			cm = new PoolingClientConnectionManager(schemeRegistry);
 			// Increase max total connection to 200
-			cm.setMaxTotal(20);//setMaxTotalConnections(200);
+			cm.setMaxTotal(500);//setMaxTotalConnections(200);
 			// Increase default max connection per route to 20
-			cm.setDefaultMaxPerRoute(10);
+			cm.setDefaultMaxPerRoute(20);
 			// Increase max connections for localhost:80 to 50
 			HttpHost localhost = new HttpHost("locahost", 80);
 			cm.setMaxPerRoute(new HttpRoute(localhost), 50);
@@ -512,7 +512,7 @@ public class HttpFetch implements Closeable {
 	
 	public void close() {
 		closeStream();
-//		httpclient = null;
+		httpclient = null;
 	}
 	public static void ressetCM() {
 		if (cm != null) {
