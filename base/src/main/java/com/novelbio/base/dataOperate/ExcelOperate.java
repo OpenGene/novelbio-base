@@ -161,9 +161,9 @@ public class ExcelOperate implements Closeable {
 					wb = new XSSFWorkbook();
 				}
 				wb.createSheet("sheet1");
-				OutputStream os = FileOperate.getOutputStream(filename, false);
-				wb.write(os);  
-				FileOperate.closeOs(os);
+//				OutputStream os = FileOperate.getOutputStream(filename, false);
+//				wb.write(os);  
+//				FileOperate.closeOs(os);
 			}
 		} catch (Exception e) {
 			logger.error("initialExcel error.", e);
@@ -560,9 +560,6 @@ public class ExcelOperate implements Closeable {
 	 * @throws IOException 
 	 */
 	public void writeExcel(int rowNum, int cellNum, List<String[]> content, ExcelStyle style) {
-		if (style != null) {
-			style.setWorkbook(wb);
-		}
 		writeExcel(1, rowNum, cellNum, content, style);
 	}
 	
@@ -610,9 +607,9 @@ public class ExcelOperate implements Closeable {
 		}
 		Sheet sheet = getSheet(sheetName);
 		if (style != null) {
+			style.setWorkbook(wb);
 			sheet.createFreezePane(style.getFreezePaneCol(),  style.getFreezenPaneRow());
 			style.setAllLineNum(rowNum + content.size() - 1);
-			style.setWorkbook(wb);
 		}
 		writeExcel(sheet, rowNum, cellNum, content, style);
 	}
@@ -633,6 +630,7 @@ public class ExcelOperate implements Closeable {
 		}
 		Sheet sheet = getSheet(sheetNum);
 		if (style != null) {
+			style.setWorkbook(wb);
 			sheet.createFreezePane(style.getFreezePaneCol(),  style.getFreezenPaneRow());
 			style.setAllLineNum(rowNum + content.size() - 1);
 		}
