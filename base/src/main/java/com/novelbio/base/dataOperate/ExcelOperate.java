@@ -524,7 +524,7 @@ public class ExcelOperate implements Closeable {
 	 * @throws IOException 
 	 */
 	public void writeExcel(List<String[]> content) {
-		writeExcel(0, content);
+		writeExcel(1, content);
 	}
 	
 	/**
@@ -653,6 +653,10 @@ public class ExcelOperate implements Closeable {
 		cellNum--;// 将sheet和行列都还原为零状态
 		if (rowNum < 0){
 			throw new RuntimeException("rowNum is error. rowNum=" + rowNum);
+		}
+		
+		if (content == null) {
+			return;
 		}
 		
 		int i = 0;
