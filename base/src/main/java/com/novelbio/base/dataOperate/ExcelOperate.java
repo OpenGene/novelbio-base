@@ -612,6 +612,7 @@ public class ExcelOperate implements Closeable {
 		if (style != null) {
 			sheet.createFreezePane(style.getFreezePaneCol(),  style.getFreezenPaneRow());
 			style.setAllLineNum(rowNum + content.size() - 1);
+			style.setWorkbook(wb);
 		}
 		writeExcel(sheet, rowNum, cellNum, content, style);
 	}
