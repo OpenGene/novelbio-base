@@ -754,12 +754,12 @@ public class ExcelOperate implements Closeable {
 		}
 	}
 	
-	@Override
 	public void close() {
 		if (wb != null) {
 			try {
-				wb.close();
-			} catch (IOException e) {
+//				wb.close();
+				wb = null;
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
