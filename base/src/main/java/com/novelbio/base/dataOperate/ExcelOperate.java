@@ -625,7 +625,7 @@ public class ExcelOperate implements Closeable {
 		if (sheetNum <= -1 || rowNum < 0){
 			throw new ExceptionNbcExcel("rowNum error,please check. rowNum=" + rowNum);
 		}
-
+		Sheet sheet = getSheet(sheetNum);
 		writeExcel(sheet, rowNum, cellNum, content, style);
 	}
 	
