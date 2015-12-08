@@ -514,6 +514,9 @@ public class ExcelOperate implements Closeable {
 	 */
 	public void writeExcelLs(List<List<String>> content) throws IOException {
 		List<String[]> lsStrings = new ArrayList<String[]>();
+		if (content == null) {
+			content = new ArrayList<>();
+		}
 		for (List<String> lsList : content) {
 			lsStrings.add(lsList.toArray(new String[0]));
 		}
