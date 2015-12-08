@@ -21,7 +21,7 @@ public class TestExcelOperate extends TestCase {
 			excelOperate = new ExcelOperate(filename);
 			List<String[]> lsData = new ArrayList<>();
 			String[] data = new String[4];
-			data[0] = "one";
+			data[0] = "中国";
 			data[1] = "two";
 			data[2] = "three";
 			data[3] = "four";
@@ -63,8 +63,39 @@ public class TestExcelOperate extends TestCase {
 		}finally{
 			excelOperate.close();
 		}
+	}
 	
-		
+	public void testHadoopExcel(){
+		ExcelOperate excelOperate = null;
+		String filename = "/media/nbfs/testdata/test5.xls";
+		try {
+			excelOperate = new ExcelOperate(filename);
+			List<String[]> lsData = new ArrayList<>();
+			String[] data = new String[4];
+			data[0] = "one";
+			data[1] = "two";
+			data[2] = "three";
+			data[3] = "four";
+			lsData.add(data);
+			lsData.add(data);
+			lsData.add(data);
+			lsData.add(data);
+			lsData.add(data);
+			lsData.add(data);
+			lsData.add(data);
+			lsData.add(data);
+			lsData.add(data);
+			lsData.add(data);
+			lsData.add(data);
+			int endRowNum = 7;
+			ExcelStyle style = ExcelStyle.getThreeLineTable(1, endRowNum);
+			excelOperate.writeExcel(1, 1, lsData, style);
+			
+			assertEquals(true, FileOperate.isFileExist(filename));
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 	
 	public void testCreateExecl(){
@@ -90,6 +121,18 @@ public class TestExcelOperate extends TestCase {
 		
 		assertTrue(FileOperate.getFileSizeLong(tempFilePath) > 0);
 	}
+	
+	public void testWriteNull(){
+		String tempFilePath = "/home/novelbio/tmp/123-3.xls";
+		List<String[]> lsExcelData = new ArrayList<>();
+		
+		ExcelOperate excelOperate = new ExcelOperate(tempFilePath);
+		excelOperate.writeExcel(null);
+		excelOperate.close();
+		
+		assertTrue(FileOperate.getFileSizeLong(tempFilePath) > 0);
+	}
+	
 	
 	public void testPath(){
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-ddhhmmss");

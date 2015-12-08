@@ -641,6 +641,9 @@ public class ExcelOperate implements Closeable {
 	 * @throws IOException 
 	 */
 	private void writeExcel(Sheet sheet, int rowNum, int cellNum, List<String[]> content, ExcelStyle style) {
+		if (content == null) {
+			content = new ArrayList<>();
+		}
 		if (style != null) {
 			style.setWorkbook(wb);
 			sheet.createFreezePane(style.getFreezePaneCol(),  style.getFreezenPaneRow());
@@ -650,7 +653,6 @@ public class ExcelOperate implements Closeable {
 			if(!style.isCanAddStyle(content.get(0).length)) {
 				style = null;
 			}
-			
 		}
 		
 		rowNum--;
@@ -659,9 +661,6 @@ public class ExcelOperate implements Closeable {
 			throw new ExceptionNbcExcel("rowNum is error. rowNum=" + rowNum);
 		}
 		
-		if (content == null) {
-			return;
-		}
 		
 		int i = 0;
 		for (String[] rowcontent : content) {
