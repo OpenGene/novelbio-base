@@ -92,7 +92,7 @@ public class TestExcelOperate extends TestCase {
 			excelOperate.writeExcel(1, 1, lsData, style);
 			
 			assertEquals(true, FileOperate.isFileExist(filename));
-			
+			excelOperate.close();
 		}catch(Exception e){
 			e.printStackTrace();
 		}

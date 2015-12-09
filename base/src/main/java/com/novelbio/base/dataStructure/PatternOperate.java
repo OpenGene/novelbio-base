@@ -16,8 +16,6 @@ public class PatternOperate {
 	boolean CASE_SENSITIVE = false;
 	Pattern patInput;
 	Matcher matInput;
-	String inputStr;
-	List<PatternUnit> lsPatternUnits;
 	
 	 /**
 	  * 设定正则表达式，默认大小写不敏感
@@ -26,7 +24,11 @@ public class PatternOperate {
 	public PatternOperate(String regex) {
 		this(regex, false);
 	}
-  
+	
+	public String getRegex() {
+		return regex;
+	}
+	
 	 /**
 	  * 设定正则表达式
 	  * @param regex
@@ -43,20 +45,14 @@ public class PatternOperate {
 		}
 	}
     
-    /** 设定需要查找的序列，设定后可以用{@link #getLsPatternUnits()} 来获得抓取得到的信息 */
-    public void setInputStr(String inputStr) {
-		this.inputStr = inputStr;
-		getPatternInfo();
-	}
-    /** 获得{@link #setInputStr(String)} 输入的list的抓取信息 */
-    public List<PatternUnit> getLsPatternUnits() {
-		return lsPatternUnits;
-	}
+   public List<PatternUnit> searchStr(String inputStr) {
+	   return getPatternInfo(inputStr);
+   }
     
-    private void getPatternInfo() {
+    private List<PatternUnit> getPatternInfo(String inputStr) {
     	//hashtable用来装载正则表达式的不同具体字符串，用以判断某个特定字符串出现的次数
     	Map<String, Integer> mapPat2Num = new HashMap<>();
-    	lsPatternUnits = new ArrayList<>();
+    	List<PatternUnit> lsPatternUnits = new ArrayList<>();
     	matInput = patInput.matcher(inputStr);
     	Integer index;//某个字符的出现次数
     	while(matInput.find()) {
@@ -79,6 +75,7 @@ public class PatternOperate {
     		patternUnit.setEndLoc(locationend);
     		lsPatternUnits.add(patternUnit);
     	}
+    	return lsPatternUnits;
     }
 
     public static class PatternUnit {

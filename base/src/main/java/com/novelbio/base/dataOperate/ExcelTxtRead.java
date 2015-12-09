@@ -44,6 +44,7 @@ public class ExcelTxtRead {
 		if (ExcelOperate.isExcel(excelFile)) {
 			ExcelOperate excelOperate = new ExcelOperate(excelFile);
 			lsResultTmp = excelOperate.readLsExcel(rowStart, rowEnd, columnID);//(rowStartNum, columnStartNum, rowEndNum, columnEndNum);//readExcel(excelFile, columnID, rowStart, rowEnd);
+			excelOperate.close();
 		}
 		else {
 			TxtReadandWrite txtRead = new TxtReadandWrite(excelFile, false);

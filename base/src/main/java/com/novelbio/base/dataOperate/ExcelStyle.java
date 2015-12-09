@@ -13,6 +13,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.experimental.categories.Categories.ExcludeCategory;
 
 import com.novelbio.base.MyBeanUtils;
+import com.novelbio.base.SepSign;
 
 public class ExcelStyle {
 	
@@ -90,6 +91,12 @@ public class ExcelStyle {
 	
 	Map<EnumXlsCell, Boolean> mapCell_2_IsText = new HashMap<>();
 	
+	/** 同一行的单元格可以使用一种类型的style，因此可以将同一种类型的单元格放到这个map里面来
+	 * key: style组合的名称
+	 * value: style的具体形式
+	 */
+	Map<String, ExcelCellStyle> mapStyleInfo2Style = new HashMap<>();
+	
 	public ExcelStyle() {
 		for (EnumXlsCell xlsCell : EnumXlsCell.values()) {
 			Map<EnumXlsCellBorder, Short> mapBorder2Color = new HashMap<>();
@@ -126,17 +133,6 @@ public class ExcelStyle {
 		}
 	}
 	
-	/** excel2007 目前最多只能加64000个cell
-	 * @param rowLen 每一行的长度
-	 * @return
-	 */
-	public boolean isCanAddStyle(int rowLen) {
-		if (rowLen * (endNum - startNum) > 60000) {
-			return false;
-		}
-		return true;
-	}
-	
 	/** 设置第一行和最后一行的行数，从1开始
 	 * @param startNum
 	 * @param endNum 小于0表示全部行
@@ -147,14 +143,14 @@ public class ExcelStyle {
 	}
 	
 	public void setWorkbook(Workbook workbook) {
-		titleLineStyle = new ExcelCellStyle(workbook);
-		evenLineStyle = new ExcelCellStyle(workbook);
-		oddLineStyle = new ExcelCellStyle(workbook);
-		endLineStyle = new ExcelCellStyle(workbook);
-		firstColStyle = new ExcelCellStyle(workbook);
-		evenColStyle = new ExcelCellStyle(workbook);
-		oddColStyle = new ExcelCellStyle(workbook);
-		blankStyle = new ExcelCellStyle(workbook);
+		titleLineStyle = new ExcelCellStyle(workbook, "title");
+		evenLineStyle = new ExcelCellStyle(workbook, "evenLine");
+		oddLineStyle = new ExcelCellStyle(workbook, "oddLine");
+		endLineStyle = new ExcelCellStyle(workbook, "endLine");
+		firstColStyle = new ExcelCellStyle(workbook, "firstCol");
+		evenColStyle = new ExcelCellStyle(workbook, "evenCol");
+		oddColStyle = new ExcelCellStyle(workbook, "oddCol");
+		blankStyle = new ExcelCellStyle(workbook, "blank");
 		wb = workbook;
 		setTitleStyle();
 	}
@@ -293,7 +289,12 @@ public class ExcelStyle {
 	
 	/** 把cellStyle2里非默认的参数设置进cellStyle1 */
 	public ExcelCellStyle unionCellStyle(ExcelCellStyle styleRaw, ExcelCellStyle styleNew) {
-		ExcelCellStyle cellStyle = new ExcelCellStyle(wb);
+		String key = styleRaw.getKey() + SepSign.SEP_ID + styleNew.getKey();
+		if (mapStyleInfo2Style.containsKey(key)) {
+			return mapStyleInfo2Style.get(key);
+		}
+		
+		ExcelCellStyle cellStyle = new ExcelCellStyle(wb, key);
 		cellStyle.cloneExcelCellStyle(styleRaw);
 		// 判断cellStyle2样式的参数是不是默认的，如果不是默认的就改变cellStyle1对应的参数
 		if (styleNew.getFillForegroundColor() != -1) cellStyle.setFillForegroundColor(styleNew.getFillForegroundColor());
@@ -308,6 +309,7 @@ public class ExcelStyle {
 		if (styleNew.isChangeFont()) cellStyle.setExcelFont(styleNew.getExcelFont());
 		if (styleNew.getDataFormat() != -1) cellStyle.setDataFormat(styleNew.getDataFormat());
 		
+		mapStyleInfo2Style.put(key, cellStyle);
 		return cellStyle;
 	}
 
@@ -434,9 +436,12 @@ class ExcelCellStyle {
 	short leftBorder = -1;
 	short dataFormat = -1;
 	
-	public ExcelCellStyle(Workbook wb) {
-		cellStyle = wb.createCellStyle();
-		font = wb.createFont();
+	String key;
+	
+	public ExcelCellStyle(Workbook wb, String key) {
+		this.cellStyle = wb.createCellStyle();
+		this.font = wb.createFont();
+		this.key = key;
 	}
 	
 	public void setExcelFont(ExcelFont excelFont) {
@@ -451,9 +456,6 @@ class ExcelCellStyle {
 		return excelFont == null? false: true;
 	}
 	
-	public Font getFont() {
-		return font;
-	}
 	
 	public ExcelFont getExcelFont() {
 		return excelFont;
@@ -557,6 +559,10 @@ class ExcelCellStyle {
 	}
 	public short getBorderBottom() {
 		return bottomBorder;
+	}
+	
+	public String getKey() {
+		return key;
 	}
 
 }

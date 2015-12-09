@@ -645,8 +645,7 @@ public class FileOperate {
 		if (patSuffix == null) {
 			return true;
 		}
-		patSuffix.setInputStr(fileName);
-		List<PatternUnit> lsPat = patSuffix.getLsPatternUnits();
+		List<PatternUnit> lsPat = patSuffix.searchStr(fileName);
 		if (lsPat.isEmpty()) {
 			return false;
 		}

@@ -160,9 +160,6 @@ public class ExcelOperate implements Closeable {
 				} else if (version == EXCEL2007) {
 					wb = new XSSFWorkbook();
 				}
-//				OutputStream os = FileOperate.getOutputStream(filename, false);
-//				wb.write(os);  
-//				FileOperate.closeOs(os);
 			}
 		} catch (Exception e) {
 			logger.error("initialExcel error.", e);
@@ -632,6 +629,8 @@ public class ExcelOperate implements Closeable {
 		writeExcel(sheet, rowNum, cellNum, content, style);
 	}
 	
+	private boolean isWrite = false;
+	
 	/**
 	 * 往excel写入数据.
 	 * 
@@ -644,6 +643,7 @@ public class ExcelOperate implements Closeable {
 	 * @throws IOException 
 	 */
 	private void writeExcel(Sheet sheet, int rowNum, int cellNum, List<String[]> content, ExcelStyle style) {
+		isWrite = true;
 		if (content == null) {
 			content = new ArrayList<>();
 		}
@@ -652,10 +652,6 @@ public class ExcelOperate implements Closeable {
 			sheet.createFreezePane(style.getFreezePaneCol(),  style.getFreezenPaneRow());
 			//TODO 这里如果rowNum > 1 则需要商榷
 			style.setAllLineNum(rowNum + content.size() - 1);
-			
-			if(!style.isCanAddStyle(content.get(0).length)) {
-				style = null;
-			}
 		}
 		
 		rowNum--;
@@ -690,11 +686,6 @@ public class ExcelOperate implements Closeable {
 				}
 			}
 			i++;
-		}
-		try {
-			save();
-		} catch (Exception e) {
-			throw new ExceptionFile("cannot save excelfile " + filename);
 		}
 	}
 
@@ -810,9 +801,18 @@ public class ExcelOperate implements Closeable {
 	}
 	
 	public void close() {
+		if (isWrite) {
+			try {
+				save();
+			} catch (Exception e) {
+				throw new ExceptionFile("cannot save excelfile " + filename);
+			}
+		}
+		
+		
 		if (wb != null) {
 			try {
-				wb.close();
+//				wb.close();
 			} catch (Throwable e) {
 				e.printStackTrace();
 			}
