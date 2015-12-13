@@ -19,6 +19,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -33,6 +34,8 @@ import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.base.fileOperate.HdfsInitial;
+import com.novelbio.base.fileOperate.RandomFileInt;
+import com.novelbio.base.fileOperate.RandomFileInt.RandomFileFactory;
 
 /**
  * 新建read没关系
@@ -718,6 +721,69 @@ public class TxtReadandWrite implements Closeable {
 		close();
 		txtOut.close();
 	}
+
+	/**
+     * 从文件末尾开始读取文件，并返回list
+     * @param filename    file path
+     * @param charset character
+     */
+    public static List<String> readReverse(String filename, int num) {
+        RandomFileInt rf = null;
+        LinkedList<String> lsResult = new LinkedList<>();
+        try {
+            rf = RandomFileFactory.createInstance(filename);
+            long fileLength = rf.length();
+            long start = rf.getFilePointer();// 返回此文件中的当前偏移量
+            long readIndex = start + fileLength -1;
+            String line;
+            rf.seek(readIndex);// 设置偏移量为文件末尾
+            int c = -1;
+            
+            int readLineNum = 0;
+            while (readIndex > start) {
+                c = rf.read();
+                if (c == '\n' || c == '\r') {
+                    line = rf.readLine();
+                    if (line != null) {
+//                    	Charset cs = Charset.forName("UTF-8");
+                    	line = new String(line.getBytes("ISO-8859-1"), "UTF-8");
+                    	lsResult.addFirst(line);
+                    } else {
+                    	lsResult.addFirst("");
+                    }
+                    readIndex--;
+                    readLineNum++;
+                    if (readLineNum >= num) {
+						break;
+					}
+                }
+                readIndex--;
+                rf.seek(readIndex);
+                if (readIndex == 0) {// 当文件指针退至文件开始处，输出第一行
+                	line = rf.readLine();
+                	line = new String(line.getBytes("ISO-8859-1"), Charset.defaultCharset());
+
+                	lsResult.addFirst(line);
+                	break;
+                }
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rf != null)
+                    rf.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return lsResult;
+    }
+
+
+	
 	
 	public static void indexLzo(String inputFile) throws Exception {
 		if(!FileHadoop.isHdfs(inputFile)) {

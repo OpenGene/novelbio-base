@@ -21,6 +21,8 @@ public interface RandomFileInt {
 	public long length() throws IOException;
 	public int read() throws IOException; 
 	public int skipBytes(int n) throws IOException;
+	long getFilePointer() throws IOException; 
+	String readLine() throws IOException; 
 	
 	public static class RandomFileFactory {
 		/** return corresponding object by judge the input fileName is FileHadoop or local file */
@@ -143,6 +145,17 @@ class RandomFileHdfs implements RandomFileInt {
 	@Override
 	public int skipBytes(int n) throws IOException {
 		return fsDataInputStream.skipBytes(n);
+	}
+
+	@Override
+	public long getFilePointer() throws IOException {
+		return fsDataInputStream.getPos();
+	}
+
+	@Override
+	public String readLine() throws IOException {
+		// TODO Auto-generated method stub
+		return fsDataInputStream.readLine();
 	}
     
 }

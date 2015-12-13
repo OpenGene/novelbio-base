@@ -607,7 +607,6 @@ public class ExcelOperate implements Closeable {
 			throw new ExceptionNbcExcel("sheetName or rowNum error,please check. sheetName=" + sheetName + ",rowNum=" + rowNum);
 		}
 		Sheet sheet = getSheet(sheetName);
-		logger.info(wb.getSheetIndex(sheet) + "");
 		writeExcel(sheet, rowNum, cellNum, content, style);
 	}
 	

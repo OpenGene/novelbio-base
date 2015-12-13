@@ -62,6 +62,7 @@ public class CmdOperate extends RunProcess<String> {
 	StreamOut outputGobbler;
 	/** 是否将本该输出到控制台的结果依然写入控制台 */
 	boolean isOutToTerminate = true;
+	boolean isPrintCmd = true;
 	
 	/** 是否需要获取cmd的标准输出流 */
 	boolean getCmdInStdStream = false;
@@ -82,6 +83,8 @@ public class CmdOperate extends RunProcess<String> {
 	
 	/** 将cmd写入sh文件的具体文件 */
 	String cmd1SH;
+
+	
 	
 	/** 设定复制输入输出文件所到的临时文件夹 */
 	public static void setTmpPath(String tmpPath) {
@@ -116,6 +119,7 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	public void setTerminateWriteTo(boolean isOutToTerminate) {
 		this.isOutToTerminate = isOutToTerminate;
+		this.isPrintCmd = isOutToTerminate;
 	}
 	
 	/**
@@ -124,7 +128,6 @@ public class CmdOperate extends RunProcess<String> {
 	 * @param cmd
 	 */
 	private void setCmdFile(String cmd, String cmdWriteInFileName) {
-		logger.info(cmd);
 		while (true) {
 			cmd1SH = CmdPath.tmpPath + cmdWriteInFileName.replace("\\", "/") + DateUtil.getDateAndRandom() + ".sh";
 			if (!FileOperate.isFileExist(cmd1SH)) {
@@ -711,7 +714,10 @@ public class CmdOperate extends RunProcess<String> {
 	protected void running() {
 		String cmd = "";
 		String realCmd = getCmdExeStr();
-		logger.info("run cmd: " + realCmd);
+		if (isPrintCmd) {
+			logger.info("run cmd: " + realCmd);
+		}
+
 		DateUtil dateTime = new DateUtil();
 		dateTime.setStartTime();
 		try {
