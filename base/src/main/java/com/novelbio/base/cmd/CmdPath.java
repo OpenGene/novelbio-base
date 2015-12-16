@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.xpath.operations.Bool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
