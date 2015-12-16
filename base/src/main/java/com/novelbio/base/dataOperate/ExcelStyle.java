@@ -10,9 +10,7 @@ import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.junit.experimental.categories.Categories.ExcludeCategory;
 
-import com.novelbio.base.MyBeanUtils;
 import com.novelbio.base.SepSign;
 
 public class ExcelStyle {
