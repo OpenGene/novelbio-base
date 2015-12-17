@@ -520,19 +520,7 @@ public class HttpFetch implements Closeable {
 		}
 		cm = null;
 	}
-	/** html解码还很薄弱 */
-	public static String decode(String inputUrl) {
-		String result = "";
-		try {
-			result = URLDecoder.decode(inputUrl, "utf-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			logger.error("解码出错：" + inputUrl);
-		}
-		result = result.replace("&amp;", "&");
-		result = result.replace("&nbsp;", " ");
-		return result;
-	}
+
 }
 /**
  * 请求重试处理

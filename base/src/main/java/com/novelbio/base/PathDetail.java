@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Properties;
 
 import com.novelbio.base.dataOperate.DateUtil;
-import com.novelbio.base.dataOperate.HttpFetch;
 import com.novelbio.base.fileOperate.FileOperate;
 
 public class PathDetail {
@@ -49,7 +48,7 @@ public class PathDetail {
 		java.net.URL url = PathDetail.class.getProtectionDomain().getCodeSource().getLocation();
 		String filePath = null;
 		try {
-			filePath = HttpFetch.decode(url.getPath());
+			filePath = StringOperate.decode(url.getPath());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -61,7 +60,7 @@ public class PathDetail {
 		java.net.URL url = PathDetail.class.getProtectionDomain().getCodeSource().getLocation();
 		String filePath = null;
 		try {
-			filePath = HttpFetch.decode(url.getPath());
+			filePath = StringOperate.decode(url.getPath());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -74,7 +73,7 @@ public class PathDetail {
 		java.net.URL url = PathDetail.class.getProtectionDomain().getCodeSource().getLocation();
 		String filePath = null;
 		try {
-			filePath = HttpFetch.decode(url.getPath());
+			filePath = StringOperate.decode(url.getPath());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

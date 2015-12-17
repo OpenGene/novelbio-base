@@ -1,11 +1,16 @@
 package com.novelbio.base;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.HashSet;
 import java.util.Set;
 
-public class StringOperate {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+public class StringOperate {
+	private static final Logger logger = LoggerFactory.getLogger(StringOperate.class);
+	
 	private static int compare(String str, String target) {
 		int d[][]; // 矩阵
 		int n = str.length();
@@ -165,5 +170,19 @@ public class StringOperate {
 			strNew = strNew.replace("%", "\\%");
 		}
 		return strNew;
+	}
+	
+	/** html解码还很薄弱 */
+	public static String decode(String inputUrl) {
+		String result = "";
+		try {
+			result = URLDecoder.decode(inputUrl, "utf-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			logger.error("解码出错：" + inputUrl);
+		}
+		result = result.replace("&amp;", "&");
+		result = result.replace("&nbsp;", " ");
+		return result;
 	}
 }
