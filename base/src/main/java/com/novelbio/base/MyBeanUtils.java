@@ -6,9 +6,7 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.beans.BeansException;
-import org.springframework.beans.FatalBeanException;
-import org.springframework.util.Assert;
+import org.apache.commons.lang.Validate;
 
 public class MyBeanUtils extends org.springframework.beans.BeanUtils {
 	/**
@@ -20,9 +18,9 @@ public class MyBeanUtils extends org.springframework.beans.BeanUtils {
 	 *            目标
 	 * @throws BeansException
 	 */
-	public static <T> Map<String, String> copyNotNullProperties(T source) throws BeansException {
+	public static <T> Map<String, String> copyNotNullProperties(T source) throws ExceptionNbcBean {
 		Map<String, String> mapResult = new HashMap<>();
-		Assert.notNull(source, "Source must not be null");
+		Validate.notNull(source, "Source must not be null");
 		Class<?> actualEditable = source.getClass();
 		PropertyDescriptor[] sourcePds = getPropertyDescriptors(actualEditable);
 		for (PropertyDescriptor sourcePd : sourcePds) {
@@ -40,7 +38,7 @@ public class MyBeanUtils extends org.springframework.beans.BeanUtils {
 					mapResult.put(sourcePd.getName(), value.toString());
 				}
 			} catch (Throwable ex) {
-				throw new FatalBeanException("Could not copy properties from source to target", ex);
+				throw new ExceptionNbcBean("Could not copy properties from source to target", ex);
 			}
 		}
 		return mapResult;
@@ -56,9 +54,9 @@ public class MyBeanUtils extends org.springframework.beans.BeanUtils {
 	 *            目标
 	 * @throws BeansException
 	 */
-	public static <T,K> K copyNotNullProperties(T source, K target) throws BeansException {
-		Assert.notNull(target, "Target must not be null");
-		Assert.notNull(source, "Source must not be null");
+	public static <T,K> K copyNotNullProperties(T source, K target) throws ExceptionNbcBean {
+		Validate.notNull(target, "Target must not be null");
+		Validate.notNull(source, "Source must not be null");
 		Class<?> actualEditable = target.getClass();
 		PropertyDescriptor[] targetPds = getPropertyDescriptors(actualEditable);
 		for (PropertyDescriptor targetPd : targetPds) {
@@ -80,7 +78,7 @@ public class MyBeanUtils extends org.springframework.beans.BeanUtils {
 							writeMethod.invoke(target, value);
 						}
 					} catch (Throwable ex) {
-						throw new FatalBeanException("Could not copy properties from source to target", ex);
+						throw new ExceptionNbcBean("Could not copy properties from source to target", ex);
 					}
 				}
 			}
@@ -97,9 +95,9 @@ public class MyBeanUtils extends org.springframework.beans.BeanUtils {
 	 *            目标
 	 * @throws BeansException
 	 */
-	public static <T,K> K copyAllProperties(T source, K target) throws BeansException {
-		Assert.notNull(target, "Target must not be null");
-		Assert.notNull(source, "Source must not be null");
+	public static <T,K> K copyAllProperties(T source, K target) throws ExceptionNbcBean {
+		Validate.notNull(target, "Target must not be null");
+		Validate.notNull(source, "Source must not be null");
 		Class<?> actualEditable = target.getClass();
 		PropertyDescriptor[] targetPds = getPropertyDescriptors(actualEditable);
 		for (PropertyDescriptor targetPd : targetPds) {
@@ -119,7 +117,7 @@ public class MyBeanUtils extends org.springframework.beans.BeanUtils {
 						}
 						writeMethod.invoke(target, value);
 					} catch (Throwable ex) {
-						throw new FatalBeanException("Could not copy properties from source to target", ex);
+						throw new ExceptionNbcBean("Could not copy properties from source to target", ex);
 					}
 				}
 			}

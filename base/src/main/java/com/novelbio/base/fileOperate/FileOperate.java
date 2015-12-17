@@ -17,8 +17,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.log4j.Logger;
@@ -296,9 +294,9 @@ public class FileOperate {
 		}
 		if (file.isFile()) {
 			long size = file.length();
-			if (size == 0 && file instanceof FileHadoop) {
-				return getFileSizeLong(FileHadoop.convertToLocalPath(filePath));
-			}
+//			if (size == 0 && file instanceof FileHadoop) {
+//				return getFileSizeLong(FileHadoop.convertToLocalPath(filePath));
+//			}
 			return size;
 		} else if (file.isDirectory()) {
 			List<File> lsFileChild = getFoldFileLs(file, "*", "*");
@@ -725,78 +723,6 @@ public class FileOperate {
 		}
 	}
 
-//	/**
-//	 * 新建文件
-//	 * 
-//	 * @param filePathAndName
-//	 *            文本文件完整绝对路径及文件名
-//	 * @param fileContent
-//	 *            文本文件内容
-//	 * @return
-//	 */
-//	public static void createFile(String filePathAndName, String fileContent) {
-//
-//		try {
-//			String filePath = filePathAndName;
-//			filePath = filePath.toString();
-//			File myFilePath = getFile(filePath);
-//			if (!myFilePath.exists()) {
-//				myFilePath.createNewFile();
-//			}
-//			if (myFilePath instanceof FileHadoop) {
-//				FileHadoop fileHadoop = (FileHadoop)myFilePath;
-//				if (fileContent != null) {
-//					fileHadoop.writeln(fileContent,false);
-//				}
-//			}else {
-//				FileWriter resultFile = new FileWriter(myFilePath);
-//				if (fileContent != null) {
-//					PrintWriter myFile = new PrintWriter(resultFile);
-//					myFile.println(fileContent);
-//					myFile.close();
-//					resultFile.close();
-//				}
-//			}
-//		} catch (Exception e) {
-//			logger.error("创建文件操作出错");
-//		}
-//	}
-
-//	/**
-//	 * 有编码方式的文件创建,HDFS上只支持UTF8
-//	 * 
-//	 * @param filePathAndName
-//	 *            文本文件完整绝对路径及文件名
-//	 * @param fileContent
-//	 *            文本文件内容
-//	 * @param encoding
-//	 *            编码方式 例如 GBK 或者 UTF-8
-//	 * @return
-//	 */
-//	public static void createFile(String filePathAndName, String fileContent,
-//			String encoding) {
-//
-//		try {
-//			String filePath = filePathAndName;
-//			filePath = filePath.toString();
-//			File myFilePath = getFile(filePath);
-//			if (!myFilePath.exists()) {
-//				myFilePath.createNewFile();
-//			}
-//			if (myFilePath instanceof FileHadoop) {
-//				FileHadoop fileHadoop = (FileHadoop)myFilePath;
-//				fileHadoop.writeln(fileContent,false);
-//			}else {
-//				PrintWriter myFile = new PrintWriter(myFilePath, encoding);
-//				String strContent = fileContent;
-//				myFile.println(strContent);
-//				myFile.close();
-//			}
-//		} catch (Exception e) {
-//			logger.error("创建文件操作出错");
-//		}
-//	}
-
 	/**
 	 * 删除文件
 	 * 
@@ -1027,20 +953,8 @@ public class FileOperate {
 					}
 					newfile.delete();
 				}
-				InputStream inStream = null;// 读入原文件
-				OutputStream fs = null;
-				if (oldfile instanceof FileHadoop) {
-					FileHadoop fileHadoop = (FileHadoop) oldfile;
-					inStream = fileHadoop.getInputStream();
-				}else {
-					inStream = new FileInputStream(oldfile); 
-				}
-				if (newfile instanceof FileHadoop) {
-					FileHadoop fileHadoop = (FileHadoop) newfile;
-					fs = fileHadoop.getOutputStreamNew(cover);
-				}else {
-					fs = new FileOutputStream(newfile, !cover);
-				}
+				InputStream inStream = FileOperate.getInputStream(oldfile);// 读入原文件
+				OutputStream fs = FileOperate.getOutputStream(newfile);
 				IOUtils.copy(inStream, fs);
 				inStream.close();
 				fs.flush();
@@ -1092,25 +1006,10 @@ public class FileOperate {
 						}
 						targetfile.delete();
 					}
-					InputStream input = null;
-					OutputStream output = null;
-					if (temp instanceof FileHadoop) {
-						FileHadoop fileHadoop = (FileHadoop) temp;
-						input = fileHadoop.getInputStream();
-					}else {
-						input = new FileInputStream(temp); 
-					}
-					if (targetfile instanceof FileHadoop) {
-						FileHadoop fileHadoop = (FileHadoop) targetfile;
-						output = fileHadoop.getOutputStreamNew(cover);
-					}else {
-						output = new FileOutputStream(targetfile, !cover);
-					}
-					byte[] b = new byte[1024 * 5];
-					int len;
-					while ((len = input.read(b)) != -1) {
-						output.write(b, 0, len);
-					}
+					
+					InputStream input = FileOperate.getInputStream(temp);// 读入原文件
+					OutputStream output = FileOperate.getOutputStream(targetfile, !cover);
+					IOUtils.copy(input, output);
 					output.flush();
 					output.close();
 					input.close();
@@ -1953,40 +1852,6 @@ public class FileOperate {
 			throw new IOException("file Length is incorrect! inputLen: " + uploadFileSize + "   realLen: " + outputLen);
 		}
 		return outputLen;
-	}
-	
-	/**
-	 * 将文件写入到response的输出流.即下载文件.
-	 * @param response
-	 * @param tempFilePath	文件路径和文件名.如:/home/novelbio/tmp/abc.xls
-	 * @param tempFileName	文件名.如:abc.xls
-	 */
-	public static void downloadFile(HttpServletResponse response, String tempFilePath, String tempFileName) {
-		InputStream is = null;
-		OutputStream os = null;
-		//add by fans.fan 如果文件不存在.往下执行会报空指针错误.添加判断处理. 150814
-		if (!isFileExist(tempFilePath)) {
-			logger.warn("download file is not exist.file=" + tempFilePath);
-			return ;
-		}
-		//end by fans.fan 
-		try {
-			response.setHeader("Content-Disposition", "attachment;fileName=" + new String(tempFileName.getBytes("utf-8"), "ISO8859-1"));
-			is = getInputStream(tempFilePath);
-			os = response.getOutputStream();
-			byte[] b = new byte[1024];
-			int length;
-			while ((length = is.read(b)) > 0) {
-				os.write(b, 0, length);
-			}
-			response.flushBuffer();
-			os.flush();
-		} catch (Exception e) {
-			logger.error("", e);
-		} finally{
-			closeIs(is);
-			closeOs(os);
-		}
 	}
 	
 	/**

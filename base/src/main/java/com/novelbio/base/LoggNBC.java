@@ -2,7 +2,6 @@ package com.novelbio.base;
 
 //import org.apache.felix.main.Main;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.support.ManagedArray;
 
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.fileOperate.FileOperate;
