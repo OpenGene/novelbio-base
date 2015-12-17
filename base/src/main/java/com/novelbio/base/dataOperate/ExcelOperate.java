@@ -10,7 +10,6 @@ import java.util.List;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -782,7 +781,7 @@ public class ExcelOperate implements Closeable {
 	 * @throws IOException 
 	 */
 	private void save() throws IOException {
-		if (filename == ""){
+		if ("".equals(filename)){
 			throw new ExceptionNbcExcel("filename is null");
 		}
 		OutputStream os = null;
