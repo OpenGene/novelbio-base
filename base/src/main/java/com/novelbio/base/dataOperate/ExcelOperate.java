@@ -686,6 +686,22 @@ public class ExcelOperate implements Closeable {
 			i++;
 		}
 	}
+	
+	/**
+	 * 将文件写到输出流里.
+	 * 
+	 * @date 2015年12月17日
+	 * @param content
+	 * @param outputStream
+	 */
+	public void writeExcel2OutputStream(List<String[]> content, OutputStream outputStream){
+		writeExcel(content);
+		try {
+			wb.write(outputStream);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * 往excel写入数据.
