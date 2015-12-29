@@ -26,7 +26,7 @@ import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.novelbio.base.fileOperate.ExceptionFile;
+import com.novelbio.base.fileOperate.ExceptionNbcFile;
 import com.novelbio.htsjdk.samtools.seekablestream.UserPasswordInput;
 
 
@@ -57,7 +57,7 @@ public class FTPUtils {
                 try {
                     is.close();
                 } catch (IOException e) {
-                    throw new ExceptionFile("Error closing connection", e);
+                    throw new ExceptionNbcFile("Error closing connection", e);
                 }
             }
         }

@@ -58,7 +58,7 @@ public class FileHadoop extends File {
 		try {
 			init();
 		} catch (Exception e) {
-			throw new ExceptionHdfsFileConnection("cannot initial file with " + hdfsFilePath, e);
+			throw new ExceptionNbcHdfsFileConnection("cannot initial file with " + hdfsFilePath, e);
 		}
 	}
 	
@@ -230,7 +230,7 @@ public class FileHadoop extends File {
 	
 	@Deprecated
 	public boolean isHidden() {
-		 throw new ExceptionFile("No support method");
+		 throw new ExceptionNbcFile("No support method");
 	}
 	
 	/** if error, return 0 */
@@ -344,7 +344,7 @@ public class FileHadoop extends File {
     }
     @Deprecated
     public boolean setReadOnly() {
-    	 throw new ExceptionFile("No support method");
+    	 throw new ExceptionNbcFile("No support method");
     }
     @Deprecated
     public boolean setWritable(boolean writable, boolean ownerOnly) {
@@ -354,7 +354,7 @@ public class FileHadoop extends File {
     }
     @Deprecated
     public boolean setWritable(boolean writable) {
-    	 throw new ExceptionFile("No support method");
+    	 throw new ExceptionNbcFile("No support method");
     }
     @Deprecated
     public boolean setReadable(boolean readable, boolean ownerOnly) {
@@ -363,18 +363,18 @@ public class FileHadoop extends File {
     }
     @Deprecated
     public boolean setReadable(boolean readable) {
-    	 throw new ExceptionFile("No support method");
+    	 throw new ExceptionNbcFile("No support method");
     }
     @Deprecated
     public boolean setExecutable(boolean executable, boolean ownerOnly) {
-    	 throw new ExceptionFile("No support method");
+    	 throw new ExceptionNbcFile("No support method");
     }
     @Deprecated
     public boolean setExecutable(boolean executable) {
-    	 throw new ExceptionFile("No support method");
+    	 throw new ExceptionNbcFile("No support method");
     }
     public boolean canExecute() {
-    	 throw new ExceptionFile("No support method");
+    	 throw new ExceptionNbcFile("No support method");
     }
     
     //TODO need test
@@ -487,17 +487,17 @@ public class FileHadoop extends File {
 
    @Deprecated
     public long getTotalSpace() {
-	   throw new ExceptionFile("No support method");
+	   throw new ExceptionNbcFile("No support method");
     }
 
    @Deprecated
     public long getFreeSpace() {
-    	throw new ExceptionFile("No support method");
+    	throw new ExceptionNbcFile("No support method");
     }
 
     @Deprecated
     public long getUsableSpace() {
-    	 throw new ExceptionFile("No support method");
+    	 throw new ExceptionNbcFile("No support method");
     }
     
     /* -- Basic infrastructure -- */

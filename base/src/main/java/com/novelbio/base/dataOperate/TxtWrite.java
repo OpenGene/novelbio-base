@@ -18,7 +18,7 @@ import org.apache.log4j.Logger;
 
 import com.hadoop.compression.lzo.LzopCodec;
 import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
-import com.novelbio.base.fileOperate.ExceptionFile;
+import com.novelbio.base.fileOperate.ExceptionNbcFile;
 import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.base.fileOperate.HdfsInitial;
 
@@ -475,7 +475,7 @@ class TxtWrite implements Closeable {
 			try {
 				TxtReadandWrite.indexLzo(getFileName());
 			} catch (Exception e) {
-				throw new ExceptionFile("cannot make lzo index for file " + getFileName(), e);
+				throw new ExceptionNbcFile("cannot make lzo index for file " + getFileName(), e);
 			}
 			
 		}

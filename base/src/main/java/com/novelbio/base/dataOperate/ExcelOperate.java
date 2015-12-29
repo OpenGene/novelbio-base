@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataStructure.ArrayOperate;
-import com.novelbio.base.fileOperate.ExceptionFile;
+import com.novelbio.base.fileOperate.ExceptionNbcFile;
 import com.novelbio.base.fileOperate.FileOperate;
 
 /**
@@ -753,7 +753,7 @@ public class ExcelOperate implements Closeable {
 		try {
 			save();
 		} catch (Exception e) {
-			throw new ExceptionFile("cannot save excelfile " + filename);
+			throw new ExceptionNbcFile("cannot save excelfile " + filename);
 		}
 	}
 	/**
@@ -819,7 +819,7 @@ public class ExcelOperate implements Closeable {
 			try {
 				save();
 			} catch (Exception e) {
-				throw new ExceptionFile("cannot save excelfile " + filename);
+				throw new ExceptionNbcFile("cannot save excelfile " + filename);
 			}
 		}
 		

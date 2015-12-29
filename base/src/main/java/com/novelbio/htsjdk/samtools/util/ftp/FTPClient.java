@@ -28,7 +28,7 @@ import java.net.Socket;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
-import com.novelbio.base.fileOperate.ExceptionFile;
+import com.novelbio.base.fileOperate.ExceptionNbcFile;
 
 /**
  * @author jrobinso
@@ -212,7 +212,7 @@ public class FTPClient {
                 }
             }
         } catch (IOException e) {
-            throw new ExceptionFile("Error disconnecting", e);
+            throw new ExceptionNbcFile("Error disconnecting", e);
         }
 
         commandStream = null;

@@ -920,7 +920,7 @@ public class FileOperate {
 		}
 		File oldfile = getFile(oldPathFile);
 		if (!FileOperate.isFileExist(oldfile)) {
-			throw new ExceptionFile("no file exist: " + oldfile);
+			throw new ExceptionNbcFile("no file exist: " + oldfile);
 		}
 		String newPathTmp = FileOperate.changeFileSuffix(newPathFile, "_tmp", null);
 		File newfile = getFile(newPathTmp);
@@ -964,7 +964,7 @@ public class FileOperate {
 				return false;
 			}
 		} catch (Exception e) {
-			throw new ExceptionFile("copy file error" , e);
+			throw new ExceptionNbcFile("copy file error" , e);
 		}
 	}
 	/**
@@ -1020,7 +1020,7 @@ public class FileOperate {
 				}
 			}
 		} catch (Exception e) {
-			throw new ExceptionFile("copy fold error", e);
+			throw new ExceptionNbcFile("copy fold error", e);
 		}
 		return true;
 	}
@@ -1522,7 +1522,7 @@ public class FileOperate {
 			try {
 				HdfsInitial.getFileContext().createSymlink(FileHadoop.getPath(rawFile), FileHadoop.getPath(linkTo), false);
 			} catch (Exception e) {
-				throw new ExceptionFile("could not creat symbolic link on hdfs");
+				throw new ExceptionNbcFile("could not creat symbolic link on hdfs");
 			}
 		}
 		
@@ -1604,6 +1604,11 @@ public class FileOperate {
 			return false;
 		}
 	}
+	
+	public static boolean isFileExistAndBigThan0(String fileName) {
+		return isFileExistAndBigThanSize(fileName, 0);
+	}
+		
 	/**
 	 * 判断文件是否存在，并且有一定的大小而不是空文件
 	 * 
@@ -1803,7 +1808,7 @@ public class FileOperate {
 	
 	public static void validateFileName(String fileName) {
 		if (fileName.contains("\\") || fileName.contains("/") || fileName.contains("*")) {
-			throw new ExceptionFile(fileName + " fileName error, cannot contain: \\ / *");
+			throw new ExceptionNbcFile(fileName + " fileName error, cannot contain: \\ / *");
         }
 	}
 	

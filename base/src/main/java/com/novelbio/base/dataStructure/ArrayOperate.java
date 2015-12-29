@@ -8,12 +8,14 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 
@@ -887,5 +889,45 @@ public class ArrayOperate {
 			result[3] = -1;
 		}
 		return result;
+	}
+	
+	
+	public static <T, K> boolean compareMapStrArray(Map<T, K[]> map1, Map<T, K[]> map2) {
+		if (map1 == null && map2 != null || map1 != null && map2 == null) {
+			return false;
+		}
+		if (map1 == null && map2 == null) {
+			return true;
+		}
+        if (map1.size() != map2.size())
+            return false;
+
+        try {
+            Iterator<Entry<T, K[]>> i = map1.entrySet().iterator();
+            while (i.hasNext()) {
+                Entry<T, K[]> e = i.next();
+                T key = e.getKey();
+                K[] value = e.getValue();
+                if (value == null) {
+                    if (!(map2.get(key)==null && map2.containsKey(key)))
+                        return false;
+                } else {
+                	K[] value2 = map2.get(key);
+                	if (value2.length != value.length) {
+						return false;
+					}
+                	for (int j = 0; j < value.length; j++) {
+						if (!value[j].equals(value2[j])) {
+							 return false;
+						}
+					}                       
+                }
+            }
+        } catch (ClassCastException unused) {
+            return false;
+        } catch (NullPointerException unused) {
+        	return false;
+        }
+        return true;
 	}
 }

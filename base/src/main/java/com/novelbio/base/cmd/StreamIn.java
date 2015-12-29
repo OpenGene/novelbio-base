@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import com.novelbio.base.fileOperate.ExceptionFileInputError;
+import com.novelbio.base.fileOperate.ExceptionNbcFileInputError;
 import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.base.multithread.RunProcess;
 
@@ -45,7 +45,7 @@ public class StreamIn extends RunProcess<Integer> {
 		try {
 			inStream = FileOperate.getInputStream(inputFile);
 		} catch (IOException e) {
-			throw new ExceptionFileInputError("input file may not exist: " + inputFile, e);
+			throw new ExceptionNbcFileInputError("input file may not exist: " + inputFile, e);
 		}
 		try {
 			copyLarge(inStream, processInStream);
