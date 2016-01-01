@@ -249,6 +249,9 @@ public class FileOperate {
 	 * @return
 	 */
 	public static String getFileName(String fileName) {
+		if (StringOperate.isRealNull(fileName)) {
+			return "";
+        }
 		File file = new File(fileName);
 		return file.getName();
 	}
@@ -915,9 +918,6 @@ public class FileOperate {
 	 * @return
 	 */
 	public static boolean copyFile(String oldPathFile, String newPathFile, boolean cover) {
-		if (oldPathFile != null && oldPathFile.equals(newPathFile)) {
-			return true;
-		}
 		File oldfile = getFile(oldPathFile);
 		if (!FileOperate.isFileExist(oldfile)) {
 			throw new ExceptionNbcFile("no file exist: " + oldfile);
@@ -942,7 +942,7 @@ public class FileOperate {
 	 * @return
 	 */
 	private static boolean copyFile(File oldfile,File newfile, boolean cover) {
-		if (oldfile != null && oldfile.getAbsoluteFile().equals(newfile.getAbsoluteFile())) {
+		if (oldfile != null && isFilePathSame(oldfile, newfile)) {
 			return true;
 		}
 		try {
@@ -964,7 +964,7 @@ public class FileOperate {
 				return false;
 			}
 		} catch (Exception e) {
-			throw new ExceptionNbcFile("copy file error" , e);
+			throw new ExceptionNbcFile("copy file from " + oldfile + " to " + newfile + " error" , e);
 		}
 	}
 	/**
@@ -1135,15 +1135,15 @@ public class FileOperate {
 				suffixOlds[i] = "." + suffixOlds[i];
 			}
 		}
-		int endDot = -1;
+		int maxEndDot = -1;
 		for (String suf : suffixOlds) {
-			endDot = fileName.toLowerCase().lastIndexOf(suf.toLowerCase());
-			if (endDot >= 0) {
-				break;
+			int endDot = fileName.toLowerCase().lastIndexOf(suf.toLowerCase());
+			if (endDot >= 0 && endDot > maxEndDot) {
+				maxEndDot = endDot;
 			}
 		}
 
-		suffixOld = fileName.substring(endDot, fileName.length());
+		suffixOld = fileName.substring(maxEndDot, fileName.length());
 		
 		if (suffixNew == null) {
 			suffixNew = suffixOld;
@@ -1153,8 +1153,8 @@ public class FileOperate {
 		}
 		int indexSep = Math.max(fileName.lastIndexOf("/"), fileName.lastIndexOf("\\"));
 		String result;
-		if (endDot > indexSep) {
-			result = fileName.substring(0, endDot);
+		if (maxEndDot > indexSep) {
+			result = fileName.substring(0, maxEndDot);
 		} else {
 			result = fileName;
 		}
@@ -1214,7 +1214,7 @@ public class FileOperate {
 		File oldFile = getFile(oldName);
 		// 文件新（目标）地址
 		File fnew = getFile(oldFile.getParentFile() + File.separator + newName);
-		if (oldFile.getAbsolutePath().equals(fnew.getAbsolutePath())) {
+		if (isFilePathSame(oldFile, fnew)) {
 			return true;
 		}
 		if (fnew.exists() && !cover) {
@@ -1268,10 +1268,6 @@ public class FileOperate {
 		
 		if (NewName == null || NewName.trim().equals("")) {
 			NewName = getFileName(oldFileName);
-		}
-		String newPathName = newPath + NewName;
-		if (oldFileName.equals(newPathName)) {
-			return true;
 		}
 		File oldFile = getFile(oldFileName);
  		if (isFileExist(oldFile)) {
@@ -1339,31 +1335,7 @@ public class FileOperate {
 		newPath = addSep(newPath);
 		// 文件原地址
 		File oldFile = getFile(oldFileName);
-		// 文件新（目标）地址
-		// new一个新文件夹
-		File fnewpath = getFile(newPath);
-		if (!oldFile.exists()) {
-			return false;
-		}
-		// 判断文件夹是否存在
-		if (!fnewpath.exists())
-			fnewpath.mkdirs();// 创建新文件
-		// 将文件移到新文件里
-		File fnew = getFile(newPath + newName);
-		if (fnew.exists()) {
-			if (!cover) {
-				return false;
-			}
-			fnew.delete();
-		}
-		if (!oldFile.renameTo(fnew)) {
-			if (copyFile(oldFileName, newPath + newName, cover)) {
-				oldFile.delete();
-				return true;
-			}
-			return false;
-		}
-		return true;
+		return moveSingleFile(oldFile, newPath, newName, cover);
 	}
 	/**
 	 * 移动文件，如果新地址有同名文件，则不移动并返回<br>
@@ -1384,9 +1356,16 @@ public class FileOperate {
 	private static boolean moveSingleFile(File oldFile, String newPath,
 			String newName, boolean cover) {
 		newPath = addSep(newPath);
+		File fnew = getFile(newPath + newName);
+
 		// 文件新（目标）地址
 		// new一个新文件夹
 		File fnewpath = getFile(newPath);
+		
+		if (isFilePathSame(oldFile, fnew)) {
+			return true;
+        }
+		
 		if (!oldFile.exists()) {
 			return false;
 		}
@@ -1394,7 +1373,6 @@ public class FileOperate {
 		if (!fnewpath.exists())
 			fnewpath.mkdirs();// 创建新文件
 		// 将文件移到新文件里
-		File fnew = getFile(newPath + newName);
 		if (fnew.exists()) {
 			if (!cover) {
 				return false;
@@ -1450,7 +1428,12 @@ public class FileOperate {
 			String newfolderfile, String prix, boolean cover) {
 		// 如果sPath不以文件分隔符结尾，自动添加文件分隔符
 		newfolderfile = addSep(newfolderfile);
-
+		
+		File fileNew = FileOperate.getFile(newfolderfile);
+		if (isFilePathSame(olddir, fileNew)) {
+			return true;
+        }
+		
 		boolean ok = true;
 		File[] files = olddir.listFiles(); // 文件一览
 		if (files == null)
@@ -1465,7 +1448,7 @@ public class FileOperate {
 		for (int i = 0; i < files.length; i++) {
 			if (files[i].isDirectory()) // 如果子文件是文件夹，则递归调用本函数，精彩的用法！！
 			{
-				ok = moveFoldFile(files[i].getPath(), newfolderfile + files[i].getName(), prix, cover);
+				ok = moveFoldFile(files[i], newfolderfile + files[i].getName(), prix, cover);
 				// 成功，删除原文件
 				if (ok) {
 					files[i].delete();
@@ -1490,6 +1473,44 @@ public class FileOperate {
 			}
 		}
 		return ok;
+	}
+	
+	public static boolean isFilePathSame(File oldFile, File newFile) {
+		if (oldFile == null && newFile != null
+				||
+				oldFile != null && newFile == null
+				) {
+			return false;
+        }
+		if (oldFile == null && newFile == null) {
+			return true;
+        }
+		
+		try {
+			String oldFileStr = oldFile.getCanonicalPath();
+			String newFileStr = newFile.getCanonicalPath();
+			
+			if (oldFileStr != null) oldFileStr = oldFileStr.replace("\\", "/");
+			if (newFileStr != null) newFileStr = newFileStr.replace("\\", "/");
+			
+			if (StringOperate.isEqual(oldFileStr, newFileStr)) {
+				return true;
+			}
+			if (oldFileStr == null || newFileStr == null) {
+				return false;
+            }
+			
+			
+			File fileOld = new File(oldFileStr);
+			File fileNew = new File(newFileStr);
+			
+			if (StringOperate.isEqual(fileOld.getCanonicalPath(), fileNew.getCanonicalPath())) {
+				return true;
+			}
+			return false;
+		} catch (IOException e) {
+			throw new ExceptionFileError("file name is not correct, old file " + oldFile.getName() + " new file " + newFile.getName() , e);
+		}
 	}
 	
 	/**
@@ -1801,6 +1822,9 @@ public class FileOperate {
 	public static String addSep(String path) {
 		path = path.trim();
 		if (!path.endsWith(File.separator)) {
+			if (path.equals("")) {
+	            	path = ".";
+            }
 			path = path + File.separator;
 		}
 		return path;
@@ -1900,6 +1924,10 @@ public class FileOperate {
 
 		public ExceptionFileError(String info) {
 			super(info);
+		}
+		
+		public ExceptionFileError(String info, Throwable t) {
+			super(info, t);
 		}
 	}
 	
