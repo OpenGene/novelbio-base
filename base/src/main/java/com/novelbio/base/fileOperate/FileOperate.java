@@ -618,45 +618,19 @@ public class FileOperate {
 		}
 		return lsFileName;
 	}
-
-	/**
-	 * 是符合条件的文件名
-	 * 
-	 * @param pattern
-	 *            用来分割文件名的正则 Pattern pattern = Pattern.compile("(.*)\\.(\\w*)",
-	 *            Pattern.CASE_INSENSITIVE);
-	 * @param matcher
+	
+	/** 给定一个文件名，返回该文件名上有几个文件夹，不包括本文件夹
+	 * 如 给定 /home/novelbio/test 和 /home/novelbio/test/ 都返回2<br>
+	 * 此外 如 mypath/novelbio/test 和 mypath/novelbio/test/ 也都返回2
 	 * @param fileName
-	 *            输入的文件名
-	 * @param regxFilename
-	 *            指定包含的文件名，是正则表达式 ，如 "*",正则表达式无视大小写
-	 * @param regxSuffix
-	 *            指定包含的后缀名，是正则表达式<br>
-	 *            文件 wfese.fse.fe认作 "wfese.fse"和"fe"<br>
-	 *            文件 wfese.fse.认作 "wfese.fse."和""<br>
-	 *            文件 wfese 认作 "wfese"和""<br>
 	 * @return
 	 */
-	private static boolean isNeedFile(PatternOperate patName, PatternOperate patSuffix, 
-			String fileName, String regxFilename, String regxSuffix) {
-		String[] fileNameSep = getFileNameSep(fileName);
-		if (patName != null && patName.getPatFirst(fileNameSep[0]) == null) {
-			return false;
-		}
-		if (patSuffix == null) {
-			return true;
-		}
-		List<PatternUnit> lsPat = patSuffix.searchStr(fileName);
-		if (lsPat.isEmpty()) {
-			return false;
-		}
-		for (int i = lsPat.size() - 1; i >= 0; i--) {
-			PatternUnit patUnit = lsPat.get(i);
-			if (patUnit.getEndLoc() == 1) {
-				return true;
-			}
-		}
-		return true;
+	public static int getFolderParentNumber(String fileName) {
+		if (StringOperate.isRealNull(fileName)) return 0;
+		fileName = fileName.replace("\\", "/").replace("//", "/");
+		fileName = removeSplashHead(fileName, false);
+		fileName = removeSplashTail(fileName, false);
+		return fileName.split("/").length - 1;
 	}
 
 	/**
@@ -1276,7 +1250,6 @@ public class FileOperate {
 			newPath = newPath + NewName;
 			okFlag = moveFoldFile(oldFile, newPath, "", cover);
 		}
-		deleteDirectory(oldFile);
 		return okFlag;
 	}
 
@@ -1297,7 +1270,6 @@ public class FileOperate {
 		if (oldFilePath == null) {
 			return false;
 		}
-		File fileOldFilePath = getFile(oldFilePath);
 		newPath = addSep(newPath);
 		boolean okFlag = false;
 		
@@ -1310,7 +1282,6 @@ public class FileOperate {
 			newPath = newPath + getFileName(oldFilePath);
 			okFlag = moveFoldFile(oldFilePath, newPath, NewNameOrPrefix, cover);
 		}
-		deleteDirectory(fileOldFilePath);
 		return okFlag;
 	}
 
@@ -1472,6 +1443,7 @@ public class FileOperate {
 				}
 			}
 		}
+		DeleteFileFolder(olddir);
 		return ok;
 	}
 	
@@ -1822,10 +1794,9 @@ public class FileOperate {
 	public static String addSep(String path) {
 		path = path.trim();
 		if (!path.endsWith(File.separator)) {
-			if (path.equals("")) {
-	            	path = ".";
+			if (!path.equals("")) {
+				path = path + File.separator;
             }
-			path = path + File.separator;
 		}
 		return path;
 	}

@@ -124,21 +124,14 @@ public class StringOperate {
 	 * @return
 	 */
 	public static String changeMessyCode(String strText) {
-		String strUtf;
-		String strIso;
-		try {
-			strUtf = new String(strText.getBytes("ISO-8859-1"), "utf-8");
-			strIso = new String(strUtf.getBytes("utf-8"), "ISO-8859-1");
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return strText;
-		}
-		if (strIso.equals(strText)) {
-			return strUtf;
-		} else {
-			return strText;
-		}
+		if (isHaveMessyCode(strText)) {
+			try {
+				return new String(strText.getBytes("ISO-8859-1"), "utf-8");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+            }
+        }
+		return strText;
 	}
 	
 	/**

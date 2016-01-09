@@ -52,47 +52,14 @@ public class MD5generate {
 	 * @param fileName
 	 * @return
 	 */
-	public static String getFileMD5String(String fileName) {
+	public static String getFileMD5(String fileName) {
 		String result = "";
 		try {
-			result = getFileMD5StringExp(fileName);
+			result = getNBCFileRealMd5(fileName);
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
 		return result;
-	}
-	
-	private static String getFileMD5StringExp(String fileName) throws IOException {
-		File file = new File(fileName);
-		FileInputStream in = new FileInputStream(file);  
-		FileChannel ch = in.getChannel();  
-		
-		//700000000 bytes are about 670M  
-		int maxSize=700000000;  
-		
-		long startPosition=0L;  
-		long step=file.length()/maxSize;  
-		
-		if(step == 0) {  
-			MappedByteBuffer byteBuffer = ch.map(FileChannel.MapMode.READ_ONLY, 0,file.length());
-			messageDigest.update(byteBuffer);  
-			return bufferToHex(messageDigest.digest());  
-		}
-         
-		for(int i=0;i<step;i++) {
-			MappedByteBuffer byteBuffer = ch.map(FileChannel.MapMode.READ_ONLY, startPosition,maxSize);  
-			messageDigest.update(byteBuffer);  
-			startPosition+=maxSize;  
-		}
-         
-		if(startPosition==file.length()) {  
-			return bufferToHex(messageDigest.digest());  
-		}
-   
-		MappedByteBuffer byteBuffer = ch.map(FileChannel.MapMode.READ_ONLY, startPosition,file.length()-startPosition);  
-		messageDigest.update(byteBuffer);  
-		in.close();
-		return bufferToHex(messageDigest.digest());  
 	}
 	
 	/**
