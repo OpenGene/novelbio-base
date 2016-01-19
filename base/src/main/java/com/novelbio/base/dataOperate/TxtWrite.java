@@ -1,10 +1,12 @@
 package com.novelbio.base.dataOperate;
 
+import hdfs.jsr203.HdfsConfInitiator;
+
 import java.io.BufferedOutputStream;
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
@@ -20,14 +22,12 @@ import com.hadoop.compression.lzo.LzopCodec;
 import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
 import com.novelbio.base.fileOperate.ExceptionNbcFile;
 import com.novelbio.base.fileOperate.FileOperate;
-import com.novelbio.base.fileOperate.HdfsInitial;
 
 class TxtWrite implements Closeable {
 	private static Logger logger = Logger.getLogger(TxtReadandWrite.class);
 	
 	TXTtype txtTtype;
-	String txtfile;
-	File file;
+	Path file;
 	BufferedOutputStream outputStream;
 	boolean append = true;
 	
@@ -36,12 +36,9 @@ class TxtWrite implements Closeable {
 	 */
 	ArchiveOutputStream zipOutputStream;
 	
-	public TxtWrite(String fileName) {
-		this.txtfile = fileName;
-	}
-	public TxtWrite(File file) {
+	public TxtWrite(Path file) {
 		this.file = file;
-		this.txtfile = file.getAbsolutePath();
+		this.txtTtype = TXTtype.getTxtType(file.toString());
 	}
 	public TxtWrite(OutputStream outputStream) {
 		if (outputStream instanceof BufferedOutputStream) {
@@ -60,8 +57,7 @@ class TxtWrite implements Closeable {
 			try {
 				createFile();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new ExceptionNbcFile("cannot read file " + file.toString(), e);
 			}
 		}
 		return outputStream;
@@ -76,17 +72,12 @@ class TxtWrite implements Closeable {
 	}
 	
 	public String getFileName() {
-		return txtfile;
+		return file.toString();
 	}
 	
 	protected void createFile() throws Exception {
-		OutputStream outputStreamRaw = null;
-		if (file != null) {
-			outputStreamRaw = FileOperate.getOutputStream(file, append);
-		} else {
-			outputStreamRaw = FileOperate.getOutputStream(txtfile, append);
-		}
-		txtTtype = TXTtype.getTxtType(txtfile);
+		OutputStream outputStreamRaw = FileOperate.getOutputStream(file, append);
+		
 		if (txtTtype == TXTtype.Txt) {
 			outputStream = new BufferedOutputStream(outputStreamRaw, TxtReadandWrite.bufferLen);
 		} else if (txtTtype == TXTtype.Gzip) {
@@ -95,12 +86,12 @@ class TxtWrite implements Closeable {
 			outputStream = new BufferedOutputStream(new BZip2CompressorOutputStream(outputStreamRaw), TxtReadandWrite.bufferLen);
 		} else if (txtTtype == TXTtype.Zip) {
 			zipOutputStream = new ZipArchiveOutputStream(outputStreamRaw);
-			ZipArchiveEntry entry = new ZipArchiveEntry(FileOperate.getFileNameSep(txtfile)[0]);
+			ZipArchiveEntry entry = new ZipArchiveEntry(FileOperate.getFileNameSep(file.toString())[0]);
 			zipOutputStream.putArchiveEntry(entry);
 			outputStream = new BufferedOutputStream(zipOutputStream, TxtReadandWrite.bufferLen);
 		} else if (txtTtype == TXTtype.Lzo) {
 			LzopCodec lzo = new LzopCodec();
-			lzo.setConf(HdfsInitial.getConf());
+			lzo.setConf(HdfsConfInitiator.getConf());
 			CompressionOutputStream outputStreamCmp =lzo.createOutputStream(outputStreamRaw);
 			outputStream = new BufferedOutputStream(outputStreamCmp);
 		}

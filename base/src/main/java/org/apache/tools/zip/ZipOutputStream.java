@@ -35,7 +35,7 @@ import java.util.zip.CRC32;
 import java.util.zip.Deflater;
 import java.util.zip.ZipException;
 
-import com.novelbio.base.fileOperate.FileHadoop;
+import com.novelbio.base.fileOperate.FileOperate;
 
 /**
  * Reimplementation of {@link java.util.zip.ZipOutputStream
@@ -308,24 +308,20 @@ public class ZipOutputStream extends FilterOutputStream {
      */
     public ZipOutputStream(File file) throws IOException {
         super(null);
-        if (file instanceof FileHadoop) {
-        	out = new FileOutputStream(file);	
-		} else {
-	        try {
-	            raf = new RandomAccessFile(file, "rw");
-	            raf.setLength(0);
-	        } catch (IOException e) {
-	            if (raf != null) {
-	                try {
-	                    raf.close();
-	                } catch (IOException inner) {
-	                    // ignore
-	                }
-	                raf = null;
-	            }
-	            out = new FileOutputStream(file);
-	        }
-		}
+        try {
+            raf = new RandomAccessFile(file, "rw");
+            raf.setLength(0);
+        } catch (IOException e) {
+            if (raf != null) {
+                try {
+                    raf.close();
+                } catch (IOException inner) {
+                    // ignore
+                }
+                raf = null;
+            }
+            out = FileOperate.getOutputStream(FileOperate.getPath(file));
+        }
     }
 
     /**

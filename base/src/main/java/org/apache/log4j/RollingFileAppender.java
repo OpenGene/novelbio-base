@@ -29,7 +29,6 @@ import org.apache.log4j.helpers.LogLog;
 import org.apache.log4j.helpers.CountingQuietWriter;
 import org.apache.log4j.spi.LoggingEvent;
 
-import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 
 /**

@@ -1,16 +1,17 @@
 package com.novelbio.base.dataOperate;
 
+import hdfs.jsr203.HdfsConfInitiator;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.Closeable;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -24,19 +25,17 @@ import org.apache.log4j.Logger;
 import com.hadoop.compression.lzo.LzopCodec;
 import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
 import com.novelbio.base.dataStructure.PatternOperate;
-import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
-import com.novelbio.base.fileOperate.HdfsInitial;
-import com.novelbio.htsjdk.samtools.seekablestream.SeekableStream;
+import com.novelbio.base.fileOperate.PositionInputStream;
 
 class TxtRead implements Closeable {
 	private static final Logger logger = Logger.getLogger(TxtRead.class);
 	
 	/** 读取本地文件时设定 */
-	String txtfile;
-	File file;
+//	String txtfile;
+	Path file;
 	
-	InputStream inputStreamRaw;
+	PositionInputStream inputStreamRaw;
 	InputStream inputStream;
 	BufferedReader bufread;
 	
@@ -48,27 +47,20 @@ class TxtRead implements Closeable {
 	
 	long filesize = 0;
 
-	public TxtRead(String fileName) {
-		this.txtfile = fileName;
-		txTtype = TXTtype.getTxtType(fileName);
-		isStream = false;
-	}
-	
-	public TxtRead(File file) {
+	public TxtRead(Path file) {
+		txTtype = TXTtype.getTxtType(file.toString());
 		this.file = file;
-		this.txtfile = file.getAbsolutePath();
-		txTtype = TXTtype.getTxtType(txtfile);
 		isStream = false;
 	}
 	
 	public TxtRead(InputStream inputStream) {
-		this.inputStreamRaw = inputStream;
+		this.inputStreamRaw = new PositionInputStream(inputStream);
 		txTtype = TXTtype.Txt;
 		isStream = true;
 	}
 	
 	public TxtRead(InputStream inputStream, TXTtype txtTtype) {
-		this.inputStreamRaw = inputStream;
+		this.inputStreamRaw = new PositionInputStream(inputStream);
 		txTtype = txtTtype;
 		isStream = true;
 	}
@@ -78,7 +70,7 @@ class TxtRead implements Closeable {
 		if (isStream) {
 			return null;
 		}
-		return txtfile;
+		return file.toString();
 	}
 	
 	/**
@@ -560,22 +552,13 @@ class TxtRead implements Closeable {
 	
 	private void setInStreamExp(TXTtype txtType) throws IOException {
 		if (!isStream) {
-			File fileThis;
-			if (file == null) {
-				fileThis = FileOperate.getFile(txtfile);
-			} else {
-				fileThis = file;
-			}
+			Path fileThis = file;
 			filesize = FileOperate.getFileSizeLong(fileThis);
-			inputStreamRaw = FileOperate.getInputStream(fileThis);
+			inputStreamRaw = new PositionInputStream(FileOperate.getInputStream(fileThis));
 		}
 
 		if (txtType == TXTtype.Txt) {
-			if (inputStreamRaw instanceof BufferedInputStream) {
-				inputStream = (BufferedInputStream)inputStreamRaw;
-			} else {
-				inputStream = new BufferedInputStream(inputStreamRaw, TxtReadandWrite.bufferLen);
-			}			
+			inputStream = new BufferedInputStream(inputStreamRaw, TxtReadandWrite.bufferLen);
 		} else if (txtType == TXTtype.Zip) {
 			ZipArchiveInputStream zipArchiveInputStream = new ZipArchiveInputStream(inputStreamRaw);
 			ArchiveEntry zipEntry = null;
@@ -590,8 +573,8 @@ class TxtRead implements Closeable {
 		} else if (txtType == TXTtype.Bzip2) {
 			inputStream = new BufferedInputStream(new BZip2CompressorInputStream(inputStreamRaw), TxtReadandWrite.bufferLen);
 		} else if (txtType == TXTtype.Lzo) {
-		    LzopCodec lzo = new LzopCodec();
-			lzo.setConf(HdfsInitial.getConf());   
+			LzopCodec lzo = new LzopCodec();
+			lzo.setConf(HdfsConfInitiator.getConf());   
 			inputStream = lzo.createInputStream(inputStreamRaw);   
 		}
 	}
@@ -610,12 +593,7 @@ class TxtRead implements Closeable {
 	}
 	
 	public long getReadByte() {
-		try {
-			SeekableStream seekableStream = (SeekableStream)inputStreamRaw;
-			return seekableStream.position();
-		} catch (Exception e) {
-			return -1;
-		}
+		return inputStreamRaw.getPos();
 	}
 	
 	/**

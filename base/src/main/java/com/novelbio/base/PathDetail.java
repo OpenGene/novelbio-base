@@ -3,6 +3,7 @@ package com.novelbio.base;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Properties;
 
@@ -87,9 +88,7 @@ public class PathDetail {
 	public static String getRworkspaceTmp() {
 		if(rworkspaceTmp == null) {
 			rworkspaceTmp = getRworkspace() + "tmp"  + File.separator;
-			if (!FileOperate.createFolders(rworkspaceTmp)) {
-				rworkspaceTmp = "";
-			}
+			FileOperate.createFolders(rworkspaceTmp);
 		}
 		return rworkspaceTmp;
 	}
@@ -114,13 +113,11 @@ public class PathDetail {
 		if (tmpPath == null) {
 			synchronized (properties) {
 				tmpPath = properties.getProperty("TMPpath");
-				if (FileOperate.createFolders(tmpPath)) {
-//					file.setReadable(true, false);
-//					file.setWritable(true, false);
-//					System.setProperty("java.io.tmpdir", tmpPath);
-				} else {
+				try {
+					FileOperate.createFolders(tmpPath);
+				} catch (Exception e) {
 					tmpPath = System.getProperty("java.io.tmpdir");
-				}
+                }
 			}
 		}
 
@@ -133,7 +130,7 @@ public class PathDetail {
 	}
 	
 	public static void cleanTmpPath() {
-		deleteFileFolder(FileOperate.getFile(tmpPath), tmpPath);
+		deleteFileFolder(FileOperate.getPath(tmpPath), tmpPath);
 	}
 	
 	/**
@@ -142,33 +139,25 @@ public class PathDetail {
 	 * @param parentPath
 	 * @return 文件夹是否被清空
 	 */
-	public static boolean deleteFileFolder(File file, String parentPath) {
+	private static void deleteFileFolder(Path file, String parentPath) {
+		parentPath = FileOperate.getCanonicalPath(parentPath);
 		boolean isClear = true;
 		if (FileOperate.isFileExist(file)) {
 			long createTime = DateUtil.getNowTimeLong() - FileOperate.getTimeLastModify(file);
 			if (createTime > tmpFileRemainDay * 24*3600 * 1000) {
 				FileOperate.delFile(file);
-				return true;
-			} else {
-				return false;
 			}
 		} else if (FileOperate.isFileDirectory(file)) {
-			List<String> lsFile = FileOperate.getFoldFileNameLs(file.getAbsolutePath(), "*", "*");
+			List<String> lsFile = FileOperate.getLsFoldFileName(file);
 			for (String string : lsFile) {
-				File file2 = FileOperate.getFile(string);
-				boolean isClearSub = deleteFileFolder(file2, parentPath);
-				if (isClear && !isClearSub) {
-					isClear = false;
-				}
+				Path file2 = FileOperate.getPath(string);
+				deleteFileFolder(file2, parentPath);
 			}
-			if (isClear && !file.getAbsolutePath().equals(parentPath)) {
+			if (isClear && !FileOperate.getCanonicalPath(file).equals(parentPath)) {
 				FileOperate.delFile(file);
-				return true;
-			} else {
-				return false;
 			}
 		}
-		return true;
+		return;
 	}
 	
 	/** 一个大的能容纳一些中间过程的文件夹hdfs开头 */
@@ -180,27 +169,21 @@ public class PathDetail {
 	/** 在tmp文件夹下新建一个随机文件名的临时文件夹，注意每次返回的都不一样 */
 	public static String getTmpPathRandom() {
 		String tmpPath = getTmpPathWithSep() + "tmp" + DateUtil.getDateAndRandom();
-		if (!FileOperate.createFolders(tmpPath)) {
-			tmpPath = null;
-		}
+		FileOperate.createFolders(tmpPath);
 		return tmpPath;
 	}
 	
 	/** 在tmp文件夹下新建一个随机文件名的临时文件夹，注意每次返回的都不一样，最后有“/” */
 	public static String getTmpPathRandomWithSep(String prefix) {
 		String tmpPath = getTmpPathWithSep() + prefix + DateUtil.getDateAndRandom() + FileOperate.getSepPath();
-		if (!FileOperate.createFolders(tmpPath)) {
-			tmpPath = null;
-		}
+		FileOperate.createFolders(tmpPath);
 		return tmpPath;
 	}
 	
 	/** 在tmp文件夹下新建一个随机文件名的临时文件夹，注意每次返回的都不一样，最后有“/” */
 	public static String getRandomWithSep(String tmpPath, String prefix) {
 		String tmpPathResult = FileOperate.addSep(tmpPath) + DateUtil.getDateAndRandom() + "_" + prefix + FileOperate.getSepPath();
-		if (!FileOperate.createFolders(tmpPathResult)) {
-			tmpPathResult = null;
-		}
+		FileOperate.createFolders(tmpPath);
 		return tmpPathResult;
 	}
 	
@@ -221,9 +204,7 @@ public class PathDetail {
 				} else {
 					rworkspace = getProjectPath() + "rscript"  + File.separator;
 				}
-				if (!FileOperate.createFolders(rworkspace)) {
-					rworkspace = null;
-				}
+				FileOperate.createFolders(rworkspace);
 			}
 		}
 		

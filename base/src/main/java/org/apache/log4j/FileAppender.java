@@ -29,7 +29,6 @@ import org.apache.log4j.helpers.LogLog;
 import org.apache.log4j.helpers.QuietWriter;
 import org.apache.log4j.spi.ErrorCode;
 
-import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 
 // Contibutors: Jens Uwe Pipka <jens.pipka@gmx.de>
@@ -283,7 +282,6 @@ public class FileAppender extends WriterAppender {
                                                             throws IOException {
 	  File file = new File(fileName);
 	  fileName = file.getAbsolutePath();
-	  fileName = FileHadoop.convertToHadoop(fileName);
 
     LogLog.debug("setFile called: "+fileName+", "+append);
 

@@ -391,18 +391,14 @@ public class CmdPath {
 		for (String outPath : mapPath2TmpPath.keySet()) {
 			String outTmpPath = mapPath2TmpPath.get(outPath);
 			
-			List<String> lsFilesFinish = FileOperate.getFoldFileNameLs(outTmpPath, "*", "*");
+			List<String> lsFilesFinish = FileOperate.getLsFoldFileName(outTmpPath);
 			for (String filePath : lsFilesFinish) {
 				String  filePathResult = filePath.replaceFirst(outTmpPath, outPath);
 				if (setInput.contains(filePathResult) && FileOperate.isFileExistAndBigThanSize(filePathResult, 0)) {
 					continue;
 				}
 				logger.info("move file from  " + filePath + "  to  " + filePathResult);
-				boolean isSucess = FileOperate.moveFile(true, filePath, filePathResult);
-				if (!isSucess) {
-					logger.error("cannot move file from  " + filePath + " to " + filePathResult);
-					throw new ExceptionCmd("cannot copy " + filePath + " to " + filePathResult);
-				}
+				FileOperate.moveFile(true, filePath, filePathResult);
 			}
 		}
 		
