@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Path;
 
 import com.novelbio.base.fileOperate.ExceptionNbcFileInputError;
 import com.novelbio.base.fileOperate.FileOperate;
@@ -15,20 +16,20 @@ import com.novelbio.base.multithread.RunProcess;
  *
  */
 public class StreamIn extends RunProcess<Integer> {
-	File inputFile;
+	private Path inputFile;
 	protected InputStream inStream;
 	/** 输入cmd的流 */
 	protected OutputStream processInStream;
 	
 	public void setInputFile(String inputFile) {
-		this.inputFile = FileOperate.getFile(inputFile);
+		this.inputFile = FileOperate.getPath(inputFile);
 	}
-	public void setInputFile(File inputFile) {
+	public void setInputFile(Path inputFile) {
 		this.inputFile = inputFile;
 	}
 	public String getInputFile() {
 		if (inputFile != null) {
-			return inputFile.getAbsolutePath();
+			return inputFile.toString();
 		}
 		return null;
 	}
@@ -42,11 +43,7 @@ public class StreamIn extends RunProcess<Integer> {
 
 	@Override
 	protected void running() {
-		try {
-			inStream = FileOperate.getInputStream(inputFile);
-		} catch (IOException e) {
-			throw new ExceptionNbcFileInputError("input file may not exist: " + inputFile, e);
-		}
+		inStream = FileOperate.getInputStream(inputFile);
 		try {
 			copyLarge(inStream, processInStream);
 		} catch (Exception e) {

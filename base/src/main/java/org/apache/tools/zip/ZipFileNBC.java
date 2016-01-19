@@ -185,7 +185,7 @@ public class ZipFileNBC {
         this.encoding = encoding;
         this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
         this.useUnicodeExtraFields = useUnicodeExtraFields;
-        archive = RandomFileFactory.createInstance(f);
+        archive = RandomFileFactory.createInstance(FileOperate.getPath(f));
         boolean success = false;
         try {
             Map entriesWithoutUTF8Flag = populateFromCentralDirectory();

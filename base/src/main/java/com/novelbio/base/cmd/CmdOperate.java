@@ -3,6 +3,7 @@ package com.novelbio.base.cmd;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -243,7 +244,7 @@ public class CmdOperate extends RunProcess<String> {
 		streamIn.setInputFile(inputFile);
 	}
 	/** 设定本cmd命令的标准输入文件，该文件会通过标准输入流输入cmd命令 */
-	public void setInputFile(File inputFile) {
+	public void setInputFile(Path inputFile) {
 		this.streamIn = new StreamIn();
 		streamIn.setInputFile(inputFile);
 	}

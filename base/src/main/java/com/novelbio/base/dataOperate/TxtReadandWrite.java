@@ -1,5 +1,7 @@
 package com.novelbio.base.dataOperate;
 
+import hdfs.jsr203.HdfsConfInitiator;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.Closeable;
@@ -16,6 +18,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -33,7 +36,6 @@ import com.hadoop.compression.lzo.DistributedLzoIndexer;
 import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
-import com.novelbio.base.fileOperate.HdfsInitial;
 import com.novelbio.base.fileOperate.RandomFileInt;
 import com.novelbio.base.fileOperate.RandomFileInt.RandomFileFactory;
 
@@ -106,18 +108,7 @@ public class TxtReadandWrite implements Closeable {
 	}
 	
 	public TxtReadandWrite(String fileName, boolean writeFile, boolean append) {
-		if (writeFile) {
-			txtWrite = new TxtWrite(fileName);
-			txtWrite.setAppend(append);
-			try { txtWrite.createFile(); } catch (Exception e) { e.printStackTrace(); }
-			read = false;
-		} else {
-			txtRead = new TxtRead(fileName);
-			read = true;
-		}
-	}
-	
-	public TxtReadandWrite(File file, boolean writeFile, boolean append) {
+		Path file = FileOperate.getPath(fileName);
 		if (writeFile) {
 			txtWrite = new TxtWrite(file);
 			txtWrite.setAppend(append);
@@ -125,6 +116,19 @@ public class TxtReadandWrite implements Closeable {
 			read = false;
 		} else {
 			txtRead = new TxtRead(file);
+			read = true;
+		}
+	}
+	
+	public TxtReadandWrite(File file, boolean writeFile, boolean append) {
+		Path path = FileOperate.getPath(file);
+		if (writeFile) {
+			txtWrite = new TxtWrite(path);
+			txtWrite.setAppend(append);
+			try { txtWrite.createFile(); } catch (Exception e) { e.printStackTrace(); }
+			read = false;
+		} else {
+			txtRead = new TxtRead(path);
 			read = true;
 		}
 	}
@@ -627,7 +631,7 @@ public class TxtReadandWrite implements Closeable {
 		try { txtWrite.close(); } catch (Exception e) { }
 		if (!read) {
 			try {
-				txtRead = new TxtRead(txtWrite.getFileName());
+				txtRead = new TxtRead(FileOperate.getPath(txtWrite.getFileName()));
 				read = true;
 			} catch (Exception e) {}
 		}
@@ -794,7 +798,7 @@ public class TxtReadandWrite implements Closeable {
 
 		inputFile = FileHadoop.convertToHdfsPath(inputFile);
 		DistributedLzoIndexer lzoIndexer = new DistributedLzoIndexer();
-		Configuration indexConf = HdfsInitial.getConf();
+		Configuration indexConf = HdfsConfInitiator.getConf();
 		indexConf.set("io.compression.codecs",
 				"com.hadoop.compression.lzo.LzopCodec");
 		lzoIndexer.setConf(indexConf);
