@@ -53,9 +53,6 @@ public abstract class SeekableStream extends InputStream {
      */
     public void readFully(byte b[]) throws IOException {
         int len = b.length;
-        if (len < 0){
-            throw new IndexOutOfBoundsException();
-        }
         int n = 0;
         while (n < len) {
             int count = read(b, n, len - n);
