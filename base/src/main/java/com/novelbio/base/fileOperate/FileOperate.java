@@ -1,5 +1,6 @@
 package com.novelbio.base.fileOperate;
 
+import hdfs.jsr203.HadoopFileSystemProvider;
 import hdfs.jsr203.HadoopPath;
 import hdfs.jsr203.HdfsConfInitiator;
 
@@ -44,6 +45,8 @@ import com.novelbio.base.dataStructure.PatternOperate;
 
 public class FileOperate {
 	private static final Logger logger = Logger.getLogger(FileOperate.class);
+	static HadoopFileSystemProvider hdfsProvider = new HadoopFileSystemProvider();
+
 	static boolean isWindowsOS = false;
 	static{
 		    String osName = System.getProperty("os.name");
@@ -112,8 +115,9 @@ public class FileOperate {
 		try {
 			if (fileName.startsWith(FileHadoop.hdfsSymbol)) {
 				URI uri = new URI(fileName);
-				Paths.class.getClassLoader();
-				return Paths.get(uri);
+				//TODO 不是类没加载，而是META文件没有读取到
+//				Paths.get(uri);
+				return hdfsProvider.getPath(uri);
 			} else {
 				File file = new File(fileName);
 				return file.toPath();
