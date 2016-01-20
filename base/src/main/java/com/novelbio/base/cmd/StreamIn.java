@@ -43,8 +43,8 @@ public class StreamIn extends RunProcess<Integer> {
 
 	@Override
 	protected void running() {
-		inStream = FileOperate.getInputStream(inputFile);
 		try {
+			inStream = FileOperate.getInputStream(inputFile);
 			copyLarge(inStream, processInStream);
 		} catch (Exception e) {
 			throw new ExceptionCmd("cmdError", e);

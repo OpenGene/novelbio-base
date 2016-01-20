@@ -1479,7 +1479,7 @@ public class ExcelOperateTest implements Closeable {
 			return false;
 		OutputStream out = null;
 		try {
-			out = FileOperate.getOutputStream(filename, true);
+			out = FileOperate.getOutputStream(filename);
 			wb.write(out);
 			out.close();
 			return true;
@@ -1502,7 +1502,7 @@ public class ExcelOperateTest implements Closeable {
 	public boolean Save(String newfilename) {
 		OutputStream out = null;
 		try {
-			out = FileOperate.getOutputStream(filename, true);
+			out = FileOperate.getOutputStream(filename);
 			wb.write(out);
 			out.close();
 			return true;

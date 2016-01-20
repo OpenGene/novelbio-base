@@ -5,8 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-
-import org.apache.hadoop.fs.FSDataInputStream;
+import java.nio.file.Path;
 
 public interface RandomFileInt {
 	public void seek(long site) throws IOException;
@@ -27,31 +26,16 @@ public interface RandomFileInt {
 	public static class RandomFileFactory {
 		/** return corresponding object by judge the input fileName is FileHadoop or local file */
 		public static RandomFileInt createInstance(String fileName) {
-			try {
-				if (FileHadoop.isHdfs(fileName)) {
-					return new RandomFileHdfs(fileName);
-				} else {
-					return new RandomFileLocal(fileName);
-				}
-			} catch (Exception e) {
-				
-			}
-		
-			return null;
+			return new RandomFileSeekable(FileOperate.getPath(fileName));
 		}
 		
-		public static RandomFileInt createInstance(File file) {
-			try {
-				if (file instanceof FileHadoop) {
-					return new RandomFileHdfs((FileHadoop)file);
-				} else {
-					return new RandomFileLocal(file);
-				}
-			} catch (Exception e) {
-				
-			}
+		/** return corresponding object by judge the input fileName is FileHadoop or local file */
+		public static RandomFileInt createInstance(File fileName) {
+			return new RandomFileSeekable(FileOperate.getPath(fileName));
+		}
 		
-			return null;
+		public static RandomFileInt createInstance(Path file) {
+			return new RandomFileSeekable(file);
 		}
 	}
 }
@@ -65,17 +49,17 @@ class RandomFileLocal extends RandomAccessFile implements RandomFileInt {
 	}
 }
 
-class RandomFileHdfs implements RandomFileInt {
-	FSDataInputStream fsDataInputStream;
-	FileHadoop fileHadoop;
-	public RandomFileHdfs(String file) throws IOException {
-		fileHadoop = new FileHadoop(file);
-		fsDataInputStream = fileHadoop.getInputStream();
+class RandomFileSeekable implements RandomFileInt {
+	SeekablePathInputStream fsDataInputStream;
+	Path path;
+	public RandomFileSeekable(String file) {
+		this.path = FileOperate.getPath(file);
+		this.fsDataInputStream = FileOperate.getSeekablePathStream(path);
 	}
 	
-	public RandomFileHdfs(FileHadoop file) throws IOException {
-		fileHadoop = file;
-		fsDataInputStream = file.getInputStream();
+	public RandomFileSeekable(Path path) {
+		this.path = path;
+		this.fsDataInputStream = FileOperate.getSeekablePathStream(path);
 	}
 	
 	@Override
@@ -134,7 +118,7 @@ class RandomFileHdfs implements RandomFileInt {
 
 	@Override
 	public long length() throws IOException {
-		return fileHadoop.length();
+		return fsDataInputStream.length();
 	}
 
 	@Override
@@ -144,12 +128,12 @@ class RandomFileHdfs implements RandomFileInt {
 
 	@Override
 	public int skipBytes(int n) throws IOException {
-		return fsDataInputStream.skipBytes(n);
+		return (int) fsDataInputStream.skip(n);
 	}
 
 	@Override
 	public long getFilePointer() throws IOException {
-		return fsDataInputStream.getPos();
+		return fsDataInputStream.position();
 	}
 
 	@Override

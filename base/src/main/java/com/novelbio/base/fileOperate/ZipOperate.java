@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.util.Enumeration;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.tools.zip.ZipEntry;
@@ -78,7 +80,7 @@ public class  ZipOperate {
     	 * @throws Exception
     	 */
     	public static void zip(String inputFileName, String zipOutName) throws Exception {
-    		zip( FileOperate.getFile(inputFileName), zipOutName);
+    		zip( FileOperate.getPath(inputFileName), zipOutName);
     	}
     	
     	/**
@@ -88,7 +90,7 @@ public class  ZipOperate {
     	 * @throws Exception
     	 * 
     	 */
-    	public static void zip(File inputFile, String zipOutName) throws Exception {
+    	public static void zip(Path inputFile, String zipOutName) throws Exception {
     		logger.info("start zip file: " + zipOutName);
     		OutputStream outFileStream = FileOperate.getOutputStream(zipOutName);
     		ZipOutputStream out = new ZipOutputStream(outFileStream);
@@ -103,13 +105,16 @@ public class  ZipOperate {
     	 * @param base 保存在zip中的路径
     	 * @throws Exception
     	 */
-    	private static void zip(ZipOutputStream out, File f, String base) throws Exception {
+    	private static void zip(ZipOutputStream out, Path f, String base) throws Exception {
     		if (FileOperate.isFileDirectory(f)) {	//判断是否为目录
-    			File[] fl = f.listFiles();
+    			List<Path> fl = FileOperate.getLsFoldPath(f);
     			out.putNextEntry(new ZipEntry(base + FileOperate.getSepPath()));
     			base = base.length() == 0 ? "" : base + FileOperate.getSepPath();
-    			for (int i = 0; i < fl.length; i++) {
-    				zip(out, fl[i], base + fl[i].getName());
+    			for (Path path : fl) {
+    				zip(out, path, base + FileOperate.getFileName(path)); 
+                }
+    			for (int i = 0; i < fl.size(); i++) {
+    				
     			}
     		} else {				//压缩目录中的所有文件
     			out.putNextEntry(new ZipEntry(base));

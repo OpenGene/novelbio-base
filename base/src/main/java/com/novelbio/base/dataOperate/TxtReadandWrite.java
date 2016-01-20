@@ -647,7 +647,7 @@ public class TxtReadandWrite implements Closeable {
 		try {
 			boolean checked = false;
 			BufferedInputStream bis = new BufferedInputStream(
-					new FileInputStream(file));
+					FileOperate.getInputStream(file));
 			bis.mark(0);
 			int read = bis.read(first3Bytes, 0, 3);
 			if (read == -1)

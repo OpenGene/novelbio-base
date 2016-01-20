@@ -15,8 +15,10 @@ import junit.framework.TestResult;
 import org.apache.fop.fo.properties.SrcMaker;
 import org.apache.fop.render.txt.TXTRenderer;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.novelbio.base.dataOperate.TxtReadandWrite;
@@ -50,53 +52,48 @@ public class TestFileOperate {
 		Assert.assertEquals(file.length(), FileOperate.getFileSizeLong(path));
 	}
 	
-	Path folderParent;
-	Path folder;
-	@Before
-	public void createFolderFile() {
+	static Path folderParent = FileOperate.getPath("/hdfs:/nbCloud/test/junittest/nbcplatform/testFileOperate/");
+	static Path folder;
+	static String hdfsFileSubFolderTest = "/hdfs:/nbCloud/test/junittest/nbcplatform/testFileOperate/";
+
+	@BeforeClass
+	public static void createFolderFile() {
 		String testFileFolder = "src/test/resources/";
-		String testFileSubFolderTest = testFileFolder + "test/";
-		String testFileSubFolder = testFileSubFolderTest + "my/test/";
-		folderParent = Paths.get(testFileSubFolderTest);
-		folder = Paths.get(testFileSubFolder);
+		
+		String testFileSubFolder = FileOperate.removeSplashHead(hdfsFileSubFolderTest, false) + "my/test/";
+		folder = FileOperate.getPath(testFileSubFolder);
 
-
+		Path file = FileOperate.getPath(testFileFolder + "testResult.txt");
+		Path file1 = FileOperate.getPath(testFileSubFolder + "/file1.fa");
+		Path file2 = FileOperate.getPath(testFileSubFolder + "/file2.sfa");
+		Path file3 = FileOperate.getPath(testFileSubFolder + "/file3.txt");
 		
-		Path file = Paths.get(testFileFolder + "testResult.txt");
-		Path file1 = Paths.get(testFileSubFolder + "/file1.fa");
-		Path file2 = Paths.get(testFileSubFolder + "/file2.sfa");
-		Path file3 = Paths.get(testFileSubFolder + "/file3.txt");
+		Path folder1 = FileOperate.getPath(testFileSubFolder+"folder1");
+		Path folder2 = FileOperate.getPath(testFileSubFolder+"folder2");
 		
-		Path folder1 = Paths.get(testFileSubFolder+"folder1");
-		Path folder2 = Paths.get(testFileSubFolder+"folder2");
+		Path file11 = FileOperate.getPath(folder1 + "/file11.fa");
+		Path file12 = FileOperate.getPath(folder1 + "/file12.sfa");
+		Path file13 = FileOperate.getPath(folder1 + "/file13.txt");
 		
-		Path file11 = Paths.get(folder1 + "/file11.fa");
-		Path file12 = Paths.get(folder1 + "/file12.sfa");
-		Path file13 = Paths.get(folder1 + "/file13.txt");
-		
-		Path file21 = Paths.get(folder2 + "/file21.fa");
-		Path file22 = Paths.get(folder2 + "/file22.sfa");
-		Path file23 = Paths.get(folder2 + "/file23.txt");
+		Path file21 = FileOperate.getPath(folder2 + "/file21.fa");
+		Path file22 = FileOperate.getPath(folder2 + "/file22.sfa");
+		Path file23 = FileOperate.getPath(folder2 + "/file23.txt");
 
 		
 		FileOperate.createFolders(folder1);
 		FileOperate.createFolders(folder2);
 		
-		FileOperate.copyFile(file, file1.toString(), true);
-		FileOperate.copyFile(file, file2.toString(), true);
-		FileOperate.copyFile(file, file3.toString(), true);
+		FileOperate.copyFile(file, FileOperate.getAbsolutePath(file1), true);
+		FileOperate.copyFile(file, file2, true);
+		FileOperate.copyFile(file, file3, true);
 		
-		FileOperate.copyFile(file, file11.toString(), true);
-		FileOperate.copyFile(file, file12.toString(), true);
-		FileOperate.copyFile(file, file13.toString(), true);
+		FileOperate.copyFile(file, file11, true);
+		FileOperate.copyFile(file, file12, true);
+		FileOperate.copyFile(file, file13, true);
 
-		FileOperate.copyFile(file, file21.toString(), true);
-		FileOperate.copyFile(file, file22.toString(), true);
-		FileOperate.copyFile(file, file23.toString(), true);
-	}
-	@After
-	public void deleteFolder() {
-		FileOperate.DeleteFileFolder(folderParent);
+		FileOperate.copyFile(file, file21, true);
+		FileOperate.copyFile(file, file22, true);
+		FileOperate.copyFile(file, file23, true);
 	}
 	
 	@Test
@@ -116,6 +113,15 @@ public class TestFileOperate {
 		
 		lsPaths = FileOperate.getLsFoldPath(folder, "file", "*");
 		Assert.assertEquals(3, lsPaths.size());
+		for (Path path : lsPaths) {
+			Assert.assertTrue(FileOperate.getAbsolutePath(path).startsWith(hdfsFileSubFolderTest));
+        }
+		
+		List<String> lsFileName = FileOperate.getLsFoldFileName(folder, "file", "*");
+		for (String path : lsFileName) {
+			Assert.assertTrue(path.startsWith(hdfsFileSubFolderTest));
+			Assert.assertTrue(FileOperate.getAbsolutePath(path).startsWith(hdfsFileSubFolderTest));
+        }
 		
 		lsPaths = FileOperate.getLsFoldPath(folder, "*", "fa");
 		Assert.assertEquals(2, lsPaths.size());
@@ -133,8 +139,13 @@ public class TestFileOperate {
 		Assert.assertEquals(5, lsPathStr.size());
 	}
 	
+	@AfterClass
+	public static void deleteFolder() {
+		FileOperate.DeleteFileFolder(folderParent);
+	}
+	
 	@Test
-	public void testOutputStream() {
+	public void testOutputStream() throws IOException {
 		String fileName = "src/test/resources/testFileOperate_write_outputstream.txt";
 		Path path = FileOperate.getPath(fileName);
 		OutputStream os = FileOperate.getOutputStream(path, false);
@@ -176,7 +187,8 @@ public class TestFileOperate {
 	}
 	@Test
 	public void testCopyAndMoveFileFolder() {
-		String folderCopy = FileOperate.changeFileSuffix(folder.toString(), "_copy", null);
+		String folderCopy = folderParent + "/copy";
+		
 		FileOperate.copyFileFolder(folder, folderCopy, true);
 		List<Path> lsPaths = FileOperate.getLsFoldPath(folder);
 		Assert.assertEquals(5, lsPaths.size());
@@ -187,10 +199,11 @@ public class TestFileOperate {
 			e.printStackTrace();
 		}
 		
-		String folderMove = FileOperate.changeFileSuffix(folder.toString(), "_move", null);
-		FileOperate.copyFileFolder(folderCopy, folderMove, true);
+		String folderMove = FileOperate.changeFileSuffix(folderParent.toString(), "move", null);
+		FileOperate.moveFile(folderCopy, folderMove, true);
 		lsPaths = FileOperate.getLsFoldPath(folder);
 		Assert.assertEquals(5, lsPaths.size());
+		Assert.assertFalse(FileOperate.isFileExist(folderCopy));
 		try {
 			List<Path> lsPathSub = Files.walk(FileOperate.getPath(folderMove)).collect(Collectors.toList());
 			Assert.assertEquals(12, lsPathSub.size());
@@ -203,8 +216,8 @@ public class TestFileOperate {
 		
 		FileOperate.DeleteFileFolder(folderMove);
 		FileOperate.DeleteFileFolder(folderCopy);
-		Assert.assertFalse(FileOperate.isFileFoldExist(folderCopy));
-		Assert.assertFalse(FileOperate.isFileFoldExist(folderMove));
+		Assert.assertFalse(FileOperate.isFileFolderExist(folderCopy));
+		Assert.assertFalse(FileOperate.isFileFolderExist(folderMove));
 
 	}
 	

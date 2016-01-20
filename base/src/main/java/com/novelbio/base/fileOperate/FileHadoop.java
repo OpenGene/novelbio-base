@@ -21,10 +21,11 @@ import com.novelbio.base.dataOperate.DateUtil;
 
 public class FileHadoop extends File {
 	private static final long serialVersionUID = 8341313247682247317L;
-	FileSystem fsHDFS;
-	Path dst;
-	FileStatus fileStatus;
-	String fileName;
+	protected static final String hdfsSymbol = "hdfs:";
+	private FileSystem fsHDFS;
+	private Path dst;
+	private FileStatus fileStatus;
+	private String fileName;
 	public Path getDst() {
 		return dst;
 	}
@@ -246,20 +247,18 @@ public class FileHadoop extends File {
 	
 	@Override
 	public boolean delete() {
-		if (fileStatus == null) {
-			return true;
-		}
 		try {
-			return fsHDFS.delete(dst, true);
-		} catch (IOException e) {
-			e.printStackTrace();
+			FileOperate.DeleteFileFolder(getAbsolutePath());
+			return FileOperate.isFileFolderExist(getAbsolutePath());
+		} catch (Exception e) {
 			return false;
-		}
+        }
 	}
 
 	public void deleteOnExit() {
-		DeleteOnExitHookHadoop.add(getAbsolutePath());
+		FileOperate.deleteOnExit(this);
 	}
+	
 	@Override
 	public FileHadoop[] listFiles() {
 		FileStatus[] childrenFileStatus;
@@ -570,6 +569,10 @@ public class FileHadoop extends File {
      */
     public String toString() {
         return getPath();
+    }
+    
+    public java.nio.file.Path toPath() {
+    		return FileOperate.getPath(this);
     }
     
 }

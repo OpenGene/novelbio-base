@@ -806,7 +806,7 @@ public class ExcelOperate implements Closeable {
 			 * 这里原来的参数是true.即追加写入.但测试发现.追加写入数据根本出不来.故改为false. modify by fans.fan 151203 
 			os = FileOperate.getOutputStream(filename, true);
 			 */
-			os = FileOperate.getOutputStream(filename, false);
+			os = FileOperate.getOutputStream(filename);
 			//end by fans.fan
 			wb.write(os);
 		} finally{
