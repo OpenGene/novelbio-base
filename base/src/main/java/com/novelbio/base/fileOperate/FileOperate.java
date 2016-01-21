@@ -206,6 +206,20 @@ public class FileOperate {
 		return getParentPathNameWithSep(fileName);
 	}
 	/**
+	 * 给定路径名，返回其最近一层路径，带"/" 如给定 /wer/fw4e/sr/frw/s3er.txt 返回 /wer/fw4e/sr/frw/<br>
+	 * 给定/wef/tesw/tre/还是返回/wef/tesw/tre/
+	 * @param fileName
+	 * @return
+	 * @throws IOException 
+	 */
+	public static String getPathName(Path path){
+		String name = getAbsolutePath(path);
+		if (isFileDirectory(path)) {
+	        	name = addSep(name);
+        }
+		return getPathName(name);
+	}
+	/**
 	 * 给定文件名，加上后缀
 	 * 
 	 * @param fileName
@@ -963,6 +977,7 @@ public class FileOperate {
 		try {
 			Files.deleteIfExists(pathNew);
 			Files.deleteIfExists(pathNewTmp);
+			createFolders(FileOperate.getPathName(pathNew));
 			Files.copy(oldfile, pathNewTmp, StandardCopyOption.REPLACE_EXISTING);
 			Files.move(pathNewTmp, pathNew, StandardCopyOption.REPLACE_EXISTING);
 		} catch (Exception e) {

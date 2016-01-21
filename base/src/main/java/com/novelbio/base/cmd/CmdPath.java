@@ -315,6 +315,8 @@ public class CmdPath {
 			String tmpPath = mapName2TmpName.get(filePathName);
 			if ( FileOperate.isFileDirectory(filePathName)) {
 				FileOperate.createFolders(tmpPath);
+			} else {
+				FileOperate.createFolders(FileOperate.getParentPathNameWithSep(tmpPath));
 			}
 		}
 	}
