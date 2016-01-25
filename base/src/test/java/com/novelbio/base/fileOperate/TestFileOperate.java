@@ -2,22 +2,14 @@ package com.novelbio.base.fileOperate;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import junit.framework.TestResult;
-
-import org.apache.fop.fo.properties.SrcMaker;
-import org.apache.fop.render.txt.TXTRenderer;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
