@@ -10,17 +10,17 @@
 	<version>0.0.3-SNAPSHOT</version>
 
 	<dependencies>
+		
 		<dependency>
 			<groupId>org.springframework</groupId>
-			<artifactId>spring-orm</artifactId>
+			<artifactId>spring-core</artifactId>
 			<version>4.0.5.RELEASE</version>
 		</dependency>
-
-		<!-- 读取hdfs使用 -->
+		
 		<dependency>
-			<groupId>com.github.jsr203hadoop</groupId>
-			<artifactId>jsr203hadoop</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<version>4.0.5.RELEASE</version>
 		</dependency>
 		
 		<dependency>
@@ -205,7 +205,7 @@
 			<version>2.21</version>
 			<classifier>shaded</classifier>
 		</dependency>
-		<!-- pageable那个类 -->
+		<!-- pageable那个类
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-mongodb</artifactId>
@@ -237,7 +237,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
+		 -->
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
@@ -259,6 +259,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<!--
 		<dependency>
 			<groupId>org.apache.curator</groupId>
 			<artifactId>curator-examples</artifactId>
@@ -270,8 +271,13 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-
-
+		-->
+		<!-- 读取hdfs使用 -->
+		<dependency>
+			<groupId>com.github.jsr203hadoop</groupId>
+			<artifactId>jsr203hadoop</artifactId>
+			<version>1.0.1-SNAPSHOT</version>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-common</artifactId>
@@ -279,10 +285,17 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-hdfs</artifactId>
+			<version>2.6.0</version>
+		</dependency>
+		
+		<!-- 
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-yarn-applications-distributedshell</artifactId>
 			<version>2.6.0</version>
 		</dependency>
-
+ 		-->
 		<dependency>
 			<groupId>org.powermock</groupId>
 			<artifactId>powermock-api-mockito</artifactId>
@@ -301,11 +314,7 @@
 			<version>1.5.1</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.hadoop</groupId>
-			<artifactId>hadoop-hdfs</artifactId>
-			<version>2.6.0</version>
-		</dependency>
+
 	</dependencies>
 	<build>
 		<defaultGoal>compile</defaultGoal>
