@@ -25,9 +25,9 @@ import com.novelbio.base.multithread.RunProcess;
 /**
  * 输入cmd，执行完毕后可以将结果输出到界面，目前cmd只支持英文，否则会出错 只要继承后重写process方法即可
  * 如果只是随便用用，那么调用doInBackground方法就好<p>
- * <b>管道只支持最后的一个 > </b>
- * 例如 "bwa aaa bbb > ccc"，此时会根据ccc的后缀，gz还是bz2，自动选择相应的压缩流<br>
- * <b>不支持这种</b> "bwa aaa bbb | grep sd > ccc"
+ * <b>管道只支持最后的一个 &gt; </b>
+ * 例如 "bwa aaa bbb &gt; ccc"，此时会根据ccc的后缀，gz还是bz2，自动选择相应的压缩流<br>
+ * <b>不支持这种</b> "bwa aaa bbb | grep sd &gt; ccc"
  * @author zong0jie
  */
 public class CmdOperate extends RunProcess<String> {
@@ -251,7 +251,7 @@ public class CmdOperate extends RunProcess<String> {
 	
 	/**
 	 *  设定标准输出流，如果是这里指定，则会即时刷新<br>
-	 * 本设置会被cmd中自带的 > 重定向覆盖
+	 * 本设置会被cmd中自带的 &gt; 重定向覆盖
 	 * @param stdOutPath
 	 * @param isSaveTmp 是否先保存为临时文件，等结束后再修改回来。如果只是随便看看结果就设置为false
 	 * @param isDelete 完成后是否删除输出文件, 如果需要删除文件，则认为该文件只是展示信息使用，会采用txt模式输出
@@ -273,7 +273,7 @@ public class CmdOperate extends RunProcess<String> {
 		this.isStderrInfo = isDelete;
 	}
 	/** 设定标准错误流，如果是这里指定，则会即时刷新<br>
-	 * 本设置会被cmd中自带的 2> 重定向覆盖
+	 * 本设置会被cmd中自带的 2&gt; 重定向覆盖
 	 * @param stdErrPath
 	 * @param isSaveTmp 是否先保存为临时文件，等结束后再修改回来。如果只是随便看看结果就设置为false
 	 */
