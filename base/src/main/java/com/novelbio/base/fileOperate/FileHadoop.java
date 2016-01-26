@@ -6,29 +6,23 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.List;
 
-import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 
 import com.novelbio.base.PathDetail;
 import com.novelbio.base.StringOperate;
-import com.novelbio.base.dataOperate.DateUtil;
 
 public class FileHadoop extends File {
 	private static final long serialVersionUID = 8341313247682247317L;
 	protected static final String hdfsSymbol = "hdfs:";
-	private FileSystem fsHDFS;
-	private Path dst;
-	private FileStatus fileStatus;
 	private String fileName;
-	public Path getDst() {
-		return dst;
-	}
+	Path path;
 	
 	/**
 	 * initial a FileHadoop object from the path<br>
@@ -36,12 +30,10 @@ public class FileHadoop extends File {
 	 *  "/hdfs:" is the "hdfsHeadSymbol" in configure file src/java/hdfs/config.properties 
 	 * @throws IOException 
 	 */
-	public FileHadoop(String fileName, FileStatus fileStatus) {
-		super(copeToHdfsHeadSymbol(fileName));
-		this.fsHDFS = HdfsInitial.getFileSystem();
-		dst = fileStatus.getPath();
-		this.fileName = fileName;
-		this.fileStatus = fileStatus;
+	public FileHadoop(Path path) {
+		super(FileOperate.removeSplashHead("/" +path.toString(), true));
+		this.fileName = FileOperate.removeSplashHead("/" +path.toString(), true);
+		this.path = path;
 	}
 	
 	/**
@@ -52,91 +44,24 @@ public class FileHadoop extends File {
 	 */
 	public FileHadoop(String hdfsFilePath) {
 		super(hdfsFilePath = copeToHdfsHeadSymbol(hdfsFilePath));
-		this.fsHDFS = HdfsInitial.getFileSystem();
-		hdfsFilePath = hdfsFilePath.replace(FileHadoop.getHdfsSymbol(), "");
-		dst = new Path(hdfsFilePath);
 		this.fileName = hdfsFilePath;
-		try {
-			init();
-		} catch (Exception e) {
-			throw new ExceptionNbcHdfsFileConnection("cannot initial file with " + hdfsFilePath, e);
-		}
-	}
-	
-	private void init() throws IOException {
-		if(fileStatus != null)
-			return;
-		if (fsHDFS.exists(dst)) {
-			fileStatus = fsHDFS.getFileStatus(dst);
-		}	
-	
+		this.path = FileOperate.getPath(fileName);
 	}
 	
 	private static String copeToHdfsHeadSymbol(String hdfsFilePath) {
-		if (!hdfsFilePath.startsWith(FileHadoop.getHdfsSymbol())) {
+		if (!hdfsFilePath.startsWith(FileHadoop.getHdfsSymbol()) && !hdfsFilePath.startsWith(hdfsSymbol)) {
 			hdfsFilePath = FileHadoop.addHdfsHeadSymbol(hdfsFilePath);
+		} else if (hdfsFilePath.startsWith(hdfsSymbol)) {
+			hdfsFilePath = hdfsFilePath.replaceFirst(hdfsSymbol, FileHadoop.getHdfsSymbol());
 		}
 		return hdfsFilePath;
 	}
 	
-	public short getReplication() {
-		return fileStatus.getReplication();
-	}
-	
-	public FSDataInputStream getInputStream() {
-		try {
-			return fsHDFS.open(dst);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-	
-	/**
-	 * get OutputStream from the file
-	 * @param overwrite  whether to overwrite the exist file
-	 * @return
-	 */
-	public FSDataOutputStream getOutputStreamNew(boolean overwrite) {
-		try {
-			return fsHDFS.create(dst, overwrite);
-		} catch (IOException e) {
-			if (!overwrite) {
-				try {
-					return fsHDFS.append(dst);
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-					return null;
-				}
-			}
-			return null;
-		}
-	}
-	
     public FileHadoop getParentFile() {
-        String p = this.getParent();
+        Path p = path.getParent();
         if (p == null) return null;
         return new FileHadoop(p);
     }
-
-	/**
-	 * 根据文件产生一个流，如果文件不存在则返回null
-	 * 如果文件存在则衔接上去
-	 * @param overwrite
-	 * @return
-	 */
-	public FSDataOutputStream getOutputStreamAppend() {
-		try {
-			return fsHDFS.append(dst);
-		} catch (IOException e) {
-			return null;
-		}
-	}
-	
-	public String getModificationTime(){
-		return DateUtil.date2String(new Date(fileStatus.getModificationTime()), DateUtil.PATTERN_DATETIME);
-	}
 	
 	@Override
 	public String getParent() {
@@ -150,29 +75,12 @@ public class FileHadoop extends File {
 
 	@Override
 	public boolean isDirectory() {
-		if(fileStatus == null){
-			try {
-				return fsHDFS.isDirectory(dst);
-			} catch (IOException e) {
-				e.printStackTrace();
-				return false;
-			}
-		} else {
-			return fileStatus.isDirectory();
-		}
-			
+		return Files.isDirectory(path);
 	}
 
 	@Override
 	public boolean exists() {
-		if(fileStatus == null) {
-			try {
-				return fsHDFS.exists(dst);
-			} catch (IOException e) {
-				return false;
-			}
-		}else
-			return true;
+		return Files.exists(path);
 	}
 	public String getAbsolutePath() {
 		return copeToHdfsHeadSymbol(fileName);
@@ -190,43 +98,35 @@ public class FileHadoop extends File {
 	
 	@Override
 	public String[] list() {
-		FileStatus[] childrenFileStatus;
-		try {
-			childrenFileStatus = fsHDFS.listStatus(dst);
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (!Files.isDirectory(path)) {
 			return null;
 		}
-		String[] files = {};
-		if (childrenFileStatus.length != 0) {
-			files = new String[childrenFileStatus.length];
+		List<String> lsFileName = FileOperate.getLsFoldFileName(path);
+		String[] ss = new String[lsFileName.size()];
+		for (int i = 0; i < ss.length; i++) {
+			ss[i] = FileOperate.getFileName(lsFileName.get(i));
 		}
-		for (int i = 0; i < childrenFileStatus.length; i++) {
-			files[i] = childrenFileStatus[i].getPath().getName();
-		}
-		return files;
+		return ss;
 	}
 
 	@Override
 	public boolean isFile() {
-		//TODO hadoop2
-//		return fileStatus == null? false : fileStatus.isFile();
-		//map3
-		if (isDirectory()) {
-			return false;
-		}
-		return fileStatus == null? false : true;
+		return Files.exists(path) && !Files.isDirectory(path);
 	}
 	
 	@Override
 	public long length() {
-		return fileStatus == null? 0 : fileStatus.getLen();
+		try {
+			return Files.readAttributes(path, BasicFileAttributes.class).size();
+		} catch (IOException e) {
+			return 0L;
+		}
 	}
 
 	@Override
 	@Deprecated
 	public URL toURL() throws MalformedURLException {
-		return super.toURL();
+		return path.toUri().toURL();
 	}
 	
 	@Deprecated
@@ -237,57 +137,49 @@ public class FileHadoop extends File {
 	/** if error, return 0 */
 	@Override
 	public long lastModified() {
-		return fileStatus == null? 0 : fileStatus.getModificationTime();
+		try {
+			return Files.readAttributes(path, BasicFileAttributes.class).lastModifiedTime().toMillis();
+		} catch (IOException e) {
+			return 0;
+		}
 	}
 
 	@Override
 	public boolean createNewFile() throws IOException {
-		return fsHDFS.createNewFile(dst);
+		Files.createFile(path);
+		return true;
 	}
 	
 	@Override
 	public boolean delete() {
 		try {
-			FileOperate.DeleteFileFolder(getAbsolutePath());
-			return FileOperate.isFileFolderExist(getAbsolutePath());
-		} catch (Exception e) {
+			Files.delete(path);
+			return true;
+		} catch (IOException e) {
 			return false;
-        }
+		}
 	}
 
 	public void deleteOnExit() {
-		FileOperate.deleteOnExit(this);
+		FileOperate.deleteOnExit(path);
 	}
 	
 	@Override
 	public FileHadoop[] listFiles() {
-		FileStatus[] childrenFileStatus;
-		try {
-			childrenFileStatus = fsHDFS.listStatus(dst);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return new FileHadoop[]{};
+		List<Path> lsSub = FileOperate.getLsFoldPath(path);
+		FileHadoop[] fileHadoop2s = new FileHadoop[lsSub.size()];
+		for (int i = 0; i < fileHadoop2s.length; i++) {
+			fileHadoop2s[i] = new FileHadoop(lsSub.get(i));
 		}
-		if (childrenFileStatus == null || childrenFileStatus.length == 0) {
-			return new FileHadoop[]{};
-		}
-		FileHadoop[] files = {};
-		if (childrenFileStatus.length != 0) {
-			files = new FileHadoop[childrenFileStatus.length];
-		}
-		for (int i = 0; i < childrenFileStatus.length; i++) {
-			Path childPath = childrenFileStatus[i].getPath();
-			files[i] = new FileHadoop(FileOperate.addSep(fileName) + childPath.getName(), childrenFileStatus[i]);
-		}
-		return files;
+		return fileHadoop2s;
 	}
 	
 	public boolean canWrite() {
-		return true;
+		return Files.isReadable(path);
 	}
 	
 	public boolean canRead() {
-		return true;
+		return Files.isWritable(path);
 	}
 
 	public FileHadoop[] listFiles(FilenameFilter filter) {
@@ -295,7 +187,7 @@ public class FileHadoop extends File {
         if (ss == null) return null;
         ArrayList<FileHadoop> files = new ArrayList<>();
         for (FileHadoop s : ss)
-            if ((filter == null) || filter.accept(this, s.dst.getName()))
+            if ((filter == null) || filter.accept(this, s.getName()))
                 files.add(s);
         return files.toArray(new FileHadoop[files.size()]);
     }
@@ -314,7 +206,8 @@ public class FileHadoop extends File {
 	@Override
 	public boolean mkdir() {
 		try {
-			return fsHDFS.mkdirs(dst);
+			Files.createDirectory(path);
+			return true;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -324,7 +217,8 @@ public class FileHadoop extends File {
 	@Override
 	public boolean mkdirs() {
 		try {
-			return fsHDFS.mkdirs(dst);
+			Files.createDirectories(path);
+			return true;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -334,7 +228,7 @@ public class FileHadoop extends File {
     public boolean setLastModified(long time) {
         if (time < 0) throw new IllegalArgumentException("Negative time");
         try {
-			fsHDFS.setTimes(dst, time, time);
+        	Files.setLastModifiedTime(path, FileTime.fromMillis(time));
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;
@@ -380,15 +274,12 @@ public class FileHadoop extends File {
 	@Override
 	public boolean renameTo(File dest) {
 		try {
-			String path = dest.getPath();
-			if (FileHadoop.isHdfs(path) || FileHadoop.isHdfs(path.substring(1, path.length()-2))) {
-				path = path.replace(getHdfsSymbol(), "");
-			}
-			return fsHDFS.rename(dst, new Path(path));
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
+			Files.move(path, FileOperate.getPath(dest));
+			return true;
+		} catch (Exception e) {
+			// TODO: handle exception
 		}
+		return false;
 	}
 	
 	
@@ -472,17 +363,6 @@ public class FileHadoop extends File {
 	public static File[] listRoots() {
         return null;
     }
-	
-	/**
-	 * 类似 /hdfs:/apps/test 这种文件名
-	 * @param hdfsFile
-	 * @return
-	 */
-	public static Path getPath(String hdfsFile) {
-		hdfsFile = hdfsFile.replace(FileHadoop.getHdfsSymbol(), "");
-		//TODO 以后就应该是
-		return new Path(hdfsFile);
-	}
 
    @Deprecated
     public long getTotalSpace() {
@@ -568,11 +448,11 @@ public class FileHadoop extends File {
      * @return  The string form of this abstract pathname
      */
     public String toString() {
-        return getPath();
+        return fileName;
     }
     
-    public java.nio.file.Path toPath() {
-    		return FileOperate.getPath(this);
+    public Path toPath() {
+    		return path;
     }
     
 }
