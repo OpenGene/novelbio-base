@@ -73,7 +73,7 @@ public class StreamOut extends Thread {
 
 	
 	/** 是否要获取输入流，默认为false<br>
-	 * {@link #setOutputStream(OutputStream)} 会覆盖该方法
+	 * {@link #setOutputStream(OutputStream, boolean)} 会覆盖该方法
 	 *  */
 	public void setGetInputStream(boolean getInputStream) {
 		this.getInputStream = getInputStream;

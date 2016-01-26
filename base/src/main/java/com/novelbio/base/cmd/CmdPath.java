@@ -378,13 +378,7 @@ public class CmdPath {
 	}
 	
 	/**
-	 * 将tmpPath文件夹中的内容全部移动到resultPath中
-	 * notmove是不需要移动的文件名
-	 * @param tmpPath
-	 * @param resultPath
-	 * @param notMove
-	 * @param isDelFile 如果出错是否删除原来的文件
-	 */
+	 * 将tmpPath文件夹中的内容全部移动到resultPath中 */
 	public void moveFileOut() {
 		if (!mapPath2TmpPath.isEmpty()) {
 			logger.info("start move files");

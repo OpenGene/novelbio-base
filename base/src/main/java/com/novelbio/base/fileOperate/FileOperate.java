@@ -1266,8 +1266,7 @@ public class FileOperate {
 				if (!cover) return;
 				Files.deleteIfExists(newPath);
 	        }
-			Files.move(oldPath, newPath, StandardCopyOption.COPY_ATTRIBUTES,
-					StandardCopyOption.REPLACE_EXISTING);
+			Files.move(oldPath, newPath);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new ExceptionFileError("cannot move file " + oldPath + " to " + newPath, e);
@@ -1316,6 +1315,28 @@ public class FileOperate {
 
 		final String newPathSep = addSep(newfolder);
 		Path pathNew = getPath(newPathSep);
+		
+		if (isFileExist(pathNew)) {
+			if (cover) {
+				try {
+					Files.delete(pathNew);
+				} catch (Exception e) {
+					throw new ExceptionFileError("cannot move file from " + olddir + " to " + newfolder + " because cannot delete file " + pathNew, e);
+				}
+			} else {
+				return;
+			}
+		}
+		
+		if (!Files.exists(pathNew) && prefix.equals("")) {
+			try {
+				Files.move(olddir, pathNew);
+				return;
+			} catch (IOException e) {
+				throw new ExceptionFileError("cannot move file from " + olddir + " to " + newfolder, e);
+			}
+		}
+
 		try {
 			createFolders(pathNew);
 			Files.list(olddir).forEach((pathOld) -> {
@@ -1329,6 +1350,7 @@ public class FileOperate {
 		} catch (Exception e) {
 			throw new ExceptionNbcFile("copy fold error", e);
 		}
+		FileOperate.DeleteFileFolder(olddir);
 	}
 	
 	protected static boolean isFilePathSame(String oldfile, String newfile) {

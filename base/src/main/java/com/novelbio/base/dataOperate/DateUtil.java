@@ -226,9 +226,8 @@ public class DateUtil {
 	 * @param smdate　较小的时间
 	 * @param bdate　较大的时间
 	 * @return 相差天数
-	 * @throws ParseException
 	 */
-	public static int daysBetween(Date smdate, Date bdate){
+	public static int daysBetween(Date smdate, Date bdate) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(smdate);
 		long time1 = cal.getTimeInMillis();
