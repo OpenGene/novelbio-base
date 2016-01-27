@@ -114,7 +114,23 @@ public class FileOperate {
         }
 		try {
 			if (fileName.startsWith(FileHadoop.hdfsSymbol)) {
-				URI uri = new URI(fileName);
+				URI uri = null;
+				if (!fileName.contains(" ")) {
+					uri = new URI(fileName);
+				} else {
+					fileName = fileName.replace(FileHadoop.hdfsSymbol, "");
+					if (fileName.startsWith(":")) fileName.replaceFirst(":", "");
+					String host = null, path = "";
+					if (fileName.startsWith("//")) {
+						String[] ss = fileName.replaceFirst("//", "").split("/", 2);
+						host = ss[0];
+						path = "/" + ss[1];
+					} else {
+						path = fileName;
+					}
+					uri = new URI("hdfs", host, path, null);
+				}
+				
 				//TODO 不是类没加载，而是META文件没有读取到
 //				Paths.get(uri);
 				return hdfsProvider.getPath(uri);
