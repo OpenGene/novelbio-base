@@ -666,7 +666,19 @@ public class FileOperate {
 	 * 获取文件夹下包含指定文件名与后缀的所有文件名，仅找第一层，不递归<br>
 	 * 如果文件不存在则返回空的list<br>
 	 * 如果不是文件夹，则返回该文件名<br>
-	 * @param filePath 目录路径
+	 * @param fileName 目录路径
+	 * @return 返回包含目标文件全名的ArrayList
+	 * @throws IOException 
+	 */
+	public static List<Path> getLsFoldPath(String fileName) {
+		return getLsFoldPath(getPath(fileName), "*", "*");
+	}
+	
+	/**
+	 * 获取文件夹下包含指定文件名与后缀的所有文件名，仅找第一层，不递归<br>
+	 * 如果文件不存在则返回空的list<br>
+	 * 如果不是文件夹，则返回该文件名<br>
+	 * @param file 目录路径
 	 * @return 返回包含目标文件全名的ArrayList
 	 * @throws IOException 
 	 */

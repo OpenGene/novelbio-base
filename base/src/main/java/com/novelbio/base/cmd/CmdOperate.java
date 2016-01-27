@@ -153,6 +153,12 @@ public class CmdOperate extends RunProcess<String> {
 		((ProcessRemote)process).setKeyFile(idrsa);
 		cmdPath.setLsCmd(lsCmd);
 	}
+	
+	public CmdOperate(String ip, String user, String idrsa) {
+		process = new ProcessRemote(ip, user);
+		((ProcessRemote)process).setKeyFile(idrsa);
+	}
+	
 	/**
 	 * 远程登录的方式运行cmd命令，<b>cmd命令运行完毕后会断开连接</b>
 	 * @param ip
@@ -735,7 +741,7 @@ public class CmdOperate extends RunProcess<String> {
 		}
 		runTime = dateTime.getElapseTime();
 		if (process instanceof ProcessRemote) {
-			((ProcessRemote)process).close();
+			((ProcessRemote)process).closeSession();
 		}
 		
 		if (isFinishedNormal()) {
@@ -796,6 +802,13 @@ public class CmdOperate extends RunProcess<String> {
 		if (cmdRunInfo == null) {
 			cmdRunInfo.setFinish();
 			cmdRunInfo = null;
+		}
+	}
+	
+	/** 如果是远程cmd，用这个关闭连接 */
+	public void closeRemote() {
+		if (process instanceof ProcessRemote) {
+			((ProcessRemote)process).close();
 		}
 	}
 

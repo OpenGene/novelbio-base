@@ -77,6 +77,13 @@ public class ProcessRemote implements IntProcess {
 	}
 	
 	/** 断开连接 */
+	public void closeSession() {
+		if (session != null) {
+			session.close();
+		}
+	}
+	
+	/** 断开连接 */
 	public void close() {
 		if (session != null) {
 			session.close();
@@ -89,7 +96,7 @@ public class ProcessRemote implements IntProcess {
 
 	@Override
 	public void exec(String[] cmd) throws Exception {
-		session = null;
+
 		if (!login()) {
 			throw new Exception("connection error: cannot login");
 		}
@@ -104,7 +111,13 @@ public class ProcessRemote implements IntProcess {
 		}
 		String cmdRun = stringBuilder.toString().trim();
 		
-		session = conn.openSession();
+		synchronized (this) {
+			if (session != null) {
+				session.close();
+			}
+			session = conn.openSession();
+		}
+
 		session.execCommand(cmdRun);
 	}
 
@@ -136,7 +149,11 @@ public class ProcessRemote implements IntProcess {
 
 	@Override
 	public void stopProcess() throws Exception {
-		session.close();
+		if (session != null) {
+			session.close();
+			session = null;
+		}
+		conn.close();
 	}
 
 	@Override
