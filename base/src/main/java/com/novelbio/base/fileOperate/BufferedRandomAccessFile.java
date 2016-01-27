@@ -276,7 +276,7 @@ public class BufferedRandomAccessFile extends RandomAccessFile {
         System.out.println("BufferedRandomAccessFile Copy & Write File: "
                            + brafReadFile.filename
                            + "    FileSize: "
-                           + java.lang.Integer.toString((int)readfilelen >> 1024)
+                           + java.lang.Integer.toString((int)readfilelen >> 10)
                            + " (KB)    "
                            + "Spend: "
                            +(double)(System.currentTimeMillis()-start) / 1000
