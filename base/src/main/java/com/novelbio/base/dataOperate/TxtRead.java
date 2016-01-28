@@ -50,6 +50,7 @@ class TxtRead implements Closeable {
 	public TxtRead(Path file) {
 		txTtype = TXTtype.getTxtType(file.toString());
 		this.file = file;
+		this.filesize = FileOperate.getFileSizeLong(file); 
 		isStream = false;
 	}
 	
@@ -552,9 +553,7 @@ class TxtRead implements Closeable {
 	
 	private void setInStreamExp(TXTtype txtType) throws IOException {
 		if (!isStream) {
-			Path fileThis = file;
-			filesize = FileOperate.getFileSizeLong(fileThis);
-			inputStreamRaw = new PositionInputStream(FileOperate.getInputStream(fileThis));
+			inputStreamRaw = new PositionInputStream(FileOperate.getInputStream(file));
 		}
 
 		if (txtType == TXTtype.Txt) {
