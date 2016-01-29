@@ -1722,6 +1722,9 @@ public class FileOperate {
 	 * @return
 	 */
 	public static void delAllFile(Path path) {
+		if (!Files.exists(path)) {
+			return;
+		}
 		if (!isFileDirectory(path)) {
 			throw new ExceptionFileError("path is not directory " + path);
         }
