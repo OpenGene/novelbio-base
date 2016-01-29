@@ -1355,15 +1355,6 @@ public class FileOperate {
 				return;
 			}
 		}
-		
-		if (!Files.exists(pathNew) && prefix.equals("")) {
-			try {
-				Files.move(olddir, pathNew);
-				return;
-			} catch (IOException e) {
-				throw new ExceptionFileError("cannot move file from " + olddir + " to " + newfolder, e);
-			}
-		}
 
 		try {
 			createFolders(pathNew);
