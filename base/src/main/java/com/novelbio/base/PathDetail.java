@@ -240,8 +240,7 @@ public class PathDetail {
 		return properties.getProperty("logoImgPath");
 	}
 	
-	//=========   zookeeper ===========================
-	
+	//=========  zookeeper  ===========================
 	/** 连接到zookeeper server的site */
 	public static String getZookeeperServerSite() {
 		return properties.getProperty("zookeeperSite");
@@ -249,5 +248,16 @@ public class PathDetail {
 	/** 连接到zookeeper server的site */
 	public static String getZookeeperLock() {
 		return properties.getProperty("znodeLock");
+	}
+	
+	//=========  Docker  ===========================
+	/** docker repository所在的ip和端口，末尾没有 "/" */
+	public static String getDockerRepoIpPort() {
+		return properties.getProperty("dockerRepositoryIp");
+	}
+
+	/** docker远程调用的端口号 */
+	public static String getDockerRemotePort() {
+		return properties.getProperty("dockerRemotePort");
 	}
 }
