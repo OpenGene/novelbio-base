@@ -2,22 +2,17 @@ package com.novelbio.base.fileOperate;
 
 import hdfs.jsr203.HadoopFileSystemProvider;
 import hdfs.jsr203.HadoopPath;
-import hdfs.jsr203.HdfsConfInitiator;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -33,7 +28,6 @@ import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.log4j.Logger;
 
 import com.novelbio.base.PathDetail;
