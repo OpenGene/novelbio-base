@@ -311,10 +311,14 @@ public class FileHadoop extends File {
 	*/
 	public static String convertToLocalPath(String hdfsPath) {
 		if (hdfsPath.length() < 6) {
-			
+			return hdfsPath;
 		}else if (FileHadoop.isHdfs(hdfsPath) || FileHadoop.isHdfs(hdfsPath.substring(1, hdfsPath.length()-2))) {
 			String parentPath = getHdfsLocalPath();
-			hdfsPath = hdfsPath.replace(getHdfsSymbol(), parentPath);
+			if (hdfsPath.startsWith(getHdfsSymbol())) {
+				hdfsPath = hdfsPath.replace(getHdfsSymbol(), parentPath);
+			} else if (hdfsPath.startsWith(hdfsSymbol)) {
+				hdfsPath = hdfsPath.replace(hdfsSymbol, parentPath);
+			}
 		}
 		return hdfsPath;
 	}
@@ -356,7 +360,7 @@ public class FileHadoop extends File {
 		if (StringOperate.isRealNull(getHdfsSymbol())) {
 			return false;
 		}
-		return fileName.startsWith(getHdfsSymbol()) ? true : false;
+		return (fileName.startsWith(getHdfsSymbol()) || fileName.startsWith(hdfsSymbol));
 	}
 
 	@Deprecated
