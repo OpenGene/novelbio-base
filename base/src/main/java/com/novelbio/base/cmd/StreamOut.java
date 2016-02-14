@@ -122,14 +122,14 @@ public class StreamOut extends Thread {
 					if (i > lineNum) {
 						lsInfo.poll();
 					}
-					if (isToTermiate) {
-						if (isStd) {
-							System.out.println(line);
-						} else {
-							System.err.println(line);
-						}
-						
+				}
+				if (isToTermiate) {
+					if (isStd) {
+						System.out.println(line);
+					} else {
+						System.err.println(line);
 					}
+					
 				}
 			}
 		} catch (IOException ioe) {
@@ -145,6 +145,7 @@ public class StreamOut extends Thread {
 				if (!isStartWrite) return;
 				
 				synchronized (this) {
+					//TODO　hdfs中连续多次flush会不会报错
 					try { os.flush(); } catch (Exception e) {e.printStackTrace(); }				
 				}
 			}

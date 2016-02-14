@@ -43,9 +43,11 @@ public class CmdOperate extends RunProcess<String> {
 	//TODO ========在使用docker之后，这两个可以考虑不用了========
 	/** 是否产生标准输出信息的文件，只有在将输出文件写入临时文件夹的情况
 	 * 下才会产生标准输出流信息文件，目的是给用户反馈目前的软件进度 */
+	@Deprecated
 	boolean isStdoutInfo = false;
 	/** 是否产生标准错误信息的文件，只有在将输出文件写入临时文件夹的情况
 	 * 下才会产生标准错误流信息文件，目的是给用户反馈目前的软件进度 */
+	@Deprecated
 	boolean isStderrInfo = false;
 	//====================================================
 	
@@ -78,9 +80,10 @@ public class CmdOperate extends RunProcess<String> {
 	/** 如果选择用list来保存错误输出，最多保存500行的输出信息 */
 	int lineNumErr = 5000;//最多保存5000行的输出信息
 	
-	/** 输出本程序正在运行时的参数等信息 */
+	/** 输出本程序正在运行时的参数等信息，本功能也用docker替换了 */
+	@Deprecated
 	String outRunInfoFileName;
-	CmdRunInfo cmdRunInfo;
+//	CmdRunInfo cmdRunInfo;
 	
 	/** 将cmd写入sh文件的具体文件 */
 	String cmd1SH;
@@ -231,7 +234,11 @@ public class CmdOperate extends RunProcess<String> {
 		this.needLog = isNeedLog;
 	}
 	
-	/** 设定输出信息，默认保存在stdout文件夹下 */
+	/** 设定输出信息，默认保存在stdout文件夹下
+	 * 使用docker remote替换
+	 * @param outRunInfoFileName
+	 */
+	@Deprecated
 	public void setOutRunInfoFileName(String outRunInfoFileName) {
 		if (outRunInfoFileName == null) {
 			this.outRunInfoFileName = "";
@@ -256,6 +263,8 @@ public class CmdOperate extends RunProcess<String> {
 	}
 	
 	/**
+	 * @deprecated 用yarn来获取log日志<br><br>
+	 * 
 	 *  设定标准输出流，如果是这里指定，则会即时刷新<br>
 	 * 本设置会被cmd中自带的 &gt; 重定向覆盖
 	 * @param stdOutPath
@@ -267,7 +276,10 @@ public class CmdOperate extends RunProcess<String> {
 		cmdPath.setJustDisplayStd(isDelete);
 		this.isStdoutInfo = isDelete;
 	}
-	/** 设定标准错误流，如果是这里指定，则会即时刷新<br>
+	/**
+	 * @deprecated 用yarn来获取log日志<br><br>
+	 * 
+	 * 设定标准错误流，如果是这里指定，则会即时刷新<br>
 	 * 本设置会被cmd中自带的 2> 重定向覆盖
 	 * @param stdErrPath
 	 * @param isSaveTmp 是否先保存为临时文件，等结束后再修改回来。如果只是随便看看结果就设置为false
@@ -278,14 +290,7 @@ public class CmdOperate extends RunProcess<String> {
 		cmdPath.setJustDisplayErr(isDelete);
 		this.isStderrInfo = isDelete;
 	}
-	/** 设定标准错误流，如果是这里指定，则会即时刷新<br>
-	 * 本设置会被cmd中自带的 2&gt; 重定向覆盖
-	 * @param stdErrPath
-	 * @param isSaveTmp 是否先保存为临时文件，等结束后再修改回来。如果只是随便看看结果就设置为false
-	 */
-	public void setRunInfoFile(String outRunInfoFileName) {
-		this.outRunInfoFileName = outRunInfoFileName;
-	}
+
 	/** 如果为null就不加入 */
 	public void addCmdParam(String param) {
 		if (!StringOperate.isRealNull(param)) {
@@ -334,20 +339,20 @@ public class CmdOperate extends RunProcess<String> {
 	 * @param output
 	 */
 	public void addCmdParamOutput(String output, boolean isAddToLsCmd) {
-		if (StringOperate.isRealNull(cmdPath.getSaveErrPath())) {
-			isStderrInfo = true;
-			cmdPath.setSaveErrPath(output + "errorInfo.txt", false);
-			cmdPath.setJustDisplayErr(true);
-		}
-		if (StringOperate.isRealNull(cmdPath.getSaveStdPath())) {
-			isStdoutInfo = true;
-			cmdPath.setSaveFilePath(output + "stdInfo.txt", false);
-			cmdPath.setJustDisplayStd(true);
-		}
-		
-		if (outRunInfoFileName == null) {
-			outRunInfoFileName = output + "_RunInfo.txt";
-		}
+//		if (StringOperate.isRealNull(cmdPath.getSaveErrPath())) {
+//			isStderrInfo = true;
+//			cmdPath.setSaveErrPath(output + "errorInfo.txt", false);
+//			cmdPath.setJustDisplayErr(true);
+//		}
+//		if (StringOperate.isRealNull(cmdPath.getSaveStdPath())) {
+//			isStdoutInfo = true;
+//			cmdPath.setSaveFilePath(output + "stdInfo.txt", false);
+//			cmdPath.setJustDisplayStd(true);
+//		}
+//		
+//		if (outRunInfoFileName == null) {
+//			outRunInfoFileName = output + "_RunInfo.txt";
+//		}
 		cmdPath.addCmdParamOutput(output, isAddToLsCmd);
 	}
 	
@@ -550,9 +555,9 @@ public class CmdOperate extends RunProcess<String> {
 		cmdPath.copyFileIn();
 		String[] cmdRun = cmdPath.getRunCmd();
 		
-		cmdRunInfo = new CmdRunInfo();
-		cmdRunInfo.setOutFile(outRunInfoFileName);
-		cmdRunInfo.setProcess(process);
+//		cmdRunInfo = new CmdRunInfo();
+//		cmdRunInfo.setOutFile(outRunInfoFileName);
+//		cmdRunInfo.setProcess(process);
 		
 		process.exec(cmdRun);
 		
@@ -565,7 +570,7 @@ public class CmdOperate extends RunProcess<String> {
 		
 		errorGobbler.start();
 		outputGobbler.start();
-		cmdRunInfo.startWriteRunInfo();
+//		cmdRunInfo.startWriteRunInfo();
 
 		finishFlag.flag = process.waitFor();
 		
@@ -581,7 +586,7 @@ public class CmdOperate extends RunProcess<String> {
 		if (needLog) logger.info("close out stream");
 		
 		closeOutStream();
-		cmdRunInfo.setFinish();
+//		cmdRunInfo.setFinish();
 
 		//不管是否跑成功，都移出文件夹
 		cmdPath.moveFileOut();
@@ -786,7 +791,7 @@ public class CmdOperate extends RunProcess<String> {
 
 	/** 终止线程，在循环中添加 */
 	public void threadStop() {
-		stopRunInfo();
+//		stopRunInfo();
 		
 		if (process != null && process.isCmdStarted()) {
 			try {
@@ -798,12 +803,12 @@ public class CmdOperate extends RunProcess<String> {
 		}
 	}
 	
-	private void stopRunInfo() {
-		if (cmdRunInfo == null) {
-			cmdRunInfo.setFinish();
-			cmdRunInfo = null;
-		}
-	}
+//	private void stopRunInfo() {
+//		if (cmdRunInfo != null) {
+//			cmdRunInfo.setFinish();
+//			cmdRunInfo = null;
+//		}
+//	}
 	
 	/** 如果是远程cmd，用这个关闭连接 */
 	public void closeRemote() {
@@ -843,6 +848,8 @@ public class CmdOperate extends RunProcess<String> {
 
 }
 
+/** 用docker去查看container的  */
+@Deprecated
 class CmdRunInfo {
 	private static final Logger logger = Logger.getLogger(CmdRunInfo.class);
 	/** 每分钟写一个信息到文本中，意思该程序还在运行中，主要是针对RNAmapping这种等待时间很长的程序 */
