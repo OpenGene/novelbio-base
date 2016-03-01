@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 
+//该脚本执行,需本地的hosts和hadoop环境
 public class TestFileOperate {
 	@Test
 	public void testGetFolderParentNumber() {
@@ -226,5 +227,9 @@ public class TestFileOperate {
 		Assert.assertTrue(FileOperate.isFileExistAndBigThanSize(folder.toString(), 0));
 		
 		Assert.assertFalse(FileOperate.isFileExistAndBigThanSize(folder + "/fsees", 0));
+		
+		
+		String path = "hdfs:/nbCloud/public/avatar/admin/559cd802e4b0c9d5e9c9a3b9_2016-01-13-03-02-5218365_40-150R1102249-50.jpg";
+		Assert.assertTrue(FileOperate.isFileExist(path));
 	}
 }
