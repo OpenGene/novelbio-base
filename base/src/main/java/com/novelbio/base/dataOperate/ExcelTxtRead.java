@@ -190,10 +190,10 @@ public class ExcelTxtRead {
 	/**
 	 * 给定文件，xls2003/2007/txt，获得它们的信息，用arraylist-string[]保存
 	 * @param excelFile
-	 * @param rowStart
-	 * @param colStart
-	 * @param rowEnd 值小于等于0时，读取全部行
-	 * @param colEnd 值小于等于0时，读取全部列
+	 * @param rowStart									从1开始计数
+	 * @param colStart									从1开始计数
+	 * @param rowEnd 									值小于等于0时，读取全部行
+	 * @param colEnd 									值小于等于0时，读取全部列
 	 * @return
 	 */
 	public static ArrayList<String[]> readLsExcelTxtFile(String excelFile,int rowStart, int colStart, int rowEnd, int colEnd) {
@@ -203,10 +203,10 @@ public class ExcelTxtRead {
 	 * 给定文件，xls2003/2007/txt，获得它们的信息，用arraylist-string[]保存
 	 * @param excelFile
 	 * @param sheetNum
-	 * @param rowStart
-	 * @param colStart
-	 * @param rowEnd 值小于等于0时，读取全部行
-	 * @param colEnd 值小于等于0时，读取全部列
+	 * @param rowStart									从1开始计数
+	 * @param colStart									从1开始计数
+	 * @param rowEnd 									值小于等于0时，读取全部行
+	 * @param colEnd 									值小于等于0时，读取全部列
 	 * @return
 	 */
 	public static ArrayList<String[]> readLsExcelTxtFile(String excelFile, int sheetNum, int rowStart, int colStart, int rowEnd, int colEnd) {
