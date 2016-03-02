@@ -5,9 +5,15 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -229,7 +235,31 @@ public class TestFileOperate {
 		Assert.assertFalse(FileOperate.isFileExistAndBigThanSize(folder + "/fsees", 0));
 		
 		
-		String path = "hdfs:/nbCloud/public/avatar/admin/559cd802e4b0c9d5e9c9a3b9_2016-01-13-03-02-5218365_40-150R1102249-50.jpg";
+		String path = "hdfs:/apps/simple/appYarn.zip";
 		Assert.assertTrue(FileOperate.isFileExist(path));
+	}
+	
+	@Test
+	public void testGetLsFile() {
+		List<Path> lsPath = FileOperate.getLsFoldPathRecur(FileOperate.getPath("src/test"), "*", "*", false);
+		List<String> setFile = new ArrayList<>();
+		for (Path path : lsPath) {
+			setFile.add(path.toString());
+		}
+		Collection<File> lsFiles = FileUtils.listFiles(new File("src/test"), null, true);
+		List<String> setFileExp = new ArrayList<>();
+		for (File path : lsFiles) {
+			setFileExp.add(path.getPath());
+		}
+		Collections.sort(setFile); Collections.sort(setFileExp);
+		Assert.assertEquals(setFile, setFileExp);
+		
+		
+		lsPath = FileOperate.getLsFoldPathRecur(FileOperate.getPath("src/test"), "*", "*", true);
+		setFile = new ArrayList<>();
+		for (Path path : lsPath) {
+			setFile.add(path.toString());
+		}
+		
 	}
 }
