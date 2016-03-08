@@ -23,7 +23,7 @@ public class PathDetail {
 		initial();
 	}
 	private static void initial() {
-		String configPath = "config.properties";
+		String configPath = "configbase.properties";
 		InputStream in = PathDetail.class.getClassLoader().getResourceAsStream(configPath);
 		properties = new Properties();
 		try {

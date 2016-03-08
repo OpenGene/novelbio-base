@@ -477,26 +477,24 @@ public class FileOperate {
 		}
 		return fileNameThis;
 	}
-
-	public static String getCanonicalPath(String fileName) {
+	
+	/** 用于取代path的tostring方法，因为hdfs的path.toString() 默认返回 hdfs:/，而我们要的是 /hdfs:/ */
+	public static String getFilePathName(Path path) {
 		boolean isAddSplashHead = false;
-		if (fileName.startsWith(FileHadoop.hdfsSymbol)) {
-			if (!fileName.startsWith("/")) {
-				fileName = "/" + fileName;
+		String filePathName = path.toString();
+		if (filePathName.startsWith(FileHadoop.hdfsSymbol)) {
+			if (!filePathName.startsWith("/")) {
+				filePathName = "/" + filePathName;
 				isAddSplashHead = true;
 			}
 		}
-		File file = new File(fileName);
-		try {
-			String canonicalPath = file.getCanonicalPath();
-			if (isAddSplashHead) {
-				canonicalPath = removeSplashHead(canonicalPath, false);
-			}
-			return canonicalPath;
-		} catch (IOException e) {
-			throw new ExceptionFileError("cannot getCanonicalPath " + fileName, e);
+		if (isAddSplashHead) {
+			filePathName = removeSplashHead(filePathName, true);
 		}
+		return filePathName;
 	}
+	
+
 	
 	public static String getAbsolutePath(String fileName) {
 		boolean isAddSplashHead = false;
@@ -509,21 +507,9 @@ public class FileOperate {
 		File file = new File(fileName);
 		String absolutePath = file.getAbsolutePath();
 		if (isAddSplashHead) {
-			absolutePath = removeSplashHead(absolutePath, false);
+			absolutePath = removeSplashHead(absolutePath, true);
 		}
 		return absolutePath;
-	}
-	
-	public static String getCanonicalPath(Path path) {
-		String name = getCanonicalPath(path.toString());
-		if (path instanceof HadoopPath) {
-			if (name.startsWith(FileHadoop.hdfsSymbol)) {
-				name = "/" + name;
-			} else if (!name.startsWith(FileHadoop.getHdfsSymbol())) {
-				   name = "/hdfs:" + name;
-			}
-        }
-		return name;
 	}
 	
 	public static String getAbsolutePath(Path path) {
@@ -537,7 +523,38 @@ public class FileOperate {
         }
 		return name;
 	}
+	
+	public static String getCanonicalPath(Path path) {
+		String name = getCanonicalPath(path.toString());
+		if (path instanceof HadoopPath) {
+			if (name.startsWith(FileHadoop.hdfsSymbol)) {
+				name = "/" + name;
+			} else if (!name.startsWith(FileHadoop.getHdfsSymbol())) {
+				   name = "/hdfs:" + name;
+			}
+        }
+		return name;
+	}
 
+	public static String getCanonicalPath(String fileName) {
+		boolean isAddSplashHead = false;
+		if (fileName.startsWith(FileHadoop.hdfsSymbol)) {
+			if (!fileName.startsWith("/")) {
+				fileName = "/" + fileName;
+				isAddSplashHead = true;
+			}
+		}
+		File file = new File(fileName);
+		try {
+			String canonicalPath = file.getCanonicalPath();
+			if (isAddSplashHead) {
+				canonicalPath = removeSplashHead(canonicalPath, true);
+			}
+			return canonicalPath;
+		} catch (IOException e) {
+			throw new ExceptionFileError("cannot getCanonicalPath " + fileName, e);
+		}
+	}
 	/**
 	 * 获取文件夹下包含指定文件名与后缀的所有文件名,等待增加功能子文件夹下的文件。也就是循环获得文件<br>
 	 * 如果文件不存在则返回空的list<br>
@@ -1373,7 +1390,7 @@ public class FileOperate {
 	//TODO 待测试
 	private static void moveSingleFile(Path oldPath, Path newPath, boolean cover) {
 		if (!isFileExist(oldPath)) return;
-		if (isFilePathSame(oldPath.toString(), newPath.toString())) {
+		if (isFilePathSame(FileOperate.getFileName(oldPath), newPath.toString())) {
 			return;
         }
 
@@ -1474,36 +1491,28 @@ public class FileOperate {
 				) {
 			return false;
 		}
+	
+		String oldFileStr =getCanonicalPath(oldfile);
+		String newFileStr = getCanonicalPath(newfile);
 		
-		File oldFile = new File(oldfile);
-		File newFile = new File(newfile);
-
-
-		try {
-			String oldFileStr = oldFile.getCanonicalPath();
-			String newFileStr = newFile.getCanonicalPath();
-			
-			if (oldFileStr != null) oldFileStr = oldFileStr.replace("\\", "/");
-			if (newFileStr != null) newFileStr = newFileStr.replace("\\", "/");
-			
-			if (StringOperate.isEqual(oldFileStr, newFileStr)) {
-				return true;
-			}
-			if (oldFileStr == null || newFileStr == null) {
-				return false;
-            }
-			
-			
-			File fileOld = new File(oldFileStr);
-			File fileNew = new File(newFileStr);
-			
-			if (StringOperate.isEqual(fileOld.getCanonicalPath(), fileNew.getCanonicalPath())) {
-				return true;
-			}
-			return false;
-		} catch (IOException e) {
-			throw new ExceptionFileError("file name is not correct, old file " + oldFile.getName() + " new file " + newFile.getName() , e);
+		if (oldFileStr != null) oldFileStr = oldFileStr.replace("\\", "/");
+		if (newFileStr != null) newFileStr = newFileStr.replace("\\", "/");
+		
+		if (StringOperate.isEqual(oldFileStr, newFileStr)) {
+			return true;
 		}
+		if (oldFileStr == null || newFileStr == null) {
+			return false;
+        }
+		
+		
+		oldFileStr =getCanonicalPath(oldFileStr);
+		newFileStr = getCanonicalPath(newFileStr);
+		
+		if (StringOperate.isEqual(oldFileStr, newFileStr)) {
+			return true;
+		}
+		return false;
 	}
 	
 	/**
@@ -1618,6 +1627,12 @@ public class FileOperate {
 	
 	public static boolean isFileExistAndBigThan0(String fileName) {
 		return isFileExistAndBigThanSize(fileName, 0);
+	}
+	
+	public static void validateFileExistAndBigThan0(String fileName) {
+		if (!isFileExistAndBigThanSize(fileName, 0)) {
+			throw new ExceptionNbcFileInputNotExist(fileName + " is not exist");
+		}
 	}
 	
 	/**

@@ -260,6 +260,21 @@ public class TestFileOperate {
 		for (Path path : lsPath) {
 			setFile.add(path.toString());
 		}
+	}
+	
+	@Test
+	public void testIsFilePathSame() {
+		String name1 = "hdfs:/abc/def/ghi";
+		String name2 = "/hdfs:/abc/def/ghi";
+		Assert.assertEquals(true, FileOperate.isFilePathSame(name1, name2));
 		
+		name1 = "hdfs:/abc/def/../ghi";
+		name2 = "/hdfs:/abc/ghi";
+		Assert.assertEquals(true, FileOperate.isFilePathSame(name1, name2));
+
+		name1 = "hdfs:/abc/../abc/./def/../../abc/def/ghi";
+		name2 = "/hdfs:/abc/def/../def/ghi";
+		Assert.assertEquals(true, FileOperate.isFilePathSame(name1, name2));
+
 	}
 }

@@ -538,7 +538,8 @@ public class CmdPath {
 		}
 		
 	}
-
+	
+	/** 把cmd中的文件路径删除 */
 	public static class ConvertCmdGetFileName extends ConvertCmd {
 		
 		@Override

@@ -7,8 +7,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -424,28 +426,26 @@ public class HttpFetch implements Closeable {
 	}
 	
 	/** 重试若干次,在0-100之间，如果没成功则抛出runtime异常 */
-	public void queryExp(int retryNum) {
+	public void queryExp(int retryNum) throws ClientProtocolException, UnknownHostException, ConnectException, IOException {
 		if (retryNum <= 0 || retryNum > 100) {
 			retryNum = 2;
 		}
-		Exception exp = null;
-		try {
-			//重试好多次
-			int queryNum = 0;
-			while (!querySucess) {
+		IOException exp = null;
+		//重试好多次
+		int queryNum = 1;
+		while (!querySucess) {
+			try {
 				getResponseExp();
-				queryNum ++;
-				if (queryNum > retryNum) {
-					break;
-				}
+			} catch (IOException e) {
+				exp = e;
 			}
-		} catch (ClientProtocolException e) {
-			exp = e;
-		} catch (IOException e) {
-			exp = e;
+			queryNum ++;
+			if (queryNum > retryNum) {
+				break;
+			}
 		}
-		if(!querySucess) {
-			throw new RuntimeException("query error:" + uri, exp);
+		if(!querySucess && exp != null) {
+			throw exp;
 		}
 	}
 	
@@ -460,12 +460,8 @@ public class HttpFetch implements Closeable {
 		closeStream();
 		instream = null;
 		HttpResponse httpResponse = null;
-		try {
-			httpResponse = httpclient.execute(getQuery());
-		} catch (Exception e) {
-			logger.error("query出错：" + uri);
-			return;
-		}
+		httpResponse = httpclient.execute(getQuery());
+
 		int httpStatusCode = httpResponse.getStatusLine().getStatusCode();
 		
 		if (httpStatusCode/100 == 4 || httpStatusCode/100 == 5) {
@@ -475,9 +471,9 @@ public class HttpFetch implements Closeable {
 			cookieStore = httpclient.getCookieStore();
 		}
 		HttpEntity entity = httpResponse.getEntity();
-        ContentType contentType = ContentType.getOrDefault(entity);
-        charset = contentType.getCharset();
-        if (charset == null) {
+		ContentType contentType = ContentType.getOrDefault(entity);
+		charset = contentType.getCharset();
+		if (charset == null) {
 			charset = Charset.defaultCharset();
 		}
 		if (entity != null) {

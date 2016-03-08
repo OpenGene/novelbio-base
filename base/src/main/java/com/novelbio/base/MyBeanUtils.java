@@ -6,7 +6,8 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
+
 
 public class MyBeanUtils extends org.springframework.beans.BeanUtils {
 	/**
