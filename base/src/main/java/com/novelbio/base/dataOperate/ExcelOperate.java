@@ -286,8 +286,7 @@ public class ExcelOperate implements Closeable {
 	 * 读取默认sheet的指定块的内容,如果中间有空行，则一并读取<br>
 	 * 
 	 * @param rowStartNum 		起点实际行数,从1开始<br>
-	 * @param columnStartNum		起点实际列数,从1开始<br>
-	 * @param rowEndNum 			终点实际行数，小于等于0则读取到尾部<br>
+	 * @param rowEndNum 		终点实际行数，小于等于0则读取到尾部<br>
 	 * @param columnEndNum 		终点实际列数，小于等于0则读取到尾部<br>
 	 *            						
 	 * @return ArrayList<String[]><br>如果行数超过文件实际行数，则多出来的数组设置为null<br>
@@ -303,10 +302,10 @@ public class ExcelOperate implements Closeable {
 	/**
 	 * 读取指定块的内容,同时将焦点放到该sheet上,返回arrayList如果中间有空行，则跳过<br>
 	 * 
-	 * @param sheetName 			待读取sheet名字<br>
+	 * @param sheetName 		待读取sheet名字<br>
 	 * @param rowStartNum 		起点实际行数,从1开始计数<br>
 	 * @param columnStartNum 	起点实际列数,从1开始计数<br>
-	 * @param rowEndNum 			终点实际行数，小于等于0则读取到尾部<br>
+	 * @param rowEndNum 		终点实际行数，小于等于0则读取到尾部<br>
 	 * @param columnEndNum 		终点实际列数，小于等于0则读取到尾部<br>
 	 *            						
 	 * @return  如果行数超过文件实际行数，则多出来的数组设置为null<br>
@@ -325,7 +324,7 @@ public class ExcelOperate implements Closeable {
 	 * 
 	 * @param rowStartNum 		起点实际行数，从1开始计数<br>
 	 * @param columnStartNum 	起点实际列数，从1开始计数<br>
-	 * @param rowEndNum 			终点实际行数，小于等于0则读取到尾部<br>
+	 * @param rowEndNum 		终点实际行数，小于等于0则读取到尾部<br>
 	 * @param columnEndNum 		终点实际列数，小于等于0则读取到尾部<br>
 	 *            						
 	 * @return 如果行数超过文件实际行数，则多出来的数组设置为null<br>
@@ -345,7 +344,7 @@ public class ExcelOperate implements Closeable {
 	 * @param sheetNum 			实际sheet数,从1开始<br>
 	 * @param rowStartNum 		起点实际行数，从1开始计数<br>
 	 * @param columnStartNum 	起点实际列数，从1开始计数<br>
-	 * @param rowEndNum 			终点实际行数，小于等于0则读取到尾部<br>
+	 * @param rowEndNum 		终点实际行数，小于等于0则读取到尾部<br>
 	 * @param columnEndNum 		终点实际列数，小于等于0则读取到尾部<br>
 	 *            						
 	 * @return 如果行数超过文件实际行数，则多出来的数组设置为null<br>
@@ -379,7 +378,7 @@ public class ExcelOperate implements Closeable {
 	 * @param sheetNum 			实际sheet数，从1开始计数<br>
 	 * @param rowStartNum 		起点实际行数，从1开始计数<br>
 	 * @param columnStartNum 	起点实际列数，从1开始计数<br>
-	 * @param rowEndNum 			终点实际行数，小于等于0则读取到尾部<br>
+	 * @param rowEndNum 		终点实际行数，小于等于0则读取到尾部<br>
 	 * @param columnEndNum 		终点实际列数，小于等于0则读取到尾部<br>
 	 *            						如果行数超过文件实际行数，则多出来的数组设置为null<br>
 	 * @return String[]
@@ -423,9 +422,9 @@ public class ExcelOperate implements Closeable {
 	
 	/**
 	 * @param sheetNum			sheet顺序号,从0开始
-	 * @param rowStartNum			起始行号,从0开始
+	 * @param rowStartNum		起始行号,从0开始
 	 * @param rowEndNum			结束行号,从0开始
-	 * @param readColNum 			如果出现负数的colNum，则跳过
+	 * @param readColNum 		如果出现负数的colNum，则跳过
 	 * @return
 	 */
 	private ArrayList<String[]> readLsExcelDetail(int sheetNum, int rowStartNum, int rowEndNum, int[] readColNum) {
@@ -562,7 +561,7 @@ public class ExcelOperate implements Closeable {
 	 * 块文件写入excel文件.<br>
 	 * <b>String[]中的null会自动跳过.<br>
 	 * 
-	 * @param sheetNum		sheet顺序号,从1开始计数.指定的sheetNum不存在,则自动新建
+	 * @param sheetNum			sheet顺序号,从1开始计数.指定的sheetNum不存在,则自动新建
 	 * @param rowNum			行号,从1开始计数
 	 * @param colNum			列号,从1开始计数
 	 * @param content			写入内容.
@@ -576,7 +575,7 @@ public class ExcelOperate implements Closeable {
 	 * 块文件写入excel文件，并设定sheetName，如果没有该sheetName，那么就新建一个
 	 *  String[][]中的null会自动跳过.
 	 * 
-	 * @param sheetName		sheet名称.指定的sheetName不存在,则自动新建
+	 * @param sheetName			sheet名称.指定的sheetName不存在,则自动新建
 	 * @param rowNum			行号,从1开始计数
 	 * @param colNum			列号,从1开始计数
 	 * @param content			写入内容.
@@ -589,7 +588,7 @@ public class ExcelOperate implements Closeable {
 	/**
 	 *  块文件写入excel文件
 	 *  
-	 * @param sheetName		sheet名称.指定的sheetName不存在,则自动新建
+	 * @param sheetName			sheet名称.指定的sheetName不存在,则自动新建
 	 * @param rowNum			行号,从1开始计数
 	 * @param cellNum			列号,从1开始计数
 	 * @param content			写入内容.
@@ -607,7 +606,7 @@ public class ExcelOperate implements Closeable {
 	/**
 	 * 块文件写入excel文件 
 	 * 
-	 * @param sheetNum		sheet顺序号,从1开始计数.指定的sheetNum不存在,则自动新建
+	 * @param sheetNum			sheet顺序号,从1开始计数.指定的sheetNum不存在,则自动新建
 	 * @param rowNum			行号,从1开始计数
 	 * @param cellNum			列号,从1开始计数
 	 * @param content			写入内容.
