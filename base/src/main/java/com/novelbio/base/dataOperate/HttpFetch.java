@@ -5,6 +5,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
@@ -12,7 +13,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.nio.charset.CodingErrorAction;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -20,52 +28,61 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
-import javax.net.ssl.SSLHandshakeException;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
+import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpVersion;
 import org.apache.http.NameValuePair;
-import org.apache.http.NoHttpResponseException;
-import org.apache.http.ProtocolException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CookieStore;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpRequestRetryHandler;
+import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.config.AuthSchemes;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.client.params.CookiePolicy;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.routing.HttpRoute;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.config.ConnectionConfig;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.ConnectTimeoutException;
+import org.apache.http.conn.HttpClientConnectionManager;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.params.HttpProtocolParamBean;
-import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.log4j.Logger;
 
+import com.novelbio.base.ExceptionNbcParamError;
+import com.novelbio.base.StringOperate;
 import com.novelbio.base.fileOperate.FileOperate;
-//import com.sun.xml.internal.xsom.impl.WildcardImpl.Other;
 
 /**
- * <b>单个HttpFetch用完后务必调用方法{@link #close()} 来释放连接，但是不能使用close</b><br>
+ * 用{@link HttpFetchMultiThread}取代
+ * 如果是做网页爬虫，推荐使用
+ * htmlUnit的{@link com.gargoylesoftware.htmlunit.WebClient}，那个更简单易用<br>
+ * <b>单个HttpFetch用完后务必调用方法{@link #close()} 来释放连接</b><br>
  * 一次只能选择一项，要么post，要么get
  * 
  * 还没有设定获得网页的信息，譬如404或者200等
@@ -73,25 +90,31 @@ import com.novelbio.base.fileOperate.FileOperate;
  * 首先query()，返回一个是否成功的标签。
  * 如果通过了则调用readResponse()或者download()
  * @author zongjie
- *
  */
+@Deprecated
 public class HttpFetch implements Closeable {
 	private static Logger logger = Logger.getLogger(HttpFetch.class);
-	
-	public static final int HTTPTYPE_POST = 2;
-	public static final int HTTPTYPE_GET = 4;
-	public static final int HTTPTYPE_HEAD = 12;
+
 	/**
 	 * 下载缓冲
 	 */
 	private final static int BUFFER = 1024;
 	
-	static PoolingClientConnectionManager cm;
-	
+	PoolingHttpClientConnectionManager cm;
+//	static {
+//		try {
+//			initialCM();
+//		} catch (KeyManagementException | NoSuchAlgorithmException
+//				| KeyStoreException | CertificateException | IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	}
+		
 	ArrayList<BasicHeader> lsHeaders = new ArrayList<BasicHeader>();
 	
 	URI uri;
-	DefaultHttpClient httpclient;
+	CloseableHttpClient httpclient;
 	
 	HttpRequestBase httpRequest;
 	/** post提交的参数 */
@@ -101,103 +124,104 @@ public class HttpFetch implements Closeable {
 	CookieStore cookieStore;
 
 	InputStream instream;
-	
-	boolean querySucess;
-	
-	int methodType = HTTPTYPE_GET;
+		
+	int methodType = HttpFetchMultiThread.HTTPTYPE_GET;
 	private Charset charset;
 	
 	/**
 	 * 不是单例，实际使用的时候get一次就可<br>
 	 * 实际使用的时候如果get多个实例，可能会耗尽连接池
 	 * @return
+	 * @throws IOException 
+	 * @throws CertificateException 
+	 * @throws KeyStoreException 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws KeyManagementException 
 	 */
 	public static HttpFetch getInstance() {
-		return new HttpFetch();
-	}
-	/** 返回共用一个连接池的webFetch
-	 * @param num 值必须大于等于1
-	 */
-	public static ArrayList<HttpFetch> getInstanceLs(int num) {
-		ArrayList<HttpFetch> lsResult = new ArrayList<HttpFetch>();
-		HttpFetch webFetch = new HttpFetch();
-		lsResult.add(webFetch);
-		for (int i = 0; i < num - 1; i++) {
-			HttpFetch webFetch2 = new HttpFetch(webFetch.httpclient);
-			lsResult.add(webFetch2);
-		}
-		return lsResult;
-	}
-	/** 返回与输入的webFetch共用同一个连接池的webFetch */
-	public static HttpFetch getInstance(HttpFetch webFetch) {
-		if (webFetch == null) {
+		try {
 			return new HttpFetch();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
-		return new HttpFetch(webFetch.httpclient);
 	}
-	private HttpFetch() {
-		initial(null);
-		setHeader();
-	}
-	private HttpFetch(DefaultHttpClient httpClient) {
-		initial(httpClient);
-		setHeader();
-	}
-	private void initial(DefaultHttpClient httpClient) {
-		if (httpClient != null) {
-			this.httpclient = httpClient;
-			return;
-		}
-		initialCM();
-		httpclient = new DefaultHttpClient(cm);
-		//设定重试
-		httpclient.setHttpRequestRetryHandler(new MyRetryHandler());
-		//设定http query的参数等
-		HttpParams httpParams = new BasicHttpParams();
-		HttpProtocolParamBean paramsBean = new HttpProtocolParamBean(httpParams); 
-		paramsBean.setVersion(HttpVersion.HTTP_1_1);
-		paramsBean.setContentCharset("UTF8");
-		paramsBean.setUseExpectContinue(true);
-		httpclient.setParams(httpParams);
-		httpclient.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY);
-		httpclient.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, true);
-		//重定向的策略，遇到301或者302也继续重定向
-		 httpclient.setRedirectStrategy(new DefaultRedirectStrategy() {                
-			 public boolean isRedirected(HttpRequest request, HttpResponse response, HttpContext context)  {
-				 boolean isRedirect=false;
-				 try {
-					 isRedirect = super.isRedirected(request, response, context);
-				 } catch (ProtocolException e) {
-					 // TODO Auto-generated catch block
-					 e.printStackTrace();
-				 }
-				 if (!isRedirect) {
-					 int responseCode = response.getStatusLine().getStatusCode();
-					 if (responseCode == 301 || responseCode == 302) {
-						 return true;
-					 }
-				 }
-				 return isRedirect;
-			 }
-		 });
-	}
-	private static PoolingClientConnectionManager initialCM(){
-		if (cm == null) {
-			SchemeRegistry schemeRegistry = new SchemeRegistry();
-			schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-			schemeRegistry.register(new Scheme("https", 443, SSLSocketFactory.getSocketFactory()));
-			cm = new PoolingClientConnectionManager(schemeRegistry);
-			// Increase max total connection to 200
-			cm.setMaxTotal(500);//setMaxTotalConnections(200);
-			// Increase default max connection per route to 20
-			cm.setDefaultMaxPerRoute(20);
-			// Increase max connections for localhost:80 to 50
-			HttpHost localhost = new HttpHost("locahost", 80);
-			cm.setMaxPerRoute(new HttpRoute(localhost), 50);
-		}
-		return cm;
 	
+	/** 返回与输入的webFetch共用同一个连接池的webFetch 
+	 * @throws IOException 
+	 * @throws CertificateException 
+	 * @throws KeyStoreException 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws KeyManagementException */
+	public static HttpFetch getInstance(CookieStore cookieStore) {
+		try {
+			return new HttpFetch();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
+	
+	private HttpFetch() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException {
+		initialCM();
+		initial(cookieStore);
+		setHeader();
+	}
+	private HttpFetch(CookieStore cookieStore) throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException {
+		initialCM();
+		this.cookieStore = cookieStore;
+		initial(cookieStore);
+		setHeader();
+	}
+	
+	private void initial(CookieStore cookieStore) {
+		// Use custom cookie store if necessary.
+		// Use custom credentials provider if necessary.
+		CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+		// Create global request configuration
+		RequestConfig defaultRequestConfig = RequestConfig.custom()
+				.setCookieSpec(CookieSpecs.DEFAULT)
+				.setExpectContinueEnabled(true)
+				.setTargetPreferredAuthSchemes(Arrays.asList(AuthSchemes.NTLM, AuthSchemes.DIGEST))
+				.setProxyPreferredAuthSchemes(Arrays.asList(AuthSchemes.BASIC))
+				.setRedirectsEnabled(true)
+				.build();
+		
+		httpclient = HttpClients.custom()
+                .setConnectionManager(cm)
+                .setDefaultCookieStore(cookieStore)
+                .setDefaultCredentialsProvider(credentialsProvider)
+                .setDefaultRequestConfig(defaultRequestConfig)
+                .setRetryHandler(new MyRetryHandler())
+                .setRedirectStrategy(new DefaultRedirectStrategy())
+                .build();
+	}
+	
+	private void initialCM() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException{
+		// Trust own CA and all self-signed certs
+		SSLContext sslcontext = getSSLContextTrustAll();//SSLContexts.custom().loadTrustMaterial(new TrustSelfSignedStrategy()).build();
+//		 SSLContext sslcontext = SSLContexts.createSystemDefault();
+		// Allow TLSv1 protocol only
+		SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+				sslcontext);
+		
+		Registry<ConnectionSocketFactory> r = RegistryBuilder.<ConnectionSocketFactory>create()
+		        .register("http", PlainConnectionSocketFactory.INSTANCE)
+		        .register("https", sslsf)
+		        .build();
+		
+		cm = new PoolingHttpClientConnectionManager(r);
+		// Increase max total connection to 200
+		cm.setMaxTotal(1000);
+		// Increase default max connection per route to 20
+		cm.setDefaultMaxPerRoute(100);
+		
+		ConnectionConfig connectionConfig = ConnectionConfig.custom()
+				.setMalformedInputAction(CodingErrorAction.IGNORE)
+				.setUnmappableInputAction(CodingErrorAction.IGNORE)
+				.setCharset(Consts.UTF_8)
+				.build();
+		cm.setDefaultConnectionConfig(connectionConfig);	
+	}
+	
 	private void setHeader() {
 		lsHeaders.clear();
 		lsHeaders.add(new BasicHeader("ContentType", "application/x-www-form-urlencoded"));
@@ -226,10 +250,11 @@ public class HttpFetch implements Closeable {
 		}
 		lsHeaders.add(new BasicHeader("Referer", refUri.toString()));
 	}
+	
 	/** 输入网址，开头可以不加http:// */
-	public void setUri(String uri) {
-		if (uri == null) {
-			return;
+	private void setUri(String uri) {
+		if (StringOperate.isRealNull(uri)) {
+			throw new ExceptionNbcParamError("uri cannot be null");
 		}
 		uri = uri.trim().toLowerCase();
 		if (uri.startsWith("//")) {
@@ -249,17 +274,34 @@ public class HttpFetch implements Closeable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		querySucess = false;
 	}
-	public void setUri(URI uri) {
+	private void setUri(URI uri) {
 		if (uri == null) {
-			return;
+			throw new ExceptionNbcParamError("uri cannot be null");
 		}
 		this.uri = uri;
-		querySucess = false;
+	}
+	
+	public void setUriGet(String uri) {
+		setUri(uri);
+		this.methodType = HttpFetchMultiThread.HTTPTYPE_GET; 
+	}
+	public void setUriGet(URI uri) {
+		setUri(uri);
+		this.methodType = HttpFetchMultiThread.HTTPTYPE_GET; 
+	}
+	public void setUriPost(String uri, List<String[]> lsPostKey2Value) {
+		setUri(uri);
+		setPostParam(lsPostKey2Value);
+		this.methodType = HttpFetchMultiThread.HTTPTYPE_POST;
+	}
+	public void setUriPost(String uri, Map<String, String> mapKey2Value) {
+		setUri(uri);
+		setPostParam(mapKey2Value);
+		this.methodType = HttpFetchMultiThread.HTTPTYPE_POST;
 	}
 	/** 设定post提交的参数，设定后默认改为post method */
-	public void setPostParam(List<String[]> lsKey2Value) {
+	private void setPostParam(List<String[]> lsKey2Value) {
 		Map<String, String> mapKey2Value = new HashMap<String, String>();
 		for (String[] strings : lsKey2Value) {
 			mapKey2Value.put(strings[0], strings[1]);
@@ -267,7 +309,7 @@ public class HttpFetch implements Closeable {
 		setPostParam(mapKey2Value);
 	}
 	/** 设定post提交的参数，设定后默认改为post method */
-	public void setPostParam(Map<String, String> mapKey2Value) {
+	private void setPostParam(Map<String, String> mapKey2Value) {
 		try {
 			setPostParamExp(mapKey2Value);
 		} catch (UnsupportedEncodingException e) {
@@ -280,25 +322,16 @@ public class HttpFetch implements Closeable {
 			nvps.add(new BasicNameValuePair(key2value.getKey(), key2value.getValue()));
 		}
 		postEntity = new UrlEncodedFormEntity(nvps);
-		methodType = HTTPTYPE_POST;
-	}
-	public void setCookies(CookieStore cookieStore) {
-		httpclient.setCookieStore(cookieStore);
+		methodType = HttpFetchMultiThread.HTTPTYPE_POST;
 	}
 	/** 运行之后获得cookies */
 	public CookieStore getCookies() {
 		return cookieStore;
 	}
-	/** 是否成功query */
-	public boolean isQuerySucess() {
-		return querySucess;
-	}
+
 	/** 读取的网页的string格式，读取出错则返回null */
 	public String getResponse() {
 		String result = "";
-		if (!querySucess) {
-			return null;
-		}
 		for (String content : readResponse()) {
 			result = result + content + "\n";
 		}
@@ -361,29 +394,16 @@ public class HttpFetch implements Closeable {
 	 * 貌似会自动重定向，如果不会的话，可以解析HttpResponse的头文件，获得重定向的url，然后再次get或者post
 	 *  */	
 	private BufferedReader getResponseReader() throws ClientProtocolException, IOException {
-		if (!querySucess) {
-			return null;
-		}
 		BufferedReader reader = new BufferedReader(new InputStreamReader(instream, charset));
 		return reader;
 	}
-	public boolean download(String fileName) {
-		try {
-			return downloadExp(fileName);
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return false;
+	public void download(String fileName) throws ClientProtocolException, IOException {
+		downloadExp(fileName);
 	}
 	/** 是否成功下载 
 	 * @throws IOException 
 	 * @throws ClientProtocolException */
-	private boolean downloadExp(String fileName) throws ClientProtocolException, IOException {
-		if (!querySucess) {
-			return false;
-		}
+	private void downloadExp(String fileName) throws ClientProtocolException, IOException {
 		String tmp = FileOperate.changeFileSuffix(fileName, "_tmp", null);
 		OutputStream out = FileOperate.getOutputStream(tmp);
 		byte[] b = new byte[BUFFER];
@@ -396,55 +416,52 @@ public class HttpFetch implements Closeable {
 		out.close();
 		out = null;
 		FileOperate.moveFile(true, tmp, fileName);
-		return true;
 	}
 	/** 默认重试2次的query */
+	@Deprecated
 	public boolean query() {
 		return query(2);
 	}
+	
 	/** 重试若干次,在0-100之间 */
+	@Deprecated
 	public boolean query(int retryNum) {
+		try {
+			queryExp();
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		if (retryNum <= 0 || retryNum > 100) {
 			retryNum = 2;
 		}
-		try {
-			//重试好多次
-			int queryNum = 0;
-			while (!querySucess) {
-				getResponseExp();
-				queryNum ++;
-				if (queryNum > retryNum) {
-					break;
-				}
-			}
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return querySucess;
+		return false;
 	}
 	
 	/** 重试若干次,在0-100之间，如果没成功则抛出runtime异常 */
+	public void queryExp() throws ClientProtocolException, UnknownHostException, ConnectException, IOException {
+		queryExp(2);
+	}
+	
+	/** 重试若干次,在0-100之间，如果没成功则抛出runtime异常 */
+	@Deprecated
 	public void queryExp(int retryNum) throws ClientProtocolException, UnknownHostException, ConnectException, IOException {
 		if (retryNum <= 0 || retryNum > 100) {
 			retryNum = 2;
 		}
 		IOException exp = null;
 		//重试好多次
-		int queryNum = 1;
-		while (!querySucess) {
+		boolean isSucess = false;
+		for (int i = 0; i < retryNum; i++) {
 			try {
 				getResponseExp();
+				isSucess = true;
+				break;
 			} catch (IOException e) {
 				exp = e;
 			}
-			queryNum ++;
-			if (queryNum > retryNum) {
-				break;
-			}
 		}
-		if(!querySucess && exp != null) {
+		if(!isSucess && exp != null) {
 			throw exp;
 		}
 	}
@@ -455,8 +472,7 @@ public class HttpFetch implements Closeable {
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	private void getResponseExp() throws ClientProtocolException, IOException {
-		querySucess = false;
+	private void getResponseExp() throws ClientProtocolException, HttpResponseException, IOException {
 		closeStream();
 		instream = null;
 		HttpResponse httpResponse = null;
@@ -465,10 +481,7 @@ public class HttpFetch implements Closeable {
 		int httpStatusCode = httpResponse.getStatusLine().getStatusCode();
 		
 		if (httpStatusCode/100 == 4 || httpStatusCode/100 == 5) {
-			querySucess = false;
-		}
-		synchronized (this) {
-			cookieStore = httpclient.getCookieStore();
+			throw new HttpResponseException(httpStatusCode, "response is not correct, http status code: " + httpStatusCode);
 		}
 		HttpEntity entity = httpResponse.getEntity();
 		ContentType contentType = ContentType.getOrDefault(entity);
@@ -479,18 +492,17 @@ public class HttpFetch implements Closeable {
 		if (entity != null) {
 			instream = entity.getContent();
 		}
-		querySucess = true;
 	}
 	
 	private HttpUriRequest getQuery() {
-		if (methodType == HTTPTYPE_GET) {
+		if (methodType == HttpFetchMultiThread.HTTPTYPE_GET) {
 			httpRequest = new HttpGet(uri);
-		} else if (methodType == HTTPTYPE_POST) {
+		} else if (methodType == HttpFetchMultiThread.HTTPTYPE_POST) {
 			httpRequest = new HttpPost(uri);
 			((HttpPost)httpRequest).setEntity(postEntity);
-			methodType = HTTPTYPE_GET;
+			methodType = HttpFetchMultiThread.HTTPTYPE_GET;
 			postEntity = null;
-		} else if (methodType == HTTPTYPE_HEAD) {
+		} else if (methodType == HttpFetchMultiThread.HTTPTYPE_HEAD) {
 			httpRequest = new HttpHead(uri);
 		}
 		
@@ -507,81 +519,45 @@ public class HttpFetch implements Closeable {
 	
 	public void close() {
 		closeStream();
-		httpclient = null;
-	}
-	public static void ressetCM() {
-		if (cm != null) {
-			cm.shutdown();
-		}
-		cm = null;
-	}
-
-}
-/**
- * 请求重试处理
- * @author zong0jie
- *
- */
-class MyRetryHandler implements HttpRequestRetryHandler {
-
-	
-	public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
-		   if (executionCount >= 5) {
-			      // 如果超过最大重试次数,那么就不要继续了
-			      return false;
-			   }
-			   if (exception instanceof NoHttpResponseException) {
-			      // 如果服务器丢掉了连接,那么就重试
-			      return true;
-			   }
-			   if (exception instanceof SSLHandshakeException) {
-			      // 不要重试SSL握手异常
-			      return false;
-			   }
-			   HttpRequest request = (HttpRequest) context.getAttribute(
-			ExecutionContext.HTTP_REQUEST);
-			   boolean idempotent = !(request instanceof
-			   HttpEntityEnclosingRequest);
-			   if (idempotent) {
-			      // 如果请求被认为是幂等的,那么就重试
-			      return true;
-			   }
-
-		return false;
-	}
-	
-}
-
-class WebFetchIdleConnectionMonitorThread extends Thread {
-	private final ClientConnectionManager connMgr;
-	private volatile boolean shutdown;
-
-	public WebFetchIdleConnectionMonitorThread(ClientConnectionManager connMgr) {
-		super();
-		this.connMgr = connMgr;
-	}
-
-	@Override
-	public void run() {
 		try {
-			while (!shutdown) {
-				synchronized (this) {
-					wait(5000);
-					// 关闭过期连接
-					connMgr.closeExpiredConnections();
-					// 可选地，关闭空闲超过30秒的连接
-					connMgr.closeIdleConnections(300, TimeUnit.SECONDS);
-				}
+			httpclient.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Trust every server - dont check for any certificate
+	 * @throws NoSuchAlgorithmException 
+	 * @throws KeyManagementException 
+	 */
+	private static SSLContext getSSLContextTrustAll() throws NoSuchAlgorithmException, KeyManagementException {
+		// Create a trust manager that does not validate certificate chains
+		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+				return new java.security.cert.X509Certificate[] {};
 			}
-		} catch (InterruptedException ex) {
-			// 终止
-		}
-	}
 
-	public void shutdown() {
-		shutdown = true;
-		synchronized (this) {
-			notifyAll();
-		}
+			public void checkClientTrusted(X509Certificate[] chain,
+					String authType) throws CertificateException {
+			}
+
+			public void checkServerTrusted(X509Certificate[] chain,
+					String authType) throws CertificateException {
+			}
+		} };
+		SSLContext sc = SSLContext.getInstance("TLS");
+		sc.init(null, trustAllCerts, new java.security.SecureRandom());
+		HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+		return sc;
 	}
+	 
+//	public static void ressetCM() {
+//		if (cm != null) {
+//			cm.shutdown();
+//		}
+//		cm = null;
+//	}
+
 }
+
