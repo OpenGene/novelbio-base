@@ -103,6 +103,7 @@ public abstract class MTmulitCopeInfo<T extends MTrecordCoper<K>, K extends MTRe
 		isFinished = false;
 		mtOneThreadReader.setLsCopedThread(lsCopeRecorders);
 		Thread thread = new Thread(mtOneThreadReader);
+		thread.setDaemon(true);
 		thread.start();
 		for (T copeRecorder : lsCopeRecorders) {
 			copeRecorder.setRunGetInfo(this);

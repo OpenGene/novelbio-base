@@ -18,6 +18,7 @@ import org.apache.hadoop.fs.FileSystem;
 import com.novelbio.base.PathDetail;
 import com.novelbio.base.StringOperate;
 
+@Deprecated
 public class FileHadoop extends File {
 	private static final long serialVersionUID = 8341313247682247317L;
 	protected static final String hdfsSymbol = "hdfs:";

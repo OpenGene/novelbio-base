@@ -13,7 +13,27 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import com.thoughtworks.xstream.core.util.Base64Encoder;
-
+/**
+ * <pre>
+ * 因为某些国家的进口管制限制，Java发布的运行环境包中的加解密有一定的限制。比如默认不允许256位密钥的AES加解密，解决方法就是修改策略文件。 
+ * 
+ * 官方网站提供了JCE无限制权限策略文件的下载： 
+ * 
+ * JDK6的下载地址： 
+ * http://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html 
+ * 
+  *  JDK7的下载地址： 
+  *  http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html 
+ * 
+ * 下载后解压，可以看到local_policy.jar和US_export_policy.jar以及readme.txt。 
+ * 
+ * 如果安装了JRE，将两个jar文件放到%JRE_HOME%\lib\security下覆盖原来文件，记得先备份。 
+ * 
+ * 如果安装了JDK，将两个jar文件也放到%JDK_HOME%\jre\lib\security下。 
+ * </pre>
+ * @author zong0jie
+ * @date 2016年3月21日
+ */
 public class SecurityCipher {
 	private static final String IV = "0102030405060708";
 	private static final String algo = "AES/CBC/PKCS5Padding";

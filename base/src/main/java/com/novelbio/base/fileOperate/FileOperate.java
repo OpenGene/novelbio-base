@@ -999,7 +999,7 @@ public class FileOperate {
 		return Files.newInputStream(file);
 	}
 	
-	public static SeekablePathInputStream getSeekablePathStream(Path path) {
+	public static SeekablePathInputStream getSeekablePathInputStream(Path path) {
 		return new SeekablePathInputStream(path);
 	}
 	

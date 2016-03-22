@@ -565,6 +565,8 @@ public class CmdOperate extends RunProcess<String> {
 		setStdStream();
 		setErrorStream();
 		
+		errorGobbler.setDaemon(true);
+		outputGobbler.setDaemon(true);
 		errorGobbler.start();
 		outputGobbler.start();
 //		cmdRunInfo.startWriteRunInfo();
