@@ -251,10 +251,7 @@ public class CmdPath {
 		
 		for (String inFile : setInput) {
 			String inTmpName = mapName2TmpName.get(inFile);
-			logger.debug("copy input file from {} to {}", inFile, inTmpName);
 			FileOperate.copyFileFolder(inFile, inTmpName, true);
-			logger.debug("finish copy {} to {}, size is {}", inFile, inTmpName);
-			logger.debug("{} size is {}", inTmpName, FileOperate.getFileSizeLong(inTmpName));
 		}
 	}
 	
@@ -332,7 +329,8 @@ public class CmdPath {
 		boolean stdOut = false;
 		boolean errOut = false;
 		
-		ConvertCmdTmp convertCmdTmp = new ConvertCmdTmp(isRedirectInToTmp, isRedirectOutToTmp, setInput, setOutput, mapName2TmpName);
+		ConvertCmdTmp convertCmdTmp = new ConvertCmdTmp(isRedirectInToTmp, isRedirectOutToTmp,
+				setInput, setOutput, mapName2TmpName);
 		ConvertCmd convertCmdHdfs2Local = new ConvertCmd() {
 			@Override
 			String convert(String subCmd) {

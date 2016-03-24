@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.NoRouteToHostException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
@@ -260,7 +261,7 @@ public class HttpFetchMultiThread implements IHttpFetch, Closeable {
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	private HttpRequestAndResponse getResponseExp(URI uri) throws ClientProtocolException, IOException {
+	private HttpRequestAndResponse getResponseExp(URI uri) throws NoRouteToHostException, HttpResponseException, ClientProtocolException, IOException {
 		HttpRequestAndResponse httpRequestAndResponse = new HttpRequestAndResponse();
 		httpRequestAndResponse.setLsHeader(lsHeaders);
 		httpRequestAndResponse.setUri(uri);
@@ -276,7 +277,7 @@ public class HttpFetchMultiThread implements IHttpFetch, Closeable {
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	private HttpRequestAndResponse getResponseExp(URI uri, List<String[]> lsPostParam) throws ClientProtocolException, IOException {
+	private HttpRequestAndResponse getResponseExp(URI uri, List<String[]> lsPostParam) throws NoRouteToHostException, HttpResponseException, ClientProtocolException, IOException {
 		HttpRequestAndResponse httpRequestAndResponse = new HttpRequestAndResponse();
 		httpRequestAndResponse.setLsHeader(lsHeaders);
 		httpRequestAndResponse.setPostParam(lsPostParam);
@@ -419,7 +420,7 @@ class HttpRequestAndResponse {
 		int httpStatusCode = httpResponse.getStatusLine().getStatusCode();
 		
 		if (httpStatusCode/100 == 4 || httpStatusCode/100 == 5) {
-			throw new HttpResponseException(httpStatusCode, "response is not correct, http status code: " + httpStatusCode);
+			throw new HttpResponseException(httpStatusCode, "response is not correct, http status code: " + httpStatusCode + " url " + uri.toString());
 		}
 		HttpEntity entity = httpResponse.getEntity();
 		ContentType contentType = ContentType.getOrDefault(entity);

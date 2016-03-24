@@ -379,7 +379,7 @@ public class CmdOperate extends RunProcess<String> {
 		cmdPath.addCmdParam(param);
 	}
 	
-	/** 返回执行的具体cmd命令，不会将文件路径删除，仅给相对路径 */
+	/** 返回执行的具体cmd命令，不会将文件路径删除，给绝对路径 */
 	public String getCmdExeStr() {
 		return getCmdExeStrReal();
 	}
@@ -565,6 +565,8 @@ public class CmdOperate extends RunProcess<String> {
 		setStdStream();
 		setErrorStream();
 		
+		errorGobbler.setDaemon(true);
+		outputGobbler.setDaemon(true);
 		errorGobbler.start();
 		outputGobbler.start();
 //		cmdRunInfo.startWriteRunInfo();

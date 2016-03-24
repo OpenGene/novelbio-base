@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
@@ -39,6 +40,7 @@ public class TestCmdPath2 {
 		cmd5();
 		cmd6();
 		cmd7();
+		cmd8();
 		cmdConvertHdfs();
 		cmdConvertGetFileName();
 	}
@@ -250,7 +252,42 @@ public class TestCmdPath2 {
 		txtWrite.close();
 		cmdPath.moveFileOut();
 		
-		assertEquals(true, FileOperate.isFileExistAndBigThanSize(FileOperate.getPathName(outFile) + resultFileName, 0));
+		assertEquals(true, FileOperate.isFileExistAndBigThan0(FileOperate.getPathName(outFile) + resultFileName));
+		FileOperate.DeleteFileFolder(outFile);
+	}
+	
+	private void cmd8() {
+		CmdPath cmdPath = new CmdPath();
+		List<String> lsCmd = new ArrayList<>();
+		String inFile1 = "src/test/resources/testTrinity.fa";
+		String inFile2 = "src/test/resources/testTrinity2.fa";
+		String outFile = "src/test/CmdOperateOut2/test";
+		lsCmd.add("bwa-index");
+		lsCmd.add("--inPath=" + inFile1 + "," + inFile2);
+		lsCmd.add(">");
+		lsCmd.add(outFile);
+		cmdPath.setLsCmd(lsCmd);
+		cmdPath.setRedirectInToTmp(true);
+		cmdPath.setRedirectOutToTmp(true);
+		cmdPath.addCmdParamInput(inFile1, true);
+		cmdPath.addCmdParamInput(inFile2, true);
+		
+		cmdPath.copyFileIn();
+		String[] ss = cmdPath.getRunCmd();
+		String inFileTmp1 = PathDetail.getRandomWithSep(tmpPath, "resources1") + "testTrinity.fa";
+		String inFileTmp2 = PathDetail.getRandomWithSep(tmpPath, "resources1") + "testTrinity2.fa";
+		assertEquals("--inPath="+ inFileTmp1 + "," + inFileTmp2, ss[1]);
+		System.out.println(ArrayOperate.cmbString(ss, " "));
+		String resultFileName = "test2.fatestResult.txt";
+		//往结果中写个文件 */
+		String outTmp = cmdPath.getSaveStdTmp();
+		Assert.assertEquals(FileOperate.changeFileSuffix(outFile, "_tmp", null), outTmp);
+		TxtReadandWrite txtWrite = new TxtReadandWrite(FileOperate.getPathName(outTmp) + resultFileName, true);
+		txtWrite.writefileln("testCmdPath");
+		txtWrite.close();
+		cmdPath.moveFileOut();
+		
+		assertEquals(true, FileOperate.isFileExistAndBigThan0(FileOperate.getPathName(outFile) + resultFileName));
 		FileOperate.DeleteFileFolder(outFile);
 	}
 	

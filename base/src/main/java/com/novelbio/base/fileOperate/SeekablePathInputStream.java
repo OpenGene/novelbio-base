@@ -80,7 +80,7 @@ public class SeekablePathInputStream extends InputStream {
      * @throws EOFException If EOF is reached before buffer is filled
      */
 	public void readFully(byte b[], int offset, final int length) throws IOException {
-		ByteBuffer byteBuffer = ByteBuffer.wrap(b, offset, length);		
+		ByteBuffer byteBuffer = ByteBuffer.wrap(b, offset, length);
 		int n = 0;
 		while (n < length) {
 			int count = seekableByteChannel.read(byteBuffer);

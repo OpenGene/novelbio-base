@@ -54,12 +54,12 @@ class RandomFileSeekable implements RandomFileInt {
 	Path path;
 	public RandomFileSeekable(String file) {
 		this.path = FileOperate.getPath(file);
-		this.fsDataInputStream = FileOperate.getSeekablePathStream(path);
+		this.fsDataInputStream = FileOperate.getSeekablePathInputStream(path);
 	}
 	
 	public RandomFileSeekable(Path path) {
 		this.path = path;
-		this.fsDataInputStream = FileOperate.getSeekablePathStream(path);
+		this.fsDataInputStream = FileOperate.getSeekablePathInputStream(path);
 	}
 	
 	@Override
