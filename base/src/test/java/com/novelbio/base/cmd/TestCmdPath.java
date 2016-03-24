@@ -15,5 +15,6 @@ public class TestCmdPath {
  
   @Test 
   public void testCallSystemStaticMethod() { 
+	  System.out.println("============");
   } 
 }

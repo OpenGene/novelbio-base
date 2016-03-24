@@ -1,16 +1,22 @@
 package com.novelbio.base.fileOperate;
 
-import hdfs.jsr203.HadoopFileSystemProvider;
-import hdfs.jsr203.HadoopPath;
-
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -36,6 +42,9 @@ import com.novelbio.base.StringOperate;
 import com.novelbio.base.cmd.CmdOperate;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.dataStructure.PatternOperate;
+
+import hdfs.jsr203.HadoopFileSystemProvider;
+import hdfs.jsr203.HadoopPath;
 
 public class FileOperate {
 	private static final Logger logger = Logger.getLogger(FileOperate.class);
@@ -181,6 +190,219 @@ public class FileOperate {
 		}
 		
 		return null;// TODO: handle exception
+	}
+	
+	/** 
+     * 
+     *读取文件  
+     *20160322 duping
+    * @param filePath 
+     */  
+    public static String readFile(String filePath) {  
+        FileInputStream fileInputStream = null;
+        String result="";
+        try {  
+        		// 获取源文件和目标文件的输入输出流    
+        		fileInputStream = new FileInputStream(filePath);  
+        		// 获取输入输出通道  
+            FileChannel fileChannel = fileInputStream.getChannel();  
+            	//分配内存
+            ByteBuffer buffer = ByteBuffer.allocate(1024*10);  
+            	// 将通道中的数据读取到缓冲区中
+            fileChannel.read(buffer);
+            buffer.flip();
+            Charset  charset = Charset.defaultCharset();  
+            result=charset.decode(buffer).toString();
+            buffer.clear();
+            buffer=null;  
+        } catch (Exception e) {  
+        	e.printStackTrace();
+        	throw new ExceptionFileError("cannot get file " + filePath);
+        } finally {  
+            if (fileInputStream != null ) {   
+                try {  
+                	fileInputStream.close();  
+                } catch (IOException e) {  
+                	throw new ExceptionFileError("file stream can not close:" + filePath, e);
+                 
+                }  
+            }  
+        }  
+        	return result;
+    }  
+    
+     /**
+        *  读取java包的资源文件
+       *  20160322 duping
+      * @param clazz 类 的路径
+      * @param filePath  资源名称
+      * @return
+      */
+    public static String readFile(Class<?> clazz,String filePath) {  
+    	 StringBuilder stringBuilder=new StringBuilder();
+    	   InputStream inputStream=null;
+    	   try {  
+    	     inputStream=clazz.getResourceAsStream(filePath); 
+    	     BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(inputStream));
+    	     String str="";
+    	     while((str=bufferedReader.readLine())!=null){
+    	    	 stringBuilder.append(str+"\n"); 
+    	   		}
+			} catch (Exception e) {  
+				throw new ExceptionFileError("cannot get file " + filePath);
+			} finally {  
+			    if (inputStream != null ) {   
+			        try {  
+			        	inputStream.close();  
+			        } catch (IOException e) {  
+			        	throw new ExceptionFileError("file stream can not close:" + filePath, e);
+			        }  
+			    }  
+			}
+			  return stringBuilder.toString();
+    }  
+    
+	 /**
+	  *  写文件20160322 duping
+	  * @param filePath  文件路径
+	  * @param fileContent 文件内容
+	  */
+	public static void writeFile(String filePath,String fileContent) {
+		FileOutputStream fos = null;
+		FileChannel fc = null;
+		ByteBuffer buffer = null;
+		try {
+				File file=new File(filePath);
+				//不存在创建文件
+				if(!file.exists()){
+					file.createNewFile();
+				} 
+				  
+				fos = new FileOutputStream(file); 
+				fc = fos.getChannel();
+				//自动缓冲区大小
+				buffer = ByteBuffer.wrap(fileContent.getBytes());
+				fos.flush();
+				fc.write(buffer);
+
+		} catch (FileNotFoundException e) {
+			throw new ExceptionFileError("cannot get file " + filePath);
+		 
+		} catch (IOException e) {
+			throw new ExceptionFileError("file content size " + filePath);
+		} finally {
+			try {
+				fc.close();
+				fos.close();
+			} catch (IOException e) {
+				throw new ExceptionFileError("file stream can not close:" + filePath, e);
+			}
+		}
+	}
+	
+	/**
+	 * 清空文件内容20160322 duping
+	 * @param filePath
+	 */
+	 public static void clearFileContent(String filePath) { 
+	 
+		try { 
+			File file=new File(filePath);
+			//判断如果文件存在 
+			if(file.exists()){ 
+				FileOutputStream out = new FileOutputStream(filePath,false); 
+				out.write(new String("").getBytes()); 
+				out.close(); 
+			} 
+		 }catch (Exception e) { 
+			throw new ExceptionFileError("clear file content fail ,path:" + filePath, e);
+		} 
+	 } 
+    
+    	/**
+    	 * 20160322 duping
+    	 * @param filePath 文件夹名称
+    	 * @return
+    	 */
+    public static String getServerAbsolutePath(String filePath){
+    	
+    	String classPath =getCurrentClassAbsolutePath();
+    	
+		String absolutePath = classPath.substring(0, classPath.indexOf("WEB-INF")) + "/"+filePath+"/";  
+		
+		 return absolutePath; 
+    	
+    } 
+    
+	/**
+	 * 20160322 duping
+	 *  得到当前class的绝对位置
+	 * @return
+	 */
+    public static String getCurrentClassAbsolutePath(){
+    	
+     	String classPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
+     	
+     	return classPath;
+    	
+    }
+    
+    /**
+       * 得到一个文件夹下的所有类 
+     * 20160322 duping
+     * @param packageToScan
+     * @return
+     */
+	public static List<String> getClassName(String packageToScan) {
+
+		List<String> classNames = new ArrayList<String>();
+
+		try {
+			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+			String rootPathToScan = packageToScan.replaceAll("\\.", "/");
+			URL rootURLToScan = classLoader.getResource(rootPathToScan); 
+			
+			File rootDirectoryToScan = new File(rootURLToScan.toURI());
+			File[] artifacts = rootDirectoryToScan.listFiles();
+			for (File artifact : artifacts) {
+				getClassName(packageToScan, artifact, classNames);
+			}
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+			throw new ExceptionFileError("Invalid URL address:", e);
+		}
+		
+		  // 过滤其他文件
+			for (int j = 0; j < classNames.size(); j++) {
+				String className = classNames.get(j);
+				if (className.indexOf(".class") ==-1) { 
+					classNames.remove(className);
+				}
+		}
+
+		return classNames;
+
+	}
+	
+	/**
+	 * 添加所有的class
+	 * 20160322 duping
+	 * @param packageToScan
+	 * @param artifact
+	 * @param classNames
+	 */
+	private static void getClassName(String packageToScan, File artifact, List<String> classNames) {
+
+		if (artifact.isFile()) {
+
+			classNames.add(packageToScan + "." + artifact.getName().replace(".class", ""));
+		} else {
+			String sonPackageToScan = packageToScan + "." + artifact.getName();
+			File[] sonArtifacts = artifact.listFiles();
+			for (File sonArtifact : sonArtifacts) {
+				getClassName(sonPackageToScan, sonArtifact, classNames);
+			}
+		}
 	}
 	
 	/**
@@ -999,7 +1221,7 @@ public class FileOperate {
 		return Files.newInputStream(file);
 	}
 	
-	public static SeekablePathInputStream getSeekablePathStream(Path path) {
+	public static SeekablePathInputStream getSeekablePathInputStream(Path path) {
 		return new SeekablePathInputStream(path);
 	}
 	

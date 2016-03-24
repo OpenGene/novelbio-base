@@ -14,6 +14,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.poi.EncryptedDocumentException;
+import org.apache.poi.util.Beta;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -277,4 +279,27 @@ public class TestFileOperate {
 		Assert.assertEquals(true, FileOperate.isFilePathSame(name1, name2));
 
 	}
+	
+	static  String  filePathToReadFile="/home/novelbio/git/base/base/src/test/java/com/novelbio/base/fileOperate/TestFileOperate.java";
+	static  String  jarPathToReadFile="/home/novelbio/.m2/repository/org/apache/poi/poi/3.8/poi-3.8-sources.jar";
+	
+	@Test
+	public void testReadFile() {
+		String fileContent=FileOperate.readFile(filePathToReadFile);
+		
+		boolean flag=fileContent.length()>0;
+		Assert.assertTrue("文件没有读取到",flag);
+		
+		//System.out.println("jar path:"+EncryptedDocumentException.class.getResource("").getPath() );
+		
+		//读取jar的配置文件
+		String javaFileContent=FileOperate.readFile(EncryptedDocumentException.class,"Version.class");
+		System.out.println(javaFileContent);
+		boolean status=javaFileContent.length()>0;
+		Assert.assertTrue("文件没有读取到",status);
+		
+		
+
+	}
+	
 }
