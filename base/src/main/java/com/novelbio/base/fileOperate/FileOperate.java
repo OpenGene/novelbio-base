@@ -1,6 +1,7 @@
 package com.novelbio.base.fileOperate;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
@@ -173,7 +174,7 @@ public class FileOperate {
 		} catch (Exception e) {
 			return false;// TODO: handle exception
 		} finally{
-			closeOs(fs);
+			close(fs);
 		}
 	}
 	
@@ -186,7 +187,7 @@ public class FileOperate {
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally{
-			closeIs(fs);
+			close(fs);
 		}
 		
 		return null;// TODO: handle exception
@@ -2193,32 +2194,32 @@ public class FileOperate {
 	}
 	
 	/**
-	 * 关闭输入流
+	 * 关闭流
 	 * @date 2015年11月24日
-	 * @param is
+	 * @param stream
 	 */
-	public static void closeIs(InputStream is){
+	public static void close(Closeable stream){
 		try {
-			if (is != null) {
-				is.close();
+			if (stream != null) {
+				stream.close();
 			}
 		} catch (Exception e) {
 		}
 	}
 	
-	/**
-	 * 关闭输出流
-	 * @date 2015年11月24日
-	 * @param os
-	 */
-	public static void closeOs(OutputStream os){
-		try {
-			if (os != null) {
-				os.close();
-			}
-		} catch (Exception e) {
-		}
-	}
+//	/**
+//	 * 关闭输出流
+//	 * @date 2015年11月24日
+//	 * @param os
+//	 */
+//	public static void closeOs(OutputStream os){
+//		try {
+//			if (os != null) {
+//				os.close();
+//			}
+//		} catch (Exception e) {
+//		}
+//	}
 	
 	public static class ExceptionFileNotExist extends RuntimeException {
 		private static final long serialVersionUID = 8125052068436320509L;
