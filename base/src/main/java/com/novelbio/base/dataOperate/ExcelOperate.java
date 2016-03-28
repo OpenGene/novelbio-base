@@ -82,13 +82,13 @@ public class ExcelOperate implements Closeable {
 		
 		InputStream is =  FileOperate.getInputStream(filename);
 		if (isExcel2003(is)) {
-			FileOperate.closeIs(is);
+			FileOperate.close(is);
 			return EXCEL2003;
 		}
 		
 		is = FileOperate.getInputStream(filename);
 		if (isExcel2007(is)) {
-			FileOperate.closeIs(is);
+			FileOperate.close(is);
 			return EXCEL2007;
 		}
 		
@@ -100,7 +100,7 @@ public class ExcelOperate implements Closeable {
 			new HSSFWorkbook(is);
 			return true;
 		} catch (Exception e) {
-			FileOperate.closeIs(is);
+			FileOperate.close(is);
 		}
 		return false;
 	}
@@ -110,7 +110,7 @@ public class ExcelOperate implements Closeable {
 			new XSSFWorkbook(is);
 			return true;
 		} catch (Exception e) {
-			FileOperate.closeIs(is);
+			FileOperate.close(is);
 		}
 		return false;
 	}
@@ -152,7 +152,7 @@ public class ExcelOperate implements Closeable {
 					wb = new XSSFWorkbook(is);
 				}
 				sheet = wb.getSheetAt(0);
-				FileOperate.closeIs(is);
+				FileOperate.close(is);
 			} else {
 				if (version == EXCEL2003) {
 					wb = new HSSFWorkbook();
@@ -804,7 +804,7 @@ public class ExcelOperate implements Closeable {
 			//end by fans.fan
 			wb.write(os);
 		} finally{
-			FileOperate.closeOs(os);
+			FileOperate.close(os);
 		}
 	}
 	
