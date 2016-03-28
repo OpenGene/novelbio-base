@@ -1,6 +1,7 @@
 package com.novelbio.base.fileOperate;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
@@ -173,7 +174,7 @@ public class FileOperate {
 		} catch (Exception e) {
 			return false;// TODO: handle exception
 		} finally{
-			closeOs(fs);
+			close(fs);
 		}
 	}
 	
@@ -186,7 +187,7 @@ public class FileOperate {
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally{
-			closeIs(fs);
+			close(fs);
 		}
 		
 		return null;// TODO: handle exception
@@ -231,10 +232,61 @@ public class FileOperate {
         	return result;
     }  
     
+	 /**
+	  　* 　读取util.ftl模板的控件内容
+	  　*　20160322 duping
+	  　* @param filePath	　　文件的绝对路径
+	  　* @param startSign   开始标签
+	  　* @param endSign	　　结束标签
+	  　* @return
+	  **/
+    public static String readFtlTempalteWidget(String filePath,String startSign,String endSign) {  
+    	StringBuilder stringBuilder=new StringBuilder();
+ 	   InputStream inputStream=null;
+ 	   BufferedReader bufferedReader=null;
+ 	   try {  
+ 	     
+ 		   inputStream=new FileInputStream(filePath);    
+ 	      bufferedReader=new BufferedReader(new InputStreamReader(inputStream));
+ 	      String str="";
+ 	      boolean start=false;
+ 	     
+ 	      while((str=bufferedReader.readLine())!=null){
+ 	    	 if(str.indexOf(startSign) !=-1){
+ 	    		 stringBuilder.append(str+"\n");
+ 	    		 start=true;
+ 	    		 if(null == endSign || endSign.length() == 0){
+ 	    			 break;
+ 	    		 }
+ 	    	 }
+ 	    	 if(null != endSign && endSign.length() > 0 && start){
+ 	    		 
+ 	    		 stringBuilder.append(str+"\n");
+ 	    		 if(str.indexOf(endSign) != -1){
+ 	    			 break; 
+ 	    		 }
+ 	    	  }
+ 	   	    }
+		 } catch (Exception e) {  
+				throw new ExceptionFileError("cannot get file " + filePath);
+		  } finally {  
+			    if (inputStream != null ) {   
+			        try {  
+			        	   bufferedReader.close();
+			        	   inputStream.close();   
+			        } catch (IOException e) {  
+			        	throw new ExceptionFileError("file stream can not close:" + filePath, e);
+			        }  
+			    }  
+			
+			}
+			  return stringBuilder.toString();
+    }  
+    
      /**
         *  读取java包的资源文件
        *  20160322 duping
-      * @param clazz 类 的路径
+      * @param clazz 类 的路径 
       * @param filePath  资源名称
       * @return
       */
@@ -395,7 +447,7 @@ public class FileOperate {
 
 		if (artifact.isFile()) {
 
-			classNames.add(packageToScan + "." + artifact.getName().replace(".class", ""));
+			classNames.add(packageToScan + "." + artifact.getName());
 		} else {
 			String sonPackageToScan = packageToScan + "." + artifact.getName();
 			File[] sonArtifacts = artifact.listFiles();
@@ -2193,32 +2245,32 @@ public class FileOperate {
 	}
 	
 	/**
-	 * 关闭输入流
+	 * 关闭流
 	 * @date 2015年11月24日
-	 * @param is
+	 * @param stream
 	 */
-	public static void closeIs(InputStream is){
+	public static void close(Closeable stream){
 		try {
-			if (is != null) {
-				is.close();
+			if (stream != null) {
+				stream.close();
 			}
 		} catch (Exception e) {
 		}
 	}
 	
-	/**
-	 * 关闭输出流
-	 * @date 2015年11月24日
-	 * @param os
-	 */
-	public static void closeOs(OutputStream os){
-		try {
-			if (os != null) {
-				os.close();
-			}
-		} catch (Exception e) {
-		}
-	}
+//	/**
+//	 * 关闭输出流
+//	 * @date 2015年11月24日
+//	 * @param os
+//	 */
+//	public static void closeOs(OutputStream os){
+//		try {
+//			if (os != null) {
+//				os.close();
+//			}
+//		} catch (Exception e) {
+//		}
+//	}
 	
 	public static class ExceptionFileNotExist extends RuntimeException {
 		private static final long serialVersionUID = 8125052068436320509L;
