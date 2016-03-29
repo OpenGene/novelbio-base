@@ -142,7 +142,7 @@ public class PathDetail {
 	private static void deleteFileFolder(Path file, String parentPath) {
 		parentPath = FileOperate.getCanonicalPath(parentPath);
 		boolean isClear = true;
-		if (FileOperate.isFileExist(file)) {
+		if (FileOperate.isFileExistAndNotDir(file)) {
 			long createTime = DateUtil.getNowTimeLong() - FileOperate.getTimeLastModify(file);
 			if (createTime > tmpFileRemainDay * 24*3600 * 1000) {
 				FileOperate.delFile(file);

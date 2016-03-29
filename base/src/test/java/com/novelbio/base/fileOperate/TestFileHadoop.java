@@ -43,9 +43,9 @@ public class TestFileHadoop {
 		txtRead.close();
 		
 //		fileTxt.deleteOnExit();
-		Assert.assertTrue(FileOperate.isFileExist(fileTxt));
+		Assert.assertTrue(FileOperate.isFileExistAndNotDir(fileTxt));
 		
 		System.out.println(fileTxt.delete());
-		Assert.assertFalse(FileOperate.isFileExist(fileTxt));
+		Assert.assertFalse(FileOperate.isFileExistAndNotDir(fileTxt));
 	}
 }

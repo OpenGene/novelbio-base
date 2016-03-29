@@ -14,8 +14,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.poi.EncryptedDocumentException;
-import org.apache.poi.util.Beta;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -103,7 +101,7 @@ public class TestFileOperate {
 		Assert.assertEquals(5, lsPaths.size());
 		int folderNum = 0, fileNum = 0;
 		for (Path path : lsPaths) {
-			if (FileOperate.isFileExist(path)) {
+			if (FileOperate.isFileExistAndNotDir(path)) {
 				fileNum++;
 			} else {
 				folderNum++;
@@ -154,7 +152,7 @@ public class TestFileOperate {
 		txtWrite.writefileln("aaaaa");
 		txtWrite.writefileln("bbbbb");
 		txtWrite.close();
-		Assert.assertTrue(FileOperate.isFileExist(path));
+		Assert.assertTrue(FileOperate.isFileExistAndNotDir(path));
 		
 		//覆盖写入
 		os = FileOperate.getOutputStream(path, false);
@@ -224,7 +222,7 @@ public class TestFileOperate {
 	
 	@Test
 	public void tsetIsFileExistAndSize() {
-		Assert.assertFalse(FileOperate.isFileExist(folder));
+		Assert.assertFalse(FileOperate.isFileExistAndNotDir(folder));
 		Assert.assertTrue(FileOperate.isFileDirectory(folder));
 		Assert.assertTrue(FileOperate.isFileExist(folder + "/file1.fa"));
 		Assert.assertFalse(FileOperate.isFileDirectory(folder + "/file1.fa"));
@@ -279,27 +277,4 @@ public class TestFileOperate {
 		Assert.assertEquals(true, FileOperate.isFilePathSame(name1, name2));
 
 	}
-	
-	static  String  filePathToReadFile="/home/novelbio/git/base/base/src/test/java/com/novelbio/base/fileOperate/TestFileOperate.java";
-	static  String  jarPathToReadFile="/home/novelbio/.m2/repository/org/apache/poi/poi/3.8/poi-3.8-sources.jar";
-	
-	@Test
-	public void testReadFile() {
-		String fileContent=FileOperate.readFile(filePathToReadFile);
-		
-		boolean flag=fileContent.length()>0;
-		Assert.assertTrue("文件没有读取到",flag);
-		
-		//System.out.println("jar path:"+EncryptedDocumentException.class.getResource("").getPath() );
-		
-		//读取jar的配置文件
-		String javaFileContent=FileOperate.readFile(EncryptedDocumentException.class,"Version.class");
-		System.out.println(javaFileContent);
-		boolean status=javaFileContent.length()>0;
-		Assert.assertTrue("文件没有读取到",status);
-		
-		
-
-	}
-	
 }

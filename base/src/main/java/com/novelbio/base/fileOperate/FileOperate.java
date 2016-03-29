@@ -624,7 +624,7 @@ public class FileOperate {
 	 */
 	//TODO 测试
 	public static long getFileSizeLong(Path path) {
-		if (!Files.exists(path)) {
+		if (path == null || !Files.exists(path)) {
 			return -1;
 		}
 		if (!isFileDirectory(path)) {
@@ -1041,7 +1041,7 @@ public class FileOperate {
 		if (suffix == null || suffix.equals("*")) {
 			suffix = ".*";
 		}
-		if (!Files.exists(file)) {
+		if (file == null || !Files.exists(file)) {
 			return new ArrayList<>();
         }
 		PredicateFileName predicateFileName = new PredicateFileName(filename, suffix);
@@ -1099,7 +1099,7 @@ public class FileOperate {
 		if (suffix == null || suffix.equals("*")) {
 			suffix = ".*";
 		}
-		if (!Files.exists(file)) {
+		if (file == null || !Files.exists(file)) {
 			return new ArrayList<>();
         }
 		PredicateFileName predicateFileName = new PredicateFileName(filename, suffix);
@@ -1240,6 +1240,9 @@ public class FileOperate {
 
 	public static void createFolders(Path path) {
 		try {
+			if (path == null) {
+				return;
+			}
 			if (isFileDirectory(path)) return;
 			if (Files.exists(path)) throw new ExceptionFileError("folderPath is an exist file " + path);
 			
@@ -1374,7 +1377,7 @@ public class FileOperate {
 	 * @return
 	 */
 	public static void copyFile(Path oldfile, Path pathNew, boolean cover) {
-		if (!isFileExist(oldfile)) {
+		if (!isFileExistAndNotDir(oldfile)) {
 			throw new ExceptionNbcFile("no file exist: " + oldfile);
         }
 		
@@ -1644,7 +1647,7 @@ public class FileOperate {
 	//TODO 待测试
 	public static void moveFile(Path oldFile, String newPathName, boolean cover) {
 		Path pathNew = FileOperate.getPath(newPathName);
- 		if (isFileExist(oldFile)) {
+ 		if (isFileExistAndNotDir(oldFile)) {
  			moveSingleFile(oldFile, pathNew, cover);
 		} else if (isFileDirectory(oldFile)) {
 			moveFoldFile(oldFile, newPathName, cover);
@@ -1663,7 +1666,7 @@ public class FileOperate {
 	 */
 	//TODO 待测试
 	private static void moveSingleFile(Path oldPath, Path newPath, boolean cover) {
-		if (!isFileExist(oldPath)) return;
+		if (!isFileExistAndNotDir(oldPath)) return;
 		if (isFilePathSame(FileOperate.getFileName(oldPath), newPath.toString())) {
 			return;
         }
@@ -1727,7 +1730,7 @@ public class FileOperate {
 		final String newPathSep = addSep(newfolder);
 		Path pathNew = getPath(newPathSep);
 		
-		if (isFileExist(pathNew)) {
+		if (isFileExistAndNotDir(pathNew)) {
 			if (cover) {
 				try {
 					Files.delete(pathNew);
@@ -1839,32 +1842,17 @@ public class FileOperate {
 			return false;
 		}
 		Path file = getPath(fileName);
-		return isFileExist(file);
+		return isFileExistAndNotDir(file);
 	}
+	
 	/**
 	 * 判断文件是否存在，并且不是文件夹，给的是绝对路径
 	 * @param fileName 如果为null, 直接返回false
 	 * @return
 	 */
 	//TODO 修改method名字为 isFileExistAndNotDir
-	public static boolean isFileExist(Path file) {
-		return Files.exists(file) && !Files.isDirectory(file);
-	}
-
-	/**
-	 * 判断文件是否存在，并且不是文件夹，给的是绝对路径
-	 * 
-	 * @param fileName
-	 *            如果为null, 直接返回false
-	 * @return
-	 */
-	public static boolean isFileOrDirectoryExist(String fileName) {
-		if (StringOperate.isRealNull(fileName)) {
-			return false;
-		}
-		
-		Path file = getPath(fileName);
-		return Files.exists(file);
+	public static boolean isFileExistAndNotDir(Path file) {
+		return file != null && Files.exists(file) && !Files.isDirectory(file);
 	}
 
 	
@@ -1876,9 +1864,9 @@ public class FileOperate {
 	 * @return
 	 */
 	@Deprecated
-	public static boolean isFileExist(File file) {
+	public static boolean isFileExistAndNotDir(File file) {
 		Path path = getPath(file);
-		return isFileExist(path);
+		return isFileExistAndNotDir(path);
 	}
 
 	/**
@@ -1993,8 +1981,13 @@ public class FileOperate {
 		return Files.isDirectory(file);
 	}
 	
+	/**
+	 * 判断文件是否存在，并且不是文件夹，给的是绝对路径
+	 * @param fileName 如果为null, 直接返回false
+	 * @return
+	 */
 	public static boolean isFileFolderExist(String fileName) {
-		if (fileName == null) {
+		if (StringOperate.isRealNull(fileName)) {
 			return false;
 		}
 		return isFileFolderExist(getPath(fileName));
@@ -2014,7 +2007,7 @@ public class FileOperate {
 	 * @return
 	 */
 	public static boolean isFileFolderExist(Path file) {
-		return Files.exists(file);
+		return file != null && Files.exists(file);
 	}
 	
 	/**
@@ -2103,7 +2096,7 @@ public class FileOperate {
 	 * @return
 	 */
 	public static void delAllFile(Path path) {
-		if (!Files.exists(path)) {
+		if (path == null || !Files.exists(path)) {
 			return;
 		}
 		if (!isFileDirectory(path)) {
@@ -2167,6 +2160,8 @@ public class FileOperate {
 	 * 不存在文件也返回true
 	 */
 	public static void DeleteFileFolder(Path file) {
+		if (file == null) return;
+		
 		if (Files.exists(file)) {
 			if (Files.isDirectory(file)) {
 				deleteFolder(file);
