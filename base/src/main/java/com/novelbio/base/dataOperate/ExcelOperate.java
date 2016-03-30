@@ -1,8 +1,10 @@
 package com.novelbio.base.dataOperate;
 
+import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +45,12 @@ public class ExcelOperate implements Closeable {
 	/** 文件不存在 */
 	public static final int EXCEL_NO_FILE = 0;
 	
+	/** 03格式的excel后缀 */
+	public static final String EXCEL03_SUFFIX = "xls";
+	/** 07格式的excel后缀 */
+	public static final String EXCEL07_SUFFIX = "xlsx";
+	
+	
 	private Workbook wb;
 	private Sheet sheet;
 //	private int sheetNum = 0; // 第sheetnum个工作表
@@ -55,8 +63,9 @@ public class ExcelOperate implements Closeable {
 	
 	/**
 	 * 判断是否为excel
-	 * 
+	 * <br/>
 	 * @return 
+	 * TODO 对excel07格式,文件较大时,判断速度比较慢.实测4.1M的excel.判断需4秒左右
 	 */
 	public static boolean isExcel(String filename) {
 		try {
@@ -66,6 +75,47 @@ public class ExcelOperate implements Closeable {
 		}
 		return false;
 	}
+	
+	/**
+	 * 简单判断文件是否是excel.不严谨.
+	 * <br/>
+	 * 判断逻辑: 1.文件后缀名是否是xls或xlsx.
+	 * 			2.文件如果以文本形式读取,第一行有小于30的asc码,就不是普通文本.应该就是excel了.
+	 * 2016年3月30日
+	 * novelbio fans.fan
+	 * @param filename
+	 * @return
+	 */
+	public static boolean isExcelSimple(String filename){
+		String suffix = FileOperate.getFileSuffix(filename);
+		if (!EXCEL03_SUFFIX.equals(suffix) && !EXCEL07_SUFFIX.equals(suffix)) {
+			return false;
+		}
+		
+		InputStream is = null;
+		InputStreamReader inputStreamReader = null;
+		BufferedReader bufferedReader = null;
+		try {
+			is =  FileOperate.getInputStream(filename);	
+			inputStreamReader = new InputStreamReader(is);
+			bufferedReader = new BufferedReader(inputStreamReader);
+			String str = bufferedReader.readLine();
+			byte[] bytes = str.getBytes();
+			for (int i = 0; i < bytes.length; i++) {
+				if (bytes[i] < 9) {
+					// 如果有ascii小于30的,肯定不是普通文本了
+					return true;
+				}
+			}
+		} catch (Exception e) {
+		} finally {
+			FileOperate.close(is);
+			FileOperate.close(inputStreamReader);
+			FileOperate.close(bufferedReader);
+		}
+		return false;
+	}
+	
 
 	/**
 	 * 判断是否为excel2003或2007
@@ -77,17 +127,16 @@ public class ExcelOperate implements Closeable {
 	 * @throws IOException 
 	 */
 	private static int isExcelVersion(String filename) throws IOException  {
-		if (!FileOperate.isFileExist(filename))
-			return EXCEL_NO_FILE;
+//		if (!FileOperate.isFileExist(filename))
+//			return EXCEL_NO_FILE;
+//		
 		
+		String suffix = FileOperate.getFileSuffix(filename);
 		InputStream is =  FileOperate.getInputStream(filename);
-		if (isExcel2003(is)) {
+		if (EXCEL03_SUFFIX.equals(suffix) && isExcel2003(is)) {
 			FileOperate.close(is);
 			return EXCEL2003;
-		}
-		
-		is = FileOperate.getInputStream(filename);
-		if (isExcel2007(is)) {
+		} else if (EXCEL07_SUFFIX.equals(suffix) && isExcel2007(is)) {
 			FileOperate.close(is);
 			return EXCEL2007;
 		}
@@ -260,6 +309,27 @@ public class ExcelOperate implements Closeable {
 		int ColCount = -1;
 		ColCount = row.getLastCellNum();
 		return ColCount;
+	}
+	
+	/**
+	 * 获取所有页签的名称
+	 * 
+	 * 2016年3月29日
+	 * novelbio fans.fan
+	 * @return
+	 */
+	public ArrayList<String> readAllSheetName(){
+		ArrayList<String> lsSheetName = new ArrayList<>();
+		if (wb == null) {
+			return lsSheetName;
+		}
+		
+		int sheetCount = getSheetCount();
+		for(int i = 0; i < sheetCount; i++){
+			lsSheetName.add(wb.getSheetName(i));
+		}
+		
+		return lsSheetName;
 	}
 	
 	/**

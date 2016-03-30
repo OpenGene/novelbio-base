@@ -675,6 +675,26 @@ public class FileOperate {
 	}
 	
 	/**
+	 * 获取文件名后缀
+	 * 
+	 * 2016年3月30日
+	 * novelbio fans.fan
+	 * @param fileName
+	 * @return
+	 */
+	public static String getFileSuffix(String fileName){
+		String suffix = "";
+		if (StringOperate.isRealNull(fileName)) {
+			return suffix;
+		}
+		
+		int endDot = fileName.lastIndexOf(".") + 1;
+		suffix = fileName.substring(endDot, fileName.length());
+		
+		return suffix;
+	}
+	
+	/**
 	 * 给定路径名，返回其名字,不带后缀名<br>
 	 * 如给定/home/zong0jie.aa.txt<br>
 	 * 则返回zong0jie.aa 和 txt<br><br>

@@ -2,15 +2,14 @@ package com.novelbio.base.fileOperate;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -276,5 +275,25 @@ public class TestFileOperate {
 		name2 = "/hdfs:/abc/def/../def/ghi";
 		Assert.assertEquals(true, FileOperate.isFilePathSame(name1, name2));
 
+	}
+	
+	@Test
+	public void testGetFileSuffix(){
+		String file = "/abc/def/321.xls";
+		String suffix = FileOperate.getFileSuffix(file);
+		Assert.assertEquals("xls", suffix);
+	}
+	
+	@Test
+	public void testGetInputStream() throws IOException{
+		String file1 = "/hdfs:/nbCloud/public/AllProject/project_56a1d075da50acf943e4bd06/task_56a5c3eada50a2b486568e55/GOAnalysis_result/GO-Analysis_BP_peak0_All.xlsx";
+		String file2 = "/hdfs:/nbCloud/public/AllProject/project_56a1d075da50acf943e4bd06/GO-Analysis_BP_peak0_All.xlsx";
+		String file3 = "/home/novelbio/文档/filetype说明.xlsx";
+		String file4 = "/home/novelbio/文档/filetype说明-noexist.xlsx";
+		
+		long time1 = System.currentTimeMillis();
+		InputStream inputStream = FileOperate.getInputStream(file1);
+		long time2 = System.currentTimeMillis();
+		System.out.println("hdfs file = " + (time2 - time1));
 	}
 }

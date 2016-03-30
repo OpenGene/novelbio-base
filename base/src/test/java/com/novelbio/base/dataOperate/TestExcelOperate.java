@@ -1,16 +1,21 @@
 package com.novelbio.base.dataOperate;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-
-import junit.framework.TestCase;
+import java.util.Map;
 
 import com.novelbio.base.PathDetail;
+import com.novelbio.base.StringOperate;
 import com.novelbio.base.fileOperate.FileOperate;
+
+import junit.framework.TestCase;
 
 public class TestExcelOperate extends TestCase {
 	
@@ -90,9 +95,11 @@ public class TestExcelOperate extends TestCase {
 			int endRowNum = 7;
 			ExcelStyle style = ExcelStyle.getThreeLineTable(1, endRowNum);
 			excelOperate.writeExcel(1, 1, lsData, style);
+			excelOperate.close();
 			
 			assertEquals(true, FileOperate.isFileExist(filename));
-			excelOperate.close();
+			
+			FileOperate.delFile(filename);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -139,6 +146,31 @@ public class TestExcelOperate extends TestCase {
 		String tempFileName  = PathDetail.getTmpPathWithSep() +FileOperate.getSepPath()+ dateFormat.format(new Date()) +"resultFileTMP.xls";	
 	
 		System.out.println("path = " + tempFileName);
+		
+	}
+	
+	/**
+	 * 测试判断文件是否excel的判断速度.
+	 * 
+	 * 2016年3月30日
+	 * novelbio fans.fan
+	 * @throws IOException 
+	 */
+	public void testIsExcel() throws IOException{
+//		String file = "/hdfs:/nbCloud/public/AllProject/project_56a1d075da50acf943e4bd06/task_56a5c3eada50a2b486568e55/GOAnalysis_result/GO-Analysis_BP_peak0_All.xlsx";
+//		String file = "/hdfs:/nbCloud/public/AllProject/project_56a1d075da50acf943e4bd06/GO-Analysis_BP_peak0_All.xlsx";
+//		String file = "/home/novelbio/文档/GO-Analysis_BP_peak0_All.xlsx";
+		String file = "/home/novelbio/文档/GO-Analysis_BP_peak0_All.xls";
+//		String file = "/home/novelbio/文档/abc.xlsx";
+//		String file = "/hdfs:/nbCloud/public/AllProject/project_56a1d075da50acf943e4bd06/task_56a5c3eada50a2b486568e55/GOAnalysis_result/testRead.xls";
+//		String file = "/media/nbfs/testdata/testRead.xls";
+		ExcelOperate excelOperate = new ExcelOperate(file);
+		long time1 = System.currentTimeMillis();
+		System.out.println("isExcel=" + ExcelOperate.isExcel(file));
+		long time2 = System.currentTimeMillis();
+		System.out.println("time=" + (time2 - time1));
+		
+		
 		
 	}
 	
