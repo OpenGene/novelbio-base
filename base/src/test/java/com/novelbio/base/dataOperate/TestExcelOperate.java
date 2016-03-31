@@ -170,8 +170,6 @@ public class TestExcelOperate extends TestCase {
 		long time2 = System.currentTimeMillis();
 		System.out.println("time=" + (time2 - time1));
 		
-		
-		
 	}
 	
 }

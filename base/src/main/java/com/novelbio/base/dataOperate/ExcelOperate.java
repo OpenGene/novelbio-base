@@ -86,7 +86,7 @@ public class ExcelOperate implements Closeable {
 	 * @param filename
 	 * @return
 	 */
-	public static boolean isExcelSimple(String filename){
+	public static boolean isExcelSimple(String filename) {
 		String suffix = FileOperate.getFileSuffix(filename);
 		if (!EXCEL03_SUFFIX.equals(suffix) && !EXCEL07_SUFFIX.equals(suffix)) {
 			return false;
@@ -103,7 +103,7 @@ public class ExcelOperate implements Closeable {
 			byte[] bytes = str.getBytes();
 			for (int i = 0; i < bytes.length; i++) {
 				if (bytes[i] < 9) {
-					// 如果有ascii小于30的,肯定不是普通文本了
+					// 如果有ascii小于9的,肯定不是普通文本了
 					return true;
 				}
 			}
@@ -318,8 +318,8 @@ public class ExcelOperate implements Closeable {
 	 * novelbio fans.fan
 	 * @return
 	 */
-	public ArrayList<String> readAllSheetName(){
-		ArrayList<String> lsSheetName = new ArrayList<>();
+	public List<String> readAllSheetName(){
+		List<String> lsSheetName = new ArrayList<>();
 		if (wb == null) {
 			return lsSheetName;
 		}
@@ -340,6 +340,34 @@ public class ExcelOperate implements Closeable {
 	 */
 	public ArrayList<String[]> readLsExcelSheet(int sheetNum) {
 		return readLsExcel(sheetNum, 1,  1,  -1, -1);
+	}
+	
+	/**
+	 * 指定sheet顺序号,读取该sheet全部内容.
+	 * <br/>
+	 * <b>注意:该方法是静态方法,不需要new excelOperate对象</b>
+	 * <br/>
+	 * 2016年3月31日
+	 * novelbio fans.fan
+	 * @param sheetNum			sheet页顺序号,从0开始.
+	 * @return
+	 */
+	public static List<List<String>> readLsExcel2007SheetFast(String filePathAndName, int sheetNum) {
+		InputStream is = null;
+		List<List<String>> exceldata = new ArrayList<>();
+		try {
+			is = FileOperate.getInputStream(filePathAndName);
+			
+			Excel2007Reader excel07 = new Excel2007Reader();
+			excel07.processOneSheet(is, sheetNum);
+			exceldata = excel07.getExcelData(); 
+		} catch (Exception e) {
+			logger.error("readExcel error.filePathAndName=" + filePathAndName + ",sheetNum=" + sheetNum, e);
+		} finally {
+			FileOperate.close(is);
+		}
+		
+		return exceldata;
 	}
 	
 	/**
