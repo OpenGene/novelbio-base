@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +19,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.novelbio.base.SepSign;
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.fileOperate.ExceptionNbcFile;
@@ -50,12 +53,18 @@ public class ExcelOperate implements Closeable {
 	/** 07格式的excel后缀 */
 	public static final String EXCEL07_SUFFIX = "xlsx";
 	
+	/** 在写入excel的时候，为了方便未来快速读取excel，会把每个sheet的内容再写入一个文本
+	 * 那么这个txt有个格式，譬如excel为 /home/novelbio/myexcel.xls
+	 * 则会把txt写入为 /home/novelbio/.tmptxt/myexcel@@sheetname.txt
+	 */
+	@VisibleForTesting
+	protected static final String TMP_TXT_PATH = ".tmptxt";
 	
 	private Workbook wb;
 	private Sheet sheet;
-//	private int sheetNum = 0; // 第sheetnum个工作表
 	private String filename = "";
 	
+	private boolean isWriteSheetToTxt = false;
 	/** 
 	 * excel 2003 或者 excel 2007 .0代表文件不存在.
 	 */
@@ -216,8 +225,16 @@ public class ExcelOperate implements Closeable {
 		}
 	
 	}
-
-
+	
+	/**
+	 * 是否在写入sheet的时候，同时将信息写入一个新的文本<br>
+	 * 可以通过 {@link #getExcelTxtName(String, String)}来获取这个文件的文件名<br>
+	 * @param isWriteSheetToTxt
+	 */
+	public void setWriteSheetToTxt(boolean isWriteSheetToTxt) {
+		this.isWriteSheetToTxt = isWriteSheetToTxt;
+	}
+	
 	/**
 	 * 返回sheet表数目,为实际sheet数目
 	 * @return int
@@ -318,7 +335,7 @@ public class ExcelOperate implements Closeable {
 	 * novelbio fans.fan
 	 * @return
 	 */
-	public List<String> readAllSheetName(){
+	public List<String> getLsSheetNames(){
 		List<String> lsSheetName = new ArrayList<>();
 		if (wb == null) {
 			return lsSheetName;
@@ -746,10 +763,11 @@ public class ExcelOperate implements Closeable {
 		
 		rowNum--;
 		cellNum--;// 将sheet和行列都还原为零状态
-		if (rowNum < 0){
+		if (rowNum < 0) {
 			throw new ExceptionNbcExcel("rowNum is error. rowNum=" + rowNum);
 		}
 		
+		if (isWriteSheetToTxt) writeToTxtFile(sheet.getSheetName(), content);
 		
 		int i = 0;
 		for (String[] rowcontent : content) {
@@ -777,6 +795,16 @@ public class ExcelOperate implements Closeable {
 			}
 			i++;
 		}
+	}
+	
+	private void writeToTxtFile(String sheetName, List<String[]> lsContent) {
+		String txtName =getExcelTxtName(filename, sheetName);
+		FileOperate.createFolders(FileOperate.getPathName(txtName));
+		TxtReadandWrite txtWrite = new TxtReadandWrite(txtName, true);
+		 for (String[] contents : lsContent) {
+			txtWrite.writefileln(contents);
+		}
+		 txtWrite.close();
 	}
 	
 	/**
@@ -926,6 +954,37 @@ public class ExcelOperate implements Closeable {
 		if (sheet != null) {
 			sheet = null;
 		}
+	}
+	
+	
+	
+	//TODO 待测试
+	/**
+	 * 给定一个excel文件，返回其相关sheet的txt文件
+	 * 因为我们会在写入某个sheet的时候把该sheet的内容再写入一个txt文本，
+	 * <p>
+	 * 譬如exel名字为  /home/novelbio/myexcel.xls
+	 * 则txt为 /home/novelbio/.tmptxt/myexcel@@sheetname.txt
+	 * 那么就会把这个txt全提取出来
+	 * @param excelFile
+	 * @return
+	 */
+	public static List<String> getLsSheetTxtFiles(String excelFile) {
+		List<String> lsResult = new ArrayList<>();
+		ExcelOperate excelOperate = new ExcelOperate(excelFile);
+		List<String> lsSheetNames = excelOperate.getLsSheetNames();
+		excelOperate.close();
+		for (String sheetName : lsSheetNames) {
+			lsResult.add(getExcelTxtName(excelFile, sheetName));
+		}
+		return lsResult;
+	}
+	
+	public static String getExcelTxtName(String filename, String sheetName) {
+		String excelName = FileOperate.getFileNameWithoutSuffix(filename);
+		String parentPath = FileOperate.getParentPathNameWithSep(filename);
+		String outTmp = parentPath + FileOperate.addSep(TMP_TXT_PATH) + excelName + SepSign.SEP_INFO;
+		return outTmp + sheetName + ".txt";
 	}
 	
 }

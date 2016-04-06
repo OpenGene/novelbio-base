@@ -7,7 +7,6 @@ import java.nio.file.Path;
 
 import org.apache.commons.io.IOUtils;
 
-import ch.ethz.ssh2.ChannelCondition;
 import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.SCPClient;
 import ch.ethz.ssh2.SCPInputStream;
@@ -78,6 +77,12 @@ public class SshScp {
 		}
 	}
 	
+	/**
+	 * 上传文件
+	 * @param file
+	 * @param remoteDir 远程文件夹，不包含文件名
+	 * @throws IOException
+	 */
 	public void uploadFile(String file, String remoteDir) throws IOException {
 		SCPClient scpClient = conn.createSCPClient();
 		Path path = FileOperate.getPath(file);
@@ -89,7 +94,7 @@ public class SshScp {
 		os.close();
 		is.close();
 	}
-	
+
 	/**
 	 * 把远程文件下载到本地文件夹
 	 * @param remoteFile
