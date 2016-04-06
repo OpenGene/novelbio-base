@@ -65,7 +65,7 @@ public class TestExcelOperate {
 	@Test
 	public void testHadoopExcel() {
 		ExcelOperate excelOperate = null;
-		String filename = "/hdfs:/nbCloud/test.xls";
+		String filename = PathDetail.getTmpHdfsPath()+ "test.xls";
 		try {
 			excelOperate = new ExcelOperate(filename);
 			List<String[]> lsData = new ArrayList<>();

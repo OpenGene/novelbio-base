@@ -955,10 +955,7 @@ public class ExcelOperate implements Closeable {
 			sheet = null;
 		}
 	}
-	
-	
-	
-	//TODO 待测试
+
 	/**
 	 * 给定一个excel文件，返回其相关sheet的txt文件
 	 * 因为我们会在写入某个sheet的时候把该sheet的内容再写入一个txt文本，
