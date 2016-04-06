@@ -3,6 +3,7 @@ package com.novelbio.base.dataOperate;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.poi.openxml4j.opc.OPCPackage;
@@ -60,7 +61,7 @@ public class Excel2007Reader extends DefaultHandler {
 	// rowlist) throws SQLException;
 
 	/**
-	 * 只遍历一个sheet，其中sheetId为要遍历的sheet索引，从1开始，1-3
+	 * 只遍历一个sheet，其中sheetId为要遍历的sheet索引，从0开始
 	 */
 	public void processOneSheet(InputStream is, int sheetId) throws Exception {
 		OPCPackage pkg = null;
@@ -168,7 +169,6 @@ public class Excel2007Reader extends DefaultHandler {
 						rowlist.add(rowlist.size(), "");
 					}
 				}
-				// add by lfc 20130710,注释掉
 
 				if (curRow == this.titleRow) {
 					this.rowsize = rowlist.size();
@@ -217,13 +217,13 @@ public class Excel2007Reader extends DefaultHandler {
 	
 	public static void main(String[] args) throws Exception {
 		
-		String filePathAndName = "/home/novelbio/文档/GO-Analysis_BP_peak0_All.xlsx";
+		String filePathAndName = "/hdfs:/nbCloud/public/AllProject/project_56a1d075da50acf943e4bd06/task_56a5c3eada50a2b486568e55/GOAnalysis_result/GO-Analysis_BP_peak0_All.xlsx";
 //		String filePathAndName = "/home/novelbio/文档/abc.xlsx";
 		InputStream is = FileOperate.getInputStream(filePathAndName);
 		
 		long time1 = System.currentTimeMillis();
 		Excel2007Reader excel07 = new Excel2007Reader();
-	    excel07.processOneSheet(is, 0);
+	    excel07.processOneSheet(is, 2);
 	    List<List<String>> exceldata = excel07.getExcelData();
 	    long time2 = System.currentTimeMillis();
 	    System.out.println("time=" + (time2 - time1));
@@ -231,14 +231,14 @@ public class Excel2007Reader extends DefaultHandler {
 	    
 	    long time3 = System.currentTimeMillis();
 	    ExcelOperate excelOperate = new ExcelOperate(filePathAndName);
-	    int size1 = excelOperate.readLsExcelSheet(0).size();
-//	    int size2 = excelOperate.readLsExcelSheet(2).size();
+//	    int size1 = excelOperate.readLsExcelSheet(1).size();
+	    int size2 = excelOperate.readLsExcelSheet(3).size();
 //	    int size3 = excelOperate.readLsExcelSheet(3).size();
 	    long time4 = System.currentTimeMillis();
 	    System.out.println("time=" + (time4 - time3));
 	    excelOperate.close();
 //	    System.out.println("total read2=" + (size1 + size2 + size3));
-	    System.out.println("total read2=" + (size1));
+	    System.out.println("total read2=" + (size2));
 	    
 	}
 

@@ -89,7 +89,7 @@ public class ExcelOperate implements Closeable {
 	 * 简单判断文件是否是excel.不严谨.
 	 * <br/>
 	 * 判断逻辑: 1.文件后缀名是否是xls或xlsx.
-	 * 			2.文件如果以文本形式读取,第一行有小于30的asc码,就不是普通文本.应该就是excel了.
+	 * 			2.文件如果以文本形式读取,第一行有asc码在0-9时,就不是普通文本.应该就是excel了.
 	 * 2016年3月30日
 	 * novelbio fans.fan
 	 * @param filename
@@ -111,8 +111,8 @@ public class ExcelOperate implements Closeable {
 			String str = bufferedReader.readLine();
 			byte[] bytes = str.getBytes();
 			for (int i = 0; i < bytes.length; i++) {
-				if (bytes[i] < 9) {
-					// 如果有ascii小于9的,肯定不是普通文本了
+				if (bytes[i] >= 0 && bytes[i] < 9) {
+					// 如果有ascii有0-9的,肯定不是普通文本了
 					return true;
 				}
 			}
