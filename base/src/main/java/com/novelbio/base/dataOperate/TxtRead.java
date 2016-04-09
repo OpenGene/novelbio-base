@@ -587,7 +587,7 @@ class TxtRead implements Closeable {
 		if (readByte < 0 || filesize < 0) {
 			return -1;
 		} else {
-			return readByte/filesize;
+			return (double)readByte/filesize;
 		}
 	}
 	

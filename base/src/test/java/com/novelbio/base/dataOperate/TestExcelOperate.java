@@ -11,7 +11,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.novelbio.base.PathDetail;
-import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.fileOperate.FileOperate;
 
