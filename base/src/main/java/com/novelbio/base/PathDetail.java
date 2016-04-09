@@ -56,7 +56,7 @@ public class PathDetail {
 		filePath = FileOperate.getParentPathNameWithSep(filePath);
 		return FileOperate.addSep(filePath);
 	}
-	/** 返回jar所在的路径，路径分隔符都为"/" */
+	/** 返回jar所在的路径，路径分隔符都为"/"，以 "/"结尾 */
 	public static String getProjectPathLinux() {
 		java.net.URL url = PathDetail.class.getProtectionDomain().getCodeSource().getLocation();
 		String filePath = null;

@@ -1016,6 +1016,7 @@ public class FileOperate {
 	 * 如果文件不存在则返回空的list<br>
 	 * 如果不是文件夹，则返回该文件名<br>
 	 * @param file 目录路径
+	 * @param isNeedFolder 是否需要把文件夹也记录下来
 	 * @return 返回包含目标文件全名的ArrayList
 	 * @throws IOException 
 	 */
@@ -1028,6 +1029,7 @@ public class FileOperate {
 	 * 如果文件不存在则返回空的list<br>
 	 * 如果不是文件夹，则返回该文件名<br>
 	 * @param file 目录路径
+	 * @param isNeedFolder 是否需要把文件夹也记录下来
 	 * @return 返回包含目标文件全名的ArrayList
 	 * @throws IOException 
 	 */
