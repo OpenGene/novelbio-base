@@ -3,9 +3,12 @@ package com.novelbio.base.cmd;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.novelbio.base.dataStructure.ArrayOperate;
-
 import junit.framework.TestCase;
+
+import com.novelbio.base.PathDetail;
+import com.novelbio.base.dataStructure.ArrayOperate;
+import com.novelbio.base.fileOperate.FileHadoop;
+import com.novelbio.base.fileOperate.FileOperate;
 
 public class TestCmdOperate extends TestCase {
 	public void testCmdReal() {
@@ -19,7 +22,9 @@ public class TestCmdOperate extends TestCase {
 		lsCmd.add("/hdfs:/nbcloud22/test.log");
 		CmdOperate cmdOperate = new CmdOperate(lsCmd);
 		String cmd = cmdOperate.getCmdExeStrReal();
-		assertEquals("samtools index /media/hdfs/nbcloud/test.bam > /media/hdfs/nbcloud22/test.bam 2> /media/hdfs/nbcloud22/test.log", cmd);
+		assertEquals("samtools index " + FileHadoop.getHdfsLocalPathWithoutSep() + "/nbcloud/test.bam > "
+		+ FileHadoop.getHdfsLocalPathWithoutSep() + "/nbcloud22/test.bam 2> "
+		+ FileHadoop.getHdfsLocalPathWithoutSep() + "/nbcloud22/test.log", cmd);
 	}
 	
 	public void testCmdModify() {
@@ -47,6 +52,6 @@ public class TestCmdOperate extends TestCase {
 		lsCmd.add("/hdfs:/nbcloud22/test.log");
 		CmdOperate cmdOperate = new CmdOperate(lsCmd);
 		String cmd = ArrayOperate.cmbString(cmdOperate.cmdPath.getRunCmd(), " ");
-		assertEquals("samtools index /media/hdfs/nbcloud/test.bam", cmd);
+		assertEquals("samtools index " + FileOperate.addSep(PathDetail.getHdfsLocalPath()) + "nbcloud/test.bam", cmd);
 	}
 }

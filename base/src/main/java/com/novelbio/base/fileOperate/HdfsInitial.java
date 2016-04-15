@@ -23,8 +23,19 @@ public class HdfsInitial {
 	}
 	
 	public static void initial() {
-		conf = HdfsInit.getConf();
-		fsHDFS = HdfsInit.getHdfs();
+		conf = new Configuration();
+		conf.addResource(new Path( PathDetail.getHdpHdfsXml()));
+		conf.addResource(new Path(PathDetail.getHdpCoreXml()));
+		
+		conf.set("dfs.permissions.enabled", "false");
+		conf.set("dfs.client.block.write.replace-datanode-on-failure.policy", "NEVER"); 
+		conf.set("dfs.client.block.write.replace-datanode-on-failure.enable", "true"); 
+		try {
+			fsHDFS = FileSystem.get(conf);
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new RuntimeException("cannot initial hadoop fs", e);
+        }
 		try {
 			fileContext = FileContext.getFileContext(conf);
 		} catch (UnsupportedFileSystemException e) {
@@ -48,37 +59,5 @@ public class HdfsInitial {
 	public static FileSystem getFileSystem() {
 		return fsHDFS;
 	}
-	
-	public static String getHdfsLocalPath() {
-		return PathDetail.getHdfsLocalPath();
-	}
 
-}
-
-class HdfsInit {
-	private static Configuration conf;
-	private static FileSystem fs;
-	static {
-		conf = new Configuration();
-		conf.addResource(new Path( PathDetail.getHdpHdfsXml()));
-		conf.addResource(new Path(PathDetail.getHdpCoreXml()));
-		
-		conf.set("dfs.permissions.enabled", "false");
-		conf.set("dfs.client.block.write.replace-datanode-on-failure.policy", "NEVER"); 
-		conf.set("dfs.client.block.write.replace-datanode-on-failure.enable", "true"); 
-		try {
-	        fs = FileSystem.get(conf);
-		} catch (IOException e) {
-			e.printStackTrace();
-			throw new RuntimeException("cannot initial hadoop fs", e);
-        }
-	}
-	
-	public static Configuration getConf() {
-		return conf;
-	}
-	
-	public static FileSystem getHdfs() {
-		return fs;
-	}
 }
