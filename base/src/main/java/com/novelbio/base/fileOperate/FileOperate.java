@@ -50,7 +50,7 @@ import hdfs.jsr203.HadoopPath;
 public class FileOperate {
 	private static final Logger logger = Logger.getLogger(FileOperate.class);
 	static HadoopFileSystemProvider hdfsProvider = new HadoopFileSystemProvider();
-
+	static PatternOperate patternOperate = new PatternOperate("^[/\\\\]{0,2}[^/]+\\:[/\\\\]{0,2}");
 	static boolean isWindowsOS = false;
 	static{
 		    String osName = System.getProperty("os.name");
@@ -467,11 +467,21 @@ public class FileOperate {
 	 */
 	public static String getParentPathNameWithSep(String fileName) {
 		if (fileName == null) return null;
+		
+		if (fileName.equals("/") || fileName.equals("\\")) {
+			return fileName;
+		}
+		
+		
 		File file = new File(fileName);
 		String fileParent = file.getParent();
-		if (fileParent == null) {
-			return "";
-		} else {
+		String head = patternOperate.getPatFirst(fileName);
+		if (head == null) head = "";
+		if (fileParent == null) fileParent = "";
+
+		if (fileParent.length() < head.length()) {
+			return head;
+		}  else {
 			return addSep(fileParent);
 		}
 	}
@@ -2245,7 +2255,7 @@ public class FileOperate {
 		if (StringOperate.isRealNull(outPath)) {
 			return 0;
 		}
-		
+		FileOperate.createFolders(FileOperate.getParentPathNameWithSep(outPath));
 		OutputStream os = FileOperate.getOutputStream(outPath);
 		if (isOutputGzip) {
 			os =  new GZIPOutputStream(os, TxtReadandWrite.bufferLen);

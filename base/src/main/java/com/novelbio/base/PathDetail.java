@@ -18,7 +18,9 @@ public class PathDetail {
 	private static String tmpPath;
 	private static String tmpHdfsPath;
 	private static String rworkspaceTmp;
-	
+	private static String hadoophome = FileOperate.addSep(System.getenv("HADOOP_HOME")); 
+	private static String hadoopstreaming = null;
+
 	static {
 		initial();
 	}
@@ -100,7 +102,14 @@ public class PathDetail {
 	
 	/** hadoop Streaming的jar包 */
 	public static String getHdpStreamingJar() {
-		return properties.getProperty("hadoopStreamingJar");
+		if (hadoopstreaming == null) {
+			List<String> lsHadoopStreaming = FileOperate.getLsFoldFileName(hadoophome + "share/hadoop/tools/lib", "hadoop-streaming", "jar");
+			if (lsHadoopStreaming.isEmpty()) {
+				throw new RuntimeException("cannot find hadoopStreaming jar");
+			}
+			hadoopstreaming = lsHadoopStreaming.get(0);
+		}
+		return hadoopstreaming;
 	}
 	
 	/** 内部不加空格 */
@@ -224,13 +233,13 @@ public class PathDetail {
 	}
 	
 	public static String getHdpHdfsXml() {
-		return properties.getProperty("hdfs-xml");
+		return hadoophome + "etc/hadoop/hdfs-site.xml";
 	}
 	public static String getHdpCoreXml() {
-		return properties.getProperty("hdfs-core-xml");
+		return hadoophome + "etc/hadoop/core-site.xml";
 	}
 	public static String getHdpYarnXml() {
-		return properties.getProperty("yarn-xml");
+		return hadoophome + "etc/hadoop/yarn-site.xml";
 	}
 	public static String getHdpHdfsHeadSymbol() {
 		return properties.getProperty("hdfsHeadSymbol");
