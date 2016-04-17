@@ -1,7 +1,5 @@
 package com.novelbio.base.fileOperate;
 
-import hdfs.jsr203.PathDetailHdfs;
-
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
