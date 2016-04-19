@@ -15,7 +15,6 @@ public class PatternOperate {
 	String regex = "";
 	boolean CASE_SENSITIVE = false;
 	Pattern patInput;
-	Matcher matInput;
 	
 	 /**
 	  * 设定正则表达式，默认大小写不敏感
@@ -53,7 +52,7 @@ public class PatternOperate {
     	//hashtable用来装载正则表达式的不同具体字符串，用以判断某个特定字符串出现的次数
     	Map<String, Integer> mapPat2Num = new HashMap<>();
     	List<PatternUnit> lsPatternUnits = new ArrayList<>();
-    	matInput = patInput.matcher(inputStr);
+    	Matcher matInput = patInput.matcher(inputStr);
     	Integer index;//某个字符的出现次数
     	while(matInput.find()) {
     		PatternUnit patternUnit = new PatternUnit();
@@ -133,7 +132,7 @@ public class PatternOperate {
      */
     public ArrayList<String> getPat(String inputstr, int groupID) {
     	ArrayList<String> lsresult = new ArrayList<String>();
-    	 matInput=patInput.matcher(inputstr);
+    	Matcher matInput=patInput.matcher(inputstr);
     	 while (matInput.find()) {
     		 String info = matInput.group(groupID);
     		 if (info != null) {
@@ -152,7 +151,7 @@ public class PatternOperate {
      */
     public ArrayList<String> getPat(String inputstr, int... groupID) {
     	ArrayList<String> lsresult = new ArrayList<String>();
-    	 matInput=patInput.matcher(inputstr);
+    	Matcher matInput=patInput.matcher(inputstr);
     	 while (matInput.find()) {
     		 for (int i : groupID) {
     			 String info = matInput.group(i);
@@ -183,11 +182,16 @@ public class PatternOperate {
      * @return 没有抓到的话，返回null
      */
     public String getPatFirst(String inputstr, int groupID)  {
-    	 matInput=patInput.matcher(inputstr);
+    	Matcher matInput=patInput.matcher(inputstr);
     	 while (matInput.find()) {
     		 return matInput.group(groupID);
 		}
     	return null;
+    }
+
+    public Matcher getMatcher(String inputstr)  {
+    	Matcher matInput=patInput.matcher(inputstr);
+    	return matInput;
     }
     
     /**

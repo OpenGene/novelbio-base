@@ -3,14 +3,19 @@ package com.novelbio.base;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.novelbio.base.dataStructure.PatternOperate;
+
 public class StringOperate {
 	private static final Logger logger = LoggerFactory.getLogger(StringOperate.class);
-	
+	private static PatternOperate patternOperate = new PatternOperate("[`~!@#$%^&*()+=|{}':;',\\[\\]<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]|\\.\\.+");
+
 	private static int compare(String str, String target) {
 		int d[][]; // 矩阵
 		int n = str.length();
@@ -177,5 +182,17 @@ public class StringOperate {
 		result = result.replace("&amp;", "&");
 		result = result.replace("&nbsp;", " ");
 		return result;
+	}
+	
+	/** 是否存在特殊字符，注意单独的.不算特殊字符，连续的".."才算 */
+	public static boolean isContainerSpecialCode(String str) {
+		String info = patternOperate.getPatFirst(str);
+		return !isRealNull(info);		
+	}
+	
+	/** 把特殊字符都替换掉，注意单独的.不算特殊字符，连续的".."才算 */
+	public static String replaceSpecialCode(String str) {
+		Matcher m = patternOperate.getMatcher(str);
+		return m.replaceAll("");
 	}
 }
