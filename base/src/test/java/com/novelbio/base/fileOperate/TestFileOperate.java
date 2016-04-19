@@ -285,15 +285,40 @@ public class TestFileOperate {
 	}
 	
 	@Test
-	public void testGetInputStream() throws IOException{
-		String file1 = "/hdfs:/nbCloud/public/AllProject/project_56a1d075da50acf943e4bd06/task_56a5c3eada50a2b486568e55/GOAnalysis_result/GO-Analysis_BP_peak0_All.xlsx";
-		String file2 = "/hdfs:/nbCloud/public/AllProject/project_56a1d075da50acf943e4bd06/GO-Analysis_BP_peak0_All.xlsx";
-		String file3 = "/home/novelbio/文档/filetype说明.xlsx";
-		String file4 = "/home/novelbio/文档/filetype说明-noexist.xlsx";
+	public void testGetParentPathNameWithSep() {
+		String path = "//hdfs:/abs/sfe/se";
+		String result = FileOperate.getParentPathNameWithSep(path);
+		for (int i = 0; i < 10; i++) {
+			result = FileOperate.getParentPathNameWithSep(result);
+		}
+		Assert.assertEquals("/hdfs:/", result);
 		
-		long time1 = System.currentTimeMillis();
-		InputStream inputStream = FileOperate.getInputStream(file1);
-		long time2 = System.currentTimeMillis();
-		System.out.println("hdfs file = " + (time2 - time1));
+		path = "\\hdfs:\\abs\\sfe\\se";
+		result = FileOperate.getParentPathNameWithSep(path);
+		for (int i = 0; i < 10; i++) {
+			result = FileOperate.getParentPathNameWithSep(result);
+		}
+		Assert.assertEquals("\\hdfs:\\", result);
+		
+		path = "//hdfs://abs//sfe//se";
+		result = FileOperate.getParentPathNameWithSep(path);
+		for (int i = 0; i < 10; i++) {
+			result = FileOperate.getParentPathNameWithSep(result);
+		}
+		Assert.assertEquals("/hdfs:/", result);
+		
+		path = "hdfs://abs//sfe//se";
+		result = FileOperate.getParentPathNameWithSep(path);
+		for (int i = 0; i < 10; i++) {
+			result = FileOperate.getParentPathNameWithSep(result);
+		}
+		Assert.assertEquals("hdfs:/", result);
+		
+		path = "hdfs:\\abs\\sfe\\se";
+		result = FileOperate.getParentPathNameWithSep(path);
+		for (int i = 0; i < 10; i++) {
+			result = FileOperate.getParentPathNameWithSep(result);
+		}
+		Assert.assertEquals("hdfs:\\", result);
 	}
 }

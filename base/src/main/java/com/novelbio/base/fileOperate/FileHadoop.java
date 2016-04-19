@@ -13,6 +13,8 @@ import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 
 import com.novelbio.base.PathDetail;
@@ -466,6 +468,32 @@ public class FileHadoop extends File {
     		return path;
     }
     
+    public org.apache.hadoop.fs.Path getHdpPath() {
+    	String hdfsFilePath = fileName.replace(FileHadoop.getHdfsSymbol(), "");
+    	org.apache.hadoop.fs.Path dst = new org.apache.hadoop.fs.Path(hdfsFilePath);
+    	return dst;
+    }
+    
+	
+	public short getReplication() throws IOException {
+		org.apache.hadoop.fs.Path path = getHdpPath();
+		FileStatus fileStatus =null;
+		if (HdfsInitial.getFileSystem().exists(path)) {
+			fileStatus = HdfsInitial.getFileSystem().getFileStatus(path);
+			return fileStatus.getReplication();
+		}
+		return 0;
+	}
+	
+	public FSDataInputStream getInputStream() {
+		try {
+			return HdfsInitial.getFileSystem().open(getHdpPath());
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
 }
 
 
