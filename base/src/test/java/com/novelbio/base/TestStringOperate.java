@@ -11,6 +11,5 @@ public class TestStringOperate {
 		String result = StringOperate.replaceSpecialCode(str);
 		Assert.assertEquals("adCVs34_a _09_b5435城池....中国344512.fd999下面.是中文的-字符", result);
 		
-		Assert.assertTrue(1==2);
 	}
 }
