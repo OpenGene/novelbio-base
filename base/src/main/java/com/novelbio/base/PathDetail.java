@@ -18,7 +18,7 @@ public class PathDetail {
 	private static String tmpPath;
 	private static String tmpHdfsPath;
 	private static String rworkspaceTmp;
-	private static String hadoophome = FileOperate.addSep(System.getenv("HADOOP_HOME")); 
+	private static String hadoophome;
 	private static String hadoopstreaming = null;
 
 	static {
@@ -43,6 +43,15 @@ public class PathDetail {
 			}
 		}
 		tmpHdfsPath = properties.getProperty("tmpHdfsPath");
+		
+		hadoophome = System.getenv("HADOOP_HOME");
+		if (hadoophome != null) {
+			hadoophome = FileOperate.addSep(hadoophome);
+		} else {
+			//TODO 需要在docker中把HADOOP_HOME都配好
+			hadoophome = "/home/novelbio/software/hadoop/";
+		}
+		
 	}
 	
 	/** 返回jar所在的路径 */
@@ -244,7 +253,10 @@ public class PathDetail {
 	public static String getHdpHdfsHeadSymbol() {
 		return properties.getProperty("hdfsHeadSymbol");
 	}
-	
+	/** 主要是在docker中挂载需要，在appmaster中，需要指定container的docker参数，而appmaster并不知道主机的 HADOOP_HOME，所以要写在配置文件中 */
+	public static String getHdpHomeRealWithoutSep() {
+		return FileOperate.removeSplashTail(properties.getProperty("hadoophome"), false);
+	}
 	public static String getLogoPath() {
 		return properties.getProperty("logoImgPath");
 	}
