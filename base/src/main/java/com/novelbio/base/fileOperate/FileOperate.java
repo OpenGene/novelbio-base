@@ -1189,7 +1189,6 @@ public class FileOperate {
 	 * 如果文件不存在则返回null<br>
 	 * 如果不是文件夹，则返回该文件名<br>
 	 * @param filePath
-	 * @param deepth 指定深度
 	 * @return
 	 */
 	public static ArrayList<String> getLsFoldFileName(String filePath) {

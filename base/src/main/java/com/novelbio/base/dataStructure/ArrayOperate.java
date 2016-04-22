@@ -3,8 +3,6 @@ package com.novelbio.base.dataStructure;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -12,31 +10,35 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 
 public class ArrayOperate {
 	private static final Logger logger = Logger.getLogger(ArrayOperate.class);
+
 	/**
 	 * 合并字符串数组
+	 * 
 	 * @param ss
+	 *            待合并的字符串数组
 	 * @param sep
+	 *            分隔符
 	 * @return
 	 */
 	public static String cmbString(String[] ss, String sep) {
-		String result = "";
+		StringBuffer result = new StringBuffer();
 		if (ss.length < 1) {
 			return "";
 		}
-		result = ss[0];
+		result.append(ss[0]);
 		for (int i = 1; i < ss.length; i++) {
-			result = result + sep + ss[i];
+			result.append(sep).append(ss[i]);
 		}
-		return result;
+		return result.toString();
 	}
 	public static<T> ArrayList<T> converArray2List(T[] array) {
 		ArrayList<T> lsResult = new ArrayList<T>();
