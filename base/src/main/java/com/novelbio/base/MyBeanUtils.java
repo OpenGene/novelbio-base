@@ -97,6 +97,18 @@ public class MyBeanUtils extends org.springframework.beans.BeanUtils {
 	 * @throws BeansException
 	 */
 	public static <T,K> K copyAllProperties(T source, K target) throws ExceptionNbcBean {
+		return copyAllProperties(source, target, false);
+	}
+
+	/**
+	 * 把新对象中不为null的属性拷贝到旧对象中
+	 * @param source
+	 * @param target
+	 * @param isCoypNull 是否拷贝为null的信息
+	 * @return
+	 * @throws ExceptionNbcBean
+	 */
+	public static <T,K> K copyAllProperties(T source, K target, boolean isCoypNull) throws ExceptionNbcBean {
 		Validate.notNull(target, "Target must not be null");
 		Validate.notNull(source, "Source must not be null");
 		Class<?> actualEditable = target.getClass();
@@ -111,6 +123,9 @@ public class MyBeanUtils extends org.springframework.beans.BeanUtils {
 							readMethod.setAccessible(true);
 						}
 						Object value = readMethod.invoke(source);
+						if (!isCoypNull && value == null) {
+							continue;
+						}
 						// 这里判断以下value是否为空 当然这里也能进行一些特殊要求的处理 例如绑定时格式转换等等
 						Method writeMethod = targetPd.getWriteMethod();
 						if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
@@ -126,4 +141,5 @@ public class MyBeanUtils extends org.springframework.beans.BeanUtils {
 		return target;
 	}
 
+	
 }
