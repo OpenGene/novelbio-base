@@ -816,6 +816,14 @@ public class CmdOperate extends RunProcess<String> {
 		}
 	}
 
+	/** 去除引号，一般是文件路径需要添加引号 **/
+	public static String removeQuot(String pathName) {
+		if (pathName.startsWith("\"") && pathName.endsWith("\"")) {
+			pathName = pathName.substring(1, pathName.length() - 1);
+		}
+		return pathName;
+	}
+	
 	/** 添加引号，一般是文件路径需要添加引号 **/
 	public static String addQuot(String pathName) {
 		return "\"" + pathName + "\"";
