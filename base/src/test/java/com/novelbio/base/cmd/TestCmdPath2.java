@@ -41,8 +41,6 @@ public class TestCmdPath2 {
 		cmd6();
 		cmd7();
 		cmd8();
-		cmdConvertHdfs();
-		cmdConvertGetFileName();
 	}
 	
 	private void cmd1() {
@@ -291,30 +289,5 @@ public class TestCmdPath2 {
 		FileOperate.DeleteFileFolder(outFile);
 	}
 	
-	private void cmdConvertHdfs() {
-		CmdPath cmdPath = new CmdPath();
-		List<String> lsCmd = new ArrayList<>();
-		String inFile1 = "/hdfs:/src/test/resources/testTrinity.fa";
-		String inFile2 = "/hdfs:/src/test/resources/testTrinity2.fa";
-		String outFile = "/hdfs:/nbCloud/test/testCode/testCmdpath.out";
-		lsCmd.add("bwa-index");
-		lsCmd.add("--inPath=" + inFile1 + "," + inFile2);
-		lsCmd.add("--outPath=" + outFile);
-		cmdPath.setLsCmd(lsCmd);
-		
-		String[] ss = cmdPath.getRunCmd();
-		String inFileLocal1 = FileHadoop.convertToLocalPath(inFile1);
-		String inFileLocal2 = FileHadoop.convertToLocalPath(inFile2);
-		String outLocal = FileHadoop.convertToLocalPath(outFile);
-		assertEquals("--inPath="+ inFileLocal1 + "," + inFileLocal2, ss[1]);
-		assertEquals("--outPath="+ outLocal, ss[2]);
-	}
-	
-	private void cmdConvertGetFileName() {
-		String cmd = "/home/novelbio/software/trinityrnaseq-2.1.1/util/support_scripts/../../Trinity --single \"/home/novelbio/tmp/2015-11-28-10-50-43-3610_RNAassembly_result2/Hap-1trinity/read_partitions/Fb_0/CBin_59/c5929.trinity.reads.fa\" --output \"/home/novelbio/tmp/2015-11-28-10-50-43-3610_RNAassembly_result2/Hap-1trinity/read_partitions/Fb_0/CBin_59/c5929.trinity.reads.fa.out\" --CPU 1";
-		ConvertCmdGetFileName convertCmdGetFileName = new ConvertCmdGetFileName();
-		String result = convertCmdGetFileName.convertCmd(cmd);
-		assertEquals("Trinity --single \"c5929.trinity.reads.fa\" --output \"c5929.trinity.reads.fa.out\" --CPU 1", result);
-	}
-	
+
 }

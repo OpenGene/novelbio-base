@@ -67,19 +67,44 @@ public class TestCmdOperate {
 //		List<String> lsCmd = Lists.newArrayList("echo 'hello,world' > /tmp/test.txt");
 		List<String> lsCmd = Lists.newArrayList("java", "-version");
 		CmdOperate cmdOperate = new CmdOperate(lsCmd);
-		cmdOperate.setGetCmdInStdStream(true);
+//		cmdOperate.setGetCmdInStdStream(true);
 //		cmdOperate.runWithExp();
 //		boolean isFinishedNormal = cmdOperate.isFinishedNormal();
 //		assertTrue(isFinishedNormal);
-		
+//		cmdOperate.setGetLsStdOut();
+
 		String cmd = ArrayOperate.cmbString(cmdOperate.cmdPath.getRunCmd(), " ");
 		System.out.println(cmd);
 		cmdOperate.run();
 		boolean isFinishedNormal = cmdOperate.isFinishedNormal();
 		assertTrue(isFinishedNormal);
-		System.out.println("1=" + cmdOperate.getLsStdOut());
+		System.out.println("1=" + cmdOperate.getLsErrOut());
 		
 	}
 	
 	
+	@Test
+	public void testSplitCmd() {
+		String cmd = "samtools  index /hdfs:/home/novelbio/test.bam  >  /home/novelbio/test.sam";
+		List<String> lsCmd = CmdOperate.splitCmd(cmd);
+		List<String> lsCmdExpect = new ArrayList<>();
+		lsCmdExpect.add("samtools"); lsCmdExpect.add("index"); lsCmdExpect.add("/hdfs:/home/novelbio/test.bam");
+		lsCmdExpect.add(">"); lsCmdExpect.add("/home/novelbio/test.sam");
+		assertEquals(lsCmdExpect, lsCmd);
+		
+		cmd = "samtools index \"/hdfs:/home/novelbio/test.bam\" \" > \" /home/novelbio/test.sam";
+		lsCmd = CmdOperate.splitCmd(cmd);
+		lsCmdExpect = new ArrayList<>();
+		lsCmdExpect.add("samtools"); lsCmdExpect.add("index"); lsCmdExpect.add("\"/hdfs:/home/novelbio/test.bam\"");
+		lsCmdExpect.add("\" > \""); lsCmdExpect.add("/home/novelbio/test.sam");
+		assertEquals(lsCmdExpect, lsCmd);
+		
+		cmd = "samtools index \"/hdfs:/home/novelbio/test.bam\" 'test\"Is ok '  \" > \" /home/novelbio/test.sam";
+		lsCmd = CmdOperate.splitCmd(cmd);
+		lsCmdExpect = new ArrayList<>();
+		lsCmdExpect.add("samtools"); lsCmdExpect.add("index"); lsCmdExpect.add("\"/hdfs:/home/novelbio/test.bam\"");
+		lsCmdExpect.add("'test\"Is ok '");
+		lsCmdExpect.add("\" > \""); lsCmdExpect.add("/home/novelbio/test.sam");
+		assertEquals(lsCmdExpect, lsCmd);
+	}
 }

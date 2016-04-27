@@ -419,6 +419,11 @@ public class CmdPath {
 	
 	//============================================================
 	//============================================================
+	/**
+	 * 文件夹切分并删除的工作
+	 * @author zong0jie
+	 * @data 2016年4月26日
+	 */
 	public static abstract class ConvertCmd {
 		abstract String convert(String subCmd);
 		
@@ -426,9 +431,9 @@ public class CmdPath {
 			if (StringOperate.isRealNull(cmd)) {
 				return cmd;
 			}
-			String[] ss = cmd.split(" ");
+			List<String> lsCmdSub = CmdOperate.splitCmd(cmd);
 			List<String> lsCmd = new ArrayList<>();
-			for (String subCmd : ss) {
+			for (String subCmd : lsCmdSub) {
 				String subModify = convertSubCmd(subCmd);
 				if (StringOperate.isRealNull(subModify)) {
 					continue;
@@ -464,37 +469,37 @@ public class CmdPath {
 		 */
 		protected String convertSubCmd(String tmpCmd) {
 			tmpCmd = tmpCmd.trim();
-			if (tmpCmd.contains("=")) {
-				String[] tmpCmd2Path = tmpCmd.split("=", 2);
-				tmpCmd = tmpCmd2Path[0] + "=" + convertSubCmd(tmpCmd2Path[1]);
-				return tmpCmd;
-			} else if (tmpCmd.contains(",")) {
-				String[] tmpCmd2Path = tmpCmd.split(",");
-				String[] tmpResult = new String[tmpCmd2Path.length];
-				for (int i = 0; i < tmpCmd2Path.length; i++) {
-					tmpResult[i] = convertSubCmd(tmpCmd2Path[i]);  
-	            }
-				tmpCmd = ArrayOperate.cmbString(tmpResult, ",");
-				return tmpCmd;
-			} else if (tmpCmd.contains(";")) {
-				String[] tmpCmd2Path = tmpCmd.split(";");
-				String[] tmpResult = new String[tmpCmd2Path.length];
-				for (int i = 0; i < tmpCmd2Path.length; i++) {
-					tmpResult[i] = convertSubCmd(tmpCmd2Path[i]);  
-	            }
-				tmpCmd = ArrayOperate.cmbString(tmpResult, ";");
-				return tmpCmd;
-			}
 			
 			if (tmpCmd.startsWith("\"") && tmpCmd.endsWith("\"")) {
-				tmpCmd = tmpCmd.substring(1, tmpCmd.length() - 1);
-				tmpCmd = convert(tmpCmd);
+				tmpCmd = CmdOperate.removeQuot(tmpCmd);
+				tmpCmd = convertSubCmd(tmpCmd);
 				tmpCmd = CmdOperate.addQuot(tmpCmd);
 			} else if (tmpCmd.startsWith("\'") && tmpCmd.endsWith("\'")) {
-				tmpCmd = tmpCmd.substring(1, tmpCmd.length() - 1);
-				tmpCmd = convert(tmpCmd);
+				tmpCmd = CmdOperate.removeQuot(tmpCmd);
+				tmpCmd = convertSubCmd(tmpCmd);
 				tmpCmd = CmdOperate.addQuotSingle(tmpCmd);
 			} else {
+				if (tmpCmd.contains("=")) {
+					String[] tmpCmd2Path = tmpCmd.split("=", 2);
+					tmpCmd = tmpCmd2Path[0] + "=" + convertSubCmd(tmpCmd2Path[1]);
+					return tmpCmd;
+				} else if (tmpCmd.contains(",")) {
+					String[] tmpCmd2Path = tmpCmd.split(",");
+					String[] tmpResult = new String[tmpCmd2Path.length];
+					for (int i = 0; i < tmpCmd2Path.length; i++) {
+						tmpResult[i] = convertSubCmd(tmpCmd2Path[i]);  
+		            }
+					tmpCmd = ArrayOperate.cmbString(tmpResult, ",");
+					return tmpCmd;
+				} else if (tmpCmd.contains(";")) {
+					String[] tmpCmd2Path = tmpCmd.split(";");
+					String[] tmpResult = new String[tmpCmd2Path.length];
+					for (int i = 0; i < tmpCmd2Path.length; i++) {
+						tmpResult[i] = convertSubCmd(tmpCmd2Path[i]);  
+		            }
+					tmpCmd = ArrayOperate.cmbString(tmpResult, ";");
+					return tmpCmd;
+				}
 				tmpCmd = convert(tmpCmd);
 			}
 			return tmpCmd;

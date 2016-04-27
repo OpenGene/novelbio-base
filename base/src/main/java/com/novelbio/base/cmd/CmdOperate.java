@@ -303,6 +303,7 @@ public class CmdOperate extends RunProcess<String> {
 	 * 
 	 * @param output
 	 */
+	@Deprecated
 	public void addCmdParamInput(String input, boolean isAddToLsCmd) {
 		cmdPath.addCmdParamInput(input, isAddToLsCmd);
 	}
@@ -335,6 +336,7 @@ public class CmdOperate extends RunProcess<String> {
 	 * 
 	 * @param output
 	 */
+	@Deprecated
 	public void addCmdParamOutput(String output, boolean isAddToLsCmd) {
 //		if (StringOperate.isRealNull(cmdPath.getSaveErrPath())) {
 //			isStderrInfo = true;
@@ -818,7 +820,9 @@ public class CmdOperate extends RunProcess<String> {
 
 	/** 去除引号，一般是文件路径需要添加引号 **/
 	public static String removeQuot(String pathName) {
-		if (pathName.startsWith("\"") && pathName.endsWith("\"")) {
+		if (pathName.startsWith("\"") && pathName.endsWith("\"")
+				|| pathName.startsWith("\'") && pathName.endsWith("\'")
+				) {
 			pathName = pathName.substring(1, pathName.length() - 1);
 		}
 		return pathName;
@@ -852,7 +856,52 @@ public class CmdOperate extends RunProcess<String> {
 	static class FinishFlag {
 		Integer flag = null;
 	}
-
+	
+	public static String getExceptionInfo(Throwable e) {
+		String failReason = e.toString();
+		for (StackTraceElement stackTraceElement : e.getStackTrace()) {
+			failReason = failReason + TxtReadandWrite.ENTER_LINUX + stackTraceElement.toString();
+		}
+		return failReason;
+	}
+	
+	/** 把一个完整的cmd命令切分成list-Cmd，其中单双引号为一个整体 */
+	public static List<String> splitCmd(String cmd) {
+		List<String> lsCmdUnit = new ArrayList<>();
+		StringBuilder stringBuilder = new StringBuilder();
+		//是否进入了引号，引号内部为一个整体
+		boolean isInQuote = false;
+		//默认为双引号
+		boolean isDoubleQuote = true;
+		for (char c : cmd.toCharArray()) {
+			if (c == '"' || c == '\'') {
+				if (!isInQuote) {
+					isInQuote = true;
+					isDoubleQuote = c=='"' ? true : false;
+				} else {
+					isInQuote = !(isDoubleQuote == (c=='"')); 
+				}
+			}
+			
+			if ((c == ' ' || c == ';' || c == '"') && !isInQuote) {
+				if (c=='"') stringBuilder.append('"');
+				
+				String info = stringBuilder.toString();
+				stringBuilder = new StringBuilder();
+				if (!StringOperate.isRealNull(info)) {
+					lsCmdUnit.add(info);
+				}
+			} else {
+				stringBuilder.append(c);
+			}
+		}
+		String info = stringBuilder.toString();
+		stringBuilder = new StringBuilder();
+		if (!StringOperate.isRealNull(info)) {
+			lsCmdUnit.add(info);
+		}
+		return lsCmdUnit;
+	}
 }
 
 /** 用docker去查看container的  */
