@@ -450,6 +450,8 @@ public class CmdOperate extends RunProcess<String> {
 	/** 程序执行完后可以看错误输出<br>
 	 * 仅返回最多{@link #lineNum}行的信息
 	 * 内部实现为linkedlist
+	 * <br/>
+	 * <b>调用此方法时,参数{@link #getCmdInStdStream}必须是false.否则不能获得所需结果.</b>
 	 */
 	public List<String> getLsErrOut() {
 		int i = 0;
