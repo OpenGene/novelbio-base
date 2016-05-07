@@ -19,7 +19,11 @@ import org.apache.log4j.Logger;
 
 public class ArrayOperate {
 	private static final Logger logger = Logger.getLogger(ArrayOperate.class);
-
+	
+	
+	public static<T> boolean isEmpty(Collection<T> collection) {
+		return (collection == null || collection.isEmpty());
+	}
 	/**
 	 * 合并字符串数组
 	 * 

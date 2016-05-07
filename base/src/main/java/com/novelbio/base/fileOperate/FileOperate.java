@@ -1176,8 +1176,12 @@ public class FileOperate {
 			if (!isFilterFolder && Files.isDirectory(t)) {
 				return true;
 			}
-			
+			String fileName = getFileName(t);
 			String[] fileNameSep = getFileNameSepWithoutPath(t.toString());
+			if (patSuffix == null && patName.getPat(fileName) != null) {
+				return true;
+			}
+			
 			boolean isNameOk = (patName == null || patName.getPatFirst(fileNameSep[0]) != null);
 			boolean isSuffixOk = (patSuffix == null || patSuffix.getPatFirst(fileNameSep[1]) != null);
 			return isNameOk&&isSuffixOk;
