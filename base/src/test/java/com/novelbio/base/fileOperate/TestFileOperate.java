@@ -317,4 +317,9 @@ public class TestFileOperate {
 		}
 		Assert.assertEquals("hdfs:\\", result);
 	}
+
+	@Test
+	public void testDelFile() {
+		FileOperate.delFile("/home/novelbio/abc.def");
+	}
 }

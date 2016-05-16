@@ -600,9 +600,9 @@ class TxtRead implements Closeable {
 	 * 关闭流文件
 	 */
 	public void close() {
-		try { bufread.close(); } catch (Exception e) {}
-		try { inputStream.close(); } catch (Exception e) {}
-		try { inputStreamRaw.close(); } catch (Exception e) {}
+		FileOperate.close(bufread);
+		FileOperate.close(inputStream);
+		FileOperate.close(inputStreamRaw);
 	}
 
 }

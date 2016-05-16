@@ -313,63 +313,7 @@ public class FileOperate {
 			}
 			  return stringBuilder.toString();
     }  
-    
-	 /**
-	  *  写文件20160322 duping
-	  * @param filePath  文件路径
-	  * @param fileContent 文件内容
-	  */
-	public static void writeFile(String filePath,String fileContent) {
-		FileOutputStream fos = null;
-		FileChannel fc = null;
-		ByteBuffer buffer = null;
-		try {
-				File file=new File(filePath);
-				//不存在创建文件
-				if(!file.exists()){
-					file.createNewFile();
-				} 
-				  
-				fos = new FileOutputStream(file); 
-				fc = fos.getChannel();
-				//自动缓冲区大小
-				buffer = ByteBuffer.wrap(fileContent.getBytes());
-				fos.flush();
-				fc.write(buffer);
-
-		} catch (FileNotFoundException e) {
-			throw new ExceptionFileError("cannot get file " + filePath);
-		 
-		} catch (IOException e) {
-			throw new ExceptionFileError("file content size " + filePath);
-		} finally {
-			try {
-				fc.close();
-				fos.close();
-			} catch (IOException e) {
-				throw new ExceptionFileError("file stream can not close:" + filePath, e);
-			}
-		}
-	}
-	
-	/**
-	 * 清空文件内容20160322 duping
-	 * @param filePath
-	 */
-	 public static void clearFileContent(String filePath) { 
-	 
-		try { 
-			File file=new File(filePath);
-			//判断如果文件存在 
-			if(file.exists()){ 
-				FileOutputStream out = new FileOutputStream(filePath,false); 
-				out.write(new String("").getBytes()); 
-				out.close(); 
-			} 
-		 }catch (Exception e) { 
-			throw new ExceptionFileError("clear file content fail ,path:" + filePath, e);
-		} 
-	 } 
+  
     
     	/**
     	 * 20160322 duping
@@ -2046,11 +1990,10 @@ public class FileOperate {
 	}
 	
 	/**
-	 * 删除文件
+	 * 删除文件.文件不存在不会报错.
 	 * 
 	 * @param filePathAndName
-	 *            文本文件完整绝对路径及文件名 文件不存在则返回false
-	 * @return Boolean 成功删除返回true遭遇异常返回false
+	 *            文本文件完整绝对路径及文件名
 	 */
 	public static void delFile(String filePathAndName) {
 		try {
