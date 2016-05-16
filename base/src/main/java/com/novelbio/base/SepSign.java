@@ -44,9 +44,13 @@ public class SepSign {
 	 */
 	public static final String SEP_INFO_SAMEDB = "#/#";
 	
+	
+	/** 用于分割多个文件名，是分号 ";" */
+	public static final String SEP_FILE_SIMPLE = ";";
+	
 	/** 用于自动化报告中的序列化文件中的文件名的分隔符,也是规则文件多个正则表达式的分隔符.“#” */
 	public static final String SEP_INFO_WELLS = "#";
-	
+
 //	/**
 //	 * 分割url中的名字的
 //	 */

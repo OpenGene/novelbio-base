@@ -36,11 +36,9 @@ public class TestFileHadoop {
 		txtWrite.writefileln("intresting");
 		txtWrite.close();		
 		FileOperate.isFileExistAndBigThan0(fileTxt.getAbsolutePath());
-		TxtReadandWrite txtRead = new TxtReadandWrite(fileTxt);
-		List<String> lsInfo = txtRead.readfileLs();
+		List<String> lsInfo = TxtReadandWrite.readfileLs(fileTxt);
 		Assert.assertEquals("some thing", lsInfo.get(0));
 		Assert.assertEquals("intresting", lsInfo.get(1));
-		txtRead.close();
 		
 //		fileTxt.deleteOnExit();
 		Assert.assertTrue(FileOperate.isFileExistAndNotDir(fileTxt));

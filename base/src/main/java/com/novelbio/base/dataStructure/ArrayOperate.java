@@ -26,11 +26,8 @@ public class ArrayOperate {
 	}
 	/**
 	 * 合并字符串数组
-	 * 
-	 * @param ss
-	 *            待合并的字符串数组
-	 * @param sep
-	 *            分隔符
+	 * @param ss 待合并的字符串数组
+	 * @param sep 分隔符
 	 * @return
 	 */
 	public static String cmbString(String[] ss, String sep) {
@@ -44,6 +41,32 @@ public class ArrayOperate {
 		}
 		return result.toString();
 	}
+	/**
+	 * 合并字符串数组
+	 * 
+	 * @param ss
+	 *            待合并的字符串数组
+	 * @param sep
+	 *            分隔符
+	 * @return
+	 */
+	public static<T> String cmbString(Collection<T> ss, String sep) {
+		StringBuffer result = new StringBuffer();
+		if (ArrayOperate.isEmpty(ss)) {
+			return "";
+		}
+		int i = 1;
+		for (T info : ss) {
+			if (i == 1) {
+				result.append(info.toString());
+			} else {
+				result.append(sep).append(info.toString());
+			}
+			i++;
+		}
+		return result.toString();
+	}
+	
 	public static<T> ArrayList<T> converArray2List(T[] array) {
 		ArrayList<T> lsResult = new ArrayList<T>();
 		for (T t : array) {

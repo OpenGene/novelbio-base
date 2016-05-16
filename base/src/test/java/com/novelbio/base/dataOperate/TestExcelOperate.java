@@ -45,9 +45,7 @@ public class TestExcelOperate {
 			Assert.assertEquals(outTxtSheet, lsSheetTxt.get(0));
 			Assert.assertTrue(FileOperate.isFileExistAndBigThan0(outTxtSheet));
 			
-			TxtReadandWrite txtReadOutTxtSheet = new TxtReadandWrite(outTxtSheet);
-			List<String> lsDataTxt = txtReadOutTxtSheet.readfileLs();
-			txtReadOutTxtSheet.close();
+			List<String> lsDataTxt = TxtReadandWrite.readfileLs(outTxtSheet);
 			List<String> lsDataExcel = new ArrayList<>();
 			for (String[] content : lsData) {
 				lsDataExcel.add(ArrayOperate.cmbString(content, "\t"));

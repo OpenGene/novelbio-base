@@ -107,21 +107,23 @@ public class TxtReadandWrite implements Closeable {
 		this(fileName, creatFile, false);
 	}
 	
+	public TxtReadandWrite(Path path, boolean creatFile) {
+		this(path, creatFile, false);
+	}
+	
+	public TxtReadandWrite(Path path) {
+		this(path, false);
+	}
+	
 	public TxtReadandWrite(String fileName, boolean writeFile, boolean append) {
-		Path file = FileOperate.getPath(fileName);
-		if (writeFile) {
-			txtWrite = new TxtWrite(file);
-			txtWrite.setAppend(append);
-			try { txtWrite.createFile(); } catch (Exception e) { e.printStackTrace(); }
-			read = false;
-		} else {
-			txtRead = new TxtRead(file);
-			read = true;
-		}
+		this(FileOperate.getPath(fileName), writeFile, append);
 	}
 	
 	public TxtReadandWrite(File file, boolean writeFile, boolean append) {
-		Path path = FileOperate.getPath(file);
+		this(FileOperate.getPath(file), writeFile, append);
+	}
+	
+	public TxtReadandWrite(Path path, boolean writeFile, boolean append) {
 		if (writeFile) {
 			txtWrite = new TxtWrite(path);
 			txtWrite.setAppend(append);
@@ -132,7 +134,6 @@ public class TxtReadandWrite implements Closeable {
 			read = true;
 		}
 	}
-	
 	/** 写入模式 */
 	public TxtReadandWrite(OutputStream outputStream) {
 		txtWrite = new TxtWrite(outputStream);
@@ -214,6 +215,7 @@ public class TxtReadandWrite implements Closeable {
 	}
 	
 	/**
+	 * 	@Deprecated 用 {@link #readfileLs(String)} 代替
 	 * @param path输入文件名
 	 * @return 返回List<String>，读完关闭
 	 * @throws Exception
@@ -249,9 +251,10 @@ public class TxtReadandWrite implements Closeable {
 	 * 把所有的内容读成一个字符串
 	 * @return
 	 */
-	public String readAllAsString(){
+	@Deprecated
+	public String readAllAsString() {
 		String content = "";
-		for (String line : readfileLs()) {
+		for (String line : readlines()) {
 			content += line;
 		}
 		return content;
@@ -804,6 +807,36 @@ public class TxtReadandWrite implements Closeable {
 		lzoIndexer.setConf(indexConf);
 		
 		lzoIndexer.run(new String[]{inputFile});
+	}
+	
+	public static List<String> readfileLs(String txtFile) {
+		TxtReadandWrite txtReadandWrite = new TxtReadandWrite(txtFile);
+		List<String> lsResult = new ArrayList<>();
+		for (String string : txtReadandWrite.readlines()) {
+			lsResult.add(string);
+		}
+		txtReadandWrite.close();
+		return lsResult;
+	}
+	
+	public static List<String> readfileLs(File txtFile) {
+		TxtReadandWrite txtReadandWrite = new TxtReadandWrite(txtFile);
+		List<String> lsResult = new ArrayList<>();
+		for (String string : txtReadandWrite.readlines()) {
+			lsResult.add(string);
+		}
+		txtReadandWrite.close();
+		return lsResult;
+	}
+	
+	public static List<String> readfileLs(Path txtFile) {
+		TxtReadandWrite txtReadandWrite = new TxtReadandWrite(txtFile);
+		List<String> lsResult = new ArrayList<>();
+		for (String string : txtReadandWrite.readlines()) {
+			lsResult.add(string);
+		}
+		txtReadandWrite.close();
+		return lsResult;
 	}
 }
 ////大文件排

@@ -159,9 +159,7 @@ public class TestFileOperate {
 		txtWrite.writefileln("aaaaa");
 		txtWrite.writefileln("bbbbb");
 		txtWrite.close();
-		TxtReadandWrite txtRead = new TxtReadandWrite(fileName);
-		List<String> lsList = txtRead.readfileLs();
-		txtRead.close();
+		List<String> lsList = TxtReadandWrite.readfileLs(fileName);
 		Assert.assertEquals(2, lsList.size());
 		Assert.assertEquals("aaaaa", lsList.get(0));
 		Assert.assertEquals("bbbbb", lsList.get(1));
@@ -172,9 +170,7 @@ public class TestFileOperate {
 		txtWrite.writefileln("aaaaa");
 		txtWrite.writefileln("bbbbb");
 		txtWrite.close();
-		txtRead = new TxtReadandWrite(fileName);
-		lsList = txtRead.readfileLs();
-		txtRead.close();
+		lsList = TxtReadandWrite.readfileLs(fileName);
 		Assert.assertEquals(4, lsList.size());
 		Assert.assertEquals("aaaaa", lsList.get(0));
 		Assert.assertEquals("bbbbb", lsList.get(1));
