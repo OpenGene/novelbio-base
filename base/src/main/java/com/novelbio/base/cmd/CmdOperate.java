@@ -340,7 +340,7 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	public void addCmdParamOutput(List<String> lsOut) {
 		for (String path : lsOut) {
-			cmdPath.addCmdParamInput(path, false);
+			cmdPath.addCmdParamOutput(path, false);
 		}
 	}
 	/**
