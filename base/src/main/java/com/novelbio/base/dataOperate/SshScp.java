@@ -109,7 +109,7 @@ public class SshScp {
 		if (!isCover && FileOperate.isFileFolderExist(outFile)) {
 			return;
 		}
-		FileOperate.DeleteFileFolder(outFile);
+		FileOperate.deleteFileFolder(outFile);
 		SCPInputStream is = scpClient.get(remoteFile);
 		OutputStream os = FileOperate.getOutputStream(outFile);
 		IOUtils.copy(is, os);
@@ -129,7 +129,7 @@ public class SshScp {
 		if (!isCover && FileOperate.isFileFolderExist(localFile)) {
 			return;
 		}
-		FileOperate.DeleteFileFolder(localFile);
+		FileOperate.deleteFileFolder(localFile);
 		SCPInputStream is = scpClient.get(remoteFile);
 		OutputStream os = FileOperate.getOutputStream(localFile);
 		IOUtils.copy(is, os);

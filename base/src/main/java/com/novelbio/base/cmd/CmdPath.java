@@ -405,7 +405,7 @@ public class CmdPath {
 		}
 		for (String tmpPath : mapPath2TmpPath.values()) {
 			logger.debug("delete file: " + tmpPath);
-			FileOperate.DeleteFileFolder(tmpPath);
+			FileOperate.deleteFileFolder(tmpPath);
 		}
 	}
 	

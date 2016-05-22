@@ -139,7 +139,7 @@ public class TestFileOperate {
 	
 	@AfterClass
 	public static void deleteFolder() {
-		FileOperate.DeleteFileFolder(folderParent);
+		FileOperate.deleteFileFolder(folderParent);
 	}
 	
 	@Test
@@ -177,7 +177,7 @@ public class TestFileOperate {
 		Assert.assertEquals("aaaaa", lsList.get(2));
 		Assert.assertEquals("bbbbb", lsList.get(3));
 		
-		FileOperate.DeleteFileFolder(path);
+		FileOperate.deleteFileFolder(path);
 	}
 	@Test
 	public void testCopyAndMoveFileFolder() {
@@ -208,8 +208,8 @@ public class TestFileOperate {
 		Assert.assertTrue(FileOperate.isFileDirectory(folderMove));
 		Assert.assertEquals(0, FileOperate.getFileSizeLong(folderMove));
 		
-		FileOperate.DeleteFileFolder(folderMove);
-		FileOperate.DeleteFileFolder(folderCopy);
+		FileOperate.deleteFileFolder(folderMove);
+		FileOperate.deleteFileFolder(folderCopy);
 		Assert.assertFalse(FileOperate.isFileFolderExist(folderCopy));
 		Assert.assertFalse(FileOperate.isFileFolderExist(folderMove));
 

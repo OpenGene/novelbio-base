@@ -740,7 +740,7 @@ public class CmdOperate extends RunProcess<String> {
 			throw new ExceptionCmd(this);
 		}
 		if (FileOperate.isFileExist(cmd1SH)) {
-			FileOperate.DeleteFileFolder(cmd1SH);
+			FileOperate.deleteFileFolder(cmd1SH);
         }
 	}
 	
@@ -774,12 +774,12 @@ public class CmdOperate extends RunProcess<String> {
 		if (isFinishedNormal()) {
 			cmdPath.moveResultFile();
 			if (isStderrInfo) {
-				FileOperate.DeleteFileFolder(cmdPath.getSaveErrPath());
+				FileOperate.deleteFileFolder(cmdPath.getSaveErrPath());
 			}
 			if (isStdoutInfo) {
-				FileOperate.DeleteFileFolder(cmdPath.getSaveStdPath());
+				FileOperate.deleteFileFolder(cmdPath.getSaveStdPath());
 			}
-			FileOperate.DeleteFileFolder(outRunInfoFileName);
+			FileOperate.deleteFileFolder(outRunInfoFileName);
 		}
 	}
 	

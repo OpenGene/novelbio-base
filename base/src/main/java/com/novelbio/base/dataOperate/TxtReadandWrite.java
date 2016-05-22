@@ -797,7 +797,7 @@ public class TxtReadandWrite implements Closeable {
 			return;
 		}
 		String inputFileHdfs = FileHadoop.convertToHadoop(inputFile);
-		FileOperate.DeleteFileFolder(inputFileHdfs + ".index");
+		FileOperate.deleteFileFolder(inputFileHdfs + ".index");
 
 		inputFile = FileHadoop.convertToHdfsPath(inputFile);
 		DistributedLzoIndexer lzoIndexer = new DistributedLzoIndexer();

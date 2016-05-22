@@ -40,7 +40,7 @@ public class TestSeekablePathOutStream {
 	@Before
 	public void After() throws FileNotFoundException {
 		String fileNameNew = "src/test/resources/testTrinity_copy.fa";
-		FileOperate.DeleteFileFolder(fileNameNew);
+		FileOperate.deleteFileFolder(fileNameNew);
 	}
 	
 	@Test
@@ -83,8 +83,8 @@ public class TestSeekablePathOutStream {
 	
 	@After
 	public void clean() {
-		FileOperate.DeleteFileFolder(fileNameNewRandom);
-		FileOperate.DeleteFileFolder(fileNameNewSeek);
+		FileOperate.deleteFileFolder(fileNameNewRandom);
+		FileOperate.deleteFileFolder(fileNameNewSeek);
 	}
 
 }

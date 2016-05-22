@@ -28,7 +28,7 @@ public class TestSeekablePathInputStreamHdfs {
 	@After
 	public void after() throws IllegalArgumentException, IOException {
 		String fileNameNew = "/hdfs:/nbCloud/test/junittest/nbcplatform/testIOStream";
-		FileOperate.DeleteFileFolder(fileNameNew);
+		FileOperate.deleteFileFolder(fileNameNew);
 		seekablePathInputStream.close();
 		fsDataInputStream.close();
 	}

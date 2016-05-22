@@ -1407,7 +1407,7 @@ public class FileOperate {
 		if (Files.exists(fnew) && !cover) {
 			return;
 		}
-		DeleteFileFolder(fnew);
+		deleteFileFolder(fnew);
 		fnew = getPath(oldFile.getParent() + File.separator + newName);
 		moveFile(cover, oldFile, fnew);
 	}
@@ -1734,7 +1734,7 @@ public class FileOperate {
 		} catch (Exception e) {
 			throw new ExceptionNbcFile("copy fold error", e);
 		}
-		FileOperate.DeleteFileFolder(olddir);
+		FileOperate.deleteFileFolder(olddir);
 	}
 	
 	protected static boolean isFilePathSame(String oldfile, String newfile) {
@@ -2046,7 +2046,7 @@ public class FileOperate {
 		final Path path = getPath(file.getPath());
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() { 
-				FileOperate.DeleteFileFolder(path);
+				FileOperate.deleteFileFolder(path);
 			}
 		});
 	}
@@ -2054,7 +2054,7 @@ public class FileOperate {
 	public static void deleteOnExit(final Path path) {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() { 
-				FileOperate.DeleteFileFolder(path);
+				FileOperate.deleteFileFolder(path);
 			}
 		});
 	}
@@ -2063,7 +2063,7 @@ public class FileOperate {
 		final Path path = getPath(fileName);
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
-				FileOperate.DeleteFileFolder(path);
+				FileOperate.deleteFileFolder(path);
 			}
 		});
 	}
@@ -2121,12 +2121,12 @@ public class FileOperate {
 	 * 不存在文件也返回true
 	 */
 	//TODO 需要重命名方法名，把首字母D小写
-	public static void DeleteFileFolder(String sPath) {
+	public static void deleteFileFolder(String sPath) {
 		if (StringOperate.isRealNull(sPath)) {
 			return;
 		}
 		Path file = getPath(sPath);
-		DeleteFileFolder(file);
+		deleteFileFolder(file);
 	}
 	
 	/**
@@ -2137,7 +2137,7 @@ public class FileOperate {
 	 * @return 删除成功返回 true，否则返回 false
 	 * 不存在文件也返回true
 	 */
-	public static void DeleteFileFolder(Path file) {
+	public static void deleteFileFolder(Path file) {
 		if (file == null) return;
 		
 		if (Files.exists(file)) {

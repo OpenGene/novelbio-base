@@ -99,7 +99,7 @@ public class TestCmdPath2 {
 		txtWrite.close();
 		cmdPath.moveFileOut();
 		assertEquals(true, FileOperate.isFileExistAndBigThanSize(FileOperate.getPathName(outFile) + "/testTrinity.fa", 0));
-		FileOperate.DeleteFileFolder(outFile);
+		FileOperate.deleteFileFolder(outFile);
 	}
 	
 	/** 假设test3文件夹 不 存在 */
@@ -130,7 +130,7 @@ public class TestCmdPath2 {
 		txtWrite.close();
 		cmdPath.moveFileOut();
 		assertEquals(true, FileOperate.isFileExistAndBigThanSize(FileOperate.getPathName(outFile) + resultFileName, 0));
-		FileOperate.DeleteFileFolder(outFile);
+		FileOperate.deleteFileFolder(outFile);
 	}
 	
 	/** 假设test4文件夹存在 */
@@ -161,7 +161,7 @@ public class TestCmdPath2 {
 		txtWrite.close();
 		cmdPath.moveFileOut();
 		assertEquals(true, FileOperate.isFileExistAndBigThanSize(FileOperate.getPathName(outFile) + resultFileName, 0));
-		FileOperate.DeleteFileFolder(outFile);
+		FileOperate.deleteFileFolder(outFile);
 	}
 	
 	/** 假设test5文件夹存在 */
@@ -191,7 +191,7 @@ public class TestCmdPath2 {
 		txtWrite.close();
 		cmdPath.moveFileOut();
 		assertEquals(true, FileOperate.isFileExistAndBigThanSize(FileOperate.getPathName(outFile) + resultFileName, 0));
-		FileOperate.DeleteFileFolder(outFile);
+		FileOperate.deleteFileFolder(outFile);
 	}
 	
 	private void cmd6() {
@@ -217,7 +217,7 @@ public class TestCmdPath2 {
 		cmdPath.moveFileOut();
 		
 		assertEquals(true, FileOperate.isFileExistAndBigThanSize(FileOperate.getPathName(outFile) + resultFileName, 0));
-		FileOperate.DeleteFileFolder(outFile);
+		FileOperate.deleteFileFolder(outFile);
 	}
 	
 	private void cmd7() {
@@ -251,7 +251,7 @@ public class TestCmdPath2 {
 		cmdPath.moveFileOut();
 		
 		assertEquals(true, FileOperate.isFileExistAndBigThan0(FileOperate.getPathName(outFile) + resultFileName));
-		FileOperate.DeleteFileFolder(outFile);
+		FileOperate.deleteFileFolder(outFile);
 	}
 	
 	private void cmd8() {
@@ -286,7 +286,7 @@ public class TestCmdPath2 {
 		cmdPath.moveFileOut();
 		
 		assertEquals(true, FileOperate.isFileExistAndBigThan0(FileOperate.getPathName(outFile) + resultFileName));
-		FileOperate.DeleteFileFolder(outFile);
+		FileOperate.deleteFileFolder(outFile);
 	}
 	
 

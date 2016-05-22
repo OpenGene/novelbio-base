@@ -29,7 +29,7 @@ public class TestSeekablePathInputStream {
 	@Before
 	public void After() throws FileNotFoundException {
 		String fileNameNew = "src/test/resources/testIOStream_copy";
-		FileOperate.DeleteFileFolder(fileNameNew);
+		FileOperate.deleteFileFolder(fileNameNew);
 	}
 	
 	@Test

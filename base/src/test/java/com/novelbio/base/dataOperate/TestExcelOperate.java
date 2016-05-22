@@ -51,7 +51,7 @@ public class TestExcelOperate {
 				lsDataExcel.add(ArrayOperate.cmbString(content, "\t"));
 			}
 			Assert.assertEquals(lsDataTxt, lsDataExcel);
-			FileOperate.DeleteFileFolder(FileOperate.getPath(outTxtSheet));
+			FileOperate.deleteFileFolder(FileOperate.getPath(outTxtSheet));
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -79,7 +79,7 @@ public class TestExcelOperate {
 			
 			Assert.assertEquals(true, FileOperate.isFileExist(filename));
 			
-			FileOperate.DeleteFileFolder(filename);
+			FileOperate.deleteFileFolder(filename);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -160,8 +160,8 @@ public class TestExcelOperate {
 		Assert.assertTrue(ExcelOperate.isExcelSimple(excel));
 		Assert.assertFalse(ExcelOperate.isExcelSimple(txt));
 		
-		FileOperate.DeleteFileFolder(excel);
-		FileOperate.DeleteFileFolder(txt);
+		FileOperate.deleteFileFolder(excel);
+		FileOperate.deleteFileFolder(txt);
 	}
 	
 }
