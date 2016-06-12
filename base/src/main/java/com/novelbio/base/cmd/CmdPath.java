@@ -24,6 +24,7 @@ import com.novelbio.base.fileOperate.FileOperate;
  * @author zong0jie
  *
  */
+//TODO 考虑兼容 "<"和"<<"
 public class CmdPath {
 	private static final Logger logger = LoggerFactory.getLogger(CmdPath.class);
 	static String tmpPath = PathDetail.getTmpPathWithSep();
@@ -57,7 +58,6 @@ public class CmdPath {
 	String saveErrPath = null;
 	/** 输出错误文件是否为txt，如果命令中含有 2>，则认为输出的可能不是txt，为二进制 */
 	boolean isJustDisplayErr = false;
-	
 	
 	/** 是否已经生成了临时文件夹，生成一次就够了 */
 	boolean isGenerateTmpPath = false;
@@ -340,7 +340,7 @@ public class CmdPath {
 		
 		for (String tmpCmd : lsCmd) {
 			if (redirectStdErr) {
-				if (tmpCmd.equals(">")) {
+				if (tmpCmd.equals(">")  || tmpCmd.equals("1>")) {
 					stdOut = true;
 					setJustDisplayStd(false);
 					continue;
