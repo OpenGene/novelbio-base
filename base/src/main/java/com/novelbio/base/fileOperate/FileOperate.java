@@ -231,177 +231,8 @@ public class FileOperate {
         }  
         	return result;
     }  
-    
-	 /**
-	  　* 　读取util.ftl模板的控件内容
-	  　*　20160322 duping
-	  　* @param filePath	　　文件的绝对路径
-	  　* @param startSign   开始标签
-	  　* @param endSign	　　结束标签
-	  　* @return
-	  **/
-    public static String readFtlTempalteWidget(String filePath,String startSign,String endSign) {  
-    	StringBuilder stringBuilder=new StringBuilder();
- 	   InputStream inputStream=null;
- 	   BufferedReader bufferedReader=null;
- 	   try {  
- 	     
- 		   inputStream=new FileInputStream(filePath);    
- 	      bufferedReader=new BufferedReader(new InputStreamReader(inputStream));
- 	      String str="";
- 	      boolean start=false;
- 	     
- 	      while((str=bufferedReader.readLine())!=null){
- 	    	 if(str.indexOf(startSign) !=-1){
- 	    		 stringBuilder.append(str+"\n");
- 	    		 start=true;
- 	    		 if(null == endSign || endSign.length() == 0){
- 	    			 break;
- 	    		 }
- 	    	 }
- 	    	 if(null != endSign && endSign.length() > 0 && start){
- 	    		 
- 	    		 stringBuilder.append(str+"\n");
- 	    		 if(str.indexOf(endSign) != -1){
- 	    			 break; 
- 	    		 }
- 	    	  }
- 	   	    }
-		 } catch (Exception e) {  
-				throw new ExceptionFileError("cannot get file " + filePath);
-		  } finally {  
-			    if (inputStream != null ) {   
-			        try {  
-			        	   bufferedReader.close();
-			        	   inputStream.close();   
-			        } catch (IOException e) {  
-			        	throw new ExceptionFileError("file stream can not close:" + filePath, e);
-			        }  
-			    }  
-			
-			}
-			  return stringBuilder.toString();
-    }  
-    
-     /**
-        *  读取java包的资源文件
-       *  20160322 duping
-      * @param clazz 类 的路径 
-      * @param filePath  资源名称
-      * @return
-      */
-    public static String readFile(Class<?> clazz,String filePath) {  
-    	 StringBuilder stringBuilder=new StringBuilder();
-    	   InputStream inputStream=null;
-    	   try {  
-    	     inputStream=clazz.getResourceAsStream(filePath); 
-    	     BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(inputStream));
-    	     String str="";
-    	     while((str=bufferedReader.readLine())!=null){
-    	    	 stringBuilder.append(str+"\n"); 
-    	   		}
-			} catch (Exception e) {  
-				throw new ExceptionFileError("cannot get file " + filePath);
-			} finally {  
-			    if (inputStream != null ) {   
-			        try {  
-			        	inputStream.close();  
-			        } catch (IOException e) {  
-			        	throw new ExceptionFileError("file stream can not close:" + filePath, e);
-			        }  
-			    }  
-			}
-			  return stringBuilder.toString();
-    }  
-  
-    
-    	/**
-    	 * 20160322 duping
-    	 * @param filePath 文件夹名称
-    	 * @return
-    	 */
-    public static String getServerAbsolutePath(String filePath){
-    	
-    	String classPath =getCurrentClassAbsolutePath();
-    	
-		String absolutePath = classPath.substring(0, classPath.indexOf("WEB-INF")) + "/"+filePath+"/";  
-		
-		 return absolutePath; 
-    	
-    } 
-    
-	/**
-	 * 20160322 duping
-	 *  得到当前class的绝对位置
-	 * @return
-	 */
-    public static String getCurrentClassAbsolutePath(){
-    	
-     	String classPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
-     	
-     	return classPath;
-    	
-    }
-    
+
     /**
-       * 得到一个文件夹下的所有类 
-     * 20160322 duping
-     * @param packageToScan
-     * @return
-     */
-	public static List<String> getClassName(String packageToScan) {
-
-		List<String> classNames = new ArrayList<String>();
-
-		try {
-			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-			String rootPathToScan = packageToScan.replaceAll("\\.", "/");
-			URL rootURLToScan = classLoader.getResource(rootPathToScan); 
-			
-			File rootDirectoryToScan = new File(rootURLToScan.toURI());
-			File[] artifacts = rootDirectoryToScan.listFiles();
-			for (File artifact : artifacts) {
-				getClassName(packageToScan, artifact, classNames);
-			}
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-			throw new ExceptionFileError("Invalid URL address:", e);
-		}
-		
-		  // 过滤其他文件
-			for (int j = 0; j < classNames.size(); j++) {
-				String className = classNames.get(j);
-				if (className.indexOf(".class") ==-1) { 
-					classNames.remove(className);
-				}
-		}
-
-		return classNames;
-
-	}
-	
-	/**
-	 * 添加所有的class
-	 * 20160322 duping
-	 * @param packageToScan
-	 * @param artifact
-	 * @param classNames
-	 */
-	private static void getClassName(String packageToScan, File artifact, List<String> classNames) {
-
-		if (artifact.isFile()) {
-
-			classNames.add(packageToScan + "." + artifact.getName());
-		} else {
-			String sonPackageToScan = packageToScan + "." + artifact.getName();
-			File[] sonArtifacts = artifact.listFiles();
-			for (File sonArtifact : sonArtifacts) {
-				getClassName(sonPackageToScan, sonArtifact, classNames);
-			}
-		}
-	}
-	
-	/**
 	 * 给定路径名，返回其上一层路径，带"/" 如给定 /wer/fw4e/sr/frw/s3er.txt 返回 /wer/fw4e/sr/frw/<br>
 	 * 如果为相对路径的最上层，譬如给定的是soap 则返回“” 可以给定不存在的路径
 	 * 
@@ -492,6 +323,7 @@ public class FileOperate {
 		Path path = getPath(fileName);
 		return getTimeLastModify(path);
 	}
+	
 	public static long getTimeLastModify(Path path) {
 		if (path == null) {
 			throw new ExceptionFileError("cannot get file " + path);
@@ -2231,19 +2063,29 @@ public class FileOperate {
 		}
 	}
 	
-//	/**
-//	 * 关闭输出流
-//	 * @date 2015年11月24日
-//	 * @param os
-//	 */
-//	public static void closeOs(OutputStream os){
-//		try {
-//			if (os != null) {
-//				os.close();
-//			}
-//		} catch (Exception e) {
-//		}
-//	}
+	/**
+	 * 检查文件名是否合法.<br/>
+	 * 规则: 1.不能有斜线,空格等特殊字符.
+	 * 
+	 * @date 2016年6月12日
+	 * @author novelbio fans.fan
+	 * @param fileName
+	 * @return
+	 */
+	public static String convertMessyCodeAndValidateFileName(String fileName) {
+		fileName = StringOperate.changeMessyCode(fileName);
+		if (fileName == null || fileName.contains("/") || fileName.contains("\\")
+				|| fileName.contains("'")) {
+			throw new ExceptionNbcFile("fileName is not valide " + fileName);
+		}
+		if (fileName.contains(" ")) {
+			throw new ExceptionNbcFile("fileName is not valide " + fileName);
+		}
+		if (StringOperate.isContainerSpecialCode(fileName)) {
+			throw new ExceptionNbcFile("文件名不允许包含特殊字符.");
+		}
+		return fileName;
+	}
 	
 	public static class ExceptionFileNotExist extends RuntimeException {
 		private static final long serialVersionUID = 8125052068436320509L;
