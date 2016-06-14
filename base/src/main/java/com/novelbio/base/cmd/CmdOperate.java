@@ -610,8 +610,8 @@ public class CmdOperate extends RunProcess<String> {
 		if (threadInStream != null) {
 			threadInStream.join();
 		}
-		outputGobbler.join();
-		errorGobbler.join();
+		outputGobbler.joinStream();
+		errorGobbler.joinStream();
 		
 		if (needLog) logger.info("close out stream");
 		
