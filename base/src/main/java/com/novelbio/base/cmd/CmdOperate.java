@@ -2,6 +2,10 @@ package com.novelbio.base.cmd;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PipedOutputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -878,12 +882,15 @@ public class CmdOperate extends RunProcess<String> {
 		Integer flag = null;
 	}
 	
-	public static String getExceptionInfo(Throwable e) {
-		String failReason = e.toString();
-		for (StackTraceElement stackTraceElement : e.getStackTrace()) {
-			failReason = failReason + TxtReadandWrite.ENTER_LINUX + stackTraceElement.toString();
+	public static String getExceptionInfo(Throwable t) {
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		try {
+			t.printStackTrace(pw);
+			return sw.toString();
+		} finally {
+			pw.close();
 		}
-		return failReason;
 	}
 	
 	/** 把一个完整的cmd命令切分成list-Cmd，其中单双引号为一个整体 */
