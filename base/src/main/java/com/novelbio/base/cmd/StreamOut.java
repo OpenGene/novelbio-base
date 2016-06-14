@@ -23,6 +23,9 @@ public class StreamOut extends Thread {
 	/** 运行进程的pid */
 	IntProcess process;
 	InputStream is;
+	BufferedReader br;
+	InputStreamReader isr;
+	
 	OutputStream os;
 	LinkedList<String> lsInfo;
 	/** lsInfo中最多存储500条信息 */
@@ -45,7 +48,7 @@ public class StreamOut extends Thread {
 	boolean isStd = true;
 	
 	Timer timerFlush;
-	
+	long readLine = 0;
 	/**
 	 * @param is 从cmd获取的输出流
 	 * @param process 
@@ -69,7 +72,26 @@ public class StreamOut extends Thread {
 		this.os = os;
 		this.isJustDisplay = isJustDisplay;
 	}
-
+	
+	public final synchronized void joinStream() throws InterruptedException {
+		long lastLine = readLine;
+		int i = 0;
+		while (isAlive()) {
+			lastLine = readLine;
+			try {
+				wait(500);
+			} catch (Exception e) {
+				e.printStackTrace();
+				Thread.sleep(500);
+			}
+			if (readLine == lastLine) {
+				closeIn();
+				break;
+			}
+		}
+		  
+		isFinished = true;
+    }
 	
 	/** 是否要获取输入流，默认为false<br>
 	 * {@link #setOutputStream(OutputStream, boolean)} 会覆盖该方法
@@ -111,11 +133,12 @@ public class StreamOut extends Thread {
 	
 	private void exhaustInStream(InputStream inputStream) {
 		try {
-			InputStreamReader isr = new InputStreamReader(inputStream);
-			BufferedReader br = new BufferedReader(isr);
+			isr = new InputStreamReader(inputStream);
+			br = new BufferedReader(isr);
 			String line = null;
 			int i = 0;
 			while ((line = br.readLine()) != null) {
+				readLine++;
 				if (lsInfo != null) {
 					lsInfo.add(line);
 					i++;
@@ -129,7 +152,6 @@ public class StreamOut extends Thread {
 					} else {
 						System.err.println(line);
 					}
-					
 				}
 			}
 		} catch (IOException ioe) {
@@ -162,11 +184,12 @@ public class StreamOut extends Thread {
 	/** 从流中读取string，然后写入outputStream，同时也会写入lsInfo */
 	private void writeToTxt(InputStream inputStream, OutputStream outputStream) {
 		try {
-			InputStreamReader isr = new InputStreamReader(inputStream);
-			BufferedReader br = new BufferedReader(isr);
+			isr = new InputStreamReader(inputStream);
+			br = new BufferedReader(isr);
 			String line = null;
 			int i = 0;
 			while ((line = br.readLine()) != null) {
+				readLine++;
 				if (lsInfo != null) {
 					lsInfo.add(line);
 					i++;
@@ -216,6 +239,7 @@ public class StreamOut extends Thread {
 			long count = 0;
 			int n = 0;
 			while (EOF != (n = input.read(buffer))) {
+				readLine++;
 				//说明流中有东西
 				if (!isStartWrite) isStartWrite = true;
 				output.write(buffer, 0, n);
@@ -224,6 +248,17 @@ public class StreamOut extends Thread {
 			return count;
 		} catch (Exception e) {
 			throw new RuntimeException("copy info error", e);
+		}
+	}
+	
+	private void closeIn() {
+		if (is!= null) {
+			try {
+				is.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	

@@ -585,6 +585,10 @@ public class CmdOperate extends RunProcess<String> {
 		
 		process.exec(cmdRun);
 		
+		//等待30ms，如果不等待，某些命令会阻塞输出流，不知道为什么，譬如以下这个命令
+		//String cmd="hisat2 -p 3 -5 0 -3 0 --min-intronlen 20 --max-intronlen 500000 -1 /media/nbfs/nbCloud/public/AllProject/project_574ba1fb45ce3ad2541b9de7/task_575e719660b2beecc9ae3422/other_result/S45_07A_150500152_L006_1_part.fq.gz -2 /media/nbfs/nbCloud/public/AllProject/project_574ba1fb45ce3ad2541b9de7/task_575e719660b2beecc9ae3422/other_result/S45_07A_150500152_L006_2_part.fq.gz -S /home/novelbio/tmp/2016-06-14-09-27-3130048_tmp.hisatDateBaseTest1/hisatDateBaseTest.sam";
+
+		Thread.sleep(30);
 		Thread threadInStream = setAndGetInStream();
 		if (threadInStream != null) {
 			threadInStream.start();
