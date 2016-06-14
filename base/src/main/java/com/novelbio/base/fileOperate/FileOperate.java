@@ -1456,7 +1456,7 @@ public class FileOperate {
 	 * @return
 	 */
 	//TODO 待测试
-	public static void moveFile(Path oldFile, String newPathName, boolean cover) {
+	private static void moveFile(Path oldFile, String newPathName, boolean cover) {
 		Path pathNew = FileOperate.getPath(newPathName);
  		if (isFileExistAndNotDir(oldFile)) {
  			moveSingleFile(oldFile, pathNew, cover);
@@ -1497,6 +1497,9 @@ public class FileOperate {
 			throw new ExceptionFileError("cannot move file " + oldPath + " to " + newPath, e);
 		}
 	}
+	public static void moveFoldFile(String olddir, String newfolder, boolean cover) {
+		moveFoldFile(olddir, newfolder, "", cover);
+	}
 	/**
 	 * 移动指定文件夹内的全部文件，如果目标文件夹下有重名文件，则跳过，同时返回false<br/>
 	 * 如果新文件夹不存在，就创建新文件夹，不过似乎只能创建一级文件夹。移动顺利则返回true
@@ -1520,22 +1523,23 @@ public class FileOperate {
 		Path olddir = getPath(oldfolderfile);
 		moveFoldFile(olddir, newfolder, prix, cover);
 	}
-	public static void moveFoldFile(Path olddir, String newfolder, boolean cover) {
+	private static void moveFoldFile(Path olddir, String newfolder, boolean cover) {
 		moveFoldFile(olddir, newfolder, "", cover);
 	}
+
 	/**
 	 * 移动指定文件夹内的全部文件，如果目标文件夹下有重名文件，则跳过，同时返回false<br/>
 	 * 如果新文件夹不存在，就创建新文件夹，不过似乎只能创建一级文件夹。移动顺利则返回true
 	 * 
-	 * @param oldfolderfile
-	 * @param newfolderfile
+	 * @param olddir
+	 * @param newfolder
 	 *            目标文件目录
 	 * @param prix 在文件前加上的前缀
 	 * @param cover
 	 *            是否覆盖
 	 * @throws Exception
 	 */
-	public static void moveFoldFile(Path olddir, String newfolder, String prix, boolean cover) {
+	private static void moveFoldFile(Path olddir, String newfolder, String prix, boolean cover) {
 		final String prefix = StringOperate.isRealNull(prix)? "" : prix;
 
 		final String newPathSep = addSep(newfolder);
@@ -1552,11 +1556,15 @@ public class FileOperate {
 				return;
 			}
 		}
-
+		final boolean[] isMakeDirSameAsOld = new boolean[]{false};
 		try {
 			createFolders(pathNew);
 			Files.list(olddir).forEach((pathOld) -> {
 				if (isFileDirectory(pathOld)) {
+					String newPath = newPathSep + pathOld.getFileName();
+					if(newPath.equals(olddir.toString())) {
+						isMakeDirSameAsOld[0] = true;
+					}
 					moveFoldFile(pathOld, newPathSep + pathOld.getFileName(), prefix, cover);
 				} else {
 					Path newPath = getPath(newPathSep + prefix + pathOld.getFileName());
@@ -1566,7 +1574,10 @@ public class FileOperate {
 		} catch (Exception e) {
 			throw new ExceptionNbcFile("copy fold error", e);
 		}
-		FileOperate.deleteFileFolder(olddir);
+
+		if (!isMakeDirSameAsOld[0]) {
+			FileOperate.deleteFileFolder(olddir);
+		}
 	}
 	
 	protected static boolean isFilePathSame(String oldfile, String newfile) {
