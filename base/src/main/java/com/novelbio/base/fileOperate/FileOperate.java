@@ -1556,13 +1556,16 @@ public class FileOperate {
 				return;
 			}
 		}
+		String olddirPathTmp = removeSplashHead(olddir.toString(), false);
+		String olddirPath = removeSplashTail(olddirPathTmp, false);
 		final boolean[] isMakeDirSameAsOld = new boolean[]{false};
 		try {
 			createFolders(pathNew);
 			Files.list(olddir).forEach((pathOld) -> {
 				if (isFileDirectory(pathOld)) {
-					String newPath = newPathSep + pathOld.getFileName();
-					if(newPath.equals(olddir.toString())) {
+					String newPath = removeSplashHead(newPathSep + pathOld.getFileName(), false);
+					newPath = removeSplashTail(newPath, false);
+					if(newPath.equals(olddirPath)) {
 						isMakeDirSameAsOld[0] = true;
 					}
 					moveFoldFile(pathOld, newPathSep + pathOld.getFileName(), prefix, cover);
@@ -1763,7 +1766,7 @@ public class FileOperate {
 	}
 	
 	/**
-	 * 如果file是文件夹，并且不为空，则返回true，否则返回false 
+	 * 如果file是文件夹，并且为空，则返回true，否则返回false 
 	 * @param fileName
 	 * @return
 	 */
