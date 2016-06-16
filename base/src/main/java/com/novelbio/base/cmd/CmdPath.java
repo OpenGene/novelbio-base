@@ -15,6 +15,7 @@ import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
+import com.thoughtworks.xstream.io.path.Path;
 
 /**
  * 输入cmdlist，将其整理为相应的cmd string array<br>
@@ -27,7 +28,6 @@ import com.novelbio.base.fileOperate.FileOperate;
 //TODO 考虑兼容 "<"和"<<"
 public class CmdPath {
 	private static final Logger logger = LoggerFactory.getLogger(CmdPath.class);
-	static String tmpPath = PathDetail.getTmpPathWithSep();
 	
 	List<String> lsCmd = new ArrayList<>();
 	
@@ -68,9 +68,15 @@ public class CmdPath {
 	 */
 	boolean isConvertHdfs2Loc = true;
 	
+	private String tmpPath;
+	private boolean isRetainTmpFiles = false;
 	/** 设定复制输入输出文件所到的临时文件夹 */
-	public static void setTmpPath(String tmpPath) {
-		CmdPath.tmpPath = tmpPath;
+	public void setTmpPath(String tmpPath) {
+		this.tmpPath = tmpPath;
+	}
+	/** 临时文件夹中的文件是否删除 */
+	public void setRetainTmpFiles(boolean isRetainTmpFiles) {
+		this.isRetainTmpFiles = isRetainTmpFiles;
 	}
 	
 	/** 如果为null就不加入 */
@@ -251,7 +257,7 @@ public class CmdPath {
 		
 		for (String inFile : setInput) {
 			String inTmpName = mapName2TmpName.get(inFile);
-			FileOperate.copyFileFolder(inFile, inTmpName, true);
+			FileOperate.copyFileFolder(inFile, inTmpName, false);
 		}
 	}
 	
@@ -285,11 +291,18 @@ public class CmdPath {
 			}
 			setFileNameAll.addAll(setOutput);
 		}
-				
-		int i  = 0;//防止产生同名文件夹的措施
+		//产生临时文件夹
+		String pathTmp = getTmp();
+		Set<String> setPathNoDup = new HashSet<>();
 		for (String path : setPath) {
-			i++;
-			String tmpPathThis = PathDetail.getRandomWithSep(tmpPath, FileOperate.getFileName(path) + i);
+			String parentPath = FileOperate.getFileName(path);
+			String parentPathFinal = parentPath;
+			int i = 1;//防止产生同名文件夹的措施
+			while (setPathNoDup.contains(parentPathFinal)) {
+				parentPathFinal = parentPath + i++;
+			}
+			setPathNoDup.add(parentPathFinal);
+			String tmpPathThis = pathTmp + parentPathFinal+ FileOperate.getSepPath();
 			mapPath2TmpPath.put(path, tmpPathThis);
 		}
 		
@@ -306,6 +319,12 @@ public class CmdPath {
 		isGenerateTmpPath = true;
 	}
 	
+	protected String getTmp() {
+		if (StringOperate.isRealNull(tmpPath)) {
+			tmpPath = PathDetail.getTmpPathRandom();
+		}
+		return tmpPath;
+	}
 	/** 将已有的输出文件夹在临时文件夹中创建好 */
 	private void createFoldTmp() {
 		for (String filePathName : mapName2TmpName.keySet()) {
@@ -392,7 +411,11 @@ public class CmdPath {
 					continue;
 				}
 				logger.info("move file from  " + filePath + "  to  " + filePathResult);
-				FileOperate.moveFile(true, filePath, filePathResult);
+				if (isRetainTmpFiles) {
+					FileOperate.copyFile(filePath, filePathResult, true);
+				} else {
+					FileOperate.moveFile(true, filePath, filePathResult);
+				}
 			}
 		}
 		
@@ -400,6 +423,9 @@ public class CmdPath {
 	
 	/** 删除中间文件，会把临时的input文件也删除 */
 	public void deleteTmpFile() {
+		if (isRetainTmpFiles) {
+			return;
+		}     
 		if (!mapPath2TmpPath.isEmpty()) {
 			logger.debug("start delete files");
 		}

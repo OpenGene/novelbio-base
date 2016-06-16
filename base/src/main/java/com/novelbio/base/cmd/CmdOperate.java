@@ -15,6 +15,7 @@ import java.util.TimerTask;
 
 import org.apache.log4j.Logger;
 
+import com.novelbio.base.PathDetail;
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
@@ -84,18 +85,10 @@ public class CmdOperate extends RunProcess<String> {
 	/** 输出本程序正在运行时的参数等信息，本功能也用docker替换了 */
 	@Deprecated
 	String outRunInfoFileName;
-//	CmdRunInfo cmdRunInfo;
 	
 	/** 将cmd写入sh文件的具体文件 */
 	String cmd1SH;
 
-	
-	
-	/** 设定复制输入输出文件所到的临时文件夹 */
-	public static void setTmpPath(String tmpPath) {
-		CmdPath.setTmpPath(tmpPath);
-	}
-	
 	public CmdOperate() {
 		process = new ProcessCmd();
 	}
@@ -134,7 +127,7 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	private void setCmdFile(String cmd, String cmdWriteInFileName) {
 		while (true) {
-			cmd1SH = CmdPath.tmpPath + cmdWriteInFileName.replace("\\", "/") + DateUtil.getDateAndRandom() + ".sh";
+			cmd1SH = cmdPath.getTmp() + cmdWriteInFileName.replace("\\", "/") + DateUtil.getDateAndRandom() + ".sh";
 			if (!FileOperate.isFileExist(cmd1SH)) {
 				break;
             }
@@ -227,6 +220,15 @@ public class CmdOperate extends RunProcess<String> {
 		process = new ProcessRemote(ip, usr, pwd);
 		((ProcessRemote)process).setKeyFile(keyFile);
 		cmdPath.setLsCmd(lsCmd);
+	}
+
+	/** 设定临时文件夹，会把重定向的文件拷贝到这个文件夹中 */
+	public void setCmdTmpPath(String tmpPath) {
+		cmdPath.setTmpPath(tmpPath);
+	}
+	/** 是否删除临时文件夹中的文件，如果连续的cmd需要顺序执行，考虑不删除 */
+	public void setRetainTmpFiles(boolean isRetainTmpFiles) {
+		cmdPath.setRetainTmpFiles(isRetainTmpFiles);
 	}
 	public void setLsCmd(List<String> lsCmd) {
 		cmdPath.setLsCmd(lsCmd);
@@ -876,10 +878,6 @@ public class CmdOperate extends RunProcess<String> {
 		}
 		
 		return input;
-	}
-	
-	public static String getCmdTmpPath() {
-		return CmdPath.tmpPath;
 	}
 	
 	static class FinishFlag {

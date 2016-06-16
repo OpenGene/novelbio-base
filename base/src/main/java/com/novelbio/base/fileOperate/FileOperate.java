@@ -1807,7 +1807,7 @@ public class FileOperate {
 	}
 	
 	/**
-	 * 判断文件是否存在，并且不是文件夹，给的是绝对路径
+	 * 判断文件或文件夹是否存在，给的是绝对路径
 	 * @param fileName 如果为null, 直接返回false
 	 * @return
 	 */
@@ -1817,7 +1817,11 @@ public class FileOperate {
 		}
 		return isFileFolderExist(getPath(fileName));
 	}
-	
+	/**
+	 * 判断文件或文件夹是否存在，给的是绝对路径
+	 * @param file 如果为null, 直接返回false
+	 * @return
+	 */
 	public static boolean isFileFolderExist(File file) {
 		if (file == null) return false;
 		Path path = getPath(file);
@@ -1825,7 +1829,7 @@ public class FileOperate {
 	}
 	
 	/**
-	 * 判断文件是否存在，并且不是文件夹，给的是绝对路径
+	 * 判断文件或文件夹是否存在，给的是绝对路径
 	 * 
 	 * @param fileName
 	 *            如果为null, 直接返回false
