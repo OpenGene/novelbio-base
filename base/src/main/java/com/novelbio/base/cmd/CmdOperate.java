@@ -2,8 +2,6 @@ package com.novelbio.base.cmd;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PipedOutputStream;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Path;
@@ -15,7 +13,7 @@ import java.util.TimerTask;
 
 import org.apache.log4j.Logger;
 
-import com.novelbio.base.PathDetail;
+import com.google.common.annotations.VisibleForTesting;
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
@@ -425,6 +423,14 @@ public class CmdOperate extends RunProcess<String> {
 		return ArrayOperate.cmbString(resultCmd, " ");
 	}
 	
+	/** 返回执行的具体cmd命令，实际cmd命令 */
+	@VisibleForTesting
+	public String getRunCmd() {
+		String[] resultCmd = cmdPath.getRunCmd();
+		replaceInputStreamFile(resultCmd);
+		return ArrayOperate.cmbString(resultCmd, " ");
+	}
+	
 	private void replaceInputStreamFile(String[] resultCmd) {
 		if (streamIn != null && !StringOperate.isRealNull(streamIn.getInputFile())) {
 			for (int i = 0; i < resultCmd.length; i++) {
@@ -578,7 +584,6 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	private void doInBackgroundB() throws Exception {
 		finishFlag = new FinishFlag();
-		cmdPath.copyFileIn();
 		String[] cmdRun = cmdPath.getRunCmd();
 		
 //		cmdRunInfo = new CmdRunInfo();
@@ -626,7 +631,18 @@ public class CmdOperate extends RunProcess<String> {
 	}
 	
 	private Thread setAndGetInStream() {
-		if (streamIn == null) return null;
+		String inFile = cmdPath.getStdInFile();
+		if (streamIn == null && StringOperate.isRealNull(inFile)) {
+			return null;
+		}
+		
+		if (streamIn != null && !StringOperate.isRealNull(inFile)) {
+			throw new ExceptionCmd("cannot both set stdin and have \">\" in  script");
+		}
+		if (streamIn == null && !StringOperate.isRealNull(inFile)) {
+			streamIn = new StreamIn();
+			streamIn.setInputFile(inFile);
+		}
 		streamIn.setProcessInStream(process.getStdIn());
 		Thread threadStreamIn = new Thread(streamIn);
 		threadStreamIn.setDaemon(true);
@@ -693,6 +709,15 @@ public class CmdOperate extends RunProcess<String> {
 		}
 	}
 	
+	/** 是否有">" 或 "1>"符号，如果有，返回输出的文件名 */
+	public String getSaveStdOutFile() {
+		return cmdPath.getSaveStdPath();
+	}
+	/** 是否有"2>"符号，如果有，返回输出的文件名 */
+	public String getSaveStdErrFile() {
+		return cmdPath.getSaveStdPath();
+	}
+	
 	/** 关闭输出流 */
 	private void closeOutStream() {
 		if (!getCmdInStdStream) {
@@ -743,15 +768,40 @@ public class CmdOperate extends RunProcess<String> {
 			throw new ExceptionCmd(info, this);
 		}
 	}
-	/** 运行，出错会抛出异常 */
-	public void runWithExp() {
-		run();
+	
+	public void run() {
+		cmdPath.generateTmPath();
+		cmdPath.copyFileIn();
+		super.run();
 		if (!isFinishedNormal()) {
 			throw new ExceptionCmd(this);
 		}
 		if (FileOperate.isFileExist(cmd1SH)) {
 			FileOperate.deleteFileFolder(cmd1SH);
         }
+	}
+	
+	/** 运行，出错会抛出异常 */
+	public void runWithExp() {
+		cmdPath.generateTmPath();
+		cmdPath.copyFileIn();
+		super.run();
+		if (!isFinishedNormal()) {
+			throw new ExceptionCmd(this);
+		}
+		if (FileOperate.isFileExist(cmd1SH)) {
+			FileOperate.deleteFileFolder(cmd1SH);
+        }
+	}
+	
+	/** 把{@link CmdOperate#runWithExp()} 拆成两个方法
+	 * 分别是 {@link CmdOperate#prepare()} 和 {@link CmdOperate#runWithExpNoPrepare()}
+	 * 
+	 * 本步骤解析cmd命令，并拷贝需要的文件到指定文件夹中
+	 */
+	public void prepare() {
+		cmdPath.generateTmPath();
+		cmdPath.generateRunCmd(true);
 	}
 	
 	@Override

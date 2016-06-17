@@ -59,6 +59,8 @@ public class CmdPath {
 	/** 输出错误文件是否为txt，如果命令中含有 2>，则认为输出的可能不是txt，为二进制 */
 	boolean isJustDisplayErr = false;
 	
+	String stdInput = null;
+	
 	/** 是否已经生成了临时文件夹，生成一次就够了 */
 	boolean isGenerateTmpPath = false;
 	
@@ -203,7 +205,11 @@ public class CmdPath {
 			return saveFilePath;
 		}
 	}
-
+	public String getStdInFile() {
+		return stdInput;
+	}
+	
+	
 	public void setSaveErrPath(String saveErrPath, boolean isSaveErrTmp) {
 		this.saveErrPath = saveErrPath;
 		this.isSaveErrTmp = isSaveErrTmp;
@@ -251,7 +257,6 @@ public class CmdPath {
 
 	/** 在cmd运行前，将输入文件拷贝到临时文件夹下 */
 	public void copyFileIn() {
-		generateTmPath();
 		createFoldTmp();
 		if (!isRedirectInToTmp) return;
 		
@@ -343,10 +348,11 @@ public class CmdPath {
 	 * 如果是实际执行的cmd，就需要重定向
 	 * @return
 	 */
-	private String[] generateRunCmd(boolean redirectStdErr) {
+	protected String[] generateRunCmd(boolean redirectStdAndErr) {
 		List<String> lsReal = new ArrayList<>();
 		boolean stdOut = false;
 		boolean errOut = false;
+		boolean stdIn = false;
 		
 		ConvertCmdTmp convertCmdTmp = new ConvertCmdTmp(isRedirectInToTmp, isRedirectOutToTmp,
 				setInput, setOutput, mapName2TmpName);
@@ -358,7 +364,7 @@ public class CmdPath {
 		};
 		
 		for (String tmpCmd : lsCmd) {
-			if (redirectStdErr) {
+			if (redirectStdAndErr) {
 				if (tmpCmd.equals(">")  || tmpCmd.equals("1>")) {
 					stdOut = true;
 					setJustDisplayStd(false);
@@ -366,6 +372,9 @@ public class CmdPath {
 				} else if (tmpCmd.equals("2>")) {
 					errOut = true;
 					setJustDisplayErr(false);
+					continue;
+				} else if (tmpCmd.equals("<")) {
+					stdIn = true;
 					continue;
 				}
 			}
@@ -383,6 +392,12 @@ public class CmdPath {
 					saveErrPath = tmpCmd;
 				}
 				errOut = false;
+				continue;
+			} else if (stdIn) {
+				if (StringOperate.isRealNull(stdInput)) {
+					stdInput = tmpCmd;
+				}
+				stdIn = false;
 				continue;
 			}
 			if (isConvertHdfs2Loc) {

@@ -110,7 +110,7 @@ public class Computer implements Serializable {
 		CmdOperate cmdOperate = new CmdOperate(lsCmd);
 		cmdOperate.setTerminateWriteTo(false);
 		cmdOperate.setGetLsStdOut();
-		cmdOperate.run();
+		cmdOperate.runWithExp();
 		PatternOperate patternOperate = new PatternOperate("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}", false);
 		for (String content : cmdOperate.getLsStdOut()) {
 			content = content.trim();

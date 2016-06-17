@@ -1770,6 +1770,15 @@ public class FileOperate {
 	 * @param fileName
 	 * @return
 	 */
+	public static boolean isFileDirectoryEmpty(String file) {
+		return isFileDirectory(getPath(file));
+	}
+	
+	/**
+	 * 如果file是文件夹，并且为空，则返回true，否则返回false 
+	 * @param fileName
+	 * @return
+	 */
 	public static boolean isFileDirectoryEmpty(Path file) {
 		if (file == null) {
 			return false;

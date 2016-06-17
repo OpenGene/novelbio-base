@@ -134,7 +134,7 @@ public class ProcessInfo {
 		List<String> lsCmd = new ArrayList<>();
 		lsCmd.add("kill"); lsCmd.add("-9"); lsCmd.add(pid + "");
 		CmdOperate cmdOperate = new CmdOperate(lsCmd);
-		cmdOperate.run();
+		cmdOperate.runWithExp();
 	}
 	
 	public static String getTitle() {
@@ -176,7 +176,7 @@ public class ProcessInfo {
 		CmdOperate cmdOperate = new CmdOperate(lsCmd);
 		cmdOperate.setTerminateWriteTo(false);
 		cmdOperate.setGetLsStdOut();
-		cmdOperate.run();
+		cmdOperate.runWithExp();
 		List<String> lsStd = cmdOperate.getLsStdOut();
 		return getLsPid(lsStd);
 	}
@@ -227,7 +227,7 @@ public class ProcessInfo {
 		cmdOperate.setTerminateWriteTo(false);
 		cmdOperate.setGetLsStdOut();
 		cmdOperate.setNeedLog(false);
-		cmdOperate.run();
+		cmdOperate.runWithExp();
 		List<String> lsStd = cmdOperate.getLsStdOut();
 		return getLsPid(lsStd, pid, isGetChild);
 	}
