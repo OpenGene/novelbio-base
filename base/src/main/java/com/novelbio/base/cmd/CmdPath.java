@@ -427,7 +427,7 @@ public class CmdPath {
 				}
 				logger.info("move file from  " + filePath + "  to  " + filePathResult);
 				if (isRetainTmpFiles) {
-					FileOperate.copyFile(filePath, filePathResult, true);
+					FileOperate.copyFileFolder(filePath, filePathResult, true);
 				} else {
 					FileOperate.moveFile(true, filePath, filePathResult);
 				}

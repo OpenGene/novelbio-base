@@ -113,7 +113,13 @@ class TxtRead implements Closeable {
 		try {
 			return readPerlines();
 		} catch (Exception e) {
-			e.printStackTrace();
+			String fileName = getFileName();
+			if (fileName == null) {
+				logger.error("read stream error", e);
+			} else {
+				logger.error("read file " + getFileName() + " error", e);
+
+			}
 			close();
 			return null;
 		}

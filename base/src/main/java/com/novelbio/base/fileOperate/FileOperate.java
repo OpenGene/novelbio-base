@@ -1669,7 +1669,19 @@ public class FileOperate {
 		Path file = getPath(fileName);
 		return isFileExistAndNotDir(file);
 	}
-	
+	/**
+	 * 判断文件是否存在，并且不是文件夹，给的是绝对路径
+	 * 
+	 * @param fileName
+	 *            如果为null, 直接返回false
+	 * @return 文件存在,返回true.否则,返回false
+	 */
+	public static boolean isFileExist(Path path) {
+		if (path == null) {
+			return false;
+		}
+		return isFileExistAndNotDir(path);
+	}
 	/**
 	 * 判断文件是否存在，并且不是文件夹，给的是绝对路径
 	 * @param fileName 如果为null, 直接返回false
@@ -1693,18 +1705,29 @@ public class FileOperate {
 		Path path = getPath(file);
 		return isFileExistAndNotDir(path);
 	}
-
+	
 	/**
 	 * 判断文件是否存在，并且有一定的大小而不是空文件
-	 * 
-	 * @param fileName
-	 *            如果为null, 直接返回false
-	 * @param size
-	 *            大小 byte为单位
+	 * @param fileName 如果为null, 直接返回false
+	 * @param size 大小 byte为单位
+	 * @return
+	 */
+	public static boolean isFileExistAndBigThanSize(Path path, double size) {
+		if (path == null) {
+			return false;
+		}
+		if (size < 0) size = -1;
+		return FileOperate.getFileSizeLong(path) > size;
+	}
+	
+	/**
+	 * 判断文件是否存在，并且有一定的大小而不是空文件
+	 * @param fileName 如果为null, 直接返回false
+	 * @param size 大小 byte为单位
 	 * @return
 	 */
 	public static boolean isFileExistAndBigThanSize(String fileName, double size) {
-		if (fileName == null || fileName.trim().equals("")) {
+		if (StringOperate.isRealNull(fileName)) {
 			return false;
 		}
 		if (size < 0) size = -1;
@@ -1715,7 +1738,9 @@ public class FileOperate {
 	public static boolean isFileExistAndBigThan0(String fileName) {
 		return isFileExistAndBigThanSize(fileName, 0);
 	}
-	
+	public static boolean isFileExistAndBigThan0(Path path) {
+		return isFileExistAndBigThanSize(path, 0);
+	}
 	public static void validateFileExistAndBigThan0(String fileName) {
 		if (!isFileExistAndBigThanSize(fileName, 0)) {
 			throw new ExceptionNbcFileInputNotExist(fileName + " is not exist");
