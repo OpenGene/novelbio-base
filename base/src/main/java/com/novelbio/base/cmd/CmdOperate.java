@@ -769,13 +769,11 @@ public class CmdOperate extends RunProcess<String> {
 		}
 	}
 	
+	/** 运行但并不报错，适合获取软件版本信息等。因为有些软件在获取版本时会返回错误，譬如bwa，输入bwa就是返回错误 */
 	public void run() {
 		cmdPath.generateTmPath();
 		cmdPath.copyFileIn();
 		super.run();
-		if (!isFinishedNormal()) {
-			throw new ExceptionCmd(this);
-		}
 		if (FileOperate.isFileExist(cmd1SH)) {
 			FileOperate.deleteFileFolder(cmd1SH);
         }
