@@ -919,12 +919,11 @@ public class CmdOperate extends RunProcess<String> {
 	
 	/** 将输入的被引号--包括英文的单引号和双引号--包围的path信息修改为相对路径 */
 	public static String makePathToRelative(String input) {
-		PatternOperate patternOperate = new PatternOperate("\"(.+?)\"|\'(.+?)\'", false);
-		List<String> lsInfo = patternOperate.getPat(input, 1,2);		
+		PatternOperate patternOperate = new PatternOperate("/{0,1}(hdfs\\:){0,1}/{0,1}([\\w\\.]+?/)+\\w+", false);
+		List<String> lsInfo = patternOperate.getPat(input);		
 		for (String string : lsInfo) {
 			input = input.replace(string, FileOperate.getFileName(string));
 		}
-		
 		return input;
 	}
 	
