@@ -24,6 +24,9 @@ public class ArrayOperate {
 	public static<T> boolean isEmpty(Collection<T> collection) {
 		return (collection == null || collection.isEmpty());
 	}
+	public static<K, V> boolean isEmpty(Map<K, V> collection) {
+		return (collection == null || collection.isEmpty());
+	}
 	public static<T> boolean isEmpty(T[] array) {
 		return (array == null || array.length == 0);
 	}
