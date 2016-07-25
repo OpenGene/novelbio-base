@@ -809,6 +809,21 @@ public class TxtReadandWrite implements Closeable {
 		lzoIndexer.run(new String[]{inputFile});
 	}
 	
+	public static String readFirstLine(String txtFile) {
+		return readFirstLine(FileOperate.getPath(txtFile));
+	}
+	
+	public static String readFirstLine(File txtFile) {
+		return readFirstLine(FileOperate.getPath(txtFile));
+	}
+	
+	public static String readFirstLine(Path txtFile) {
+		TxtReadandWrite txtReadandWrite = new TxtReadandWrite(txtFile);
+		String firstLine = txtReadandWrite.readFirstLine();
+		txtReadandWrite.close();
+		return firstLine;
+	}
+	
 	public static List<String> readfileLs(String txtFile) {
 		TxtReadandWrite txtReadandWrite = new TxtReadandWrite(txtFile);
 		List<String> lsResult = new ArrayList<>();
@@ -818,7 +833,7 @@ public class TxtReadandWrite implements Closeable {
 		txtReadandWrite.close();
 		return lsResult;
 	}
-	
+
 	public static List<String> readfileLs(File txtFile) {
 		TxtReadandWrite txtReadandWrite = new TxtReadandWrite(txtFile);
 		List<String> lsResult = new ArrayList<>();

@@ -1141,6 +1141,13 @@ public class FileOperate {
 	 */
 	public static boolean copyFolder(Path oldFilePath, String newPath, boolean cover) {
 		final String newPathSep = addSep(newPath);
+		if (!FileOperate.isFileFolderExist(oldFilePath)) {
+			logger.error(oldFilePath + " is not exist");
+		}
+		if (!FileOperate.isFileDirectory(oldFilePath)) {
+			logger.error(oldFilePath + " is not a folder");
+			return false;
+		}
 		try {
 			createFolders(newPathSep);
 			Files.list(oldFilePath).forEach((pathOld) -> {				
@@ -1540,6 +1547,14 @@ public class FileOperate {
 	 * @throws Exception
 	 */
 	private static void moveFoldFile(Path olddir, String newfolder, String prix, boolean cover) {
+		if (!FileOperate.isFileFolderExist(olddir)) {
+			logger.error(olddir + " is not exist");
+		}
+		if (!FileOperate.isFileDirectory(olddir)) {
+			logger.error(olddir + " is not a folder");
+			return;
+		}
+		
 		final String prefix = StringOperate.isRealNull(prix)? "" : prix;
 
 		final String newPathSep = addSep(newfolder);
