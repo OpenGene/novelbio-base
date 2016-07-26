@@ -291,4 +291,12 @@ public class PathDetail {
 	public static String getDockerRemotePort() {
 		return properties.getProperty("dockerRemotePort");
 	}
+	
+	//========== ssh ========================
+	public static String getSshName() {
+		return properties.getProperty("sshName");
+	}
+	public static String getSshIdrsaFile() {
+		return properties.getProperty("sshidrsa");
+	}
 }
