@@ -136,6 +136,22 @@ public class DateUtil {
 	}
 	
 	/**
+	 * long值转date
+	 * 
+	 * @date 2016年7月31日
+	 * @author novelbio fans.fan
+	 * @param date
+	 * @return
+	 */
+	public static Date Long2Date(long date) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(date);
+		return calendar.getTime();
+	}
+	
+	
+	
+	/**
 	 * String转Long
 	 * @param date
 	 * @param pattern 格式类似：yyyy-MM-dd HH:mm:ss，注意大小写
