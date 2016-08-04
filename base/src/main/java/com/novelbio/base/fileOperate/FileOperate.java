@@ -342,6 +342,18 @@ public class FileOperate {
 	}
 	
 	/**
+	 * 给定路径名，返回上一级文件夹的名字，可以给定不存在的路径。
+	 * 如给定 /home/novelbio/zongjie/ 和 /home/novelbio/zongjie
+	 * 均返回 novelbio
+	 * @param fileName
+	 * @return
+	 */
+	public static String getLastPathName(String fileName) {
+		String ParentPath = getParentPathNameWithSep(fileName);
+		return FileOperate.getFileName(ParentPath);
+	}
+	
+	/**
 	 * 给定路径名，返回其名字 如给定/home/zong0jie/和/home/zong0jie 都返回zong0jie 可以给定不存在的路径
 	 * @param fileName
 	 * @return
