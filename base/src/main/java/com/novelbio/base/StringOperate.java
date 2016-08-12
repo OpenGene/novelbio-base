@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -195,5 +196,25 @@ public class StringOperate {
             return s;
         else
             return (new StringBuilder()).append(Character.toLowerCase(s.charAt(0))).append(s.substring(1)).toString();
+    }
+    
+    /**
+     * 编码html中的符号.并将\n转为<br>标签
+     * 
+     * 如:<div>test</div>
+     * 变成:&lt;div&gt;test&lt;/div&gt;
+     * 
+     * @date 2016年8月12日
+     * @author novelbio fans.fan
+     * @param content
+     * @return
+     */
+    public static String escapeHtml(String content) {
+    	if (isRealNull(content)) {
+			return content;
+		} else {
+			return StringEscapeUtils.escapeHtml(content).replace("\n", "<br>").replace("\r\n", "<br>");
+		}
+    	
     }
 }

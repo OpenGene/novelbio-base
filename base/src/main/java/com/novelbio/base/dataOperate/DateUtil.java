@@ -22,6 +22,8 @@ public class DateUtil {
 
 	/** 年月日 */
 	public static final String PATTERN_YYYYMMDD = "yyyyMMdd";
+	/** 年2位月日 */
+	public static final String PATTERN_YYMMDD = "yyMMdd";
 
 	/** 当前日期和时间 */
 	public static final String PATTERN_DATETIME = "yyyy-MM-dd HH:mm:ss";
