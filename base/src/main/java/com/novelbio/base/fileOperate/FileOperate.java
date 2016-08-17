@@ -491,12 +491,12 @@ public class FileOperate {
 	}
 	
 	/**
-	 * 获取文件名，不包括前缀
+	 * 获取文件名，不包括后缀
 	 * @param fileName
 	 * @return
 	 */
 	public static String getFileNameWithoutSuffix(String fileName) {
-		return getFileNameSepWithoutPath(fileName)[0]; 
+		return getFileNameSep(fileName)[0]; 
 	}
 	
 	/**
@@ -507,7 +507,7 @@ public class FileOperate {
 	 * @return
 	 */
 	public static String getFileSuffix(String fileName) {
-		return getFileNameSepWithoutPath(fileName)[1]; 
+		return getFileNameSep(fileName)[1]; 
 	}
 	
 	/** 给定文件的相对路径名，返回文件名字
@@ -1362,8 +1362,8 @@ public class FileOperate {
 				maxEndDot = endDot;
 			}
 		}
-
-		suffixOld = fileName.substring(maxEndDot, fileName.length());
+		
+		suffixOld = maxEndDot < 0 ? "" : fileName.substring(maxEndDot, fileName.length());
 		
 		if (suffixNew == null) {
 			suffixNew = suffixOld;

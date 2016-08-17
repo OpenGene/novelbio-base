@@ -263,10 +263,6 @@ public class PathDetail {
 	public static String getHdpHdfsHeadSymbol() {
 		return properties.getProperty("hdfsHeadSymbol");
 	}
-	/** 主要是在docker中挂载需要，在appmaster中，需要指定container的docker参数，而appmaster并不知道主机的 HADOOP_HOME，所以要写在配置文件中 */
-	public static String getHdpHomeRealWithoutSep() {
-		return FileOperate.removeSplashTail(properties.getProperty("hadoophome"), false);
-	}
 	public static String getLogoPath() {
 		return properties.getProperty("logoImgPath");
 	}

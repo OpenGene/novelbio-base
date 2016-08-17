@@ -112,12 +112,21 @@ public class Computer implements Serializable {
 		cmdOperate.setGetLsStdOut();
 		cmdOperate.runWithExp();
 		PatternOperate patternOperate = new PatternOperate("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}", false);
+		boolean isEth0 = false;
+		String ipEth0 = null;
 		for (String content : cmdOperate.getLsStdOut()) {
 			content = content.trim();
+			if (content.startsWith("eth0")) {
+				isEth0 = true;
+			}
 			if (content.startsWith("inet") && !content.startsWith("inet6")) {
 				String ipTmp = patternOperate.getPatFirst(content);
 				if (!ipTmp.equals("127.0.0.1")) {
 					lsIp.add(ipTmp);
+				}
+				if (isEth0) {
+					ipEth0 = ipTmp;
+					isEth0 = false;
 				}
 			}
 		}
@@ -133,8 +142,14 @@ public class Computer implements Serializable {
 			}
 		}
 		if (StringOperate.isRealNull(ip)) {
-			logger.error("cannot get this server's ip");
-			throw new RuntimeException("cannot get this server's ip");
+			if (!StringOperate.isRealNull(ipEth0)) {
+				ip = ipEth0;
+			} else if (!lsIp.isEmpty()) {
+				ip = lsIp.get(0);
+			} else {
+				logger.error("cannot get this server's ip");
+				throw new RuntimeException("cannot get this server's ip");
+			}
 		}
 		return ip;
 	}
