@@ -192,45 +192,6 @@ public class FileOperate {
 		
 		return null;// TODO: handle exception
 	}
-	
-	/** 
-     * 
-     *读取文件  
-     *20160322 duping
-    * @param filePath 
-     */  
-    public static String readFile(String filePath) {  
-        FileInputStream fileInputStream = null;
-        String result="";
-        try {  
-        		// 获取源文件和目标文件的输入输出流    
-        		fileInputStream = new FileInputStream(filePath);  
-        		// 获取输入输出通道  
-            FileChannel fileChannel = fileInputStream.getChannel();  
-            	//分配内存
-            ByteBuffer buffer = ByteBuffer.allocate(1024*10);  
-            	// 将通道中的数据读取到缓冲区中
-            fileChannel.read(buffer);
-            buffer.flip();
-            Charset  charset = Charset.defaultCharset();  
-            result=charset.decode(buffer).toString();
-            buffer.clear();
-            buffer=null;  
-        } catch (Exception e) {  
-        	e.printStackTrace();
-        	throw new ExceptionFileError("cannot get file " + filePath);
-        } finally {  
-            if (fileInputStream != null ) {   
-                try {  
-                	fileInputStream.close();  
-                } catch (IOException e) {  
-                	throw new ExceptionFileError("file stream can not close:" + filePath, e);
-                 
-                }  
-            }  
-        }  
-        	return result;
-    }  
 
     /**
 	 * 给定路径名，返回其上一层路径，带"/" 如给定 /wer/fw4e/sr/frw/s3er.txt 返回 /wer/fw4e/sr/frw/<br>
@@ -2165,6 +2126,29 @@ public class FileOperate {
 		}
 		return fileName;
 	}
+	
+	/**
+	 * 获取文件内容<br>
+	 * <b>只允许对小于5M的文件读取</b>
+	 * @date 2016年8月24日
+	 * @author novelbio fans.fan
+	 * @param fileName
+	 * @return
+	 * @throws IOException
+	 */
+	public static String getFileContent(String filePathAndName) throws IOException {
+		if (!isFileExistAndBigThan0(filePathAndName)) {
+			return null;
+		}
+		if (getFileSizeLong(filePathAndName) > 5242880) {
+			throw new RuntimeException("file size more than 5M");
+		}
+		StringBuffer stringBuffer = new StringBuffer();
+		TxtReadandWrite.readfileLs(filePathAndName).forEach(str -> stringBuffer.append(str));
+		
+		return stringBuffer.toString();
+	}
+	
 	
 	public static class ExceptionFileNotExist extends RuntimeException {
 		private static final long serialVersionUID = 8125052068436320509L;
