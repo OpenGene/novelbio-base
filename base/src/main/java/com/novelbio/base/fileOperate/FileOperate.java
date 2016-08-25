@@ -1028,7 +1028,8 @@ public class FileOperate {
 				return;
 			}
 			if (isFileDirectory(path)) return;
-			if (Files.exists(path)) throw new ExceptionFileError("folderPath is an exist file " + path);
+			//这里再判定一次，因为有可能别的程序在这时候新建了一个文件夹
+			if (isFileExistAndNotDir(path)) throw new ExceptionFileError("folderPath is an exist file " + path);
 			
 			Files.createDirectories(path);
 		} catch (IOException e) {

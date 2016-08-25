@@ -266,7 +266,9 @@ public class PathDetail {
 	public static String getLogoPath() {
 		return properties.getProperty("logoImgPath");
 	}
-	
+	public static String getHadoophome() {
+		return hadoophome;
+	}
 	//=========  zookeeper  ===========================
 	/** 连接到zookeeper server的site */
 	public static String getZookeeperServerSite() {
