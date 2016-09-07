@@ -586,10 +586,6 @@ public class CmdOperate extends RunProcess<String> {
 		finishFlag = new FinishFlag();
 		String[] cmdRun = cmdPath.getRunCmd();
 		
-//		cmdRunInfo = new CmdRunInfo();
-//		cmdRunInfo.setOutFile(outRunInfoFileName);
-//		cmdRunInfo.setProcess(process);
-		
 		process.exec(cmdRun);
 		
 		//等待30ms，如果不等待，某些命令会阻塞输出流，不知道为什么，譬如以下这个命令
@@ -607,7 +603,6 @@ public class CmdOperate extends RunProcess<String> {
 		outputGobbler.setDaemon(true);
 		errorGobbler.start();
 		outputGobbler.start();
-//		cmdRunInfo.startWriteRunInfo();
 
 		finishFlag.flag = process.waitFor();
 		
@@ -623,8 +618,7 @@ public class CmdOperate extends RunProcess<String> {
 		if (needLog) logger.info("close out stream");
 		
 		closeOutStream();
-//		cmdRunInfo.setFinish();
-
+		
 		//不管是否跑成功，都移出文件夹
 		cmdPath.moveFileOut();
 		cmdPath.deleteTmpFile();

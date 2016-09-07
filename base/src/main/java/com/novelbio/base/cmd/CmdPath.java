@@ -43,8 +43,9 @@ public class CmdPath {
 	 */
 	Map<String, String> mapName2TmpName = new HashMap<>();
 	/** 输入文件夹对应的输出文件夹，可以将输入文件夹里的文件直接复制到输出文件夹中 */
-	Map<String, String> mapPath2TmpPath = new HashMap<>();
-	
+	Map<String, String> mapPath2TmpPathIn = new HashMap<>();
+	Map<String, String> mapPath2TmpPathOut = new HashMap<>();
+
 	/** 存储stdout是否为临时文件 */
 	boolean isSaveFileTmp = true;
 	/** 截获标准输出流的输出文件名 */
@@ -262,7 +263,13 @@ public class CmdPath {
 		
 		for (String inFile : setInput) {
 			String inTmpName = mapName2TmpName.get(inFile);
-			FileOperate.copyFileFolder(inFile, inTmpName, false);
+			logger.info("copy file from {} to {}", inFile, inTmpName);
+			try {
+				FileOperate.copyFileFolder(inFile, inTmpName, false);
+
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
 		}
 	}
 	
@@ -277,27 +284,32 @@ public class CmdPath {
 		if (isGenerateTmpPath) {
 			return;
 		}
-		Set<String> setPath = new HashSet<>();
 		Set<String> setFileNameAll = new HashSet<>();
-		mapPath2TmpPath.clear();
-		mapName2TmpName.clear();
 		
+		Map<String, String> mapPath2TmpPath = new HashMap<>();
 		if (isRedirectInToTmp) {
-			for (String inFileName : setInput) {
-				String inPath = FileOperate.getParentPathNameWithSep(inFileName);
-				setPath.add(inPath);
-			}
+			mapPath2TmpPathIn = getMapPath2TmpPath(setInput, getTmp());
 			setFileNameAll.addAll(setInput);
+			mapPath2TmpPath.putAll(mapPath2TmpPathIn);
 		}
 		if (isRedirectOutToTmp) {
-			for (String outFileName : setOutput) {
-				String outPath = FileOperate.getParentPathNameWithSep(outFileName);
-				setPath.add(outPath);
-			}
+			mapPath2TmpPathOut = getMapPath2TmpPath(setOutput, getTmp());
 			setFileNameAll.addAll(setOutput);
+			mapPath2TmpPath.putAll(mapPath2TmpPathOut);
 		}
-		//产生临时文件夹
-		String pathTmp = getTmp();
+		
+		mapName2TmpName = getMapName2TmpName(setFileNameAll, mapPath2TmpPath);
+		isGenerateTmpPath = true;
+	}
+	
+	private Map<String, String> getMapPath2TmpPath(Set<String> setFiles, String pathTmp) {
+		Map<String, String> mapPath2TmpPath = new HashMap<>();
+		Set<String> setPath = new HashSet<>();
+		for (String inFileName : setFiles) {
+			String inPath = FileOperate.getParentPathNameWithSep(inFileName);
+			setPath.add(inPath);
+		}
+		
 		Set<String> setPathNoDup = new HashSet<>();
 		for (String path : setPath) {
 			String parentPath = FileOperate.getFileName(path);
@@ -310,7 +322,12 @@ public class CmdPath {
 			String tmpPathThis = pathTmp + parentPathFinal+ FileOperate.getSepPath();
 			mapPath2TmpPath.put(path, tmpPathThis);
 		}
-		
+		return mapPath2TmpPath;
+	}
+	
+	private Map<String, String> getMapName2TmpName(Set<String> setFileNameAll, Map<String, String> mapPath2TmpPath) {
+		Map<String, String> mapName2TmpName = new HashMap<>();
+
 		for (String filePathName : setFileNameAll) {
 			String tmpPath = mapPath2TmpPath.get(FileOperate.getParentPathNameWithSep(filePathName));
 			String fileName = FileOperate.getFileName(filePathName);
@@ -321,7 +338,7 @@ public class CmdPath {
 			}
 			mapName2TmpName.put(filePathName, tmpPath);
 		}
-		isGenerateTmpPath = true;
+		return mapName2TmpName;
 	}
 	
 	protected String getTmp() {
@@ -412,12 +429,12 @@ public class CmdPath {
 	/**
 	 * 将tmpPath文件夹中的内容全部移动到resultPath中 */
 	public void moveFileOut() {
-		if (!mapPath2TmpPath.isEmpty()) {
+		if (!mapPath2TmpPathOut.isEmpty()) {
 			logger.info("start move files");
 		}
 		
-		for (String outPath : mapPath2TmpPath.keySet()) {
-			String outTmpPath = mapPath2TmpPath.get(outPath);
+		for (String outPath : mapPath2TmpPathOut.keySet()) {
+			String outTmpPath = mapPath2TmpPathOut.get(outPath);
 			
 			List<String> lsFilesFinish = FileOperate.getLsFoldFileName(outTmpPath);
 			for (String filePath : lsFilesFinish) {
@@ -441,6 +458,9 @@ public class CmdPath {
 		if (isRetainTmpFiles) {
 			return;
 		}     
+		Map<String, String> mapPath2TmpPath = new HashMap<>();
+		mapPath2TmpPath.putAll(mapPath2TmpPathIn);
+		mapPath2TmpPath.putAll(mapPath2TmpPathOut);
 		if (!mapPath2TmpPath.isEmpty()) {
 			logger.debug("start delete files");
 		}
@@ -455,7 +475,8 @@ public class CmdPath {
 		setInput.clear();
 		setOutput.clear();
 		mapName2TmpName.clear();
-		mapPath2TmpPath.clear();
+		mapPath2TmpPathIn.clear();
+		mapPath2TmpPathOut.clear();
 	}
 	
 	//============================================================
