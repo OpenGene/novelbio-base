@@ -896,7 +896,7 @@ public class ExcelOperate implements Closeable {
 	/**
 	 * 根据sheet顺序号获取Sheet.没有则创建.
 	 * 
-	 * @param sheetNum 	没有设为小于1
+	 * @param sheetNum 	默认从1开始，没有设为小于1
 	 * @return
 	 */
 	private Sheet getSheet(int sheetNum) {
