@@ -34,13 +34,7 @@ public class PathDetail {
 			e1.printStackTrace();
 			throw new RuntimeException(e1);
 		} finally{
-			try {
-				if(in != null){
-					in.close();
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			FileOperate.close(in);
 		}
 		tmpHdfsPath = properties.getProperty("tmpHdfsPath");
 		
