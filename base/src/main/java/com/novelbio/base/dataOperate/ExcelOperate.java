@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPOutputStream;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -808,7 +809,9 @@ public class ExcelOperate implements Closeable {
 	}
 	
 	/**
-	 * 将文件写到输出流里.
+	 * 将文件写到输出流里.<br>
+	 * <b>注意:这个里面使用了gzip压缩.<br/>
+	 * 如果OutputStream来自response.需设置	response.setHeader("Content-Encoding", "gzip");</b>
 	 * 
 	 * @date 2015年12月17日
 	 * @param content
@@ -816,10 +819,14 @@ public class ExcelOperate implements Closeable {
 	 */
 	public void writeExcel2OutputStream(List<String[]> content, OutputStream outputStream){
 		writeExcel(content);
+		GZIPOutputStream gzipOutputStream = null;
 		try {
-			wb.write(outputStream);
+			gzipOutputStream = new GZIPOutputStream(outputStream);
+			wb.write(gzipOutputStream);
 		} catch (IOException e) {
 			e.printStackTrace();
+		} finally {
+			FileOperate.close(gzipOutputStream);
 		}
 	}
 
