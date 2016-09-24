@@ -59,6 +59,11 @@ public class CmdPathAli extends CmdPath {
 			}
 		}
 	}
+
+	public static String convertAli2Loc(String path, boolean b) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
 
 
