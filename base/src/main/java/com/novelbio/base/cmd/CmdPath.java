@@ -25,7 +25,7 @@ import com.thoughtworks.xstream.io.path.Path;
  * @author zong0jie
  *
  */
-//TODO 考虑兼容 "<"和"<<"
+//TODO 考虑兼容 "<<"
 public class CmdPath {
 	private static final Logger logger = LoggerFactory.getLogger(CmdPath.class);
 	
@@ -68,11 +68,13 @@ public class CmdPath {
 	/** 是否将hdfs的路径，改为本地路径
 	 * 如将 /hdfs:/fseresr 改为 /media/hdfs/fseresr
 	 * 只有类似varscan这种我们修改了代码，让其兼容hdfs的程序才不需要修改
+	 * 
+	 * 也有把oss或者bos路径修改为本地路径
 	 */
 	boolean isConvertHdfs2Loc = true;
 	
 	private String tmpPath;
-	private boolean isRetainTmpFiles = false;
+	protected boolean isRetainTmpFiles = false;
 	/** 设定复制输入输出文件所到的临时文件夹 */
 	public void setTmpPath(String tmpPath) {
 		this.tmpPath = tmpPath;
@@ -229,7 +231,7 @@ public class CmdPath {
 		}
 	}
 	
-	public void moveResultFile() {
+	public void moveLogfiles() {
 		if (isSaveFileTmp && getSaveStdTmp() != null) {
 			FileOperate.moveFile(true, getSaveStdTmp(), saveFilePath);
 		}
@@ -348,7 +350,7 @@ public class CmdPath {
 		return tmpPath;
 	}
 	/** 将已有的输出文件夹在临时文件夹中创建好 */
-	private void createFoldTmp() {
+	protected void createFoldTmp() {
 		for (String filePathName : mapName2TmpName.keySet()) {
 			String tmpPath = mapName2TmpName.get(filePathName);
 			if ( FileOperate.isFileDirectory(filePathName)) {
@@ -373,12 +375,7 @@ public class CmdPath {
 		
 		ConvertCmdTmp convertCmdTmp = new ConvertCmdTmp(isRedirectInToTmp, isRedirectOutToTmp,
 				setInput, setOutput, mapName2TmpName);
-		ConvertCmd convertCmdHdfs2Local = new ConvertCmd() {
-			@Override
-			String convert(String subCmd) {
-				return FileHadoop.convertToLocalPath(subCmd);
-			}
-		};
+		ConvertCmd convertOs2Local = getConvertOs2Local();
 		
 		for (String tmpCmd : lsCmd) {
 			if (redirectStdAndErr) {
@@ -418,12 +415,22 @@ public class CmdPath {
 				continue;
 			}
 			if (isConvertHdfs2Loc) {
-				tmpCmd = convertCmdHdfs2Local.convertSubCmd(tmpCmd);
+				tmpCmd = convertOs2Local.convertSubCmd(tmpCmd);
 			}
 			lsReal.add(tmpCmd);
 		}
 		String[] realCmd = lsReal.toArray(new String[0]);
 		return realCmd;
+	}
+	
+	protected ConvertCmd getConvertOs2Local() {
+		ConvertCmd convertCmdHdfs2Local = new ConvertCmd() {
+			@Override
+			String convert(String subCmd) {
+				return FileHadoop.convertToLocalPath(subCmd);
+			}
+		};
+		return convertCmdHdfs2Local;
 	}
 	
 	/**
@@ -450,7 +457,6 @@ public class CmdPath {
 				}
 			}
 		}
-		
 	}
 	
 	/** 删除中间文件，会把临时的input文件也删除 */

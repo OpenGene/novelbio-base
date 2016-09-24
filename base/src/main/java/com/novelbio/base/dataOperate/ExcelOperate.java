@@ -9,7 +9,6 @@ import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.GZIPOutputStream;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -809,9 +808,7 @@ public class ExcelOperate implements Closeable {
 	}
 	
 	/**
-	 * 将文件写到输出流里.<br>
-	 * <b>注意:这个里面使用了gzip压缩.<br/>
-	 * 如果OutputStream来自response.需设置	response.setHeader("Content-Encoding", "gzip");</b>
+	 * 将文件写到输出流里.
 	 * 
 	 * @date 2015年12月17日
 	 * @param content
@@ -819,14 +816,10 @@ public class ExcelOperate implements Closeable {
 	 */
 	public void writeExcel2OutputStream(List<String[]> content, OutputStream outputStream){
 		writeExcel(content);
-		GZIPOutputStream gzipOutputStream = null;
 		try {
-			gzipOutputStream = new GZIPOutputStream(outputStream);
-			wb.write(gzipOutputStream);
+			wb.write(outputStream);
 		} catch (IOException e) {
 			e.printStackTrace();
-		} finally {
-			FileOperate.close(gzipOutputStream);
 		}
 	}
 
@@ -903,7 +896,7 @@ public class ExcelOperate implements Closeable {
 	/**
 	 * 根据sheet顺序号获取Sheet.没有则创建.
 	 * 
-	 * @param sheetNum 	默认从1开始，没有设为小于1
+	 * @param sheetNum 	默认没有设为小于1
 	 * @return
 	 */
 	private Sheet getSheet(int sheetNum) {

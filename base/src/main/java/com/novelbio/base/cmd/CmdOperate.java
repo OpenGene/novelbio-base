@@ -618,10 +618,6 @@ public class CmdOperate extends RunProcess<String> {
 		if (needLog) logger.info("close out stream");
 		
 		closeOutStream();
-		
-		//不管是否跑成功，都移出文件夹
-		cmdPath.moveFileOut();
-		cmdPath.deleteTmpFile();
 	}
 	
 	private Thread setAndGetInStream() {
@@ -765,8 +761,6 @@ public class CmdOperate extends RunProcess<String> {
 	
 	/** 运行但并不报错，适合获取软件版本信息等。因为有些软件在获取版本时会返回错误，譬如bwa，输入bwa就是返回错误 */
 	public void run() {
-		cmdPath.generateTmPath();
-		cmdPath.copyFileIn();
 		super.run();
 		if (FileOperate.isFileExist(cmd1SH)) {
 			FileOperate.deleteFileFolder(cmd1SH);
@@ -775,8 +769,6 @@ public class CmdOperate extends RunProcess<String> {
 	
 	/** 运行，出错会抛出异常 */
 	public void runWithExp() {
-		cmdPath.generateTmPath();
-		cmdPath.copyFileIn();
 		super.run();
 		if (!isFinishedNormal()) {
 			throw new ExceptionCmd(this);
@@ -798,6 +790,9 @@ public class CmdOperate extends RunProcess<String> {
 	
 	@Override
 	protected void running() {
+		cmdPath.generateTmPath();
+		cmdPath.copyFileIn();
+		
 		String cmd = "";
 		String realCmd = getCmdExeStr();
 		if (isPrintCmd) {
@@ -818,13 +813,18 @@ public class CmdOperate extends RunProcess<String> {
 			e.printStackTrace();
 			logger.error("cmd cannot executed correctly: " + cmd, e);
 		}
+		
+		//不管是否跑成功，都移出文件夹
+		cmdPath.moveFileOut();
+		cmdPath.deleteTmpFile();
+		
 		runTime = dateTime.getElapseTime();
 		if (process instanceof ProcessRemote) {
 			((ProcessRemote)process).closeSession();
 		}
 		
 		if (isFinishedNormal()) {
-			cmdPath.moveResultFile();
+			cmdPath.moveLogfiles();
 			if (isStderrInfo) {
 				FileOperate.deleteFileFolder(cmdPath.getSaveErrPath());
 			}
