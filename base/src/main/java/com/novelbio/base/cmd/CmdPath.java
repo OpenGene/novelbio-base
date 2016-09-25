@@ -75,6 +75,9 @@ public class CmdPath {
 	
 	private String tmpPath;
 	protected boolean isRetainTmpFiles = false;
+	
+	protected CmdPath() {};
+	
 	/** 设定复制输入输出文件所到的临时文件夹 */
 	public void setTmpPath(String tmpPath) {
 		this.tmpPath = tmpPath;
@@ -573,7 +576,14 @@ public class CmdPath {
 			return tmpCmd;
 		}
 	}
-
+	
+	public static CmdPath generateCmdPath(boolean isLocal) {
+		if (isLocal) {
+			return new CmdPath();
+		} else {
+			return new CmdPathAli();
+		}
+	}
 
 	public static class ConvertCmdTmp extends ConvertCmd {
 		boolean stdOut;

@@ -42,7 +42,7 @@ public class TestCmdPath {
 	}
 	
 	private void cmd1() {
-		CmdPath cmdPath = new CmdPath();
+		CmdPath cmdPath = CmdPath.generateCmdPath(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile = "src/test/resources/testTrinity.fa";
 		lsCmd.add("bwa-index"); lsCmd.add(inFile);
@@ -74,7 +74,7 @@ public class TestCmdPath {
 	}
 	
 	private void cmd2() {
-		CmdPath cmdPath = new CmdPath();
+		CmdPath cmdPath = CmdPath.generateCmdPath(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile = "src/test/resources/testTrinity.fa";
 		String outFile = "src/test/CmdOperateOut/testTrinity.fa";
@@ -104,7 +104,7 @@ public class TestCmdPath {
 	
 	/** 假设test3文件夹 不 存在 */
 	private void cmd3() {
-		CmdPath cmdPath = new CmdPath();
+		CmdPath cmdPath = CmdPath.generateCmdPath(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile = "src/test/resources/testTrinity.fa";
 		String outFile = "src/test/CmdOperateOut/testcc";
@@ -136,7 +136,7 @@ public class TestCmdPath {
 	
 	/** 假设test4文件夹存在 */
 	private void cmd4() {
-		CmdPath cmdPath = new CmdPath();
+		CmdPath cmdPath = CmdPath.generateCmdPath(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile = "src/test/resources/testTrinity.fa";
 		String outFile = "src/test/CmdOperateOut/testTrinity3.fa";
@@ -168,7 +168,7 @@ public class TestCmdPath {
 	
 	/** 假设test5文件夹存在 */
 	private void cmd5() {
-		CmdPath cmdPath = new CmdPath();
+		CmdPath cmdPath = CmdPath.generateCmdPath(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile = "src/test/resources/testTrinity.fa";
 		String outFile = "src/test/CmdOperateOut/testTrinity4.fa";
@@ -198,7 +198,7 @@ public class TestCmdPath {
 	}
 	
 	private void cmd6() {
-		CmdPath cmdPath = new CmdPath();
+		CmdPath cmdPath = CmdPath.generateCmdPath(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile = "src/test/resources/testTrinity.fa";
 		String outFile = "src/test/CmdOperateOut2/test";
@@ -225,7 +225,7 @@ public class TestCmdPath {
 	}
 	
 	private void cmd7() {
-		CmdPath cmdPath = new CmdPath();
+		CmdPath cmdPath = CmdPath.generateCmdPath(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile1 = "src/test/resources/testTrinity.fa";
 		String inFile2 = "src/test/resources/testTrinity2.fa";
@@ -262,7 +262,7 @@ public class TestCmdPath {
 	}
 	
 	private void cmd8() {
-		CmdPath cmdPath = new CmdPath();
+		CmdPath cmdPath = CmdPath.generateCmdPath(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile1 = "src/test/resources/testTrinity.fa";
 		String inFile2 = "src/test/resources/testTrinity2.fa";

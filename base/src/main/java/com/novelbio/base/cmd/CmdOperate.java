@@ -73,7 +73,7 @@ public class CmdOperate extends RunProcess<String> {
 	boolean getCmdInErrStream = false;
 	
 	/** 用来传递参数，拷贝输入输出文件夹的类 */
-	CmdPath cmdPath = new CmdPath();
+	CmdPath cmdPath = CmdPath.generateCmdPath(true);
 	
 	/** 如果选择用list来保存结果输出，最多保存500行的输出信息 */
 	int lineNumStd = 1000;
@@ -90,7 +90,14 @@ public class CmdOperate extends RunProcess<String> {
 	public CmdOperate() {
 		process = new ProcessCmd();
 	}
-	
+	/**
+	 * 是本地使用的cmd还是阿里云的
+	 * @param isLocal
+	 */
+	public CmdOperate(boolean isLocal) {
+		process = new ProcessCmd();
+		cmdPath = CmdPath.generateCmdPath(isLocal);
+	}
 	/**
 	 * 初始化后直接开新线程即可 先写入Shell脚本，再运行。
 	 * 一般用不到，只有当直接运行cmd会失败时才考虑使用该方法。

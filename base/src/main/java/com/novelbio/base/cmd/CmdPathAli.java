@@ -5,7 +5,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.novelbio.base.PathDetail;
+import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
+import com.novelbio.jsr203.bos.PathDetailOs;
 
 
 /**
@@ -17,8 +20,10 @@ import com.novelbio.base.fileOperate.FileOperate;
  */
 public class CmdPathAli extends CmdPath {
 	private static final Logger logger = LoggerFactory.getLogger(CmdPathAli.class);
-	
-	/** 在cmd运行前，将输入文件拷贝到临时文件夹下 */
+
+	/** 在cmd运行前，将输入文件拷贝到临时文件夹下
+	 * 阿里云因为支持软连接，所以就不需要拷贝了，直接作软连接即可
+	 */
 	public void copyFileIn() {
 		createFoldTmp();
 		if (!isRedirectInToTmp) return;
@@ -27,8 +32,7 @@ public class CmdPathAli extends CmdPath {
 			String inTmpName = mapName2TmpName.get(inFile);
 			logger.info("copy file from {} to {}", inFile, inTmpName);
 			try {
-				FileOperate.copyFileFolder(inFile, inTmpName, false);
-
+				FileOperate.linkFile(inFile, inTmpName, false);
 			} catch (Exception e) {
 				// TODO: handle exception
 			}
@@ -50,6 +54,7 @@ public class CmdPathAli extends CmdPath {
 				if (setInput.contains(filePathResult) && FileOperate.isFileExistAndBigThanSize(filePathResult, 0)) {
 					continue;
 				}
+				filePathResult = convertAli2Loc(filePathResult, false);
 				logger.info("move file from  " + filePath + "  to  " + filePathResult);
 				if (isRetainTmpFiles) {
 					FileOperate.copyFileFolder(filePath, filePathResult, true);
@@ -59,10 +64,24 @@ public class CmdPathAli extends CmdPath {
 			}
 		}
 	}
-
-	public static String convertAli2Loc(String path, boolean b) {
-		// TODO Auto-generated method stub
-		return null;
+	
+	public static String convertAli2Loc(String path, boolean isInMap) {
+		String inMap = ".inmap.", outMap = ".outmap.";
+		
+		String pathLocal = PathDetailOs.changeOsToLocal(path);
+		if (!pathLocal.startsWith(PathDetailOs.getOsMountPathWithSep())) {
+			return pathLocal;
+		}
+		pathLocal = pathLocal.replaceFirst(PathDetailOs.getOsMountPathWithSep(), "");
+		if (pathLocal.startsWith(inMap)) {
+			pathLocal = FileOperate.removeSplashHead(pathLocal.replaceFirst(inMap, ""), false);
+		} else if (pathLocal.startsWith(outMap)) {
+			pathLocal = FileOperate.removeSplashHead(pathLocal.replaceFirst(outMap, ""), false);
+		}
+		String head = isInMap? inMap:outMap;
+		pathLocal = PathDetailOs.getOsMountPathWithSep() + head + "/" + pathLocal;
+		
+		return pathLocal;
 	}
 }
 
