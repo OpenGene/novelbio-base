@@ -1639,7 +1639,7 @@ public class FileOperate {
 		lsCmd.add(rawFile); lsCmd.add(linkTo);
 		CmdOperate cmdOperate = new CmdOperate(lsCmd);
 		cmdOperate.setTerminateWriteTo(false);
-		cmdOperate.run();
+		cmdOperate.runWithExp();
 		return true;
 	}
 

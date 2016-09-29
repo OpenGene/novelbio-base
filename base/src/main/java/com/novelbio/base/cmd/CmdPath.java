@@ -201,6 +201,13 @@ public class CmdPath {
 	public String getSaveStdPath() {
 		return saveFilePath;
 	}
+	/** 标准输出流的临时文件，主要给script加壳使用 */
+	public String getSaveStdOutTmpFile() {
+		ConvertCmdTmp convertCmdTmp = new ConvertCmdTmp(isRedirectInToTmp, isRedirectOutToTmp,
+				setInput, setOutput, mapName2TmpName);
+		return convertCmdTmp.convertCmd(saveFilePath);
+	}
+	
 	protected String getSaveStdTmp() {
 		if (saveFilePath == null) {
 			return null;
@@ -395,7 +402,8 @@ public class CmdPath {
 					continue;
 				}
 			}
-			convertCmdTmp.setStdInOut(stdOut, errOut);
+			
+			setStdAndErr(convertCmdTmp, stdOut, errOut);
 			tmpCmd = convertCmdTmp.convertSubCmd(tmpCmd);
 			
 			if (stdOut) {
@@ -424,6 +432,10 @@ public class CmdPath {
 		}
 		String[] realCmd = lsReal.toArray(new String[0]);
 		return realCmd;
+	}
+	
+	protected void setStdAndErr(ConvertCmdTmp convertCmdTmp, boolean stdOut, boolean errOut) {
+		convertCmdTmp.setStdInOut(stdOut, errOut);
 	}
 	
 	protected ConvertCmd getConvertOs2Local() {

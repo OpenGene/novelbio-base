@@ -145,9 +145,12 @@ public class CmdOperate extends RunProcess<String> {
 		cmdPath.addCmdParam(cmd1SH);
 	}
 
-	
 	public CmdOperate(List<String> lsCmd) {
+		this(lsCmd, true);
+	}
+	public CmdOperate(List<String> lsCmd, boolean isLocal) {
 		process = new ProcessCmd();
+		cmdPath = CmdPath.generateCmdPath(isLocal);
 		cmdPath.setLsCmd(lsCmd);
 	}
 	public CmdOperate(String ip, String user, List<String> lsCmd, String idrsa) {
@@ -710,6 +713,11 @@ public class CmdOperate extends RunProcess<String> {
 	public String getSaveStdOutFile() {
 		return cmdPath.getSaveStdPath();
 	}
+	/** 是否有">" 或 "1>"符号，如果有，返回输出的文件名的临时文件，给Script加壳使用 */
+	public String getSaveStdOutTmpFile() {
+		return cmdPath.getSaveStdOutTmpFile();
+	}
+	
 	/** 是否有"2>"符号，如果有，返回输出的文件名 */
 	public String getSaveStdErrFile() {
 		return cmdPath.getSaveStdPath();
@@ -821,15 +829,6 @@ public class CmdOperate extends RunProcess<String> {
 			logger.error("cmd cannot executed correctly: " + cmd, e);
 		}
 		
-		//不管是否跑成功，都移出文件夹
-		cmdPath.moveFileOut();
-		cmdPath.deleteTmpFile();
-		
-		runTime = dateTime.getElapseTime();
-		if (process instanceof ProcessRemote) {
-			((ProcessRemote)process).closeSession();
-		}
-		
 		if (isFinishedNormal()) {
 			cmdPath.moveLogfiles();
 			if (isStderrInfo) {
@@ -839,6 +838,15 @@ public class CmdOperate extends RunProcess<String> {
 				FileOperate.deleteFileFolder(cmdPath.getSaveStdPath());
 			}
 			FileOperate.deleteFileFolder(outRunInfoFileName);
+		}
+		
+		//不管是否跑成功，都移出文件夹
+		cmdPath.moveFileOut();
+		cmdPath.deleteTmpFile();
+		
+		runTime = dateTime.getElapseTime();
+		if (process instanceof ProcessRemote) {
+			((ProcessRemote)process).closeSession();
 		}
 	}
 	

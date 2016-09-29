@@ -1,11 +1,15 @@
 package com.novelbio.base.cmd;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.novelbio.base.PathDetail;
+import com.novelbio.base.StringOperate;
+import com.novelbio.base.cmd.CmdPath.ConvertCmd;
+import com.novelbio.base.cmd.CmdPath.ConvertCmdTmp;
 import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.jsr203.bos.PathDetailOs;
@@ -20,7 +24,11 @@ import com.novelbio.jsr203.bos.PathDetailOs;
  */
 public class CmdPathAli extends CmdPath {
 	private static final Logger logger = LoggerFactory.getLogger(CmdPathAli.class);
-
+	
+	protected void setStdAndErr(ConvertCmdTmp convertCmdTmp, boolean stdOut, boolean errOut) {
+		//不用设置，全都要转成tmp格式
+	}
+	
 	/** 在cmd运行前，将输入文件拷贝到临时文件夹下
 	 * 阿里云因为支持软连接，所以就不需要拷贝了，直接作软连接即可
 	 */
