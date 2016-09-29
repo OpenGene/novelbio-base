@@ -43,6 +43,8 @@ import com.novelbio.base.StringOperate;
 import com.novelbio.base.cmd.CmdOperate;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.dataStructure.PatternOperate;
+import com.novelbio.jsr203.bos.OssFileSystemProvider;
+import com.novelbio.jsr203.bos.OssPath;
 
 import hdfs.jsr203.HadoopFileSystemProvider;
 import hdfs.jsr203.HadoopPath;
@@ -50,6 +52,7 @@ import hdfs.jsr203.HadoopPath;
 public class FileOperate {
 	private static final Logger logger = Logger.getLogger(FileOperate.class);
 	static HadoopFileSystemProvider hdfsProvider = new HadoopFileSystemProvider();
+	static OssFileSystemProvider ossProvider = new OssFileSystemProvider();
 	static PatternOperate patternOperate = new PatternOperate("^[/\\\\]{0,2}[^/]+\\:[/\\\\]{0,2}");
 	static boolean isWindowsOS = false;
 	static{
@@ -138,6 +141,9 @@ public class FileOperate {
 				//TODO 不是类没加载，而是META文件没有读取到
 //				Paths.get(uri);
 				return hdfsProvider.getPath(uri);
+			} else if (fileName.startsWith(OssFileSystemProvider.SCHEME)) {
+				URI uri = new URI(fileName);
+				return ossProvider.getPath(uri);
 			} else {
 				File file = new File(fileName);
 				return file.toPath();
@@ -207,7 +213,6 @@ public class FileOperate {
 		if (fileName.equals("/") || fileName.equals("\\")) {
 			return fileName;
 		}
-		
 		
 		File file = new File(fileName);
 		String fileParent = file.getParent();
@@ -573,6 +578,8 @@ public class FileOperate {
 			} else if (!name.startsWith(FileHadoop.getHdfsSymbol())) {
 				   name = "/hdfs:" + name;
 			}
+        } else if (path instanceof OssPath) {
+        	name = path.toUri().toString();
         }
 		return name;
 	}
@@ -585,6 +592,8 @@ public class FileOperate {
 			} else if (!name.startsWith(FileHadoop.getHdfsSymbol())) {
 				   name = "/hdfs:" + name;
 			}
+        } else if (path instanceof OssPath) {
+        	name = path.toUri().toString();
         }
 		return name;
 	}
@@ -2123,7 +2132,7 @@ public class FileOperate {
 			throw new ExceptionNbcFile("fileName is not valide " + fileName);
 		}
 		if (StringOperate.isContainerSpecialCode(fileName)) {
-			throw new ExceptionNbcFile("文件名不允许包含特殊字符.");
+			throw new ExceptionNbcFile("文件名只允许包含汉字,字母,数字,中划线和下划线.");
 		}
 		return fileName;
 	}
