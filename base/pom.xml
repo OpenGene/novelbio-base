@@ -239,7 +239,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.novelbio</groupId>
-			<artifactId>jsr203-oos</artifactId>
+			<artifactId>jsr203-oss</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
