@@ -20,6 +20,7 @@ import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -214,17 +215,29 @@ public class FileOperate {
 			return fileName;
 		}
 		
-		File file = new File(fileName);
-		String fileParent = file.getParent();
-		String head = patternOperate.getPatFirst(fileName);
-		if (head == null) head = "";
-		if (fileParent == null) fileParent = "";
-
-		if (fileParent.length() < head.length()) {
-			return head;
-		}  else {
-			return addSep(fileParent);
+		if (fileName.startsWith("oss://")) {
+			try {
+				URI uri = new URI(fileName);
+				String parentPath = new OssFileSystemProvider().getPath(uri).getParent().toUri().toString();
+				return parentPath.endsWith("/") ? parentPath : parentPath + getSepPath();
+			} catch (Exception e) {
+				logger.error("getParentPathNameWithSep error.filename=" + fileName, e);
+				return fileName;
+			}
+		} else {
+			File file = new File(fileName);
+			String fileParent = file.getParent();
+			String head = patternOperate.getPatFirst(fileName);
+			if (head == null) head = "";
+			if (fileParent == null) fileParent = "";
+			
+			if (fileParent.length() < head.length()) {
+				return head;
+			}  else {
+				return addSep(fileParent);
+			}
 		}
+		
 	}
 	/**
 	 * 给定路径名，返回其最近一层路径，带"/" 如给定 /wer/fw4e/sr/frw/s3er.txt 返回 /wer/fw4e/sr/frw/<br>
