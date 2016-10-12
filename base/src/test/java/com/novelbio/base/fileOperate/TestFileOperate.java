@@ -332,14 +332,19 @@ public class TestFileOperate {
 		}
 		System.out.println(result);
 		Assert.assertEquals("oss:/", result);
-		
-		path = "oss://novelbio/nbCloud/public/rawData/A__2016-09/project_57ea175c45ce95f1d60f8af5/small.txt";
-		result = FileOperate.getParentPathNameWithSep(path);
+	}
+	
+	@Test
+	public void testGetParentPathNameWithSep2() {
+		String path = "oss://novelbio/nbCloud/public/rawData/A__2016-09/project_57ea175c45ce95f1d60f8af5/small.txt";
+		String result = FileOperate.getParentPathNameWithSep(path);
+		System.out.println(result);
 		Assert.assertEquals("oss://novelbio/nbCloud/public/rawData/A__2016-09/project_57ea175c45ce95f1d60f8af5/", result);
 		for (int i = 0; i < 10; i++) {
 			result = FileOperate.getParentPathNameWithSep(result);
 		}
 		Assert.assertEquals("oss://novelbio/", result);
+		
 	}
 
 	@Test
