@@ -135,6 +135,11 @@ public class HttpFetchMultiThread implements IHttpFetch, Closeable {
 			throw new RuntimeException(e);
 		}
 	}
+	
+	public void setCookieStore(CookieStore cookieStore) {
+		this.cookieStore = cookieStore;
+	}
+	
 	private HttpFetchMultiThread(int maxConnect, int maxConnectPerRoute, CookieStore cookieStore) throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException {
 		initialCM(maxConnect,maxConnectPerRoute);
 		this.cookieStore = cookieStore == null ? new BasicCookieStore() : cookieStore;
@@ -236,7 +241,10 @@ public class HttpFetchMultiThread implements IHttpFetch, Closeable {
 		HttpRequestAndResponse httpRequestAndResponse = getResponseExp(getUri(uri));
 		httpRequestAndResponse.downloadExp(fileName);
 	}
-	
+	public void download(URI uri, String fileName) throws ClientProtocolException, IOException {
+		HttpRequestAndResponse httpRequestAndResponse = getResponseExp(uri);
+		httpRequestAndResponse.downloadExp(fileName);
+	}
 	public String queryGetUriStr(String uri) throws ClientProtocolException, IOException {
 		HttpRequestAndResponse httpRequestAndResponse = getResponseExp(getUri(uri), null);
 		return httpRequestAndResponse.getResponse();

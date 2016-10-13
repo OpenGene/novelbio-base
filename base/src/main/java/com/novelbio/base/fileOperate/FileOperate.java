@@ -1113,6 +1113,9 @@ public class FileOperate {
 	
 	public static OutputStream getOutputStream(Path file, boolean append) throws IOException {
 		StandardOpenOption openOption = append? StandardOpenOption.APPEND: StandardOpenOption.CREATE;
+		if (!FileOperate.isFileFolderExist(file)) {
+			openOption = StandardOpenOption.CREATE;
+		}
 		return Files.newOutputStream(file, openOption);
 	}
 	
@@ -1811,7 +1814,7 @@ public class FileOperate {
 	}
 	
 	/**
-	 * 判断文件是否存在，并且不是文件夹，给的是绝对路径
+	 * 判断文件是否存在，给的是绝对路径
 	 * 
 	 * @param fileName
 	 *            如果为null, 直接返回false
