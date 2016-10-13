@@ -41,7 +41,7 @@ public class TestExcelOperate {
 			
 			List<String> lsSheetTxt = ExcelOperate.getLsSheetTxtFiles(filename);
 			Assert.assertEquals(1, lsSheetTxt.size());
-			String outTxtSheet = PathDetail.getTmpPathWithSep() + ExcelOperate.TMP_TXT_PATH + "/test1@@sheet1.txt";
+			String outTxtSheet = PathDetail.getTmpPathWithSep() + ExcelOperate.TMP_TXT_PATH + "/test1@sheet1.txt";
 			Assert.assertEquals(outTxtSheet, lsSheetTxt.get(0));
 			Assert.assertTrue(FileOperate.isFileExistAndBigThan0(outTxtSheet));
 			

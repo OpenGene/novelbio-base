@@ -140,6 +140,47 @@ public class MyBeanUtils extends org.springframework.beans.BeanUtils {
 		}
 		return target;
 	}
-
 	
+	/**
+	 * 把source对象的属性拷贝到target对象中，除了"id"属性
+	 * @param source
+	 * @param target
+	 * @param isCoypNull 是否拷贝为null的信息
+	 * @return
+	 * @throws ExceptionNbcBean
+	 */
+	public static <T,K> K copyAllPropertiesWithoutId(T source, K target, boolean isCoypNull) throws ExceptionNbcBean {
+		Validate.notNull(target, "Target must not be null");
+		Validate.notNull(source, "Source must not be null");
+		Class<?> actualEditable = target.getClass();
+		Class<?> sourceClass = source.getClass();
+		PropertyDescriptor sourcePd = null;
+		PropertyDescriptor[] targetPds = getPropertyDescriptors(actualEditable);
+		for (PropertyDescriptor targetPd : targetPds) {
+			if (!targetPd.getName().equals("id") && targetPd.getWriteMethod() != null) {
+				sourcePd = getPropertyDescriptor(sourceClass, targetPd.getName());
+				if (sourcePd != null && sourcePd.getReadMethod() != null) {
+					try {
+						Method readMethod = sourcePd.getReadMethod();
+						if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
+							readMethod.setAccessible(true);
+						}
+						Object value = readMethod.invoke(source);
+						if (!isCoypNull && value == null) {
+							continue;
+						}
+						// 这里判断以下value是否为空 当然这里也能进行一些特殊要求的处理 例如绑定时格式转换等等
+						Method writeMethod = targetPd.getWriteMethod();
+						if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
+							writeMethod.setAccessible(true);
+						}
+						writeMethod.invoke(target, value);
+					} catch (Throwable ex) {
+						throw new ExceptionNbcBean("Could not copy properties from source to target", ex);
+					}
+				}
+			}
+		}
+		return target;
+	}
 }

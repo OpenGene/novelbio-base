@@ -34,13 +34,7 @@ public class PathDetail {
 			e1.printStackTrace();
 			throw new RuntimeException(e1);
 		} finally{
-			try {
-				if(in != null){
-					in.close();
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			FileOperate.close(in);
 		}
 		tmpHdfsPath = properties.getProperty("tmpHdfsPath");
 		
@@ -183,11 +177,16 @@ public class PathDetail {
 		return tmpHdfsPath;
 	}
 	
-	
-	/** 在tmp文件夹下新建一个随机文件名的临时文件夹，注意每次返回的都不一样 */
+	/** 在tmp文件夹下新建一个随机文件名的临时文件夹，注意每次返回的都不一样，最后有“/” */
 	public static String getTmpPathRandom() {
-		String tmpPath = getTmpPathWithSep() + "tmp" + DateUtil.getDateAndRandom();
+		String tmpPath = getTmpPathWithSep() + "tmp" + DateUtil.getDateAndRandom() + FileOperate.getSepPath();
 		FileOperate.createFolders(tmpPath);
+		return tmpPath;
+	}
+	
+	/** 在tmp文件夹下新建一个随机文件名的临时文件夹，注意每次返回的都不一样，最后有“/” */
+	public static String getTmpPathRandomNotCreate() {
+		String tmpPath = getTmpPathWithSep() + "tmp" + DateUtil.getDateAndRandom() + FileOperate.getSepPath();
 		return tmpPath;
 	}
 	
@@ -199,8 +198,13 @@ public class PathDetail {
 	}
 	
 	/** 在tmp文件夹下新建一个随机文件名的临时文件夹，注意每次返回的都不一样，最后有“/” */
+	public static String getRandomWithSep(String tmpPath) {
+		return getRandomWithSep(tmpPath, "");
+	}
+	/** 在tmp文件夹下新建一个随机文件名的临时文件夹，注意每次返回的都不一样，最后有“/” */
 	public static String getRandomWithSep(String tmpPath, String prefix) {
-		String tmpPathResult = FileOperate.addSep(tmpPath) + DateUtil.getDateAndRandom() + "_" + prefix + FileOperate.getSepPath();
+		String tmpPrefix = StringOperate.isRealNull(prefix)? "" : "_" + prefix;
+		String tmpPathResult = FileOperate.addSep(tmpPath) + DateUtil.getDateAndRandom() + tmpPrefix + FileOperate.getSepPath();
 		FileOperate.createFolders(tmpPath);
 		return tmpPathResult;
 	}
@@ -253,14 +257,12 @@ public class PathDetail {
 	public static String getHdpHdfsHeadSymbol() {
 		return properties.getProperty("hdfsHeadSymbol");
 	}
-	/** 主要是在docker中挂载需要，在appmaster中，需要指定container的docker参数，而appmaster并不知道主机的 HADOOP_HOME，所以要写在配置文件中 */
-	public static String getHdpHomeRealWithoutSep() {
-		return FileOperate.removeSplashTail(properties.getProperty("hadoophome"), false);
-	}
 	public static String getLogoPath() {
 		return properties.getProperty("logoImgPath");
 	}
-	
+	public static String getHadoophome() {
+		return hadoophome;
+	}
 	//=========  zookeeper  ===========================
 	/** 连接到zookeeper server的site */
 	public static String getZookeeperServerSite() {
@@ -280,5 +282,13 @@ public class PathDetail {
 	/** docker远程调用的端口号 */
 	public static String getDockerRemotePort() {
 		return properties.getProperty("dockerRemotePort");
+	}
+	
+	//========== ssh ========================
+	public static String getSshName() {
+		return properties.getProperty("sshName");
+	}
+	public static String getSshIdrsaFile() {
+		return properties.getProperty("sshidrsa");
 	}
 }

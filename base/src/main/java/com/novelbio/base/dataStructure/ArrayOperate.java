@@ -24,6 +24,9 @@ public class ArrayOperate {
 	public static<T> boolean isEmpty(Collection<T> collection) {
 		return (collection == null || collection.isEmpty());
 	}
+	public static<K, V> boolean isEmpty(Map<K, V> collection) {
+		return (collection == null || collection.isEmpty());
+	}
 	public static<T> boolean isEmpty(T[] array) {
 		return (array == null || array.length == 0);
 	}
@@ -254,6 +257,27 @@ public class ArrayOperate {
 			} else {
 				result[i]=Aarray[i-Barray.length];
 			}
+		}
+		return result;
+	}
+	
+	public static<T> T[] deletElement(T[] Aarray, List<Integer> deletNum) {
+		TreeSet<Integer> treeRemove = new TreeSet<Integer>();
+		for (int i : deletNum) {
+			if (i < 0 || i >= Aarray.length) {
+				continue;
+			}
+			treeRemove.add(i);
+		}
+		
+		T[] result=(T[]) Array.newInstance(Aarray.getClass().getComponentType(), Aarray.length - treeRemove.size());//new T[Astring.length+Bstring.length];
+		int resultNum = 0;
+		for (int i = 0; i < Aarray.length; i++) {
+			if (treeRemove.contains(i)) {
+				continue;
+			}
+			result[resultNum] = Aarray[i];
+			resultNum++ ;
 		}
 		return result;
 	}

@@ -282,8 +282,15 @@ public class TestFileOperate {
 	
 	@Test
 	public void testGetParentPathNameWithSep() {
-		String path = "//hdfs:/abs/sfe/se";
+		String path = "hdfs:/abs/sfe/se";
 		String result = FileOperate.getParentPathNameWithSep(path);
+//		for (int i = 0; i < 10; i++) {
+//			result = FileOperate.getParentPathNameWithSep(result);
+//		}
+//		Assert.assertEquals("/hdfs:/", result);
+		
+		path = "//hdfs:/abs/sfe/se";
+		result = FileOperate.getParentPathNameWithSep(path);
 		for (int i = 0; i < 10; i++) {
 			result = FileOperate.getParentPathNameWithSep(result);
 		}
@@ -316,10 +323,33 @@ public class TestFileOperate {
 			result = FileOperate.getParentPathNameWithSep(result);
 		}
 		Assert.assertEquals("hdfs:\\", result);
+		
+		path = "oss:/nbCloud/public/rawData/A__2016-09/project_57ea175c45ce95f1d60f8af5/small.txt";
+		result = FileOperate.getParentPathNameWithSep(path);
+		Assert.assertEquals("oss:/nbCloud/public/rawData/A__2016-09/project_57ea175c45ce95f1d60f8af5/", result);
+		for (int i = 0; i < 10; i++) {
+			result = FileOperate.getParentPathNameWithSep(result);
+		}
+		System.out.println(result);
+		Assert.assertEquals("oss:/", result);
+	}
+	
+	@Test
+	public void testGetParentPathNameWithSep2() {
+		String path = "oss://novelbio/nbCloud/public/rawData/A__2016-09/project_57ea175c45ce95f1d60f8af5/small.txt";
+		String result = FileOperate.getParentPathNameWithSep(path);
+		System.out.println(result);
+		Assert.assertEquals("oss://novelbio/nbCloud/public/rawData/A__2016-09/project_57ea175c45ce95f1d60f8af5/", result);
+		for (int i = 0; i < 10; i++) {
+			result = FileOperate.getParentPathNameWithSep(result);
+		}
+		Assert.assertEquals("oss://novelbio/", result);
+		
 	}
 
 	@Test
 	public void testDelFile() {
 		FileOperate.delFile("/home/novelbio/abc.def");
 	}
+	
 }

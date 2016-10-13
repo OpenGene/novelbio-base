@@ -896,7 +896,7 @@ public class ExcelOperate implements Closeable {
 	/**
 	 * 根据sheet顺序号获取Sheet.没有则创建.
 	 * 
-	 * @param sheetNum 	没有设为小于1
+	 * @param sheetNum 	默认没有设为小于1
 	 * @return
 	 */
 	private Sheet getSheet(int sheetNum) {
@@ -943,7 +943,6 @@ public class ExcelOperate implements Closeable {
 			}
 		}
 		
-		
 		if (wb != null) {
 			try {
 //				wb.close();
@@ -980,7 +979,7 @@ public class ExcelOperate implements Closeable {
 	public static String getExcelTxtName(String filename, String sheetName) {
 		String excelName = FileOperate.getFileNameWithoutSuffix(filename);
 		String parentPath = FileOperate.getParentPathNameWithSep(filename);
-		String outTmp = parentPath + FileOperate.addSep(TMP_TXT_PATH) + excelName + SepSign.SEP_INFO;
+		String outTmp = parentPath + FileOperate.addSep(TMP_TXT_PATH) + excelName + SepSign.SEP_INFO_SIMPLE;
 		return outTmp + sheetName + ".txt";
 	}
 	

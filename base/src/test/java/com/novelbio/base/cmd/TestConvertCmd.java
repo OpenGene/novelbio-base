@@ -14,7 +14,7 @@ public class TestConvertCmd {
 	
 	@Test
 	public void cmdConvertHdfs() {
-		CmdPath cmdPath = new CmdPath();
+		CmdPath cmdPath = CmdPath.generateCmdPath(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile1 = "/hdfs:/src/test/resources/testTrinity.fa";
 		String inFile2 = "/hdfs:/src/test/resources/testTrinity2.fa";

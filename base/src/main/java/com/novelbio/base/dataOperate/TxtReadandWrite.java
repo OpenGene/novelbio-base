@@ -95,38 +95,38 @@ public class TxtReadandWrite implements Closeable {
 		this(file, false);
 	}
 	
-	public TxtReadandWrite(File file, boolean creatFile) {
-		this(file, creatFile, false);
+	public TxtReadandWrite(File file, boolean isNeedWriteFile) {
+		this(file, isNeedWriteFile, false);
 	}
 	
 	public TxtReadandWrite(String fileName) {
 		this(fileName, false);
 	}
 	
-	public TxtReadandWrite(String fileName, boolean creatFile) {
-		this(fileName, creatFile, false);
+	public TxtReadandWrite(String fileName, boolean isNeedWriteFile) {
+		this(fileName, isNeedWriteFile, false);
 	}
 	
-	public TxtReadandWrite(Path path, boolean creatFile) {
-		this(path, creatFile, false);
+	public TxtReadandWrite(Path path, boolean isNeedWriteFile) {
+		this(path, isNeedWriteFile, false);
 	}
 	
 	public TxtReadandWrite(Path path) {
 		this(path, false);
 	}
 	
-	public TxtReadandWrite(String fileName, boolean writeFile, boolean append) {
-		this(FileOperate.getPath(fileName), writeFile, append);
+	public TxtReadandWrite(String fileName, boolean isNeedWriteFile, boolean isAppend) {
+		this(FileOperate.getPath(fileName), isNeedWriteFile, isAppend);
 	}
 	
-	public TxtReadandWrite(File file, boolean writeFile, boolean append) {
-		this(FileOperate.getPath(file), writeFile, append);
+	public TxtReadandWrite(File file, boolean isNeedWriteFile, boolean isAppend) {
+		this(FileOperate.getPath(file), isNeedWriteFile, isAppend);
 	}
 	
-	public TxtReadandWrite(Path path, boolean writeFile, boolean append) {
-		if (writeFile) {
+	public TxtReadandWrite(Path path, boolean isNeedWriteFile, boolean isAppend) {
+		if (isNeedWriteFile) {
 			txtWrite = new TxtWrite(path);
-			txtWrite.setAppend(append);
+			txtWrite.setAppend(isAppend);
 			try { txtWrite.createFile(); } catch (Exception e) { e.printStackTrace(); }
 			read = false;
 		} else {
@@ -809,6 +809,21 @@ public class TxtReadandWrite implements Closeable {
 		lzoIndexer.run(new String[]{inputFile});
 	}
 	
+	public static String readFirstLine(String txtFile) {
+		return readFirstLine(FileOperate.getPath(txtFile));
+	}
+	
+	public static String readFirstLine(File txtFile) {
+		return readFirstLine(FileOperate.getPath(txtFile));
+	}
+	
+	public static String readFirstLine(Path txtFile) {
+		TxtReadandWrite txtReadandWrite = new TxtReadandWrite(txtFile);
+		String firstLine = txtReadandWrite.readFirstLine();
+		txtReadandWrite.close();
+		return firstLine;
+	}
+	
 	public static List<String> readfileLs(String txtFile) {
 		TxtReadandWrite txtReadandWrite = new TxtReadandWrite(txtFile);
 		List<String> lsResult = new ArrayList<>();
@@ -818,7 +833,7 @@ public class TxtReadandWrite implements Closeable {
 		txtReadandWrite.close();
 		return lsResult;
 	}
-	
+
 	public static List<String> readfileLs(File txtFile) {
 		TxtReadandWrite txtReadandWrite = new TxtReadandWrite(txtFile);
 		List<String> lsResult = new ArrayList<>();

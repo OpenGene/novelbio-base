@@ -22,6 +22,8 @@ public class DateUtil {
 
 	/** 年月日 */
 	public static final String PATTERN_YYYYMMDD = "yyyyMMdd";
+	/** 年2位月日 */
+	public static final String PATTERN_YYMMDD = "yyMMdd";
 
 	/** 当前日期和时间 */
 	public static final String PATTERN_DATETIME = "yyyy-MM-dd HH:mm:ss";
@@ -136,6 +138,22 @@ public class DateUtil {
 	}
 	
 	/**
+	 * long值转date
+	 * 
+	 * @date 2016年7月31日
+	 * @author novelbio fans.fan
+	 * @param date
+	 * @return
+	 */
+	public static Date Long2Date(long date) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(date);
+		return calendar.getTime();
+	}
+	
+	
+	
+	/**
 	 * String转Long
 	 * @param date
 	 * @param pattern 格式类似：yyyy-MM-dd HH:mm:ss，注意大小写
@@ -166,7 +184,15 @@ public class DateUtil {
 	     Date currentDate = new Date(); //得到当前系统时间
 	     return formatDate.format(currentDate); //将日期时间格式化
 	}
-	
+	/**
+	 * 返回当前日期，格式 "yyyy-MM-dd"
+	 * @return
+	 */
+	public static String getDate(String pattern) {
+	     SimpleDateFormat formatDate= new SimpleDateFormat(pattern);
+	     Date currentDate = new Date(); //得到当前系统时间
+	     return formatDate.format(currentDate); //将日期时间格式化
+	}
 	/**
 	 * 返回当前日期，格式“yyyyMMddHHmmssSSS”
 	 * @return

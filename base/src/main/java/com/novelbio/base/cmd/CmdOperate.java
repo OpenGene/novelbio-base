@@ -2,6 +2,8 @@ package com.novelbio.base.cmd;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -11,6 +13,7 @@ import java.util.TimerTask;
 
 import org.apache.log4j.Logger;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
@@ -70,7 +73,7 @@ public class CmdOperate extends RunProcess<String> {
 	boolean getCmdInErrStream = false;
 	
 	/** 用来传递参数，拷贝输入输出文件夹的类 */
-	CmdPath cmdPath = new CmdPath();
+	CmdPath cmdPath = CmdPath.generateCmdPath(true);
 	
 	/** 如果选择用list来保存结果输出，最多保存500行的输出信息 */
 	int lineNumStd = 1000;
@@ -80,22 +83,21 @@ public class CmdOperate extends RunProcess<String> {
 	/** 输出本程序正在运行时的参数等信息，本功能也用docker替换了 */
 	@Deprecated
 	String outRunInfoFileName;
-//	CmdRunInfo cmdRunInfo;
 	
 	/** 将cmd写入sh文件的具体文件 */
 	String cmd1SH;
 
-	
-	
-	/** 设定复制输入输出文件所到的临时文件夹 */
-	public static void setTmpPath(String tmpPath) {
-		CmdPath.setTmpPath(tmpPath);
-	}
-	
 	public CmdOperate() {
 		process = new ProcessCmd();
 	}
-	
+	/**
+	 * 是本地使用的cmd还是阿里云的
+	 * @param isLocal
+	 */
+	public CmdOperate(boolean isLocal) {
+		process = new ProcessCmd();
+		cmdPath = CmdPath.generateCmdPath(isLocal);
+	}
 	/**
 	 * 初始化后直接开新线程即可 先写入Shell脚本，再运行。
 	 * 一般用不到，只有当直接运行cmd会失败时才考虑使用该方法。
@@ -130,7 +132,7 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	private void setCmdFile(String cmd, String cmdWriteInFileName) {
 		while (true) {
-			cmd1SH = CmdPath.tmpPath + cmdWriteInFileName.replace("\\", "/") + DateUtil.getDateAndRandom() + ".sh";
+			cmd1SH = cmdPath.getTmp() + cmdWriteInFileName.replace("\\", "/") + DateUtil.getDateAndRandom() + ".sh";
 			if (!FileOperate.isFileExist(cmd1SH)) {
 				break;
             }
@@ -143,9 +145,12 @@ public class CmdOperate extends RunProcess<String> {
 		cmdPath.addCmdParam(cmd1SH);
 	}
 
-	
 	public CmdOperate(List<String> lsCmd) {
+		this(lsCmd, true);
+	}
+	public CmdOperate(List<String> lsCmd, boolean isLocal) {
 		process = new ProcessCmd();
+		cmdPath = CmdPath.generateCmdPath(isLocal);
 		cmdPath.setLsCmd(lsCmd);
 	}
 	public CmdOperate(String ip, String user, List<String> lsCmd, String idrsa) {
@@ -223,6 +228,15 @@ public class CmdOperate extends RunProcess<String> {
 		process = new ProcessRemote(ip, usr, pwd);
 		((ProcessRemote)process).setKeyFile(keyFile);
 		cmdPath.setLsCmd(lsCmd);
+	}
+
+	/** 设定临时文件夹，会把重定向的文件拷贝到这个文件夹中 */
+	public void setCmdTmpPath(String tmpPath) {
+		cmdPath.setTmpPath(tmpPath);
+	}
+	/** 是否删除临时文件夹中的文件，如果连续的cmd需要顺序执行，考虑不删除 */
+	public void setRetainTmpFiles(boolean isRetainTmpFiles) {
+		cmdPath.setRetainTmpFiles(isRetainTmpFiles);
 	}
 	public void setLsCmd(List<String> lsCmd) {
 		cmdPath.setLsCmd(lsCmd);
@@ -419,6 +433,14 @@ public class CmdOperate extends RunProcess<String> {
 		return ArrayOperate.cmbString(resultCmd, " ");
 	}
 	
+	/** 返回执行的具体cmd命令，实际cmd命令 */
+	@VisibleForTesting
+	public String getRunCmd() {
+		String[] resultCmd = cmdPath.getRunCmd();
+		replaceInputStreamFile(resultCmd);
+		return ArrayOperate.cmbString(resultCmd, " ");
+	}
+	
 	private void replaceInputStreamFile(String[] resultCmd) {
 		if (streamIn != null && !StringOperate.isRealNull(streamIn.getInputFile())) {
 			for (int i = 0; i < resultCmd.length; i++) {
@@ -572,15 +594,14 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	private void doInBackgroundB() throws Exception {
 		finishFlag = new FinishFlag();
-		cmdPath.copyFileIn();
 		String[] cmdRun = cmdPath.getRunCmd();
-		
-//		cmdRunInfo = new CmdRunInfo();
-//		cmdRunInfo.setOutFile(outRunInfoFileName);
-//		cmdRunInfo.setProcess(process);
 		
 		process.exec(cmdRun);
 		
+		//等待30ms，如果不等待，某些命令会阻塞输出流，不知道为什么，譬如以下这个命令
+		//String cmd="hisat2 -p 3 -5 0 -3 0 --min-intronlen 20 --max-intronlen 500000 -1 /media/nbfs/nbCloud/public/AllProject/project_574ba1fb45ce3ad2541b9de7/task_575e719660b2beecc9ae3422/other_result/S45_07A_150500152_L006_1_part.fq.gz -2 /media/nbfs/nbCloud/public/AllProject/project_574ba1fb45ce3ad2541b9de7/task_575e719660b2beecc9ae3422/other_result/S45_07A_150500152_L006_2_part.fq.gz -S /home/novelbio/tmp/2016-06-14-09-27-3130048_tmp.hisatDateBaseTest1/hisatDateBaseTest.sam";
+
+		Thread.sleep(30);
 		Thread threadInStream = setAndGetInStream();
 		if (threadInStream != null) {
 			threadInStream.start();
@@ -592,7 +613,6 @@ public class CmdOperate extends RunProcess<String> {
 		outputGobbler.setDaemon(true);
 		errorGobbler.start();
 		outputGobbler.start();
-//		cmdRunInfo.startWriteRunInfo();
 
 		finishFlag.flag = process.waitFor();
 		
@@ -602,21 +622,27 @@ public class CmdOperate extends RunProcess<String> {
 		if (threadInStream != null) {
 			threadInStream.join();
 		}
-		outputGobbler.join();
-		errorGobbler.join();
+		outputGobbler.joinStream();
+		errorGobbler.joinStream();
 		
 		if (needLog) logger.info("close out stream");
 		
 		closeOutStream();
-//		cmdRunInfo.setFinish();
-
-		//不管是否跑成功，都移出文件夹
-		cmdPath.moveFileOut();
-		cmdPath.deleteTmpFile();
 	}
 	
 	private Thread setAndGetInStream() {
-		if (streamIn == null) return null;
+		String inFile = cmdPath.getStdInFile();
+		if (streamIn == null && StringOperate.isRealNull(inFile)) {
+			return null;
+		}
+		
+		if (streamIn != null && !StringOperate.isRealNull(inFile)) {
+			throw new ExceptionCmd("cannot both set stdin and have \">\" in  script");
+		}
+		if (streamIn == null && !StringOperate.isRealNull(inFile)) {
+			streamIn = new StreamIn();
+			streamIn.setInputFile(inFile);
+		}
 		streamIn.setProcessInStream(process.getStdIn());
 		Thread threadStreamIn = new Thread(streamIn);
 		threadStreamIn.setDaemon(true);
@@ -683,6 +709,20 @@ public class CmdOperate extends RunProcess<String> {
 		}
 	}
 	
+	/** 是否有">" 或 "1>"符号，如果有，返回输出的文件名 */
+	public String getSaveStdOutFile() {
+		return cmdPath.getSaveStdPath();
+	}
+	/** 是否有">" 或 "1>"符号，如果有，返回输出的文件名的临时文件，给Script加壳使用 */
+	public String getSaveStdOutTmpFile() {
+		return cmdPath.getSaveStdOutTmpFile();
+	}
+	
+	/** 是否有"2>"符号，如果有，返回输出的文件名 */
+	public String getSaveStdErrFile() {
+		return cmdPath.getSaveStdPath();
+	}
+	
 	/** 关闭输出流 */
 	private void closeOutStream() {
 		if (!getCmdInStdStream) {
@@ -733,9 +773,18 @@ public class CmdOperate extends RunProcess<String> {
 			throw new ExceptionCmd(info, this);
 		}
 	}
+	
+	/** 运行但并不报错，适合获取软件版本信息等。因为有些软件在获取版本时会返回错误，譬如bwa，输入bwa就是返回错误 */
+	public void run() {
+		super.run();
+		if (FileOperate.isFileExist(cmd1SH)) {
+			FileOperate.deleteFileFolder(cmd1SH);
+        }
+	}
+	
 	/** 运行，出错会抛出异常 */
 	public void runWithExp() {
-		run();
+		super.run();
 		if (!isFinishedNormal()) {
 			throw new ExceptionCmd(this);
 		}
@@ -744,8 +793,21 @@ public class CmdOperate extends RunProcess<String> {
         }
 	}
 	
+	/** 把{@link CmdOperate#runWithExp()} 拆成两个方法
+	 * 分别是 {@link CmdOperate#prepare()} 和 {@link CmdOperate#runWithExpNoPrepare()}
+	 * 
+	 * 本步骤解析cmd命令，并拷贝需要的文件到指定文件夹中
+	 */
+	public void prepare() {
+		cmdPath.generateTmPath();
+		cmdPath.generateRunCmd(true);
+	}
+	
 	@Override
 	protected void running() {
+		cmdPath.generateTmPath();
+		cmdPath.copyFileIn();
+		
 		String cmd = "";
 		String realCmd = getCmdExeStr();
 		if (isPrintCmd) {
@@ -766,13 +828,9 @@ public class CmdOperate extends RunProcess<String> {
 			e.printStackTrace();
 			logger.error("cmd cannot executed correctly: " + cmd, e);
 		}
-		runTime = dateTime.getElapseTime();
-		if (process instanceof ProcessRemote) {
-			((ProcessRemote)process).closeSession();
-		}
 		
 		if (isFinishedNormal()) {
-			cmdPath.moveResultFile();
+			cmdPath.moveLogfiles();
 			if (isStderrInfo) {
 				FileOperate.deleteFileFolder(cmdPath.getSaveErrPath());
 			}
@@ -780,6 +838,15 @@ public class CmdOperate extends RunProcess<String> {
 				FileOperate.deleteFileFolder(cmdPath.getSaveStdPath());
 			}
 			FileOperate.deleteFileFolder(outRunInfoFileName);
+		}
+		
+		//不管是否跑成功，都移出文件夹
+		cmdPath.moveFileOut();
+		cmdPath.deleteTmpFile();
+		
+		runTime = dateTime.getElapseTime();
+		if (process instanceof ProcessRemote) {
+			((ProcessRemote)process).closeSession();
 		}
 	}
 	
@@ -861,29 +928,27 @@ public class CmdOperate extends RunProcess<String> {
 	
 	/** 将输入的被引号--包括英文的单引号和双引号--包围的path信息修改为相对路径 */
 	public static String makePathToRelative(String input) {
-		PatternOperate patternOperate = new PatternOperate("\"(.+?)\"|\'(.+?)\'", false);
-		List<String> lsInfo = patternOperate.getPat(input, 1,2);		
+		PatternOperate patternOperate = new PatternOperate("/{0,1}(hdfs\\:){0,1}/{0,1}([\\w\\.]+?/)+\\w+", false);
+		List<String> lsInfo = patternOperate.getPat(input);		
 		for (String string : lsInfo) {
 			input = input.replace(string, FileOperate.getFileName(string));
 		}
-		
 		return input;
-	}
-	
-	public static String getCmdTmpPath() {
-		return CmdPath.tmpPath;
 	}
 	
 	static class FinishFlag {
 		Integer flag = null;
 	}
 	
-	public static String getExceptionInfo(Throwable e) {
-		String failReason = e.toString();
-		for (StackTraceElement stackTraceElement : e.getStackTrace()) {
-			failReason = failReason + TxtReadandWrite.ENTER_LINUX + stackTraceElement.toString();
+	public static String getExceptionInfo(Throwable t) {
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		try {
+			t.printStackTrace(pw);
+			return sw.toString();
+		} finally {
+			pw.close();
 		}
-		return failReason;
 	}
 	
 	/** 把一个完整的cmd命令切分成list-Cmd，其中单双引号为一个整体 */
