@@ -125,8 +125,8 @@ public class DateUtil {
 	 * @param pattern
 	 * @return
 	 */
-	public static Date string2Date(String date,String pattern)
-	{	try {
+	public static Date string2Date(String date,String pattern) {
+		try {
 			SimpleDateFormat sf = new SimpleDateFormat(pattern);
 			Date newdate;
 			newdate = sf.parse(date);
@@ -134,7 +134,6 @@ public class DateUtil {
 		} catch (Exception e) {
 			return null;
 		}
-		
 	}
 	
 	/**
