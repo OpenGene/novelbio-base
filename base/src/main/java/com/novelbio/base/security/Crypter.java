@@ -28,7 +28,7 @@ public class Crypter {
 									+ "5k23/SLS0RS0pVD9Kudl8miQSUXbBljoD5wru1rAUOiTySCUWP9dv5FyGobYyBCCJUluG4bC8IiH\n"
 									+ "stDSUBh6";
 	
-	/** AES密钥 */
+	/** 默认AES密钥 */
 	private static final String AES_KEY = "anYX2bSM6l/z7OSSox6zKA==\n";
 	
 	private static String toHexString(byte[] b) {
@@ -126,9 +126,19 @@ public class Crypter {
 	 * @return String
 	 */
 	public static String encryptAES(String input) {
+		return encryptAES(input, AES_KEY);
+	}
+	
+	/**
+	 * 进行AES算法加密
+	 * @param input 待加密字符串
+	 * @param key 密钥
+	 * @return String
+	 */
+	public static String encryptAES(String input, String key) {
 		try {
 			checkNotNull(input, "input is null");
-			String output = Coder.encryptBASE64(DESCoder.encryptAES(input.getBytes(), AES_KEY));
+			String output = Coder.encryptBASE64(DESCoder.encryptAES(input.getBytes(), key));
 			return output;
 		} catch (Exception e) {
 			logger.error("encryptAES error.", e);
@@ -142,9 +152,19 @@ public class Crypter {
 	 * @return String
 	 */
 	public static String decryptAES(String input) {
+		return decryptAES(input, AES_KEY);
+	}
+	
+	/**
+	 * 进行AES算法解密
+	 * @param input 待解密字符串
+	 * @param key 密钥
+	 * @return String
+	 */
+	public static String decryptAES(String input, String key) {
 		try {
 			checkNotNull(input, "input is null");
-			byte[] output = DESCoder.decryptAES(Coder.decryptBASE64(input), AES_KEY);
+			byte[] output = DESCoder.decryptAES(Coder.decryptBASE64(input), key);
 			return new String(output);
 		} catch (Exception e) {
 			logger.error("decryptAES error.", e);
