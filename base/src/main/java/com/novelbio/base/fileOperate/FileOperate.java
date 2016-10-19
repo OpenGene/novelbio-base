@@ -1484,7 +1484,7 @@ public class FileOperate {
 	//TODO 待测试
 	private static void moveSingleFile(Path oldPath, Path newPath, boolean cover) {
 		if (!isFileExistAndNotDir(oldPath)) return;
-		if (isFilePathSame(FileOperate.getFileName(oldPath), newPath.toString())) {
+		if (isFilePathSame(oldPath.toUri().toString(), newPath.toUri().toString())) {
 			return;
         }
 
