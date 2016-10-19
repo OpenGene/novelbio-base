@@ -7,8 +7,12 @@ public class TestCmdPathAli {
 	
 	@Test
 	public void testConvertAli2Loc() {
-		String path = "oss://bucket/mypath/.inmap./file";
+		String path = "oss://bucket/mypath/file";
 		String inPath = CmdPathAli.convertAli2Loc(path, true);
+		Assert.assertEquals("/home/novelbio/oss/.inmap./bucket/mypath/file", inPath);
+		
+		path = "oss://bucket/mypath/.inmap./file";
+		inPath = CmdPathAli.convertAli2Loc(path, true);
 		Assert.assertEquals("/home/novelbio/oss/.inmap./bucket/mypath/.inmap./file", inPath);
 		
 		String outPath = CmdPathAli.convertAli2Loc(path, false);

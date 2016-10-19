@@ -73,7 +73,15 @@ public class CmdPathAli extends CmdPath {
 		}
 	}
 	
-	public static String convertAli2Loc(String path, boolean isInMap) {
+	/**
+	 * 把oss://bucket/path/to/myfile 转成 /home/novelbio/.inmap./path/to/myfile
+	 * @param path
+	 * @param isReadMap <br>
+	 * true: 只读挂载 <br>
+	 * false: 只写挂载 
+	 * @return
+	 */
+	public static String convertAli2Loc(String path, boolean isReadMap) {
 		String inMap = ".inmap.", outMap = ".outmap.";
 		
 		String pathLocal = PathDetailOs.changeOsToLocal(path);
@@ -86,7 +94,7 @@ public class CmdPathAli extends CmdPath {
 		} else if (pathLocal.startsWith(outMap)) {
 			pathLocal = FileOperate.removeSplashHead(pathLocal.replaceFirst(outMap, ""), false);
 		}
-		String head = isInMap? inMap:outMap;
+		String head = isReadMap? inMap:outMap;
 		pathLocal = PathDetailOs.getOsMountPathWithSep() + head + "/" + pathLocal;
 		
 		return pathLocal;
