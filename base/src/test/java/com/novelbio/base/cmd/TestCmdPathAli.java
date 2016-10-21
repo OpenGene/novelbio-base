@@ -15,6 +15,11 @@ public class TestCmdPathAli {
 		inPath = CmdPathAli.convertAli2Loc(path, true);
 		Assert.assertEquals("/home/novelbio/oss/.inmap./mypath/.inmap./file", inPath);
 		
+		path = "oss://novelbiotest/nbCloud/public/nbcplatform/genome/";
+		inPath = CmdPathAli.convertAli2Loc(path, true);
+		System.out.println(inPath);
+		Assert.assertEquals("/home/novelbio/oss/.inmap./nbCloud/public/nbcplatform/genome/", inPath);
+		
 		String outPath = CmdPathAli.convertAli2Loc(path, false);
 		Assert.assertEquals("/home/novelbio/oss/.outmap./mypath/.inmap./file", outPath);
 		
