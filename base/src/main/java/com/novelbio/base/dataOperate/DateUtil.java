@@ -210,12 +210,12 @@ public class DateUtil {
 	 * @return
 	 */
 	public static String getDateAndRandom() {
-	     SimpleDateFormat formatDate= new SimpleDateFormat( "yyyy-MM-dd-hh-mm-ss");
+	     SimpleDateFormat formatDate= new SimpleDateFormat( "yyyy_MM_dd_hh_mm_ss");
 	     Date currentDate = new Date(); //得到当前系统时间
 	     String date = formatDate.format(currentDate); //将日期时间格式化
 	     Random random = new Random(System.currentTimeMillis());
 	     short Tmp = (short)random.nextInt();
-	     return date + Tmp;
+	     return date + "_" + Tmp;
 	}
 	/**
 	 * 返回当前日期，格式 "yyyy-MM-dd-hh-mm-ss"
