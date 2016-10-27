@@ -343,7 +343,7 @@ public class TestFileOperate {
 		for (int i = 0; i < 10; i++) {
 			result = FileOperate.getParentPathNameWithSep(result);
 		}
-		Assert.assertEquals("oss://novelbio/", result);
+		Assert.assertEquals("oss://novelbio/nbCloud/", result);
 		
 	}
 
