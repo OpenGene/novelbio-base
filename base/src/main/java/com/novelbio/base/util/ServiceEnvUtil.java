@@ -1,15 +1,6 @@
 package com.novelbio.base.util;
 
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.yarn.conf.YarnConfiguration;
-
-import com.aliyun.oss.OSSClient;
-import com.gargoylesoftware.htmlunit.BrowserVersion;
-import com.gargoylesoftware.htmlunit.WebClient;
 import com.novelbio.base.PathDetail;
-import com.novelbio.jsr203.bos.OssInitiator;
-import com.novelbio.jsr203.bos.PathDetailOs;
-import com.sun.tools.doclint.Env;
 
 /**
  * 服务运行环境判定.是hadoop还是阿里云
