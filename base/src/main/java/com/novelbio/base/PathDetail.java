@@ -291,4 +291,8 @@ public class PathDetail {
 	public static String getSshIdrsaFile() {
 		return properties.getProperty("sshidrsa");
 	}
+
+	public static String getEnvName() {
+		return properties.getProperty("env");
+	}
 }

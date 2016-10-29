@@ -1,16 +1,10 @@
 package com.novelbio.base.cmd;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.novelbio.base.PathDetail;
-import com.novelbio.base.StringOperate;
-import com.novelbio.base.cmd.CmdPath.ConvertCmd;
-import com.novelbio.base.cmd.CmdPath.ConvertCmdTmp;
-import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.jsr203.bos.PathDetailOs;
 
@@ -24,6 +18,12 @@ import com.novelbio.jsr203.bos.PathDetailOs;
  */
 public class CmdPathAli extends CmdPath {
 	private static final Logger logger = LoggerFactory.getLogger(CmdPathAli.class);
+	
+	/** 只读挂载相对路径 */
+	public static final String IN_MAP = ".inmap.";
+	/** 只写挂载相对路径 */
+	public static final String OUT_MAP = ".outmap.";
+
 	
 	protected void setStdAndErr(ConvertCmdTmp convertCmdTmp, boolean stdOut, boolean errOut) {
 		//不用设置，全都要转成tmp格式
@@ -73,20 +73,26 @@ public class CmdPathAli extends CmdPath {
 		}
 	}
 	
-	public static String convertAli2Loc(String path, boolean isInMap) {
-		String inMap = ".inmap.", outMap = ".outmap.";
+	/**
+	 * 把oss://bucket/path/to/myfile 转成 /home/novelbio/.inmap./path/to/myfile
+	 * @param path
+	 * @param isReadMap <br>
+	 * true: 只读挂载 <br>
+	 * false: 只写挂载 
+	 * @return
+	 */
+	public static String convertAli2Loc(String path, boolean isReadMap) {
 		
 		String pathLocal = PathDetailOs.changeOsToLocal(path);
-		if (!pathLocal.startsWith(PathDetailOs.getOsMountPathWithSep())) {
-			return pathLocal;
+		if (pathLocal.startsWith(PathDetailOs.getOsMountPathWithSep())) {
+			pathLocal = pathLocal.replaceFirst(PathDetailOs.getOsMountPathWithSep(), "");
 		}
-		pathLocal = pathLocal.replaceFirst(PathDetailOs.getOsMountPathWithSep(), "");
-		if (pathLocal.startsWith(inMap)) {
-			pathLocal = FileOperate.removeSplashHead(pathLocal.replaceFirst(inMap, ""), false);
-		} else if (pathLocal.startsWith(outMap)) {
-			pathLocal = FileOperate.removeSplashHead(pathLocal.replaceFirst(outMap, ""), false);
+		if (pathLocal.startsWith(IN_MAP)) {
+			pathLocal = FileOperate.removeSplashHead(pathLocal.replaceFirst(IN_MAP, ""), false);
+		} else if (pathLocal.startsWith(OUT_MAP)) {
+			pathLocal = FileOperate.removeSplashHead(pathLocal.replaceFirst(OUT_MAP, ""), false);
 		}
-		String head = isInMap? inMap:outMap;
+		String head = isReadMap? IN_MAP : OUT_MAP;
 		pathLocal = PathDetailOs.getOsMountPathWithSep() + head + "/" + pathLocal;
 		
 		return pathLocal;

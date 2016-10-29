@@ -58,8 +58,9 @@ public class DateUtil {
 	}
 	
 	public static String getNowTimeLongRandom() {
-	     Random random = new Random(System.currentTimeMillis());
-		return new Date().getTime() + "_" + random.nextInt();
+		Random random = new Random(System.currentTimeMillis());
+		short tmp = (short)Math.abs(random.nextInt());
+		return new Date().getTime() + "_" + tmp;
 	}
 	
 	/**
@@ -125,8 +126,8 @@ public class DateUtil {
 	 * @param pattern
 	 * @return
 	 */
-	public static Date string2Date(String date,String pattern)
-	{	try {
+	public static Date string2Date(String date,String pattern) {
+		try {
 			SimpleDateFormat sf = new SimpleDateFormat(pattern);
 			Date newdate;
 			newdate = sf.parse(date);
@@ -134,7 +135,6 @@ public class DateUtil {
 		} catch (Exception e) {
 			return null;
 		}
-		
 	}
 	
 	/**
@@ -202,7 +202,7 @@ public class DateUtil {
 		Date currentDate = new Date();
 		String date = formatDate.format(currentDate);
 	     Random random = new Random(System.currentTimeMillis());
-	     short Tmp = (short)random.nextInt();
+	     short Tmp = (short)Math.abs(random.nextInt());
 	     return date + Tmp;
 	}
 	
@@ -211,12 +211,12 @@ public class DateUtil {
 	 * @return
 	 */
 	public static String getDateAndRandom() {
-	     SimpleDateFormat formatDate= new SimpleDateFormat( "yyyy-MM-dd-hh-mm-ss");
+	     SimpleDateFormat formatDate= new SimpleDateFormat( "yyyy_MM_dd_hh_mm_ss");
 	     Date currentDate = new Date(); //得到当前系统时间
 	     String date = formatDate.format(currentDate); //将日期时间格式化
 	     Random random = new Random(System.currentTimeMillis());
-	     short Tmp = (short)random.nextInt();
-	     return date + Tmp;
+	     short Tmp = (short)Math.abs(random.nextInt());
+	     return date + "_" + Tmp;
 	}
 	/**
 	 * 返回当前日期，格式 "yyyy-MM-dd-hh-mm-ss"
