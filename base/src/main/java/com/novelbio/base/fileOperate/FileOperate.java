@@ -109,7 +109,9 @@ public class FileOperate {
 		boolean isHdfs = FileHadoop.isHdfs(filePath);
 		if (isHdfs) {
 			file = new FileHadoop(filePath);
-		}else {
+		} else if (filePath.startsWith("oss:/")) {
+			file = new File(getPath(filePath).toString());
+		} else {
 			file = new File(filePath);
 		}
 		return file;

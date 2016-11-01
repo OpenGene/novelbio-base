@@ -15,7 +15,7 @@ import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
-import com.thoughtworks.xstream.io.path.Path;
+import com.novelbio.jsr203.bos.PathDetailOs;
 
 /**
  * 输入cmdlist，将其整理为相应的cmd string array<br>
@@ -442,7 +442,17 @@ public class CmdPath {
 		ConvertCmd convertCmdHdfs2Local = new ConvertCmd() {
 			@Override
 			String convert(String subCmd) {
-				return FileHadoop.convertToLocalPath(subCmd);
+				if (subCmd.length() > 6) {
+					if (FileHadoop.isHdfs(subCmd) || FileHadoop.isHdfs(subCmd.substring(1, subCmd.length() - 2))) {
+						return FileHadoop.convertToLocalPath(subCmd);
+					}
+				} 
+				if(subCmd.startsWith("oss://")) {
+					// TODO 这里是有bug的.测试先这么写.
+					return CmdPathAli.convertAli2Loc(subCmd, true);
+				} else {
+					return subCmd;
+				}
 			}
 		};
 		return convertCmdHdfs2Local;

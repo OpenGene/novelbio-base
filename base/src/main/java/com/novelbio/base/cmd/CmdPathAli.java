@@ -84,7 +84,7 @@ public class CmdPathAli extends CmdPath {
 	public static String convertAli2Loc(String path, boolean isReadMap) {
 		
 		String pathLocal = PathDetailOs.changeOsToLocal(path);
-		if (pathLocal.startsWith(PathDetailOs.getOsMountPathWithSep())) {
+		if (pathLocal.startsWith(PathDetailOs.getOsMountPathWithSep())) {		//	/home/novelbio/oss
 			pathLocal = pathLocal.replaceFirst(PathDetailOs.getOsMountPathWithSep(), "");
 		}
 		if (pathLocal.startsWith(IN_MAP)) {
