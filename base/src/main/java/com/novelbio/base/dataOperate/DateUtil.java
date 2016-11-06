@@ -28,6 +28,7 @@ public class DateUtil {
 	/** 当前日期和时间 */
 	public static final String PATTERN_DATETIME = "yyyy-MM-dd HH:mm:ss";
 	
+	/** 年月 yyyy-MM */
 	public static final String PATTERN_YYYYMM = "yyyy-MM";
 	/** 当前日期的年份 */
 	public static final String PATTERN_YYYY = "yyyy";
