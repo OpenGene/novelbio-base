@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -137,6 +138,7 @@ public class MathComput {
 	 */
 	public static ArrayList<String[]> getMedian(List<String[]> lsIn, int colAccID, List<Integer> colNum) {
 		/** 每个ID一个基因 */
+		Set<String> setGeneId = new LinkedHashSet<>();
 		ArrayListMultimap<String, String[]> mapAccID2Info = ArrayListMultimap.create();
 		ArrayList<String[]> lsResult = new ArrayList<String[]>();
 		colAccID--;
@@ -146,9 +148,10 @@ public class MathComput {
 		}
 		for (String[] strings : lsIn) {
 			mapAccID2Info.put(strings[colAccID].trim(), strings);
+			setGeneId.add(strings[colAccID].trim());
 		}
 		
-		for (String accID : mapAccID2Info.keySet()) {
+		for (String accID : setGeneId) {
 			List<String[]> value = mapAccID2Info.get(accID);
 			try {
 				lsResult.add(getMediaInfo(value, lsColNum));
