@@ -59,9 +59,7 @@ public class DateUtil {
 	}
 	
 	public static String getNowTimeLongRandom() {
-		Random random = new Random(System.currentTimeMillis());
-		short tmp = (short)Math.abs(random.nextInt());
-		return new Date().getTime() + "_" + tmp;
+		return new Date().getTime() + "_" + getRandomAbs();
 	}
 	
 	/**
@@ -202,9 +200,7 @@ public class DateUtil {
 		SimpleDateFormat formatDate = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 		Date currentDate = new Date();
 		String date = formatDate.format(currentDate);
-	     Random random = new Random(System.currentTimeMillis());
-	     short Tmp = (short)Math.abs(random.nextInt());
-	     return date + Tmp;
+		return date + "_" + getRandomAbs();
 	}
 	
 	/**
@@ -215,9 +211,16 @@ public class DateUtil {
 	     SimpleDateFormat formatDate= new SimpleDateFormat( "yyyy_MM_dd_hh_mm_ss");
 	     Date currentDate = new Date(); //得到当前系统时间
 	     String date = formatDate.format(currentDate); //将日期时间格式化
-	     Random random = new Random(System.currentTimeMillis());
-	     short Tmp = (short)Math.abs(random.nextInt());
-	     return date + "_" + Tmp;
+	     return date + "_" + getRandomAbs();
+	}
+	
+	/** 获得随机的正数，不用负数的原因是会在tmp路径中加入 - ，类似 2016_10_29_12_31_23_-2345
+	 * 部分生物信息算法会根据 - 进行截取，然后会报错 */
+	private static int getRandomAbs() {
+		  Random random = new Random(System.currentTimeMillis());
+		  int tmp = (short)random.nextInt();
+		  tmp = Math.abs(tmp);
+		  return tmp;
 	}
 	/**
 	 * 返回当前日期，格式 "yyyy-MM-dd-hh-mm-ss"
