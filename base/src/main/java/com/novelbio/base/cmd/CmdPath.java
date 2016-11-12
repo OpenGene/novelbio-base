@@ -46,15 +46,22 @@ public class CmdPath {
 	Map<String, String> mapPath2TmpPathIn = new HashMap<>();
 	Map<String, String> mapPath2TmpPathOut = new HashMap<>();
 
-	/** 存储stdout是否为临时文件 */
-	boolean isSaveFileTmp = true;
+	/** 是否保存stdout文件, <b>默认为true</b><br>
+	 * stdout的保存有几种：<br>
+	 * 1. 在cmd命令中添加 > 然后得到标准输出文件<br>
+	 * 2. 通过 {@link #setSaveFilePath(String)} 外部设置stdout的文件名<br>
+	 * 3. 从cmdOperate中获得标准输出流，自行保存<br>
+	 * 其中1,2需要保存std文件，并且在最后需要把std的临时文件修改为最终文件<br>
+	 * 3不需要保存std文件<br>
+	 *  */
+	boolean isSaveStdFile = true;
 	/** 截获标准输出流的输出文件名 */
 	String saveFilePath = null;
 	/** 输出文件是否为txt，如果命令中含有 >，则认为输出的可能不是txt，为二进制 */
 	boolean isJustDisplayStd = false;
 	
-	/** 存储stderr是否为临时文件 */
-	boolean isSaveErrTmp = true;
+	/** 是否保存stderr文件，同 {@link #isSaveStdFile} */
+	boolean isSaveErrFile = true;
 	/** 截获标准错误流的错误文件名 */
 	String saveErrPath = null;
 	/** 输出错误文件是否为txt，如果命令中含有 2>，则认为输出的可能不是txt，为二进制 */
@@ -194,9 +201,14 @@ public class CmdPath {
 		}
 	}
 	
-	public void setSaveFilePath(String saveFilePath, boolean isSaveFileTmp) {
+	public String getStdInFile() {
+		return stdInput;
+	}
+	
+	/** 设定最后保存的标准输出流文件名，注意会设定 {@link #setIsSaveStdFile(boolean)}为true */
+	public void setSaveFilePath(String saveFilePath) {
 		this.saveFilePath = saveFilePath;
-		this.isSaveFileTmp = isSaveFileTmp;
+		this.isSaveStdFile = true;
 	}
 	public String getSaveStdPath() {
 		return saveFilePath;
@@ -212,21 +224,19 @@ public class CmdPath {
 		if (saveFilePath == null) {
 			return null;
 		}
-		if (isSaveFileTmp) {
+		if (isSaveStdFile) {
 			return FileOperate.changeFileSuffix(saveFilePath, "_tmp", null);
 		} else {
 			return saveFilePath;
 		}
 	}
-	public String getStdInFile() {
-		return stdInput;
-	}
-	
-	
-	public void setSaveErrPath(String saveErrPath, boolean isSaveErrTmp) {
+
+	/** 设定最后保存的标准错误流文件名，注意会设定 {@link #setIsSaveErrFile(boolean)}为true */
+	public void setSaveErrPath(String saveErrPath) {
 		this.saveErrPath = saveErrPath;
-		this.isSaveErrTmp = isSaveErrTmp;
+		this.isSaveErrFile = true;
 	}
+
 	public String getSaveErrPath() {
 		return saveErrPath;
 	}
@@ -234,18 +244,42 @@ public class CmdPath {
 		if (saveErrPath == null) {
 			return null;
 		}
-		if (isSaveErrTmp) {
+		if (isSaveErrFile) {
 			return FileOperate.changeFileSuffix(saveErrPath, "_tmp", null);
 		} else {
 			return saveErrPath;
 		}
 	}
 	
-	public void moveLogfiles() {
-		if (isSaveFileTmp && getSaveStdTmp() != null) {
+	/** 是否保存stdout文件，<b>默认为true</b><br>
+	 * stdout的保存有几种：<br>
+	 * 1. 在cmd命令中添加 > 然后得到标准输出文件<br>
+	 * 2. 通过 {@link #setSaveFilePath(String)} 外部设置stdout的文件名<br>
+	 * 3. 从cmdOperate中获得标准输出流，自行保存<br>
+	 * 其中1,2需要保存std文件，并且在最后需要把std的临时文件修改为最终文件<br>
+	 * 3不需要保存std文件<br>
+	 *  */
+	protected void setIsSaveStdFile(boolean isSaveStdFile) {
+		this.isSaveStdFile = isSaveStdFile;
+	}
+	
+	/** 是否保存stderr文件， <b>默认为true</b><br>
+	 * stderr的保存有几种：<br>
+	 * 1. 在cmd命令中添加 2> 然后得到标准输出文件<br>
+	 * 2. 通过 {@link #setSaveErrPath(String)} 外部设置stdout的文件名<br>
+	 * 3. 从cmdOperate中获得标准输出流，自行保存<br>
+	 * 其中1,2需要保存std文件，并且在最后需要把std的临时文件修改为最终文件<br>
+	 * 3不需要保存std文件<br>
+	 *  */
+	protected void setIsSaveErrFile(boolean isSaveErrFile) {
+		this.isSaveErrFile = isSaveErrFile;
+	}
+	
+	public void moveStdFiles() {
+		if (isSaveStdFile && getSaveStdTmp() != null) {
 			FileOperate.moveFile(true, getSaveStdTmp(), saveFilePath);
 		}
-		if (isSaveErrTmp && getSaveErrPath() != null) {
+		if (isSaveErrFile && getSaveErrPath() != null) {
 			FileOperate.moveFile(true, getSaveErrTmp(), saveErrPath);
 		}
 	}
@@ -382,6 +416,8 @@ public class CmdPath {
 		boolean stdOut = false;
 		boolean errOut = false;
 		boolean stdIn = false;
+		saveFilePath = null;
+		saveErrPath = null;
 		
 		ConvertCmdTmp convertCmdTmp = new ConvertCmdTmp(isRedirectInToTmp, isRedirectOutToTmp,
 				setInput, setOutput, mapName2TmpName);
@@ -407,13 +443,13 @@ public class CmdPath {
 			tmpCmd = convertCmdTmp.convertSubCmd(tmpCmd);
 			
 			if (stdOut) {
-				if (StringOperate.isRealNull(saveFilePath)) {
+				if (isSaveStdFile && StringOperate.isRealNull(saveFilePath)) {
 					saveFilePath = tmpCmd;
 				}
 				stdOut = false;
 				continue;
 			} else if (errOut) {
-				if (StringOperate.isRealNull(saveErrPath)) {
+				if (isSaveErrFile && StringOperate.isRealNull(saveErrPath)) {
 					saveErrPath = tmpCmd;
 				}
 				errOut = false;

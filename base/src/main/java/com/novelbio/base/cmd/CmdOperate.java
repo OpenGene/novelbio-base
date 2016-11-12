@@ -279,11 +279,10 @@ public class CmdOperate extends RunProcess<String> {
 	 *  设定标准输出流，如果是这里指定，则会即时刷新<br>
 	 * 本设置会被cmd中自带的 &gt; 重定向覆盖
 	 * @param stdOutPath
-	 * @param isSaveTmp 是否先保存为临时文件，等结束后再修改回来。如果只是随便看看结果就设置为false
 	 * @param isDelete 完成后是否删除输出文件, 如果需要删除文件，则认为该文件只是展示信息使用，会采用txt模式输出
 	 */
-	public void setStdOutPath(String stdOutPath, boolean isSaveTmp, boolean isDelete) {
-		cmdPath.setSaveFilePath(stdOutPath, isSaveTmp);
+	public void setStdOutPath(String stdOutPath, boolean isDelete) {
+		cmdPath.setSaveFilePath(stdOutPath);
 		cmdPath.setJustDisplayStd(isDelete);
 		this.isStdoutInfo = isDelete;
 	}
@@ -293,11 +292,10 @@ public class CmdOperate extends RunProcess<String> {
 	 * 设定标准错误流，如果是这里指定，则会即时刷新<br>
 	 * 本设置会被cmd中自带的 2> 重定向覆盖
 	 * @param stdErrPath
-	 * @param isSaveTmp 是否先保存为临时文件，等结束后再修改回来。如果只是随便看看结果就设置为false
 	 * @param isDelete 完成后是否删除输出文件, 如果需要删除文件，则认为该文件只是展示信息使用，会采用txt模式输出
 	 */
-	public void setStdErrPath(String stdErrPath, boolean isSaveTmp, boolean isDelete) {
-		cmdPath.setSaveErrPath(stdErrPath, isSaveTmp);
+	public void setStdErrPath(String stdErrPath, boolean isDelete) {
+		cmdPath.setSaveErrPath(stdErrPath);
 		cmdPath.setJustDisplayErr(isDelete);
 		this.isStderrInfo = isDelete;
 	}
@@ -593,6 +591,9 @@ public class CmdOperate extends RunProcess<String> {
 	 * @throws Exception
 	 */
 	private void doInBackgroundB() throws Exception {
+		cmdPath.setIsSaveStdFile(!getCmdInStdStream);
+		cmdPath.setIsSaveErrFile(!getCmdInErrStream);
+
 		finishFlag = new FinishFlag();
 		String[] cmdRun = cmdPath.getRunCmd();
 		
@@ -660,6 +661,7 @@ public class CmdOperate extends RunProcess<String> {
 		String outPath = cmdPath.getSaveStdTmp(); 
 		outputGobbler = new StreamOut(process.getStdOut(), process, isOutToTerminate, true);
 		outputGobbler.setDaemon(true);
+		
 		if (!getCmdInStdStream) {
 			if (outPath != null) {
 				FileOperate.createFolders(FileOperate.getPathName(outPath));
@@ -690,6 +692,7 @@ public class CmdOperate extends RunProcess<String> {
 		String errPath = cmdPath.getSaveErrTmp();
 		errorGobbler = new StreamOut(process.getStdErr(), process, isOutToTerminate, false);
 		errorGobbler.setDaemon(true);
+		
 		if (!getCmdInErrStream) {
 			if (errPath != null) {
 				FileOperate.createFolders(FileOperate.getPathName(errPath));
@@ -830,7 +833,7 @@ public class CmdOperate extends RunProcess<String> {
 		}
 		
 		if (isFinishedNormal()) {
-			cmdPath.moveLogfiles();
+			cmdPath.moveStdFiles();
 			if (isStderrInfo) {
 				FileOperate.deleteFileFolder(cmdPath.getSaveErrPath());
 			}
