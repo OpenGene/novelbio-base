@@ -302,7 +302,7 @@ public class HttpFetchMultiThread implements IHttpFetch, Closeable {
 		if (StringOperate.isRealNull(uri)) {
 			throw new ExceptionNbcParamError("uri cannot be null");
 		}
-		uri = uri.trim().toLowerCase();
+		uri = uri.trim();
 		if (uri.startsWith("//")) {
 			uri = "http:" + uri;
 		} else if (uri.startsWith("/")) {
