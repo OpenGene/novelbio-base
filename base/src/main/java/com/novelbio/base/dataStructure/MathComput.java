@@ -595,7 +595,18 @@ public class MathComput {
 		}
 		return resultBinValue;
 	}
-	
+	/**
+	 * 给定一组数(有顺序的排列)，根据给定的分割数，加权平均，最后获得指定分割数量的数组
+	 * 譬如现在有int[20]的一组数，我想要把这组数缩小到int[10]里面并且保持其比例大体吻合，这时候我采用加权平均的方法
+	 * 检查了一遍，感觉可以
+	 * 用于将500或更多份的基因中tag累计数缩小到100份内
+	 * @param treatNum invNum里面的bp具体值
+	 * @param binNum 后面要生成的分割的块数
+	 * @return
+	 */
+	public static double[] mySpline(double[] treatNum, int binNum) {
+		return mySpline(treatNum, binNum, 0, 0, 0);
+	}
 	/**
 	 * 给定一组数(有顺序的排列)，根据给定的分割数，指定获得加权平均，最后获得指定分割数量的数组
 	 * 譬如现在有int[20]的一组数，我想要把这组数缩小到int[10]里面并且保持其比例大体吻合，这时候我采用加权平均的方法
