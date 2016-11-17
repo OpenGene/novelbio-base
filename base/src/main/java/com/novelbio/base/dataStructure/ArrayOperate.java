@@ -47,6 +47,19 @@ public class ArrayOperate {
 		}
 		return result.toString();
 	}
+	
+	public static String cmbString(double[] values, String sep) {
+		StringBuffer result = new StringBuffer();
+		if (values.length < 1) {
+			return "";
+		}
+		result.append(values[0]);
+		for (int i = 1; i < values.length; i++) {
+			result.append(sep).append(values[i]);
+		}
+		return result.toString();
+	}
+	
 	/**
 	 * 合并字符串数组
 	 * 
