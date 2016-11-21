@@ -1,14 +1,17 @@
 package com.novelbio.base.security;
 
+import java.security.InvalidKeyException;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
+import org.apache.commons.codec.binary.Base64;
+
+import com.novelbio.base.ExceptionNbcBean;
 
 /**
  * 基础加密组件
@@ -32,80 +35,80 @@ public abstract class Coder {
 
 	/**
 	 * BASE64解密
-	 * 
 	 * @param key
-	 * @return
-	 * @throws Exception
+	 * @return byte[]
 	 */
-	public static byte[] decryptBASE64(String key) throws Exception {
-		return (new BASE64Decoder()).decodeBuffer(key);
+	public static byte[] decryptBASE64(String key) {
+		return Base64.decodeBase64(key);
 	}
 
 	/**
 	 * BASE64加密
-	 * 
 	 * @param key
-	 * @return
-	 * @throws Exception
+	 * @return String
 	 */
-	public static String encryptBASE64(byte[] key) throws Exception {
-		return (new BASE64Encoder()).encodeBuffer(key);
+	public static String encryptBASE64(byte[] key) {
+		return Base64.encodeBase64String(key);
 	}
 
 	/**
 	 * MD5加密
-	 * 
 	 * @param data
-	 * @return
-	 * @throws Exception
+	 * @return byte[]
 	 */
-	public static byte[] encryptMD5(byte[] data) throws Exception {
-		MessageDigest md5 = MessageDigest.getInstance(KEY_MD5);
-		md5.update(data);
-
-		return md5.digest();
+	public static byte[] encryptMD5(byte[] data) {
+		try {
+			MessageDigest md5 = MessageDigest.getInstance(KEY_MD5);
+			md5.update(data);
+			return md5.digest();
+		} catch (NoSuchAlgorithmException e) {
+			throw new ExceptionNbcBean(e);
+		}
 	}
 
 	/**
 	 * SHA加密
-	 * 
 	 * @param data
-	 * @return
-	 * @throws Exception
+	 * @return byte[]
 	 */
-	public static byte[] encryptSHA(byte[] data) throws Exception {
-		MessageDigest sha = MessageDigest.getInstance(KEY_SHA);
-		sha.update(data);
-
-		return sha.digest();
+	public static byte[] encryptSHA(byte[] data) {
+		try {
+			MessageDigest sha = MessageDigest.getInstance(KEY_SHA);
+			sha.update(data);
+			return sha.digest();
+		} catch (NoSuchAlgorithmException e) {
+			throw new ExceptionNbcBean(e);
+		}
 	}
 
 	/**
 	 * 初始化HMAC密钥
-	 * 
-	 * @return
-	 * @throws Exception
+	 * @return String
 	 */
-	public static String initMacKey() throws Exception {
-		KeyGenerator keyGenerator = KeyGenerator.getInstance(KEY_MAC);
-
-		SecretKey secretKey = keyGenerator.generateKey();
-		return encryptBASE64(secretKey.getEncoded());
+	public static String initMacKey() {
+		try {
+			KeyGenerator keyGenerator = KeyGenerator.getInstance(KEY_MAC);
+			SecretKey secretKey = keyGenerator.generateKey();
+			return encryptBASE64(secretKey.getEncoded());
+		} catch (NoSuchAlgorithmException e) {
+			throw new ExceptionNbcBean(e);
+		}
 	}
 
 	/**
 	 * HMAC加密
-	 * 
 	 * @param data
 	 * @param key
-	 * @return
-	 * @throws Exception
+	 * @return byte[]
 	 */
-	public static byte[] encryptHMAC(byte[] data, String key) throws Exception {
-		SecretKey secretKey = new SecretKeySpec(decryptBASE64(key), KEY_MAC);
-		Mac mac = Mac.getInstance(secretKey.getAlgorithm());
-		mac.init(secretKey);
-
-		return mac.doFinal(data);
+	public static byte[] encryptHMAC(byte[] data, String key) {
+		try {
+			SecretKey secretKey = new SecretKeySpec(decryptBASE64(key), KEY_MAC);
+			Mac mac = Mac.getInstance(secretKey.getAlgorithm());
+			mac.init(secretKey);
+			return mac.doFinal(data);
+		} catch (InvalidKeyException | NoSuchAlgorithmException | IllegalStateException e) {
+			throw new ExceptionNbcBean(e);
+		}
 	}
 }
