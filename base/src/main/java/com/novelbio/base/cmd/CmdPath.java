@@ -309,12 +309,11 @@ public class CmdPath {
 		
 		for (String inFile : setInput) {
 			String inTmpName = mapName2TmpName.get(inFile);
-			logger.info("copy file from {} to {}", inFile, inTmpName);
 			try {
 				FileOperate.copyFileFolder(inFile, inTmpName, false);
-
+				logger.info("copy file from {} to {}", inFile, inTmpName);
 			} catch (Exception e) {
-				// TODO: handle exception
+				logger.error("copy file from " + inFile + " to " + inTmpName + "error", e);
 			}
 		}
 	}
