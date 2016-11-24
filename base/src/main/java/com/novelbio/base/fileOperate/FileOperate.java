@@ -645,6 +645,8 @@ public class FileOperate {
 				fileName = "/" + fileName;
 				isAddSplashHead = true;
 			}
+		} else if (fileName.startsWith("file://")) {
+			fileName = fileName.replaceFirst("file://", "");
 		}
 		File file = new File(fileName);
 		try {
@@ -1739,7 +1741,9 @@ public class FileOperate {
 				|| !StringOperate.isRealNull(oldfile) && StringOperate.isRealNull(newfile)) {
 			return false;
 		}
-
+		if (StringOperate.isEqual(oldfile, newfile)) {
+			return true;
+		}
 		String oldFileStr = getCanonicalPath(oldfile);
 		String newFileStr = getCanonicalPath(newfile);
 
