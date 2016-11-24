@@ -2,6 +2,10 @@ package com.novelbio.base;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -215,6 +219,28 @@ public class StringOperate {
 		} else {
 			return StringEscapeUtils.escapeHtml(content).replace("\n", "<br>").replace("\r\n", "<br>");
 		}
-    	
     }
+    
+	/**
+	 * 将ByteBuffer转为String类型
+	 * 
+	 * @param buffer
+	 * @return
+	 */
+	public static String getString(ByteBuffer buffer) {
+		Charset charset = null;
+		CharsetDecoder decoder = null;
+		CharBuffer charBuffer = null;
+		try {
+			charset = Charset.forName("UTF-8");
+			decoder = charset.newDecoder();
+			// 用这个的话，只能输出来一次结果，第二次显示为空
+			// charBuffer = decoder.decode(buffer);
+			charBuffer = decoder.decode(buffer.asReadOnlyBuffer());
+			return charBuffer.toString();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return "error";
+		}
+	}
 }
