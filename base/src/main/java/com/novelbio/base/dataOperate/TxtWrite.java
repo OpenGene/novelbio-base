@@ -106,7 +106,9 @@ class TxtWrite implements Closeable {
 	public void flush() {
 		try {
 			outputStream.flush();
-		} catch (Exception e) {}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	/**
@@ -129,8 +131,7 @@ class TxtWrite implements Closeable {
 				 flush();
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 	}
 	/**
@@ -145,8 +146,7 @@ class TxtWrite implements Closeable {
 				 flush();
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 	}
 	
@@ -159,7 +159,9 @@ class TxtWrite implements Closeable {
 	public void writefileln(String content) {
 		try {
 			outputStream.write((content + TxtReadandWrite.ENTER_LINUX).getBytes());
-		} catch (Exception e) { e.printStackTrace();}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 	/**
 	 * 写入并换行，没有flush
@@ -171,7 +173,9 @@ class TxtWrite implements Closeable {
 		try {
 			outputStream.write(content);
 			outputStream.write((byte)'\n');
-		} catch (Exception e) { e.printStackTrace();}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 	/**
 	 * 写入并换行，没有flush
@@ -185,7 +189,9 @@ class TxtWrite implements Closeable {
 			if (flash) {
 				 flush();
 			}
-		} catch (Exception e) { }
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 	/**
 	 * 写入一行数组并换行，用sep隔开
@@ -200,7 +206,9 @@ class TxtWrite implements Closeable {
 		}
 		try {
 			outputStream.write((content2 + TxtReadandWrite.ENTER_LINUX).getBytes());
-		} catch (Exception e) { }
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	/**
@@ -234,7 +242,7 @@ class TxtWrite implements Closeable {
 		try {
 			outputStream.write(TxtReadandWrite.ENTER_LINUX.getBytes());
 		} catch (Exception e) {
-			// TODO: handle exception
+			throw new RuntimeException(e);
 		}
 	}
 	/**
@@ -254,6 +262,7 @@ class TxtWrite implements Closeable {
 			}
 			flush();
 		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 	
@@ -265,7 +274,9 @@ class TxtWrite implements Closeable {
 	public void Rwritefile(double[] content) {
 		try {
 			Rwritefile(content, 20, " ");
-		} catch (Exception e) { }
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 	/**
 	 * 给定内容，写入文本，这个写入的东西可以给R语言用scan读取,默认每行20个元素，用空格隔开
@@ -301,8 +312,10 @@ class TxtWrite implements Closeable {
 			flush();
 		} catch (Exception e) {
 			logger.error("file error: "+ getFileName());
+			throw new RuntimeException(e);
+		} finally {
+			close();
 		}
-		close();
 	}
 	/**
 	 * 给定内容，写入文本，这个写入的东西可以给R语言用scan读取
@@ -323,8 +336,10 @@ class TxtWrite implements Closeable {
 			flush();
 		} catch (Exception e) {
 			logger.error("file error: "+getFileName());
+			throw new RuntimeException(e);
+		} finally {
+			close();
 		}
-		close();
 	}
 	/**
 	 * 给定内容，写入文本，这个写入的东西可以给R语言用scan读取
@@ -360,9 +375,10 @@ class TxtWrite implements Closeable {
 			}
 			flush();
 		} catch (Exception e) {
-			// TODO: handle exception
+			throw new RuntimeException(e);
+		} finally {
+			close();
 		}
-		close();
 	}
 	/**
 	 * 效率太低，待修正
@@ -396,8 +412,10 @@ class TxtWrite implements Closeable {
 			flush();
 		} catch (Exception e) {
 			logger.error("write list data error:"+getFileName());
+			throw new RuntimeException(e);
+		} finally {
+			close();
 		}
-		close();
 	}
 
 	/**

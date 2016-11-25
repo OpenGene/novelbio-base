@@ -2359,7 +2359,7 @@ public class FileOperate {
 			throw new RuntimeException("file size more than 5M");
 		}
 		StringBuffer stringBuffer = new StringBuffer();
-		TxtReadandWrite.readfileLs(filePathAndName).forEach(str -> stringBuffer.append(str));
+		TxtReadandWrite.readfileLs(filePathAndName).forEach(str -> stringBuffer.append(str).append("\n"));
 
 		return stringBuffer.toString();
 	}
