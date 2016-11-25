@@ -10,8 +10,8 @@ import com.novelbio.base.PathDetail;
  */
 public class ServiceEnvUtil {
 	
-	private static final String ENV_HADOOP = "hadoop";
-	private static final String ENV_ALIYUN = "aliyun";
+	public static final String ENV_HADOOP = "hadoop";
+	public static final String ENV_ALIYUN = "aliyun";
 	private static String env;
 	
 	static{

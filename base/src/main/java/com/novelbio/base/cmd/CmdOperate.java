@@ -14,6 +14,7 @@ import java.util.TimerTask;
 import org.apache.log4j.Logger;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.novelbio.base.PathDetail;
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
@@ -21,6 +22,7 @@ import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.dataStructure.PatternOperate;
 import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.base.multithread.RunProcess;
+import com.novelbio.base.util.ServiceEnvUtil;
 
 /**
  * 输入cmd，执行完毕后可以将结果输出到界面，目前cmd只支持英文，否则会出错 只要继承后重写process方法即可
@@ -73,7 +75,7 @@ public class CmdOperate extends RunProcess<String> {
 	boolean getCmdInErrStream = false;
 	
 	/** 用来传递参数，拷贝输入输出文件夹的类 */
-	CmdPath cmdPath = CmdPath.generateCmdPath(true);
+	CmdPath cmdPath = CmdPath.generateCmdPath(!ServiceEnvUtil.isAliyunEnv());
 	
 	/** 如果选择用list来保存结果输出，最多保存500行的输出信息 */
 	int lineNumStd = 1000;
@@ -87,16 +89,12 @@ public class CmdOperate extends RunProcess<String> {
 	/** 将cmd写入sh文件的具体文件 */
 	String cmd1SH;
 
-	public CmdOperate() {
-		process = new ProcessCmd();
-	}
 	/**
 	 * 是本地使用的cmd还是阿里云的
 	 * @param isLocal
 	 */
-	public CmdOperate(boolean isLocal) {
+	public CmdOperate() {
 		process = new ProcessCmd();
-		cmdPath = CmdPath.generateCmdPath(isLocal);
 	}
 	/**
 	 * 初始化后直接开新线程即可 先写入Shell脚本，再运行。
@@ -114,43 +112,9 @@ public class CmdOperate extends RunProcess<String> {
 		FileOperate.validateFileName(cmdWriteInFileName);
 		setCmdFile(cmd, cmdWriteInFileName);
 	}
-	
-	/** 是否将本该输出到控制台的结果依然写入控制台，一般在运行长时间任务的时候，
-	 * 譬如 tophat等，需要写入控制台，如果一些譬如获得version之类的命令，就不需要
-	 * 往控制台写了
-	 * @param isOutToTerminate 默认是true
-	 */
-	public void setTerminateWriteTo(boolean isOutToTerminate) {
-		this.isOutToTerminate = isOutToTerminate;
-		this.isPrintCmd = isOutToTerminate;
-	}
-	
-	/**
-	 * 将cmd写入哪个文本，然后执行，如果初始化输入了cmdWriteInFileName, 就不需要这个了
-	 * 
-	 * @param cmd
-	 */
-	private void setCmdFile(String cmd, String cmdWriteInFileName) {
-		while (true) {
-			cmd1SH = cmdPath.getTmp() + cmdWriteInFileName.replace("\\", "/") + DateUtil.getDateAndRandom() + ".sh";
-			if (!FileOperate.isFileExist(cmd1SH)) {
-				break;
-            }
-        }
-		TxtReadandWrite txtCmd1 = new TxtReadandWrite(cmd1SH, true);
-		txtCmd1.writefile(cmd);
-		txtCmd1.close();
-		cmdPath.clearLsCmd();
-		cmdPath.addCmdParam("sh");
-		cmdPath.addCmdParam(cmd1SH);
-	}
 
 	public CmdOperate(List<String> lsCmd) {
-		this(lsCmd, true);
-	}
-	public CmdOperate(List<String> lsCmd, boolean isLocal) {
 		process = new ProcessCmd();
-		cmdPath = CmdPath.generateCmdPath(isLocal);
 		cmdPath.setLsCmd(lsCmd);
 	}
 	public CmdOperate(String ip, String user, List<String> lsCmd, String idrsa) {
@@ -163,7 +127,6 @@ public class CmdOperate extends RunProcess<String> {
 		process = new ProcessRemote(ip, user);
 		((ProcessRemote)process).setKeyFile(idrsa);
 	}
-	
 	/**
 	 * 远程登录的方式运行cmd命令，<b>cmd命令运行完毕后会断开连接</b>
 	 * @param ip
@@ -230,6 +193,36 @@ public class CmdOperate extends RunProcess<String> {
 		cmdPath.setLsCmd(lsCmd);
 	}
 
+	/** 是否将本该输出到控制台的结果依然写入控制台，一般在运行长时间任务的时候，
+	 * 譬如 tophat等，需要写入控制台，如果一些譬如获得version之类的命令，就不需要
+	 * 往控制台写了
+	 * @param isOutToTerminate 默认是true
+	 */
+	public void setTerminateWriteTo(boolean isOutToTerminate) {
+		this.isOutToTerminate = isOutToTerminate;
+		this.isPrintCmd = isOutToTerminate;
+	}
+	
+	/**
+	 * 将cmd写入哪个文本，然后执行，如果初始化输入了cmdWriteInFileName, 就不需要这个了
+	 * 
+	 * @param cmd
+	 */
+	private void setCmdFile(String cmd, String cmdWriteInFileName) {
+		while (true) {
+			cmd1SH = cmdPath.getTmp() + cmdWriteInFileName.replace("\\", "/") + DateUtil.getDateAndRandom() + ".sh";
+			if (!FileOperate.isFileExist(cmd1SH)) {
+				break;
+            }
+        }
+		TxtReadandWrite txtCmd1 = new TxtReadandWrite(cmd1SH, true);
+		txtCmd1.writefile(cmd);
+		txtCmd1.close();
+		cmdPath.clearLsCmd();
+		cmdPath.addCmdParam("sh");
+		cmdPath.addCmdParam(cmd1SH);
+	}
+	
 	/** 设定临时文件夹，会把重定向的文件拷贝到这个文件夹中 */
 	public void setCmdTmpPath(String tmpPath) {
 		cmdPath.setTmpPath(tmpPath);
@@ -715,10 +708,6 @@ public class CmdOperate extends RunProcess<String> {
 	/** 是否有">" 或 "1>"符号，如果有，返回输出的文件名 */
 	public String getSaveStdOutFile() {
 		return cmdPath.getSaveStdPath();
-	}
-	/** 是否有">" 或 "1>"符号，如果有，返回输出的文件名的临时文件，给Script加壳使用 */
-	public String getSaveStdOutTmpFile() {
-		return cmdPath.getSaveStdOutTmpFile();
 	}
 	
 	/** 是否有"2>"符号，如果有，返回输出的文件名 */

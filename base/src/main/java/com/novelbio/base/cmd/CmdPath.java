@@ -213,12 +213,6 @@ public class CmdPath {
 	public String getSaveStdPath() {
 		return saveFilePath;
 	}
-	/** 标准输出流的临时文件，主要给script加壳使用 */
-	public String getSaveStdOutTmpFile() {
-		ConvertCmdTmp convertCmdTmp = new ConvertCmdTmp(isRedirectInToTmp, isRedirectOutToTmp,
-				setInput, setOutput, mapName2TmpName);
-		return convertCmdTmp.convertCmd(saveFilePath);
-	}
 	
 	protected String getSaveStdTmp() {
 		if (saveFilePath == null) {

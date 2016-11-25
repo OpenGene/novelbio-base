@@ -33,8 +33,8 @@ public class ExcelTxtRead {
 	 * 指定excel/txt文件，以及需要读取的列和行
 	 * @param excelFile 待读取的excel文件
 	 * @param columnID 待读取的列，int[]中间是读取的第几列，读取结果会按照指定的列的顺序给出
-	 * @param rowStart
-	 * @param rowEnd 如果rowEnd<1，则一直读到sheet1文件结尾
+	 * @param rowStart 如果rowStart<0，则一直读到sheet1文件结尾
+	 * @param rowEnd 如果rowEnd<0，则一直读到sheet1文件结尾
 	 * @param DelFirst 是否将第一列空位或者null的行删除
 	 * @return
 	 */

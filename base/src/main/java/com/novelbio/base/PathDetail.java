@@ -13,7 +13,7 @@ import com.novelbio.base.fileOperate.FileOperate;
 public class PathDetail {
 	/** 临时文件夹中的文件保留若干天 */
 	static final int tmpFileRemainDay = 6;
-	private static Properties properties;
+	public static Properties properties;
 	private static String rworkspace;
 	private static String tmpPath;
 	private static String tmpHdfsPath;
