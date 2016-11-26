@@ -848,7 +848,26 @@ public class FileOperate {
 	public static List<Path> getLsFoldPathRecur(String file, boolean isNeedFolder) {
 		return getLsFoldPathRecur(FileOperate.getPath(file), "*", "*", isNeedFolder);
 	}
-
+	/**
+	 * 获取文件夹下包含指定文件名与后缀的所有文件名，仅找第一层，不递归<br>
+	 * 如果文件不存在则返回空的list<br>
+	 * 如果不是文件夹，则返回该文件名<br>
+	 * 
+	 * @param file
+	 *            目录路径
+	 * @param isNeedFolder
+	 *            是否需要把文件夹也记录下来
+	 * @return 返回包含目标文件全名的ArrayList
+	 * @throws IOException
+	 */
+	public static List<String> getLsFoldPathRecurStr(String file, boolean isNeedFolder) {
+		List<Path> lsPaths = getLsFoldPathRecur(FileOperate.getPath(file), "*", "*", isNeedFolder);
+		List<String> lsResult = new ArrayList<>();
+		lsPaths.forEach((path) -> {
+			lsResult.add(getAbsolutePath(path));
+		});
+		return lsResult;
+	}
 	/**
 	 * 获取文件夹下包含指定文件名与后缀的所有文件名，仅找第一层，不递归<br>
 	 * 如果文件不存在则返回空的list<br>
@@ -1779,6 +1798,9 @@ public class FileOperate {
 	 * @return 返回是否创建成功
 	 */
 	public static boolean linkFile(String rawFile, String linkTo, boolean cover) {
+		if (!cover && FileOperate.isFileFolderExist(linkTo)) {
+			return true;
+		}
 		if (!FileOperate.isFileExist(rawFile)) {
 			return false;
 		}
@@ -1786,6 +1808,7 @@ public class FileOperate {
 		if (FileOperate.isFileExist(linkTo) && cover) {
 			FileOperate.delFile(linkTo);
 		}
+
 		rawFile = FileHadoop.convertToHadoop(rawFile);
 		linkTo = FileHadoop.convertToHadoop(linkTo);
 		boolean isRawHdfs = FileHadoop.isHdfs(rawFile);
@@ -1863,7 +1886,9 @@ public class FileOperate {
 		Path path = getPath(file);
 		return isFileExistAndNotDir(path);
 	}
-
+	public static boolean isSymbolicLink(String fileName) {
+		return Files.isSymbolicLink(FileOperate.getPath(fileName));
+	}
 	/**
 	 * 判断文件是否存在，并且有一定的大小而不是空文件
 	 * 

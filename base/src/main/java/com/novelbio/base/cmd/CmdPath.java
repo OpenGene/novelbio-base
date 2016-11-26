@@ -1,5 +1,6 @@
 package com.novelbio.base.cmd;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,8 +46,9 @@ public class CmdPath {
 	Map<String, String> mapName2TmpName = new HashMap<>();
 	/** 输入文件夹对应的输出文件夹，可以将输入文件夹里的文件直接复制到输出文件夹中 */
 	Map<String, String> mapPath2TmpPathIn = new HashMap<>();
+	/** 输出文件夹对应的临时输出文件夹 */
 	Map<String, String> mapPath2TmpPathOut = new HashMap<>();
-
+	
 	/** 是否保存stdout文件, <b>默认为true</b><br>
 	 * stdout的保存有几种：<br>
 	 * 1. 在cmd命令中添加 > 然后得到标准输出文件<br>
@@ -83,6 +85,9 @@ public class CmdPath {
 	
 	private String tmpPath;
 	protected boolean isRetainTmpFiles = false;
+	
+	/** 临时文件夹中很可能已经存在了一些文件，这些文件不需要被拷贝出去 */
+	private Map<String, long[]> mapFileName2LastModifyTimeAndLen = new HashMap<>();
 	
 	protected CmdPath() {};
 	
@@ -141,21 +146,13 @@ public class CmdPath {
 	}
 	/**
 	 * 添加输入文件路径的参数，配合{@link #setRedirectInToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
-	 * @param output 输出文件的哪个参数
-	 * @param isAddToLsCmd 是否加入参数list<br>
-	 * true: 作为一个参数加入lscmd<br>
-	 * false: 不加入lsCmd，仅仅标记一下
-	 * 
-	 * @param output
+	 * @param input 输入文件的哪个参数
 	 */
-	public void addCmdParamInput(String input, boolean isAddToLsCmd) {
+	public void addCmdParamInput(String input) {
 		if (StringOperate.isRealNull(input)) {
 			throw new ExceptionCmd("input is null");
 		}
 		setInput.add(input);
-		if (isAddToLsCmd) {
-			lsCmd.add(input);
-		}
 	}
 	
 	public void setLsCmd(List<String> lsCmd) {
@@ -165,20 +162,12 @@ public class CmdPath {
 	/**
 	 * 添加输出文件路径的参数，配合{@link #setRedirectOutToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
 	 * @param output 输出文件的哪个参数，如果输入参数类似 "--outPath=/hdfs:/test.fa"，这里填写 "/hdfs:/test.fa"
-	 * @param isAddToLsCmd 是否加入参数list<br>
-	 * true: 作为一个参数加入lscmd<br>
-	 * false: 不加入lsCmd，仅仅标记一下
-	 * 
-	 * @param output
 	 */
-	public void addCmdParamOutput(String output, boolean isAddToLsCmd) {
+	public void addCmdParamOutput(String output) {
 		if (StringOperate.isRealNull(output)) {
 			throw new ExceptionCmd("Output is null");
 		}
 		setOutput.add(output);
-		if (isAddToLsCmd) {
-			lsCmd.add(output);
-		}
 	}
 	
 	/** 如果param为null则返回 */
@@ -297,11 +286,25 @@ public class CmdPath {
 		return generateRunCmd(false);
 	}
 
-	/** 在cmd运行前，将输入文件拷贝到临时文件夹下 */
-	public void copyFileIn() {
+	/** 在cmd运行前，将输入文件拷贝到临时文件夹下
+	 * 同时记录临时文件夹下有多少文件，用于后面删除时跳过 */
+	public void copyFileInAndRecordFiles() {
 		createFoldTmp();
-		if (!isRedirectInToTmp) return;
-		
+		if (isRedirectInToTmp) {
+			copyFileIn();
+		}
+		if (isRedirectOutToTmp) {
+			mapFileName2LastModifyTimeAndLen.clear();
+			List<Path> lsPaths = FileOperate.getLsFoldPathRecur(tmpPath, false);
+			lsPaths.forEach((path)->{
+				mapFileName2LastModifyTimeAndLen.put(FileOperate.getAbsolutePath(path), 
+						getLastModifyTime2Len(path));
+			}); 
+		}
+	}
+	
+	/** 把要输入的文件拷贝到临时文件夹中 */
+	protected void copyFileIn() {
 		for (String inFile : setInput) {
 			String inTmpName = mapName2TmpName.get(inFile);
 			try {
@@ -313,7 +316,7 @@ public class CmdPath {
 		}
 	}
 	
-	/** 必须先调用{@link #copyFileIn()}，
+	/** 必须先调用{@link #copyFileInAndRecordFiles()}，
 	 * 等运行cmd结束后还需要调用{@link #moveFileOut()} 来完成运行 */
 	public String[] getRunCmd() {
 		generateTmPath();
@@ -481,20 +484,61 @@ public class CmdPath {
 		
 		for (String outPath : mapPath2TmpPathOut.keySet()) {
 			String outTmpPath = mapPath2TmpPathOut.get(outPath);
-			
+			//遍历某个输出临时文件夹下的全体文件，看是否是cmd运行之前就保存的文件
+			//如果是新生成的文件，就可以拷贝出去
 			List<String> lsFilesFinish = FileOperate.getLsFoldFileName(outTmpPath);
-			for (String filePath : lsFilesFinish) {
-				String  filePathResult = filePath.replaceFirst(outTmpPath, outPath);
+			for (String fileInTmp : lsFilesFinish) {
+				String  filePathResult = fileInTmp.replaceFirst(outTmpPath, outPath);
 				if (setInput.contains(filePathResult) && FileOperate.isFileExistAndBigThanSize(filePathResult, 0)) {
 					continue;
 				}
-				logger.info("move file from  " + filePath + "  to  " + filePathResult);
-				if (isRetainTmpFiles) {
-					FileOperate.copyFileFolder(filePath, filePathResult, true);
-				} else {
-					FileOperate.moveFile(true, filePath, filePathResult);
+				
+				List<String> lsFilesNeedMove = getLsFileNeedMove(fileInTmp);
+				for (String file : lsFilesNeedMove) {
+					String  filePathOut = fileInTmp.replaceFirst(outTmpPath, outPath);
+					moveSingleFileOut(file, filePathOut);
 				}
 			}
+		}
+	}
+	
+	/**
+	 * 给定某个文件或文件夹，看里面哪些文件需要移动
+	 * @param fileInTmp
+	 * @return
+	 */
+	private List<String> getLsFileNeedMove(String fileInTmp) {
+		List<String> lsFileNeedMove = new ArrayList<>();
+		List<Path> lsFiles = FileOperate.getLsFoldPathRecur(fileInTmp, false);
+		for (Path path : lsFiles) {
+			String pathStr = FileOperate.getAbsolutePath(path);
+			if (!mapFileName2LastModifyTimeAndLen.containsKey(pathStr)) {
+				lsFileNeedMove.add(FileOperate.getAbsolutePath(path));
+				continue;
+			}
+			long[] lastModifyTime2Len = mapFileName2LastModifyTimeAndLen.get(pathStr);
+			long[] lastModifyTime2LenThis = getLastModifyTime2Len(path);			
+			if (lastModifyTime2LenThis[0] != lastModifyTime2Len[0] || lastModifyTime2LenThis[1] != lastModifyTime2Len[1]) {
+				lsFileNeedMove.add(FileOperate.getAbsolutePath(path));
+			}
+		}
+		return lsFileNeedMove;
+	
+	}
+	
+	private long[] getLastModifyTime2Len(Path path) {
+		long len = FileOperate.getFileSizeLong(path);
+		long lastModifyTime = len < 0 ? 0 : FileOperate.getTimeLastModify(path);
+		return new long[]{lastModifyTime, len};
+	}
+	
+	protected void moveSingleFileOut(String filePathTmp, String filePathOut) {
+		String operate = isRetainTmpFiles? "copy" : "move";
+		logger.info(operate + " file from  " + filePathTmp + "  to  " + filePathOut);
+		if (isRetainTmpFiles) {
+			FileOperate.copyFileFolder(filePathTmp, filePathOut, true);
+		} else {
+			FileOperate.moveFile(true, filePathTmp, filePathOut);
 		}
 	}
 	

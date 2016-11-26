@@ -32,47 +32,29 @@ public class CmdPathAli extends CmdPath {
 	/** 在cmd运行前，将输入文件拷贝到临时文件夹下
 	 * 阿里云因为支持软连接，所以就不需要拷贝了，直接作软连接即可
 	 */
-	public void copyFileIn() {
-		createFoldTmp();
-		if (!isRedirectInToTmp) return;
-		
+	protected void copyFileIn() {
 		for (String inFile : setInput) {
 			String inTmpName = mapName2TmpName.get(inFile);
 			logger.info("copy file from {} to {}", inFile, inTmpName);
 			try {
 				FileOperate.linkFile(inFile, inTmpName, false);
 			} catch (Exception e) {
-				// TODO: handle exception
+				logger.error("link file from " + inFile + " to " + inTmpName + "error", e);
 			}
 		}
 	}
-	
-	/** 将tmpPath文件夹中的内容全部移动到resultPath中 */
-	public void moveFileOut() {
-		if (!mapPath2TmpPathOut.isEmpty()) {
-			logger.info("start move files");
-		}
 		
-		for (String outPath : mapPath2TmpPathOut.keySet()) {
-			String outTmpPath = mapPath2TmpPathOut.get(outPath);
-			
-			List<String> lsFilesFinish = FileOperate.getLsFoldFileName(outTmpPath);
-			for (String filePath : lsFilesFinish) {
-				String  filePathResult = filePath.replaceFirst(outTmpPath, outPath);
-				if (setInput.contains(filePathResult) && FileOperate.isFileExistAndBigThanSize(filePathResult, 0)) {
-					continue;
-				}
-				filePathResult = convertAli2Loc(filePathResult, false);
-				logger.info("move file from  " + filePath + "  to  " + filePathResult);
-				if (isRetainTmpFiles) {
-					FileOperate.copyFileFolder(filePath, filePathResult, true);
-				} else {
-					FileOperate.moveFile(true, filePath, filePathResult);
-				}
-			}
+	protected void moveSingleFileOut(String filePathTmp, String filePathOut) {
+		filePathOut = convertAli2Loc(filePathOut, false);
+		String operate = isRetainTmpFiles? "link" : "move";
+		logger.info(operate + " file from  " + filePathTmp + "  to  " + filePathOut);
+		if (isRetainTmpFiles) {
+			FileOperate.linkFile(filePathTmp, filePathOut, true);
+		} else {
+			//TODO 这里可能全改为move会更好些
+			FileOperate.moveFile(true, filePathTmp, filePathOut);
 		}
 	}
-	
 	/**
 	 * 把oss://bucket/path/to/myfile 转成 /home/novelbio/.inmap./path/to/myfile
 	 * @param path

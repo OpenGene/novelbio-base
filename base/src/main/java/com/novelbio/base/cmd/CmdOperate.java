@@ -299,26 +299,14 @@ public class CmdOperate extends RunProcess<String> {
 			cmdPath.addCmdParam(param);
 		}
 	}
-	/**
-	 * 添加输入文件路径的参数，配合{@link #setRedirectInToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
-	 * @param output 输出文件的哪个参数
-	 * @param isAddToLsCmd 是否加入参数list<br>
-	 * true: 作为一个参数加入lscmd<br>
-	 * false: 不加入lsCmd，仅仅标记一下
-	 * 
-	 * @param output
-	 */
-	@Deprecated
-	public void addCmdParamInput(String input, boolean isAddToLsCmd) {
-		cmdPath.addCmdParamInput(input, isAddToLsCmd);
-	}
+	
 	/**
 	 * 添加输入文件路径的参数，配合{@link #setRedirectInToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
 	 * @param output 输出文件的哪个参数，默认不加入参数list，仅仅标记一下
 	 * @param output
 	 */
 	public void addCmdParamInput(String input) {
-		cmdPath.addCmdParamInput(input, false);
+		cmdPath.addCmdParamInput(input);
 	}
 	/**
 	 * 添加输入文件路径的参数，配合{@link #setRedirectInToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
@@ -327,7 +315,7 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	public void addCmdParamInput(List<String> lsInput) {
 		for (String path : lsInput) {
-			cmdPath.addCmdParamInput(path, false);
+			cmdPath.addCmdParamInput(path);
 		}
 	}
 	/**
@@ -336,7 +324,7 @@ public class CmdOperate extends RunProcess<String> {
 	 * @param output 输出文件的哪个参数，默认不加入参数list，仅仅标记一下
 	 */
 	public void addCmdParamOutput(String output) {
-		addCmdParamOutput(output, false);
+		cmdPath.addCmdParamOutput(output);
 	}
 	/**
 	 * 添加输入文件路径的参数，配合{@link #setRedirectInToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
@@ -345,38 +333,8 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	public void addCmdParamOutput(List<String> lsOut) {
 		for (String path : lsOut) {
-			cmdPath.addCmdParamOutput(path, false);
+			cmdPath.addCmdParamOutput(path);
 		}
-	}
-	/**
-	 * 添加文件输出参数，配合{@link #setRedirectOutToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
-	 * 由于是需要先将输入文件保存到临时文件夹，等程序结束后再拷贝回实际文件夹，所以应该不是从std走文件了，
-	 * 所以在这里把 setJustDisplayErr 和 setJustDisplayStd都设置为true<br>
-	 * 本参数不影响 {@link #getStreamStd()} 和 {@link #getStreamErr()} 方法
-	 * @param output 输出文件的哪个参数
-	 * @param isAddToLsCmd 是否加入参数list<br>
-	 * true: 作为一个参数加入lscmd<br>
-	 * false: 不加入lsCmd，仅仅标记一下
-	 * 
-	 * @param output
-	 */
-	@Deprecated
-	public void addCmdParamOutput(String output, boolean isAddToLsCmd) {
-//		if (StringOperate.isRealNull(cmdPath.getSaveErrPath())) {
-//			isStderrInfo = true;
-//			cmdPath.setSaveErrPath(output + "errorInfo.txt", false);
-//			cmdPath.setJustDisplayErr(true);
-//		}
-//		if (StringOperate.isRealNull(cmdPath.getSaveStdPath())) {
-//			isStdoutInfo = true;
-//			cmdPath.setSaveFilePath(output + "stdInfo.txt", false);
-//			cmdPath.setJustDisplayStd(true);
-//		}
-//		
-//		if (outRunInfoFileName == null) {
-//			outRunInfoFileName = output + "_RunInfo.txt";
-//		}
-		cmdPath.addCmdParamOutput(output, isAddToLsCmd);
 	}
 	
 	/** 是否将hdfs的路径，改为本地路径，<b>默认为true</b><br>
@@ -798,7 +756,7 @@ public class CmdOperate extends RunProcess<String> {
 	@Override
 	protected void running() {
 		cmdPath.generateTmPath();
-		cmdPath.copyFileIn();
+		cmdPath.copyFileInAndRecordFiles();
 		
 		String cmd = "";
 		String realCmd = getCmdExeStr();

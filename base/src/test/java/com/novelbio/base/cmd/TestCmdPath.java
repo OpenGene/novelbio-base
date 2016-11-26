@@ -49,10 +49,10 @@ public class TestCmdPath {
 		cmdPath.setLsCmd(lsCmd);
 		cmdPath.setRedirectInToTmp(true);
 		cmdPath.setRedirectOutToTmp(true);
-		cmdPath.addCmdParamInput(inFile, false);
-		cmdPath.addCmdParamOutput("src/test/resources/cmd", false);
+		cmdPath.addCmdParamInput(inFile);
+		cmdPath.addCmdParamOutput("src/test/resources/cmd");
 		cmdPath.generateTmPath();
-		cmdPath.copyFileIn();
+		cmdPath.copyFileInAndRecordFiles();
 		String[] ss = cmdPath.getRunCmd();
 		assertEquals("bwa-index", ss[0]);
 
@@ -82,10 +82,10 @@ public class TestCmdPath {
 		cmdPath.setLsCmd(lsCmd);
 		cmdPath.setRedirectInToTmp(true);
 		cmdPath.setRedirectOutToTmp(true);
-		cmdPath.addCmdParamInput(inFile, false);
-		cmdPath.addCmdParamOutput(outFile, false);
+		cmdPath.addCmdParamInput(inFile);
+		cmdPath.addCmdParamOutput(outFile);
 		cmdPath.generateTmPath();
-		cmdPath.copyFileIn();
+		cmdPath.copyFileInAndRecordFiles();
 		String[] ss = cmdPath.getRunCmd();
 		System.out.println(ArrayOperate.cmbString(ss, " "));
 		boolean isFileExist = FileOperate.isFileExistAndBigThanSize(ss[1], 0);
@@ -112,10 +112,10 @@ public class TestCmdPath {
 		cmdPath.setLsCmd(lsCmd);
 		cmdPath.setRedirectInToTmp(true);
 		cmdPath.setRedirectOutToTmp(true);
-		cmdPath.addCmdParamInput(inFile, false);
-		cmdPath.addCmdParamOutput(outFile, false);
+		cmdPath.addCmdParamInput(inFile);
+		cmdPath.addCmdParamOutput(outFile);
 		cmdPath.generateTmPath();
-		cmdPath.copyFileIn();
+		cmdPath.copyFileInAndRecordFiles();
 		String[] ss = cmdPath.getRunCmd();
 		System.out.println(ArrayOperate.cmbString(ss, " "));
 		boolean isFileExist = FileOperate.isFileExistAndBigThanSize(ss[1], 0);
@@ -144,10 +144,10 @@ public class TestCmdPath {
 		cmdPath.setLsCmd(lsCmd);
 		cmdPath.setRedirectInToTmp(false);
 		cmdPath.setRedirectOutToTmp(true);
-		cmdPath.addCmdParamInput(inFile, false);
-		cmdPath.addCmdParamOutput(outFile, false);
+		cmdPath.addCmdParamInput(inFile);
+		cmdPath.addCmdParamOutput(outFile);
 		cmdPath.generateTmPath();
-		cmdPath.copyFileIn();
+		cmdPath.copyFileInAndRecordFiles();
 		String[] ss = cmdPath.getRunCmd();
 		System.out.println(ArrayOperate.cmbString(ss, " "));
 		boolean isFileExist = FileOperate.isFileExistAndBigThanSize(ss[1], 0);
@@ -176,10 +176,10 @@ public class TestCmdPath {
 		cmdPath.setLsCmd(lsCmd);
 		cmdPath.setRedirectInToTmp(true);
 		cmdPath.setRedirectOutToTmp(true);
-		cmdPath.addCmdParamInput(inFile, false);
-		cmdPath.addCmdParamOutput(outFile, false);
+		cmdPath.addCmdParamInput(inFile);
+		cmdPath.addCmdParamOutput(outFile);
 		cmdPath.generateTmPath();
-		cmdPath.copyFileIn();
+		cmdPath.copyFileInAndRecordFiles();
 		String[] ss = cmdPath.getRunCmd();
 		System.out.println(ArrayOperate.cmbString(ss, " "));
 		boolean isFileExist = FileOperate.isFileExistAndBigThanSize(ss[1], 0);
@@ -207,9 +207,9 @@ public class TestCmdPath {
 		lsCmd.add("--outPath=" + outFile);
 		cmdPath.setLsCmd(lsCmd);
 		cmdPath.setRedirectOutToTmp(true);
-		cmdPath.addCmdParamOutput(outFile, false);
+		cmdPath.addCmdParamOutput(outFile);
 		cmdPath.generateTmPath();
-		cmdPath.copyFileIn();
+		cmdPath.copyFileInAndRecordFiles();
 		String[] ss = cmdPath.getRunCmd();
 		System.out.println(ArrayOperate.cmbString(ss, " "));
 		String resultFileName = "test2.fatestResult.txt";
@@ -236,12 +236,12 @@ public class TestCmdPath {
 		cmdPath.setLsCmd(lsCmd);
 		cmdPath.setRedirectInToTmp(true);
 		cmdPath.setRedirectOutToTmp(true);
-		cmdPath.addCmdParamInput(inFile1, true);
-		cmdPath.addCmdParamInput(inFile2, true);
+		cmdPath.addCmdParamInput(inFile1);
+		cmdPath.addCmdParamInput(inFile2);
 
-		cmdPath.addCmdParamOutput(outFile, false);
+		cmdPath.addCmdParamOutput(outFile);
 		cmdPath.generateTmPath();
-		cmdPath.copyFileIn();
+		cmdPath.copyFileInAndRecordFiles();
 		String[] ss = cmdPath.getRunCmd();
 		
 		String inFileTmp1 = PathDetail.getTmpPathRandom() +  "resources/testTrinity.fa";
@@ -274,11 +274,11 @@ public class TestCmdPath {
 		cmdPath.setLsCmd(lsCmd);
 		cmdPath.setRedirectInToTmp(true);
 		cmdPath.setRedirectOutToTmp(true);
-		cmdPath.addCmdParamInput(inFile1, true);
-		cmdPath.addCmdParamInput(inFile2, true);
+		cmdPath.addCmdParamInput(inFile1);
+		cmdPath.addCmdParamInput(inFile2);
 		
 		cmdPath.generateTmPath();
-		cmdPath.copyFileIn();
+		cmdPath.copyFileInAndRecordFiles();
 		String[] ss = cmdPath.getRunCmd();
 
 		String inFileTmp1 = PathDetail.getTmpPathRandom() +  "resources/testTrinity.fa";
