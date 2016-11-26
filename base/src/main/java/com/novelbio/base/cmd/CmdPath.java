@@ -15,6 +15,7 @@ import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
+import com.novelbio.base.util.ServiceEnvUtil;
 import com.novelbio.jsr203.bos.PathDetailOs;
 
 /**
@@ -468,23 +469,7 @@ public class CmdPath {
 	}
 	
 	protected ConvertCmd getConvertOs2Local() {
-		ConvertCmd convertCmdHdfs2Local = new ConvertCmd() {
-			@Override
-			String convert(String subCmd) {
-				if (subCmd.length() > 6) {
-					if (FileHadoop.isHdfs(subCmd) || FileHadoop.isHdfs(subCmd.substring(1, subCmd.length() - 2))) {
-						return FileHadoop.convertToLocalPath(subCmd);
-					}
-				} 
-				if(subCmd.startsWith("oss://")) {
-					// TODO 这里是有bug的.测试先这么写.
-					return CmdPathAli.convertAli2Loc(subCmd, true);
-				} else {
-					return subCmd;
-				}
-			}
-		};
-		return convertCmdHdfs2Local;
+		return ServiceEnvUtil.isAliyunEnv() ? new ConvertOss() : new ConvertHdfs();
 	}
 	
 	/**
@@ -635,7 +620,38 @@ public class CmdPath {
 			return new CmdPathAli();
 		}
 	}
-
+	
+	public static class ConvertHdfs extends ConvertCmd {
+		@Override
+		String convert(String subCmd) {
+			if (subCmd.length() > 6) {
+				if (FileHadoop.isHdfs(subCmd) || FileHadoop.isHdfs(subCmd.substring(1, subCmd.length() - 2))) {
+					return FileHadoop.convertToLocalPath(subCmd);
+				}
+			}
+			return subCmd;
+		}
+	}
+	public static class ConvertOss extends ConvertCmd {
+		boolean isReadMap = true;
+		public void setIsReadMap(boolean isReadMap) {
+			this.isReadMap = isReadMap;
+		}
+		@Override
+		String convert(String subCmd) {
+			if (subCmd.length() > 6) {
+				if (FileHadoop.isHdfs(subCmd) || FileHadoop.isHdfs(subCmd.substring(1, subCmd.length() - 2))) {
+					return FileHadoop.convertToLocalPath(subCmd);
+				}
+			} 
+			if(subCmd.startsWith("oss://")) {
+				// TODO 这里是有bug的.测试先这么写.
+				return CmdPathAli.convertAli2Loc(subCmd, isReadMap);
+			} else {
+				return subCmd;
+			}
+		}
+	}
 	public static class ConvertCmdTmp extends ConvertCmd {
 		boolean stdOut;
 		boolean errOut;
