@@ -123,7 +123,7 @@ public abstract class ConvertCmd {
 			} 
 			if(subCmd.startsWith("oss://")) {
 				// TODO 这里是有bug的.测试先这么写.
-				return CmdPathAli.convertAli2Loc(subCmd, isReadMap);
+				return CmdOrderGeneratorAli.convertAli2Loc(subCmd, isReadMap);
 			} else {
 				return subCmd;
 			}

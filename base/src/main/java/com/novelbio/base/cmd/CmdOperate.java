@@ -74,7 +74,7 @@ public class CmdOperate extends RunProcess<String> {
 	boolean getCmdInErrStream = false;
 	
 	/** 用来传递参数，拷贝输入输出文件夹的类 */
-	CmdPath cmdPath = CmdPath.generateCmdPath(!ServiceEnvUtil.isAliyunEnv());
+	CmdOrderGenerator cmdOrderGenerator = CmdOrderGenerator.getInstance(!ServiceEnvUtil.isAliyunEnv());
 	
 	/** 如果选择用list来保存结果输出，最多保存500行的输出信息 */
 	int lineNumStd = 1000;
@@ -114,12 +114,12 @@ public class CmdOperate extends RunProcess<String> {
 
 	public CmdOperate(List<String> lsCmd) {
 		process = new ProcessCmd();
-		cmdPath.setLsCmd(lsCmd);
+		cmdOrderGenerator.setLsCmd(lsCmd);
 	}
 	public CmdOperate(String ip, String user, List<String> lsCmd, String idrsa) {
 		process = new ProcessRemote(ip, user);
 		((ProcessRemote)process).setKeyFile(idrsa);
-		cmdPath.setLsCmd(lsCmd);
+		cmdOrderGenerator.setLsCmd(lsCmd);
 	}
 	
 	public CmdOperate(String ip, String user, String idrsa) {
@@ -135,7 +135,7 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	public CmdOperate(String ip, String usr, String pwd, List<String> lsCmd) {
 		process = new ProcessRemote(ip, usr, pwd);
-		cmdPath.setLsCmd(lsCmd);
+		cmdOrderGenerator.setLsCmd(lsCmd);
 	}
 	
 	/**
@@ -149,7 +149,7 @@ public class CmdOperate extends RunProcess<String> {
 	public CmdOperate(String ip, String usr, String pwd, String keyInfo, List<String> lsCmd) {
 		process = new ProcessRemote(ip, usr, pwd);
 		((ProcessRemote)process).setKey(keyInfo);
-		cmdPath.setLsCmd(lsCmd);
+		cmdOrderGenerator.setLsCmd(lsCmd);
 	}
 	/**
 	 * 远程登录的方式运行cmd命令，<b>cmd命令运行完毕后会断开连接</b>
@@ -175,7 +175,7 @@ public class CmdOperate extends RunProcess<String> {
 	public CmdOperate(String ip, String usr, String pwd, char[] keyInfo, List<String> lsCmd) {
 		process = new ProcessRemote(ip, usr, pwd);
 		((ProcessRemote)process).setKey(keyInfo);
-		cmdPath.setLsCmd(lsCmd);
+		cmdOrderGenerator.setLsCmd(lsCmd);
 	}
 	
 	/**
@@ -189,7 +189,7 @@ public class CmdOperate extends RunProcess<String> {
 	public CmdOperate(String ip, String usr, String pwd, List<String> lsCmd, String keyFile) {
 		process = new ProcessRemote(ip, usr, pwd);
 		((ProcessRemote)process).setKeyFile(keyFile);
-		cmdPath.setLsCmd(lsCmd);
+		cmdOrderGenerator.setLsCmd(lsCmd);
 	}
 
 	/** 是否将本该输出到控制台的结果依然写入控制台，一般在运行长时间任务的时候，
@@ -209,7 +209,7 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	private void setCmdFile(String cmd, String cmdWriteInFileName) {
 		while (true) {
-			cmd1SH = cmdPath.getTmp() + cmdWriteInFileName.replace("\\", "/") + DateUtil.getDateAndRandom() + ".sh";
+			cmd1SH = cmdOrderGenerator.getTmp() + cmdWriteInFileName.replace("\\", "/") + DateUtil.getDateAndRandom() + ".sh";
 			if (!FileOperate.isFileExist(cmd1SH)) {
 				break;
             }
@@ -217,21 +217,21 @@ public class CmdOperate extends RunProcess<String> {
 		TxtReadandWrite txtCmd1 = new TxtReadandWrite(cmd1SH, true);
 		txtCmd1.writefile(cmd);
 		txtCmd1.close();
-		cmdPath.clearLsCmd();
-		cmdPath.addCmdParam("sh");
-		cmdPath.addCmdParam(cmd1SH);
+		cmdOrderGenerator.clearLsCmd();
+		cmdOrderGenerator.addCmdParam("sh");
+		cmdOrderGenerator.addCmdParam(cmd1SH);
 	}
 	
 	/** 设定临时文件夹，会把重定向的文件拷贝到这个文件夹中 */
 	public void setCmdTmpPath(String tmpPath) {
-		cmdPath.setTmpPath(tmpPath);
+		cmdOrderGenerator.setTmpPath(tmpPath);
 	}
 	/** 是否删除临时文件夹中的文件，如果连续的cmd需要顺序执行，考虑不删除 */
 	public void setRetainTmpFiles(boolean isRetainTmpFiles) {
-		cmdPath.setRetainTmpFiles(isRetainTmpFiles);
+		cmdOrderGenerator.setRetainTmpFiles(isRetainTmpFiles);
 	}
 	public void setLsCmd(List<String> lsCmd) {
-		cmdPath.setLsCmd(lsCmd);
+		cmdOrderGenerator.setLsCmd(lsCmd);
 	}
 	protected void setNeedLog(boolean isNeedLog) {
 		this.needLog = isNeedLog;
@@ -274,8 +274,8 @@ public class CmdOperate extends RunProcess<String> {
 	 * @param isDelete 完成后是否删除输出文件, 如果需要删除文件，则认为该文件只是展示信息使用，会采用txt模式输出
 	 */
 	public void setStdOutPath(String stdOutPath, boolean isDelete) {
-		cmdPath.setSaveFilePath(stdOutPath);
-		cmdPath.setJustDisplayStd(isDelete);
+		cmdOrderGenerator.setSaveFilePath(stdOutPath);
+		cmdOrderGenerator.setJustDisplayStd(isDelete);
 		this.isStdoutInfo = isDelete;
 	}
 	/**
@@ -287,15 +287,15 @@ public class CmdOperate extends RunProcess<String> {
 	 * @param isDelete 完成后是否删除输出文件, 如果需要删除文件，则认为该文件只是展示信息使用，会采用txt模式输出
 	 */
 	public void setStdErrPath(String stdErrPath, boolean isDelete) {
-		cmdPath.setSaveErrPath(stdErrPath);
-		cmdPath.setJustDisplayErr(isDelete);
+		cmdOrderGenerator.setSaveErrPath(stdErrPath);
+		cmdOrderGenerator.setJustDisplayErr(isDelete);
 		this.isStderrInfo = isDelete;
 	}
 
 	/** 如果为null就不加入 */
 	public void addCmdParam(String param) {
 		if (!StringOperate.isRealNull(param)) {
-			cmdPath.addCmdParam(param);
+			cmdOrderGenerator.addCmdParam(param);
 		}
 	}
 	
@@ -305,7 +305,7 @@ public class CmdOperate extends RunProcess<String> {
 	 * @param output
 	 */
 	public void addCmdParamInput(String input) {
-		cmdPath.addCmdParamInput(input);
+		cmdOrderGenerator.addCmdParamInput(input);
 	}
 	/**
 	 * 添加输入文件路径的参数，配合{@link #setRedirectInToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
@@ -314,7 +314,7 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	public void addCmdParamInput(List<String> lsInput) {
 		for (String path : lsInput) {
-			cmdPath.addCmdParamInput(path);
+			cmdOrderGenerator.addCmdParamInput(path);
 		}
 	}
 	/**
@@ -323,7 +323,7 @@ public class CmdOperate extends RunProcess<String> {
 	 * @param output 输出文件的哪个参数，默认不加入参数list，仅仅标记一下
 	 */
 	public void addCmdParamOutput(String output) {
-		cmdPath.addCmdParamOutput(output);
+		cmdOrderGenerator.addCmdParamOutput(output);
 	}
 	/**
 	 * 添加输入文件路径的参数，配合{@link #setRedirectInToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
@@ -332,7 +332,7 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	public void addCmdParamOutput(List<String> lsOut) {
 		for (String path : lsOut) {
-			cmdPath.addCmdParamOutput(path);
+			cmdOrderGenerator.addCmdParamOutput(path);
 		}
 	}
 	
@@ -341,25 +341,25 @@ public class CmdOperate extends RunProcess<String> {
 	 * 只有类似varscan这种我们修改了代码，让其兼容hdfs的程序才不需要修改
 	 */
 	public void setIsConvertHdfsToLocal(boolean isConvertHdfs2Loc) {
-		cmdPath.setConvertHdfs2Loc(isConvertHdfs2Loc);
+		cmdOrderGenerator.setConvertHdfs2Loc(isConvertHdfs2Loc);
 	}
 	
 	/** 是否将输入文件拷贝到临时文件夹，默认为false */
 	public void setRedirectInToTmp(boolean isRedirectInToTmp) {
-		cmdPath.setRedirectInToTmp(isRedirectInToTmp);
+		cmdOrderGenerator.setRedirectInToTmp(isRedirectInToTmp);
 	}
 	/** 是否将输出先重定位到临时文件夹，再拷贝回实际文件夹，默认为false */
 	public void setRedirectOutToTmp(boolean isRedirectOutToTmp) {
-		cmdPath.setRedirectOutToTmp(isRedirectOutToTmp);
+		cmdOrderGenerator.setRedirectOutToTmp(isRedirectOutToTmp);
 	}
 	
 	/** 如果param为null则返回 */
 	public void addCmdParam(List<String> lsCmd) {
-		cmdPath.addCmdParam(lsCmd);
+		cmdOrderGenerator.addCmdParam(lsCmd);
 	}
 	/** 如果param为null则返回 */
 	public void addCmdParam(String[] param) {
-		cmdPath.addCmdParam(param);
+		cmdOrderGenerator.addCmdParam(param);
 	}
 	
 	/** 返回执行的具体cmd命令，不会将文件路径删除，给绝对路径 */
@@ -369,14 +369,14 @@ public class CmdOperate extends RunProcess<String> {
 	
 	/** 返回执行的具体cmd命令，会将文件路径删除，仅给相对路径 */
 	public String getCmdExeStrModify() {
-		String[] resultCmd = cmdPath.getCmdExeStrModify();
+		String[] resultCmd = cmdOrderGenerator.getCmdExeStrModify();
 		replaceInputStreamFile(resultCmd);
 		return ArrayOperate.cmbString(resultCmd, " ");
 	}
 	
 	/** 返回执行的具体cmd命令，实际cmd命令 */
 	public String getCmdExeStrReal() {
-		String[] resultCmd = cmdPath.getCmdExeStrReal();
+		String[] resultCmd = cmdOrderGenerator.getCmdExeStrReal();
 		replaceInputStreamFile(resultCmd);
 		return ArrayOperate.cmbString(resultCmd, " ");
 	}
@@ -384,7 +384,7 @@ public class CmdOperate extends RunProcess<String> {
 	/** 返回执行的具体cmd命令，实际cmd命令 */
 	@VisibleForTesting
 	public String getRunCmd() {
-		String[] resultCmd = cmdPath.getRunCmd();
+		String[] resultCmd = cmdOrderGenerator.getRunCmd();
 		replaceInputStreamFile(resultCmd);
 		return ArrayOperate.cmbString(resultCmd, " ");
 	}
@@ -541,11 +541,11 @@ public class CmdOperate extends RunProcess<String> {
 	 * @throws Exception
 	 */
 	private void doInBackgroundB() throws Exception {
-		cmdPath.setIsSaveStdFile(!getCmdInStdStream);
-		cmdPath.setIsSaveErrFile(!getCmdInErrStream);
+		cmdOrderGenerator.setIsSaveStdFile(!getCmdInStdStream);
+		cmdOrderGenerator.setIsSaveErrFile(!getCmdInErrStream);
 
 		finishFlag = new FinishFlag();
-		String[] cmdRun = cmdPath.getRunCmd();
+		String[] cmdRun = cmdOrderGenerator.getRunCmd();
 		
 		process.exec(cmdRun);
 		
@@ -582,7 +582,7 @@ public class CmdOperate extends RunProcess<String> {
 	}
 	
 	private Thread setAndGetInStream() {
-		String inFile = cmdPath.getStdInFile();
+		String inFile = cmdOrderGenerator.getStdInFile();
 		if (streamIn == null && StringOperate.isRealNull(inFile)) {
 			return null;
 		}
@@ -608,7 +608,7 @@ public class CmdOperate extends RunProcess<String> {
 	 * @param isWriteStdTips 是否需要每隔几分钟写一小段话以表示程序还在运行中
 	 */
 	private void setStdStream() {
-		String outPath = cmdPath.getSaveStdTmp(); 
+		String outPath = cmdOrderGenerator.getSaveStdTmp(); 
 		outputGobbler = new StreamOut(process.getStdOut(), process, isOutToTerminate, true);
 		outputGobbler.setDaemon(true);
 		
@@ -617,8 +617,8 @@ public class CmdOperate extends RunProcess<String> {
 				FileOperate.createFolders(FileOperate.getPathName(outPath));
 				//标准输出流不能被关闭，从txt拿流是因为如果输出写为.gz，txt会给流套上gz流的壳
 				TxtReadandWrite txtWrite = new TxtReadandWrite(outPath, true);
-				outputGobbler.setOutputStream(txtWrite.getOutputStream(), cmdPath.isJustDisplayStd());
-				if (cmdPath.isJustDisplayStd() && lsOutInfo != null) {
+				outputGobbler.setOutputStream(txtWrite.getOutputStream(), cmdOrderGenerator.isJustDisplayStd());
+				if (cmdOrderGenerator.isJustDisplayStd() && lsOutInfo != null) {
 					outputGobbler.setLsInfo(lsOutInfo, lineNumStd);
 				}
 			} else if (lsOutInfo != null) {
@@ -639,7 +639,7 @@ public class CmdOperate extends RunProcess<String> {
 	 * @param isWriteErrTips 是否需要每隔几分钟写一小段话以表示程序还在运行中
 	 */
 	private void setErrorStream() {
-		String errPath = cmdPath.getSaveErrTmp();
+		String errPath = cmdOrderGenerator.getSaveErrTmp();
 		errorGobbler = new StreamOut(process.getStdErr(), process, isOutToTerminate, false);
 		errorGobbler.setDaemon(true);
 		
@@ -648,8 +648,8 @@ public class CmdOperate extends RunProcess<String> {
 				FileOperate.createFolders(FileOperate.getPathName(errPath));
 				//标准输出流不能被关闭
 				TxtReadandWrite txtWrite = new TxtReadandWrite(errPath, true);
-				errorGobbler.setOutputStream(txtWrite.getOutputStream(), cmdPath.isJustDisplayErr());
-				if (cmdPath.isJustDisplayErr() && lsErrorInfo != null) {
+				errorGobbler.setOutputStream(txtWrite.getOutputStream(), cmdOrderGenerator.isJustDisplayErr());
+				if (cmdOrderGenerator.isJustDisplayErr() && lsErrorInfo != null) {
 					errorGobbler.setLsInfo(lsErrorInfo, lineNumErr);
 				}
 			} else if (lsErrorInfo != null) {
@@ -664,36 +664,36 @@ public class CmdOperate extends RunProcess<String> {
 	
 	/** 是否有">" 或 "1>"符号，如果有，返回输出的文件名 */
 	public String getSaveStdOutFile() {
-		return cmdPath.getSaveStdPath();
+		return cmdOrderGenerator.getSaveStdPath();
 	}
 	
 	/** 是否有"2>"符号，如果有，返回输出的文件名 */
 	public String getSaveStdErrFile() {
-		return cmdPath.getSaveStdPath();
+		return cmdOrderGenerator.getSaveStdPath();
 	}
 	
 	/** 关闭输出流 */
 	private void closeOutStream() {
 		if (!getCmdInStdStream) {
-			if (cmdPath.isJustDisplayStd()) {
+			if (cmdOrderGenerator.isJustDisplayStd()) {
 				if (isFinishedNormal()) {
 					outputGobbler.close(DateUtil.getNowTimeStr() + " Task Finish Normally");
 				} else {
 					outputGobbler.close(DateUtil.getNowTimeStr() + " Task Finish AbNormally");
 				}
-			} else if(cmdPath.getSaveStdPath() != null) {
+			} else if(cmdOrderGenerator.getSaveStdPath() != null) {
 				outputGobbler.close();
 			}
 		}
 		
 		if (!getCmdInErrStream) {
-			if (cmdPath.isJustDisplayErr()) {
+			if (cmdOrderGenerator.isJustDisplayErr()) {
 				if(isFinishedNormal()) {
 					errorGobbler.close("Task Finish Normally");
 				} else {
 					errorGobbler.close("Task Finish AbNormally");
 				}
-			} else if(cmdPath.getSaveErrPath() != null) {
+			} else if(cmdOrderGenerator.getSaveErrPath() != null) {
 				errorGobbler.close();
 			}
 		}
@@ -748,14 +748,14 @@ public class CmdOperate extends RunProcess<String> {
 	 * 本步骤解析cmd命令，并拷贝需要的文件到指定文件夹中
 	 */
 	public void prepare() {
-		cmdPath.generateTmPath();
-		cmdPath.generateRunCmd(true);
+		cmdOrderGenerator.generateTmPath();
+		cmdOrderGenerator.generateRunCmd(true);
 	}
 	
 	@Override
 	protected void running() {
-		cmdPath.generateTmPath();
-		cmdPath.copyFileInAndRecordFiles();
+		cmdOrderGenerator.generateTmPath();
+		cmdOrderGenerator.copyFileInAndRecordFiles();
 		
 		String cmd = "";
 		String realCmd = getCmdExeStr();
@@ -779,19 +779,19 @@ public class CmdOperate extends RunProcess<String> {
 		}
 		
 		if (isFinishedNormal()) {
-			cmdPath.moveStdFiles();
+			cmdOrderGenerator.moveStdFiles();
 			if (isStderrInfo) {
-				FileOperate.deleteFileFolder(cmdPath.getSaveErrPath());
+				FileOperate.deleteFileFolder(cmdOrderGenerator.getSaveErrPath());
 			}
 			if (isStdoutInfo) {
-				FileOperate.deleteFileFolder(cmdPath.getSaveStdPath());
+				FileOperate.deleteFileFolder(cmdOrderGenerator.getSaveStdPath());
 			}
 			FileOperate.deleteFileFolder(outRunInfoFileName);
 		}
 		
 		//不管是否跑成功，都移出文件夹
-		cmdPath.moveFileOut();
-		cmdPath.deleteTmpFile();
+		cmdOrderGenerator.moveFileOut();
+		cmdOrderGenerator.deleteTmpFile();
 		
 		runTime = dateTime.getElapseTime();
 		if (process instanceof ProcessRemote) {

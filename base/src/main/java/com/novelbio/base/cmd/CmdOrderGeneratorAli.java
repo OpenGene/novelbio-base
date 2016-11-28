@@ -15,8 +15,8 @@ import com.novelbio.jsr203.bos.PathDetailOs;
  * 同时还产生相应的cmd命令参数
  * @author zong0jie
  */
-public class CmdPathAli extends CmdPath {
-	private static final Logger logger = LoggerFactory.getLogger(CmdPathAli.class);
+public class CmdOrderGeneratorAli extends CmdOrderGenerator {
+	private static final Logger logger = LoggerFactory.getLogger(CmdOrderGeneratorAli.class);
 	
 	/** 只读挂载相对路径 */
 	public static final String IN_MAP = ".inmap.";
