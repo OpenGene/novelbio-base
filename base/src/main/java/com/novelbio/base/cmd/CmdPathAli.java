@@ -1,10 +1,9 @@
 package com.novelbio.base.cmd;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.novelbio.base.cmd.ConvertCmd.ConvertCmdTmp;
 import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.jsr203.bos.PathDetailOs;
 

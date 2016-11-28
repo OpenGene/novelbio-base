@@ -14,7 +14,6 @@ import java.util.TimerTask;
 import org.apache.log4j.Logger;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.novelbio.base.PathDetail;
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
