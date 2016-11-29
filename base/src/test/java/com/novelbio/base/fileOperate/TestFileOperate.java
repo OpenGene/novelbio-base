@@ -2,7 +2,6 @@ package com.novelbio.base.fileOperate;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -343,7 +342,7 @@ public class TestFileOperate {
 		for (int i = 0; i < 10; i++) {
 			result = FileOperate.getParentPathNameWithSep(result);
 		}
-		Assert.assertEquals("oss://novelbio/nbCloud/", result);
+		Assert.assertEquals("oss://novelbio/", result);
 		
 	}
 
