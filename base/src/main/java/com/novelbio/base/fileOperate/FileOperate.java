@@ -226,6 +226,7 @@ public class FileOperate {
 				String parentPath = new OssFileSystemProvider().getPath(uri).getParent().toUri().toString();
 				return parentPath.endsWith("/") ? parentPath : parentPath + getSepPath();
 			} catch (Exception e) {
+				e.printStackTrace();
 				logger.error("getParentPathNameWithSep error.filename=" + fileName, e);
 				return fileName;
 			}

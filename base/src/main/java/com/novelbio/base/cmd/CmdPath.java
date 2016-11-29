@@ -32,23 +32,12 @@ public class CmdPath {
 		
 	boolean isRedirectInToTmp = false;
 	boolean isRedirectOutToTmp = false;
-
-	Set<String> setInput = new HashSet<>();
-	Set<String> setOutput = new HashSet<>();
-	/**
-	 * 输出文件夹路径
-	 * key: 文件名
-	 * value: 临时文件名
-	 */
-	Map<String, String> mapName2TmpName = new HashMap<>();	
-	/** 输入文件夹对应的输出文件夹，可以将输入文件夹里的文件直接复制到输出文件夹中 */
-	Map<String, String> mapPath2TmpPathIn = new HashMap<>();
-	/** 输出文件夹对应的临时输出文件夹 */
-	Map<String, String> mapPath2TmpPathOut = new HashMap<>();
 	
 	/** 是否已经生成了临时文件夹，生成一次就够了 */
 	boolean isGenerateTmpPath = false;
 	
+	protected boolean isRetainTmpFiles = false;
+
 	/** 是否将hdfs的路径，改为本地路径
 	 * 如将 /hdfs:/fseresr 改为 /media/hdfs/fseresr
 	 * 只有类似varscan这种我们修改了代码，让其兼容hdfs的程序才不需要修改
@@ -60,12 +49,32 @@ public class CmdPath {
 	/** 输出的临时文件夹路径 */
 	private String tmpPath;
 	
-	protected boolean isRetainTmpFiles = false;
+	/** 全体输入文件 */
+	Set<String> setInput = new HashSet<>();
+	Set<String> setOutput = new HashSet<>();
+	
+	/**
+	 * key: 输入或输出的文件(夹)全名
+	 * value: 临时文件(夹)全名
+	 */
+	Map<String, String> mapName2TmpName = new HashMap<>();	
+	/** 输入文件夹对应的输出文件夹，可以将输入文件夹里的文件直接复制到输出文件夹中 */
+	Map<String, String> mapPath2TmpPathIn = new HashMap<>();
+	/** 输出文件夹对应的临时输出文件夹 */
+	Map<String, String> mapPath2TmpPathOut = new HashMap<>();
+	
 	
 	/** 临时文件夹中很可能已经存在了一些文件，这些文件不需要被拷贝出去 */
 	private Map<String, long[]> mapFileName2LastModifyTimeAndLen = new HashMap<>();
 	
-	protected CmdPath() {};
+	CmdPathCluster cmdPathCluster;
+	
+	protected CmdPath(String tmpPath) {
+		if (StringOperate.isRealNull(tmpPath)) {
+			tmpPath = PathDetail.getTmpPathRandom();
+		}
+		this.tmpPath = tmpPath;
+	}
 	
 	/** 设定复制输入输出文件所到的临时文件夹 */
 	public void setTmpPath(String tmpPath) {
@@ -113,6 +122,47 @@ public class CmdPath {
 		}
 		setOutput.add(output);
 	}
+	
+	//============================ 生成临时文件夹和配对路径 ============================
+	protected synchronized void generateTmPath() {
+		if (isGenerateTmpPath) {
+			return;
+		}
+		Set<String> setFileNameAll = new HashSet<>();
+		
+		Map<String, String> mapPath2TmpPath = new HashMap<>();
+		if (isRedirectInToTmp) {
+			mapPath2TmpPathIn = cmdPathCluster.getMapInPath2TmpPath(setInput, tmpPath);
+			setFileNameAll.addAll(setInput);
+			mapPath2TmpPath.putAll(mapPath2TmpPathIn);
+		}
+		if (isRedirectOutToTmp) {
+			mapPath2TmpPathOut = cmdPathCluster.getMapOutPath2TmpPath(setOutput, tmpPath);
+			setFileNameAll.addAll(setOutput);
+			mapPath2TmpPath.putAll(mapPath2TmpPathOut);
+		}
+		
+		mapName2TmpName = getMapName2TmpName(setFileNameAll, mapPath2TmpPath);
+		isGenerateTmpPath = true;
+	}
+	
+	private Map<String, String> getMapName2TmpName(Set<String> setFileNameAll, Map<String, String> mapPath2TmpPath) {
+		Map<String, String> mapName2TmpName = new HashMap<>();
+
+		for (String filePathName : setFileNameAll) {
+			String tmpPath = mapPath2TmpPath.get(FileOperate.getParentPathNameWithSep(filePathName));
+			String fileName = FileOperate.getFileName(filePathName);
+			tmpPath = tmpPath + fileName;
+			/** 将已有的输出文件夹在临时文件夹中创建好 */
+			if (filePathName.endsWith("/") || filePathName.endsWith("\\")) {
+				tmpPath = FileOperate.addSep(tmpPath);
+			}
+			mapName2TmpName.put(filePathName, tmpPath);
+		}
+		return mapName2TmpName;
+	}
+	
+	//===========================================================================
 
 	/** 在cmd运行前，将输入文件拷贝到临时文件夹下
 	 * 同时记录临时文件夹下有多少文件，用于后面删除时跳过 */
@@ -144,76 +194,6 @@ public class CmdPath {
 		}
 	}
 	
-	//============================ 生成临时文件夹和配对路径 ============================
-	protected synchronized void generateTmPath() {
-		if (isGenerateTmpPath) {
-			return;
-		}
-		Set<String> setFileNameAll = new HashSet<>();
-		
-		Map<String, String> mapPath2TmpPath = new HashMap<>();
-		if (isRedirectInToTmp) {
-			mapPath2TmpPathIn = getMapPath2TmpPath(setInput, getTmp());
-			setFileNameAll.addAll(setInput);
-			mapPath2TmpPath.putAll(mapPath2TmpPathIn);
-		}
-		if (isRedirectOutToTmp) {
-			mapPath2TmpPathOut = getMapPath2TmpPath(setOutput, getTmp());
-			setFileNameAll.addAll(setOutput);
-			mapPath2TmpPath.putAll(mapPath2TmpPathOut);
-		}
-		
-		mapName2TmpName = getMapName2TmpName(setFileNameAll, mapPath2TmpPath);
-		isGenerateTmpPath = true;
-	}
-	
-	private Map<String, String> getMapPath2TmpPath(Set<String> setFiles, String pathTmp) {
-		Map<String, String> mapPath2TmpPath = new HashMap<>();
-		Set<String> setPath = new HashSet<>();
-		for (String inFileName : setFiles) {
-			String inPath = FileOperate.getParentPathNameWithSep(inFileName);
-			setPath.add(inPath);
-		}
-		
-		Set<String> setPathNoDup = new HashSet<>();
-		for (String path : setPath) {
-			String parentPath = FileOperate.getFileName(path);
-			String parentPathFinal = parentPath;
-			int i = 1;//防止产生同名文件夹的措施
-			while (setPathNoDup.contains(parentPathFinal)) {
-				parentPathFinal = parentPath + i++;
-			}
-			setPathNoDup.add(parentPathFinal);
-			String tmpPathThis = pathTmp + parentPathFinal+ FileOperate.getSepPath();
-			mapPath2TmpPath.put(path, tmpPathThis);
-		}
-		return mapPath2TmpPath;
-	}
-	
-	private Map<String, String> getMapName2TmpName(Set<String> setFileNameAll, Map<String, String> mapPath2TmpPath) {
-		Map<String, String> mapName2TmpName = new HashMap<>();
-
-		for (String filePathName : setFileNameAll) {
-			String tmpPath = mapPath2TmpPath.get(FileOperate.getParentPathNameWithSep(filePathName));
-			String fileName = FileOperate.getFileName(filePathName);
-			tmpPath = tmpPath + fileName;
-			/** 将已有的输出文件夹在临时文件夹中创建好 */
-			if (filePathName.endsWith("/") || filePathName.endsWith("\\")) {
-				tmpPath = FileOperate.addSep(tmpPath);
-			}
-			mapName2TmpName.put(filePathName, tmpPath);
-		}
-		return mapName2TmpName;
-	}
-	
-	//===========================================================================
-	
-	protected String getTmp() {
-		if (StringOperate.isRealNull(tmpPath)) {
-			tmpPath = PathDetail.getTmpPathRandom();
-		}
-		return tmpPath;
-	}
 	/** 将已有的输出文件夹在临时文件夹中创建好 */
 	protected void createFoldTmp() {
 		for (String filePathName : mapName2TmpName.keySet()) {
@@ -252,9 +232,10 @@ public class CmdPath {
 					continue;
 				}
 				
-				List<String> lsFilesNeedMove = getLsFileNeedMove(fileInTmp);
-				for (String file : lsFilesNeedMove) {
-					String  filePathOut = fileInTmp.replaceFirst(outTmpPath, outPath);
+				List<String> lsFilesInTmpNeedMove = getLsFileInTmpNeedMove(fileInTmp);
+				for (String file : lsFilesInTmpNeedMove) {
+					String  filePathOut = file.replaceFirst(outTmpPath, outPath);
+					cmdPathCluster.putTmpOut2Out(file, filePathOut);
 					moveSingleFileOut(file, filePathOut);
 				}
 			}
@@ -262,14 +243,14 @@ public class CmdPath {
 	}
 	
 	/**
-	 * 给定某个文件或文件夹，看里面哪些文件需要移动
+	 * 给定某个临时文件或文件夹，看里面哪些文件需要移动
 	 * @param fileInTmp
 	 * @return
 	 */
-	private List<String> getLsFileNeedMove(String fileInTmp) {
+	private List<String> getLsFileInTmpNeedMove(String fileInTmp) {
 		List<String> lsFileNeedMove = new ArrayList<>();
-		List<Path> lsFiles = FileOperate.getLsFoldPathRecur(fileInTmp, false);
-		for (Path path : lsFiles) {
+		List<Path> lsFilesInTmp = FileOperate.getLsFoldPathRecur(fileInTmp, false);
+		for (Path path : lsFilesInTmp) {
 			String pathStr = FileOperate.getAbsolutePath(path);
 			if (!mapFileName2LastModifyTimeAndLen.containsKey(pathStr)) {
 				lsFileNeedMove.add(FileOperate.getAbsolutePath(path));
