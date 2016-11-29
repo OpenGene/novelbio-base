@@ -13,7 +13,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.novelbio.base.PathDetail;
-import com.novelbio.base.cmd.CmdPath.ConvertCmdGetFileName;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.dataStructure.ArrayOperate;
@@ -22,7 +21,7 @@ import com.novelbio.base.fileOperate.FileOperate;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(DateUtil.class)
-public class TestCmdPath {
+public class TestCmdOrderGenerator {
 	String tmpPath = PathDetail.getTmpPathWithSep();
 	
 	@PrepareForTest(DateUtil.class)
@@ -42,7 +41,7 @@ public class TestCmdPath {
 	}
 	
 	private void cmd1() {
-		CmdPath cmdPath = CmdPath.generateCmdPath(true);
+		CmdOrderGenerator cmdPath = new CmdOrderGenerator(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile = "src/test/resources/testTrinity.fa";
 		lsCmd.add("bwa-index"); lsCmd.add(inFile);
@@ -66,7 +65,7 @@ public class TestCmdPath {
 		String resultFileName = "testResult.txt";
 		//往结果中写个文件 */
 		TxtReadandWrite txtWrite = new TxtReadandWrite(FileOperate.getPathName(ss[1]) + resultFileName, true);
-		txtWrite.writefileln("testCmdPath");
+		txtWrite.writefileln("testCmdOrderGenerator");
 		txtWrite.close();
 		cmdPath.moveFileOut();
 		
@@ -74,7 +73,7 @@ public class TestCmdPath {
 	}
 	
 	private void cmd2() {
-		CmdPath cmdPath = CmdPath.generateCmdPath(true);
+		CmdOrderGenerator cmdPath = new CmdOrderGenerator(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile = "src/test/resources/testTrinity.fa";
 		String outFile = "src/test/CmdOperateOut/testTrinity.fa";
@@ -95,7 +94,7 @@ public class TestCmdPath {
 		String resultFileName = "testTrinity.fa";
 		//往结果中写个文件 */
 		TxtReadandWrite txtWrite = new TxtReadandWrite(FileOperate.getPathName(ss[2]) + resultFileName, true);
-		txtWrite.writefileln("testCmdPath");
+		txtWrite.writefileln("testCmdOrderGenerator");
 		txtWrite.close();
 		cmdPath.moveFileOut();
 		assertEquals(true, FileOperate.isFileExistAndBigThanSize(FileOperate.getPathName(outFile) + "/testTrinity.fa", 0));
@@ -104,7 +103,7 @@ public class TestCmdPath {
 	
 	/** 假设test3文件夹 不 存在 */
 	private void cmd3() {
-		CmdPath cmdPath = CmdPath.generateCmdPath(true);
+		CmdOrderGenerator cmdPath = new CmdOrderGenerator(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile = "src/test/resources/testTrinity.fa";
 		String outFile = "src/test/CmdOperateOut/testcc";
@@ -127,7 +126,7 @@ public class TestCmdPath {
 		FileOperate.createFolders(FileOperate.getPathName(ss[2]));
 		String outPath = FileOperate.getPathName(ss[2]) + resultFileName;
 		TxtReadandWrite txtWrite = new TxtReadandWrite(outPath, true);
-		txtWrite.writefileln("testCmdPath");
+		txtWrite.writefileln("testCmdOrderGenerator");
 		txtWrite.close();
 		cmdPath.moveFileOut();
 		assertEquals(true, FileOperate.isFileExistAndBigThanSize(FileOperate.getPathName(outFile) + resultFileName, 0));
@@ -136,7 +135,7 @@ public class TestCmdPath {
 	
 	/** 假设test4文件夹存在 */
 	private void cmd4() {
-		CmdPath cmdPath = CmdPath.generateCmdPath(true);
+		CmdOrderGenerator cmdPath = new CmdOrderGenerator(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile = "src/test/resources/testTrinity.fa";
 		String outFile = "src/test/CmdOperateOut/testTrinity3.fa";
@@ -159,7 +158,7 @@ public class TestCmdPath {
 		//往结果中写个文件 */
 		String outPath = FileOperate.getPathName(ss[2]) + resultFileName;
 		TxtReadandWrite txtWrite = new TxtReadandWrite(outPath, true);
-		txtWrite.writefileln("testCmdPath");
+		txtWrite.writefileln("testCmdOrderGenerator");
 		txtWrite.close();
 		cmdPath.moveFileOut();
 		assertEquals(true, FileOperate.isFileExistAndBigThanSize(FileOperate.getPathName(outFile) + resultFileName, 0));
@@ -168,7 +167,7 @@ public class TestCmdPath {
 	
 	/** 假设test5文件夹存在 */
 	private void cmd5() {
-		CmdPath cmdPath = CmdPath.generateCmdPath(true);
+		CmdOrderGenerator cmdPath = new CmdOrderGenerator(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile = "src/test/resources/testTrinity.fa";
 		String outFile = "src/test/CmdOperateOut/testTrinity4.fa";
@@ -190,7 +189,7 @@ public class TestCmdPath {
 		//往结果中写个文件 */
 		String outPath = FileOperate.getPathName(ss[2]) + resultFileName;
 		TxtReadandWrite txtWrite = new TxtReadandWrite(outPath, true);
-		txtWrite.writefileln("testCmdPath");
+		txtWrite.writefileln("testCmdOrderGenerator");
 		txtWrite.close();
 		cmdPath.moveFileOut();
 		assertEquals(true, FileOperate.isFileExistAndBigThanSize(FileOperate.getPathName(outFile) + resultFileName, 0));
@@ -198,7 +197,7 @@ public class TestCmdPath {
 	}
 	
 	private void cmd6() {
-		CmdPath cmdPath = CmdPath.generateCmdPath(true);
+		CmdOrderGenerator cmdPath = new CmdOrderGenerator(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile = "src/test/resources/testTrinity.fa";
 		String outFile = "src/test/CmdOperateOut2/test";
@@ -216,7 +215,7 @@ public class TestCmdPath {
 		//往结果中写个文件 */
 		String outTmp = ss[2].split("=")[1];
 		TxtReadandWrite txtWrite = new TxtReadandWrite(FileOperate.getPathName(outTmp) + resultFileName, true);
-		txtWrite.writefileln("testCmdPath");
+		txtWrite.writefileln("testCmdOrderGenerator");
 		txtWrite.close();
 		cmdPath.moveFileOut();
 		
@@ -225,7 +224,7 @@ public class TestCmdPath {
 	}
 	
 	private void cmd7() {
-		CmdPath cmdPath = CmdPath.generateCmdPath(true);
+		CmdOrderGenerator cmdPath = new CmdOrderGenerator(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile1 = "src/test/resources/testTrinity.fa";
 		String inFile2 = "src/test/resources/testTrinity2.fa";
@@ -253,7 +252,7 @@ public class TestCmdPath {
 		//往结果中写个文件 */
 		String outTmp = ss[2].split("=")[1];
 		TxtReadandWrite txtWrite = new TxtReadandWrite(FileOperate.getPathName(outTmp) + resultFileName, true);
-		txtWrite.writefileln("testCmdPath");
+		txtWrite.writefileln("testCmdOrderGenerator");
 		txtWrite.close();
 		cmdPath.moveFileOut();
 		
@@ -262,7 +261,7 @@ public class TestCmdPath {
 	}
 	
 	private void cmd8() {
-		CmdPath cmdPath = CmdPath.generateCmdPath(true);
+		CmdOrderGenerator cmdPath = new CmdOrderGenerator(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile1 = "src/test/resources/testTrinity.fa";
 		String inFile2 = "src/test/resources/testTrinity2.fa";
@@ -291,7 +290,7 @@ public class TestCmdPath {
 		String outTmp = cmdPath.getSaveStdTmp();
 		Assert.assertEquals(FileOperate.changeFileSuffix(outFile, "_tmp", null), outTmp);
 		TxtReadandWrite txtWrite = new TxtReadandWrite(FileOperate.getPathName(outTmp) + resultFileName, true);
-		txtWrite.writefileln("testCmdPath");
+		txtWrite.writefileln("testCmdOrderGenerator");
 		txtWrite.close();
 		cmdPath.moveFileOut();
 		

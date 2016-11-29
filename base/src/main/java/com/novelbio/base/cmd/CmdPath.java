@@ -30,67 +30,60 @@ import com.novelbio.base.util.ServiceEnvUtil;
 public class CmdPath {
 	private static final Logger logger = LoggerFactory.getLogger(CmdPath.class);
 		
-	boolean isRedirectInToTmp = false;
-	boolean isRedirectOutToTmp = false;
+	private boolean isRedirectInToTmp = false;
+	private boolean isRedirectOutToTmp = false;
 	
 	/** 是否已经生成了临时文件夹，生成一次就够了 */
-	boolean isGenerateTmpPath = false;
+	private boolean isGenerateTmpPath = false;
 	
 	protected boolean isRetainTmpFiles = false;
-
-	/** 是否将hdfs的路径，改为本地路径
-	 * 如将 /hdfs:/fseresr 改为 /media/hdfs/fseresr
-	 * 只有类似varscan这种我们修改了代码，让其兼容hdfs的程序才不需要修改
-	 * 
-	 * 也有把oss或者bos路径修改为本地路径
-	 */
-	boolean isConvertHdfs2Loc = true;
 	
 	/** 输出的临时文件夹路径 */
 	private String tmpPath;
 	
 	/** 全体输入文件 */
-	Set<String> setInput = new HashSet<>();
-	Set<String> setOutput = new HashSet<>();
+	protected Set<String> setInput = new HashSet<>();
+	private Set<String> setOutput = new HashSet<>();
 	
 	/**
 	 * key: 输入或输出的文件(夹)全名
 	 * value: 临时文件(夹)全名
 	 */
-	Map<String, String> mapName2TmpName = new HashMap<>();	
+	protected Map<String, String> mapName2TmpName = new HashMap<>();	
 	/** 输入文件夹对应的输出文件夹，可以将输入文件夹里的文件直接复制到输出文件夹中 */
-	Map<String, String> mapPath2TmpPathIn = new HashMap<>();
+	private Map<String, String> mapPath2TmpPathIn = new HashMap<>();
 	/** 输出文件夹对应的临时输出文件夹 */
-	Map<String, String> mapPath2TmpPathOut = new HashMap<>();
+	private Map<String, String> mapPath2TmpPathOut = new HashMap<>();
 	
-	
-	/** 临时文件夹中很可能已经存在了一些文件，这些文件不需要被拷贝出去 */
+	/** 临时文件夹中很可能已经存在了一些文件，这些文件不需要被拷贝出去，
+	 * 那么就需要在运行前先保存这些文件的大小和时间等信息，运行完毕后把
+	 * 结果文件夹中的文件与这里面的信息进行比较。如果一致就不拷贝出去
+	 */
 	private Map<String, long[]> mapFileName2LastModifyTimeAndLen = new HashMap<>();
 	
-	CmdPathCluster cmdPathCluster;
+	private CmdPathCluster cmdPathCluster;
 	
-	protected CmdPath(String tmpPath) {
-		if (StringOperate.isRealNull(tmpPath)) {
-			tmpPath = PathDetail.getTmpPathRandom();
-		}
-		this.tmpPath = tmpPath;
+	protected CmdPath() {
+		this.tmpPath = PathDetail.getTmpPathRandom();
+	}
+	
+	public void setCmdPathCluster(CmdPathCluster cmdPathCluster) {
+		this.cmdPathCluster = cmdPathCluster;
 	}
 	
 	/** 设定复制输入输出文件所到的临时文件夹 */
 	public void setTmpPath(String tmpPath) {
-		this.tmpPath = tmpPath;
+		if (StringOperate.isRealNull(tmpPath)) {
+			throw new ExceptionCmd("tmpPath cannot be null");
+		}
+		this.tmpPath = FileOperate.addSep(tmpPath);
+	}
+	public String getTmpPath() {
+		return tmpPath;
 	}
 	/** 临时文件夹中的文件是否删除 */
 	public void setRetainTmpFiles(boolean isRetainTmpFiles) {
 		this.isRetainTmpFiles = isRetainTmpFiles;
-	}
-	
-	/** 是否将hdfs的路径，改为本地路径，<b>默认为true</b><br>
-	 * 如将 /hdfs:/fseresr 改为 /media/hdfs/fseresr<br>
-	 * 只有类似varscan这种我们修改了代码，让其兼容hdfs的程序才不需要修改
-	 */
-	public void setConvertHdfs2Loc(boolean isConvertHdfs2Loc) {
-		this.isConvertHdfs2Loc = isConvertHdfs2Loc;
 	}
 	
 	/** 是否将输入文件拷贝到临时文件夹，默认为false */
@@ -128,6 +121,8 @@ public class CmdPath {
 		if (isGenerateTmpPath) {
 			return;
 		}
+		if (cmdPathCluster == null) cmdPathCluster = new CmdPathCluster();
+		
 		Set<String> setFileNameAll = new HashSet<>();
 		
 		Map<String, String> mapPath2TmpPath = new HashMap<>();
@@ -173,7 +168,7 @@ public class CmdPath {
 		}
 		if (isRedirectOutToTmp) {
 			mapFileName2LastModifyTimeAndLen.clear();
-			List<Path> lsPaths = FileOperate.getLsFoldPathRecur(tmpPath, false);
+			List<Path> lsPaths = FileOperate.getLsFoldPathRecur(tmpPath, true);
 			lsPaths.forEach((path)->{
 				mapFileName2LastModifyTimeAndLen.put(FileOperate.getAbsolutePath(path), 
 						getLastModifyTime2Len(path));
@@ -205,10 +200,6 @@ public class CmdPath {
 			}
 		}
 	}
-
-	protected void setStdAndErr(ConvertCmdTmp convertCmdTmp, boolean stdOut, boolean errOut) {
-		convertCmdTmp.setStdInOut(stdOut, errOut);
-	}
 	
 	protected ConvertCmd getConvertOs2Local() {
 		return ServiceEnvUtil.isAliyunEnv() ? new ConvertOss() : new ConvertHdfs();
@@ -232,7 +223,7 @@ public class CmdPath {
 					continue;
 				}
 				
-				List<String> lsFilesInTmpNeedMove = getLsFileInTmpNeedMove(fileInTmp);
+				List<String> lsFilesInTmpNeedMove = getLsFileInTmpNeedMove(FileOperate.getPath(fileInTmp));
 				for (String file : lsFilesInTmpNeedMove) {
 					String  filePathOut = file.replaceFirst(outTmpPath, outPath);
 					cmdPathCluster.putTmpOut2Out(file, filePathOut);
@@ -244,31 +235,46 @@ public class CmdPath {
 	
 	/**
 	 * 给定某个临时文件或文件夹，看里面哪些文件需要移动
-	 * @param fileInTmp
+	 * @param pathInTmp
 	 * @return
 	 */
-	private List<String> getLsFileInTmpNeedMove(String fileInTmp) {
+	private List<String> getLsFileInTmpNeedMove(Path pathInTmp) {
 		List<String> lsFileNeedMove = new ArrayList<>();
-		List<Path> lsFilesInTmp = FileOperate.getLsFoldPathRecur(fileInTmp, false);
-		for (Path path : lsFilesInTmp) {
-			String pathStr = FileOperate.getAbsolutePath(path);
-			if (!mapFileName2LastModifyTimeAndLen.containsKey(pathStr)) {
-				lsFileNeedMove.add(FileOperate.getAbsolutePath(path));
-				continue;
-			}
-			long[] lastModifyTime2Len = mapFileName2LastModifyTimeAndLen.get(pathStr);
-			long[] lastModifyTime2LenThis = getLastModifyTime2Len(path);			
-			if (lastModifyTime2LenThis[0] != lastModifyTime2Len[0] || lastModifyTime2LenThis[1] != lastModifyTime2Len[1]) {
-				lsFileNeedMove.add(FileOperate.getAbsolutePath(path));
-			}
+		String pathStr = FileOperate.getAbsolutePath(pathInTmp);
+		//全新的文件，则直接返回表示需要移动
+		if (!mapFileName2LastModifyTimeAndLen.containsKey(pathStr)) {
+			lsFileNeedMove.add(FileOperate.getAbsolutePath(pathInTmp));
+			return lsFileNeedMove;
+		}
+		
+		//文件修改过了，修改时间和文件大小都不同了，也直接返回
+		long[] lastModifyTime2Len = mapFileName2LastModifyTimeAndLen.get(pathStr);
+		long[] lastModifyTime2LenThis = getLastModifyTime2Len(pathInTmp);			
+		if (lastModifyTime2LenThis[0] != lastModifyTime2Len[0] || lastModifyTime2LenThis[1] != lastModifyTime2Len[1]) {
+			lsFileNeedMove.add(FileOperate.getAbsolutePath(pathInTmp));
+			return lsFileNeedMove;
+		}
+		
+		//输入的不是文件夹，直接返回
+		if (!FileOperate.isFileDirectory(pathInTmp)) {
+			return lsFileNeedMove;
+		}
+		
+		List<Path> lsSubPaths = FileOperate.getLsFoldPath(pathInTmp);
+		for (Path path : lsSubPaths) {
+			lsFileNeedMove.addAll(getLsFileInTmpNeedMove(path));
 		}
 		return lsFileNeedMove;
-	
 	}
 	
+	/**
+	 * 文件夹的时间和大小都为0
+	 * @param path
+	 * @return
+	 */
 	private long[] getLastModifyTime2Len(Path path) {
-		long len = FileOperate.getFileSizeLong(path);
-		long lastModifyTime = len < 0 ? 0 : FileOperate.getTimeLastModify(path);
+		long len = FileOperate.isFileDirectory(path) ? 0 : FileOperate.getFileSizeLong(path);
+		long lastModifyTime = len <= 0 ? 0 : FileOperate.getTimeLastModify(path);
 		return new long[]{lastModifyTime, len};
 	}
 	
@@ -307,4 +313,17 @@ public class CmdPath {
 		mapPath2TmpPathOut.clear();
 	}
 	
+	/** 用于做路径转换 */
+	public ConvertCmdTmp generateConvertCmdTmp() {
+		return new ConvertCmdTmp(isRedirectInToTmp, isRedirectOutToTmp,
+				setInput, setOutput, mapName2TmpName);
+	}
+	
+	public static CmdPath getInstance(boolean isLocal) {
+		if (isLocal) {
+			return new CmdPath();
+		} else {
+			return new CmdPathAli();
+		}
+	}
 }

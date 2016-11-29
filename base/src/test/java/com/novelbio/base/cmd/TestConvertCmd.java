@@ -7,14 +7,14 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.novelbio.base.cmd.CmdPath.ConvertCmdGetFileName;
+import com.novelbio.base.cmd.ConvertCmd.ConvertCmdGetFileName;
 import com.novelbio.base.fileOperate.FileHadoop;
 
 public class TestConvertCmd {
 	
 	@Test
 	public void cmdConvertHdfs() {
-		CmdPath cmdPath = CmdPath.generateCmdPath(true);
+		CmdOrderGenerator cmdPath = new CmdOrderGenerator(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile1 = "/hdfs:/src/test/resources/testTrinity.fa";
 		String inFile2 = "/hdfs:/src/test/resources/testTrinity2.fa";
@@ -35,7 +35,7 @@ public class TestConvertCmd {
 	@Test
 	public void cmdConvertGetFileName() {
 		String cmd = "/home/novelbio/software/trinityrnaseq-2.1.1/util/support_scripts/../../Trinity --single \"/home/novelbio/tmp/2015-11-28-10-50-43-3610_RNAassembly_result2/Hap-1trinity/read_partitions/Fb_0/CBin_59/c5929.trinity.reads.fa\" --output \"/home/novelbio/tmp/2015-11-28-10-50-43-3610_RNAassembly_result2/Hap-1trinity/read_partitions/Fb_0/CBin_59/c5929.trinity.reads.fa.out\" --CPU 1";
-		ConvertCmdGetFileName convertCmdGetFileName = new ConvertCmdGetFileName();
+		ConvertCmd.ConvertCmdGetFileName convertCmdGetFileName = new ConvertCmdGetFileName();
 		String result = convertCmdGetFileName.convertCmd(cmd);
 		assertEquals("Trinity --single \"c5929.trinity.reads.fa\" --output \"c5929.trinity.reads.fa.out\" --CPU 1", result);
 	}

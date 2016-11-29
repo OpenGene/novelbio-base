@@ -34,21 +34,7 @@ public class CmdOrderGenerator {
 	
 	List<String> lsCmd = new ArrayList<>();
 	
-	boolean isRedirectInToTmp = false;
-	boolean isRedirectOutToTmp = false;
-
-	Set<String> setInput = new HashSet<>();
-	Set<String> setOutput = new HashSet<>();
-	/**
-	 * 输出文件夹路径
-	 * key: 文件名
-	 * value: 临时文件名
-	 */
-	Map<String, String> mapName2TmpName = new HashMap<>();	
-	/** 输入文件夹对应的输出文件夹，可以将输入文件夹里的文件直接复制到输出文件夹中 */
-	Map<String, String> mapPath2TmpPathIn = new HashMap<>();
-	/** 输出文件夹对应的临时输出文件夹 */
-	Map<String, String> mapPath2TmpPathOut = new HashMap<>();
+	CmdPath cmdPath;
 	
 	/** 是否保存stdout文件, <b>默认为true</b><br>
 	 * stdout的保存有几种：<br>
@@ -82,25 +68,26 @@ public class CmdOrderGenerator {
 	 * 
 	 * 也有把oss或者bos路径修改为本地路径
 	 */
-	boolean isConvertHdfs2Loc = true;
+	boolean isConvertHdfs2Loc = true;	
 	
-	private String tmpPath;
-	protected boolean isRetainTmpFiles = false;
-	
-	/** 临时文件夹中很可能已经存在了一些文件，这些文件不需要被拷贝出去 */
-	private Map<String, long[]> mapFileName2LastModifyTimeAndLen = new HashMap<>();
-	
-	protected CmdOrderGenerator() {};
-	
+	public CmdOrderGenerator(boolean isLocal) {
+		cmdPath = CmdPath.getInstance(isLocal);
+	}
 	/** 设定复制输入输出文件所到的临时文件夹 */
 	public void setTmpPath(String tmpPath) {
-		this.tmpPath = tmpPath;
+		cmdPath.setTmpPath(tmpPath);
 	}
-	/** 临时文件夹中的文件是否删除 */
-	public void setRetainTmpFiles(boolean isRetainTmpFiles) {
-		this.isRetainTmpFiles = isRetainTmpFiles;
+	public String getTmpPath() {
+		return cmdPath.getTmpPath();
 	}
 	
+	/** 临时文件夹中的文件是否删除 */
+	public void setRetainTmpFiles(boolean isRetainTmpFiles) {
+		cmdPath.setRetainTmpFiles(isRetainTmpFiles);
+	}
+	public void setCmdPathCluster(CmdPathCluster cmdPathCluster) {
+		cmdPath.setCmdPathCluster(cmdPathCluster);
+	}
 	/** 如果为null就不加入 */
 	public void addCmdParam(String param) {
 		if (!StringOperate.isRealNull(param)) {
@@ -129,6 +116,10 @@ public class CmdOrderGenerator {
 		return isJustDisplayStd;
 	}
 	
+	public void setLsCmd(List<String> lsCmd) {
+		this.lsCmd = lsCmd;
+	}
+	
 	/** 是否将hdfs的路径，改为本地路径，<b>默认为true</b><br>
 	 * 如将 /hdfs:/fseresr 改为 /media/hdfs/fseresr<br>
 	 * 只有类似varscan这种我们修改了代码，让其兼容hdfs的程序才不需要修改
@@ -139,36 +130,26 @@ public class CmdOrderGenerator {
 	
 	/** 是否将输入文件拷贝到临时文件夹，默认为false */
 	public void setRedirectInToTmp(boolean isRedirectInToTmp) {
-		this.isRedirectInToTmp = isRedirectInToTmp;
+		cmdPath.setRedirectInToTmp(isRedirectInToTmp);
 	}
 	/** 是否将输出先重定位到临时文件夹，再拷贝回实际文件夹，默认为false */
 	public void setRedirectOutToTmp(boolean isRedirectOutToTmp) {
-		this.isRedirectOutToTmp = isRedirectOutToTmp;
+		cmdPath.setRedirectOutToTmp(isRedirectOutToTmp);
 	}
+
 	/**
 	 * 添加输入文件路径的参数，配合{@link #setRedirectInToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
 	 * @param input 输入文件的哪个参数
 	 */
 	public void addCmdParamInput(String input) {
-		if (StringOperate.isRealNull(input)) {
-			throw new ExceptionCmd("input is null");
-		}
-		setInput.add(input);
+		cmdPath.addCmdParamInput(input);
 	}
-	
-	public void setLsCmd(List<String> lsCmd) {
-		this.lsCmd = lsCmd;
-	}
-	
 	/**
 	 * 添加输出文件路径的参数，配合{@link #setRedirectOutToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
 	 * @param output 输出文件的哪个参数，如果输入参数类似 "--outPath=/hdfs:/test.fa"，这里填写 "/hdfs:/test.fa"
 	 */
 	public void addCmdParamOutput(String output) {
-		if (StringOperate.isRealNull(output)) {
-			throw new ExceptionCmd("Output is null");
-		}
-		setOutput.add(output);
+		cmdPath.addCmdParamOutput(output);
 	}
 	
 	/** 如果param为null则返回 */
@@ -276,136 +257,34 @@ public class CmdOrderGenerator {
 	
 	/** 返回执行的具体cmd命令，会将文件路径删除，仅给相对路径 */
 	public String[] getCmdExeStrModify() {
-		generateTmPath();
+		cmdPath.generateTmPath();
 		ConvertCmdGetFileName convertGetFileName = new ConvertCmdGetFileName();
 		return convertGetFileName.convertCmd(generateRunCmd(false));
 	}
 	
+	public void generateTmPath() {
+		cmdPath.generateTmPath();
+	}
+	
 	/** 返回执行的具体cmd命令，实际cmd命令 */
 	public String[] getCmdExeStrReal() {
-		generateTmPath();
+		cmdPath.generateTmPath();
 		return generateRunCmd(false);
 	}
 
 	/** 在cmd运行前，将输入文件拷贝到临时文件夹下
 	 * 同时记录临时文件夹下有多少文件，用于后面删除时跳过 */
 	public void copyFileInAndRecordFiles() {
-		createFoldTmp();
-		if (isRedirectInToTmp) {
-			copyFileIn();
-		}
-		if (isRedirectOutToTmp) {
-			mapFileName2LastModifyTimeAndLen.clear();
-			List<Path> lsPaths = FileOperate.getLsFoldPathRecur(tmpPath, false);
-			lsPaths.forEach((path)->{
-				mapFileName2LastModifyTimeAndLen.put(FileOperate.getAbsolutePath(path), 
-						getLastModifyTime2Len(path));
-			}); 
-		}
-	}
-	
-	/** 把要输入的文件拷贝到临时文件夹中 */
-	protected void copyFileIn() {
-		for (String inFile : setInput) {
-			String inTmpName = mapName2TmpName.get(inFile);
-			try {
-				FileOperate.copyFileFolder(inFile, inTmpName, false);
-				logger.info("copy file from {} to {}", inFile, inTmpName);
-			} catch (Exception e) {
-				logger.error("copy file from " + inFile + " to " + inTmpName + "error", e);
-			}
-		}
+		cmdPath.copyFileInAndRecordFiles();
 	}
 	
 	/** 必须先调用{@link #copyFileInAndRecordFiles()}，
 	 * 等运行cmd结束后还需要调用{@link #moveFileOut()} 来完成运行 */
 	public String[] getRunCmd() {
-		generateTmPath();
+		cmdPath.generateTmPath();
 		return generateRunCmd(true);
 	}
-	
-	//============================ 生成临时文件夹和配对路径 ============================
-	protected synchronized void generateTmPath() {
-		if (isGenerateTmpPath) {
-			return;
-		}
-		Set<String> setFileNameAll = new HashSet<>();
 		
-		Map<String, String> mapPath2TmpPath = new HashMap<>();
-		if (isRedirectInToTmp) {
-			mapPath2TmpPathIn = getMapPath2TmpPath(setInput, getTmp());
-			setFileNameAll.addAll(setInput);
-			mapPath2TmpPath.putAll(mapPath2TmpPathIn);
-		}
-		if (isRedirectOutToTmp) {
-			mapPath2TmpPathOut = getMapPath2TmpPath(setOutput, getTmp());
-			setFileNameAll.addAll(setOutput);
-			mapPath2TmpPath.putAll(mapPath2TmpPathOut);
-		}
-		
-		mapName2TmpName = getMapName2TmpName(setFileNameAll, mapPath2TmpPath);
-		isGenerateTmpPath = true;
-	}
-	
-	private Map<String, String> getMapPath2TmpPath(Set<String> setFiles, String pathTmp) {
-		Map<String, String> mapPath2TmpPath = new HashMap<>();
-		Set<String> setPath = new HashSet<>();
-		for (String inFileName : setFiles) {
-			String inPath = FileOperate.getParentPathNameWithSep(inFileName);
-			setPath.add(inPath);
-		}
-		
-		Set<String> setPathNoDup = new HashSet<>();
-		for (String path : setPath) {
-			String parentPath = FileOperate.getFileName(path);
-			String parentPathFinal = parentPath;
-			int i = 1;//防止产生同名文件夹的措施
-			while (setPathNoDup.contains(parentPathFinal)) {
-				parentPathFinal = parentPath + i++;
-			}
-			setPathNoDup.add(parentPathFinal);
-			String tmpPathThis = pathTmp + parentPathFinal+ FileOperate.getSepPath();
-			mapPath2TmpPath.put(path, tmpPathThis);
-		}
-		return mapPath2TmpPath;
-	}
-	
-	private Map<String, String> getMapName2TmpName(Set<String> setFileNameAll, Map<String, String> mapPath2TmpPath) {
-		Map<String, String> mapName2TmpName = new HashMap<>();
-
-		for (String filePathName : setFileNameAll) {
-			String tmpPath = mapPath2TmpPath.get(FileOperate.getParentPathNameWithSep(filePathName));
-			String fileName = FileOperate.getFileName(filePathName);
-			tmpPath = tmpPath + fileName;
-			/** 将已有的输出文件夹在临时文件夹中创建好 */
-			if (filePathName.endsWith("/") || filePathName.endsWith("\\")) {
-				tmpPath = FileOperate.addSep(tmpPath);
-			}
-			mapName2TmpName.put(filePathName, tmpPath);
-		}
-		return mapName2TmpName;
-	}
-	
-	//===========================================================================
-	
-	protected String getTmp() {
-		if (StringOperate.isRealNull(tmpPath)) {
-			tmpPath = PathDetail.getTmpPathRandom();
-		}
-		return tmpPath;
-	}
-	/** 将已有的输出文件夹在临时文件夹中创建好 */
-	protected void createFoldTmp() {
-		for (String filePathName : mapName2TmpName.keySet()) {
-			String tmpPath = mapName2TmpName.get(filePathName);
-			if ( FileOperate.isFileDirectory(filePathName)) {
-				FileOperate.createFolders(tmpPath);
-			} else {
-				FileOperate.createFolders(FileOperate.getParentPathNameWithSep(tmpPath));
-			}
-		}
-	}
-	
 	/** 返回实际运行的cmd string数组
 	 * 必须设定好lcCmd后才能使用
 	 * @param redirectStdErr 是否重定向标准输出和错误输出，如果只是获得命令，那不需要重定向<br>
@@ -420,8 +299,7 @@ public class CmdOrderGenerator {
 		saveFilePath = null;
 		saveErrPath = null;
 		
-		ConvertCmdTmp convertCmdTmp = new ConvertCmdTmp(isRedirectInToTmp, isRedirectOutToTmp,
-				setInput, setOutput, mapName2TmpName);
+		ConvertCmdTmp convertCmdTmp = cmdPath.generateConvertCmdTmp();
 		ConvertCmd convertOs2Local = getConvertOs2Local();
 		
 		for (String tmpCmd : lsCmd) {
@@ -440,7 +318,6 @@ public class CmdOrderGenerator {
 				}
 			}
 			
-			setStdAndErr(convertCmdTmp, stdOut, errOut);
 			tmpCmd = convertCmdTmp.convertSubCmd(tmpCmd);
 			
 			if (stdOut) {
@@ -471,10 +348,6 @@ public class CmdOrderGenerator {
 		return realCmd;
 	}
 	
-	protected void setStdAndErr(ConvertCmdTmp convertCmdTmp, boolean stdOut, boolean errOut) {
-		convertCmdTmp.setStdInOut(stdOut, errOut);
-	}
-	
 	protected ConvertCmd getConvertOs2Local() {
 		return ServiceEnvUtil.isAliyunEnv() ? new ConvertOss() : new ConvertHdfs();
 	}
@@ -482,102 +355,17 @@ public class CmdOrderGenerator {
 	/**
 	 * 将tmpPath文件夹中的内容全部移动到resultPath中 */
 	public void moveFileOut() {
-		if (!mapPath2TmpPathOut.isEmpty()) {
-			logger.info("start move files");
-		}
-		
-		for (String outPath : mapPath2TmpPathOut.keySet()) {
-			String outTmpPath = mapPath2TmpPathOut.get(outPath);
-			//遍历某个输出临时文件夹下的全体文件，看是否是cmd运行之前就保存的文件
-			//如果是新生成的文件，就可以拷贝出去
-			List<String> lsFilesFinish = FileOperate.getLsFoldFileName(outTmpPath);
-			for (String fileInTmp : lsFilesFinish) {
-				String  filePathResult = fileInTmp.replaceFirst(outTmpPath, outPath);
-				if (setInput.contains(filePathResult) && FileOperate.isFileExistAndBigThanSize(filePathResult, 0)) {
-					continue;
-				}
-				
-				List<String> lsFilesNeedMove = getLsFileNeedMove(fileInTmp);
-				for (String file : lsFilesNeedMove) {
-					String  filePathOut = fileInTmp.replaceFirst(outTmpPath, outPath);
-					moveSingleFileOut(file, filePathOut);
-				}
-			}
-		}
-	}
-	
-	/**
-	 * 给定某个文件或文件夹，看里面哪些文件需要移动
-	 * @param fileInTmp
-	 * @return
-	 */
-	private List<String> getLsFileNeedMove(String fileInTmp) {
-		List<String> lsFileNeedMove = new ArrayList<>();
-		List<Path> lsFiles = FileOperate.getLsFoldPathRecur(fileInTmp, false);
-		for (Path path : lsFiles) {
-			String pathStr = FileOperate.getAbsolutePath(path);
-			if (!mapFileName2LastModifyTimeAndLen.containsKey(pathStr)) {
-				lsFileNeedMove.add(FileOperate.getAbsolutePath(path));
-				continue;
-			}
-			long[] lastModifyTime2Len = mapFileName2LastModifyTimeAndLen.get(pathStr);
-			long[] lastModifyTime2LenThis = getLastModifyTime2Len(path);			
-			if (lastModifyTime2LenThis[0] != lastModifyTime2Len[0] || lastModifyTime2LenThis[1] != lastModifyTime2Len[1]) {
-				lsFileNeedMove.add(FileOperate.getAbsolutePath(path));
-			}
-		}
-		return lsFileNeedMove;
-	
-	}
-	
-	private long[] getLastModifyTime2Len(Path path) {
-		long len = FileOperate.getFileSizeLong(path);
-		long lastModifyTime = len < 0 ? 0 : FileOperate.getTimeLastModify(path);
-		return new long[]{lastModifyTime, len};
-	}
-	
-	protected void moveSingleFileOut(String filePathTmp, String filePathOut) {
-		String operate = isRetainTmpFiles? "copy" : "move";
-		logger.info(operate + " file from  " + filePathTmp + "  to  " + filePathOut);
-		if (isRetainTmpFiles) {
-			FileOperate.copyFileFolder(filePathTmp, filePathOut, true);
-		} else {
-			FileOperate.moveFile(true, filePathTmp, filePathOut);
-		}
+		cmdPath.moveFileOut();
 	}
 	
 	/** 删除中间文件，会把临时的input文件也删除 */
 	public void deleteTmpFile() {
-		if (isRetainTmpFiles) {
-			return;
-		}     
-		Map<String, String> mapPath2TmpPath = new HashMap<>();
-		mapPath2TmpPath.putAll(mapPath2TmpPathIn);
-		mapPath2TmpPath.putAll(mapPath2TmpPathOut);
-		if (!mapPath2TmpPath.isEmpty()) {
-			logger.debug("start delete files");
-		}
-		for (String tmpPath : mapPath2TmpPath.values()) {
-			logger.debug("delete file: " + tmpPath);
-			FileOperate.deleteFileFolder(tmpPath);
-		}
+		cmdPath.deleteTmpFile();
 	}
 	
 	public void clearLsCmd() {
 		lsCmd.clear();
-		setInput.clear();
-		setOutput.clear();
-		mapName2TmpName.clear();
-		mapPath2TmpPathIn.clear();
-		mapPath2TmpPathOut.clear();
+		cmdPath.clearLsCmd();
 	}
 
-	public static CmdOrderGenerator getInstance(boolean isLocal) {
-		if (isLocal) {
-			return new CmdOrderGenerator();
-		} else {
-			return new CmdOrderGeneratorAli();
-		}
-	}
-	
 }

@@ -123,16 +123,13 @@ public abstract class ConvertCmd {
 			} 
 			if(subCmd.startsWith("oss://")) {
 				// TODO 这里是有bug的.测试先这么写.
-				return CmdOrderGeneratorAli.convertAli2Loc(subCmd, isReadMap);
+				return CmdPathAli.convertAli2Loc(subCmd, isReadMap);
 			} else {
 				return subCmd;
 			}
 		}
 	}
 	public static class ConvertCmdTmp extends ConvertCmd {
-		boolean stdOut;
-		boolean errOut;
-		
 		boolean isRedirectOutToTmp;
 		boolean isRedirectInToTmp;
 		Set<String> setInput;
@@ -147,16 +144,11 @@ public abstract class ConvertCmd {
 			this.mapName2TmpName = mapName2TmpName;
 		}
 		
-		public void setStdInOut(boolean stdOut, boolean errOut) {
-			this.stdOut = stdOut;
-			this.errOut = errOut;
-		}
-		
 		@Override
 		String convert(String subCmd) {
 			if ((isRedirectInToTmp && setInput.contains(subCmd))
 					|| 
-					(!errOut && !stdOut && isRedirectOutToTmp && setOutput.contains(subCmd))) {
+					(isRedirectOutToTmp && setOutput.contains(subCmd))) {
 				subCmd = mapName2TmpName.get(subCmd);
 			}
 			return subCmd;

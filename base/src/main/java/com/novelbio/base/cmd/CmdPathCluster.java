@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.fileOperate.FileOperate;
 
@@ -62,7 +63,8 @@ public class CmdPathCluster {
 		for (String path : setPath) {
 			//如果前面的task已经记录了该文件夹的存储路径，则拷贝到同一个文件夹下
 			//这样相同文件名的就可以跳过了
-			if (mapOutPath2TmpOutPath.containsKey(path)) {
+			String tmpPath = getTmpPathAlreadyExist(path);
+			if (tmpPath != null) {
 				mapPath2TmpPath.put(path, mapOutPath2TmpOutPath.get(path));
 			} else {
 				setPathNotExist.add(path);
@@ -93,10 +95,19 @@ public class CmdPathCluster {
 	 * @param inputPath
 	 * @return
 	 */
-	private String getTmpPathAlreadyExist(String inputPath) {
-		while (!StringOperate.isRealNull(inputPath) && inputPath.length() > 10) {
-			
+	@VisibleForTesting
+	protected String getTmpPathAlreadyExist(String inputPath) {
+		String lastPath = null;
+		String resultTmpPath = null;
+		while (!StringOperate.isRealNull(inputPath) && !StringOperate.isEqual(inputPath, lastPath)) {
+			if (mapOutPath2TmpOutPath.containsKey(inputPath)) {
+				resultTmpPath = mapOutPath2TmpOutPath.get(inputPath);
+				break;
+			}
+			lastPath = inputPath;
+			inputPath = FileOperate.getParentPathNameWithSep(inputPath);
 		}
+		return resultTmpPath;
 	}
 	
 	private Map<String, String> getMapPath2TmpPath(Set<String> setPath, String pathTmp) {

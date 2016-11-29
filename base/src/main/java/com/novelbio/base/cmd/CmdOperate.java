@@ -74,7 +74,7 @@ public class CmdOperate extends RunProcess<String> {
 	boolean getCmdInErrStream = false;
 	
 	/** 用来传递参数，拷贝输入输出文件夹的类 */
-	CmdOrderGenerator cmdOrderGenerator = CmdOrderGenerator.getInstance(!ServiceEnvUtil.isAliyunEnv());
+	CmdOrderGenerator cmdOrderGenerator = new CmdOrderGenerator(!ServiceEnvUtil.isAliyunEnv());
 	
 	/** 如果选择用list来保存结果输出，最多保存500行的输出信息 */
 	int lineNumStd = 1000;
@@ -191,7 +191,10 @@ public class CmdOperate extends RunProcess<String> {
 		((ProcessRemote)process).setKeyFile(keyFile);
 		cmdOrderGenerator.setLsCmd(lsCmd);
 	}
-
+	
+	public void setCmdPathCluster(CmdPathCluster cmdPathCluster) {
+		cmdOrderGenerator.setCmdPathCluster(cmdPathCluster);
+	}
 	/** 是否将本该输出到控制台的结果依然写入控制台，一般在运行长时间任务的时候，
 	 * 譬如 tophat等，需要写入控制台，如果一些譬如获得version之类的命令，就不需要
 	 * 往控制台写了
@@ -209,7 +212,7 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	private void setCmdFile(String cmd, String cmdWriteInFileName) {
 		while (true) {
-			cmd1SH = cmdOrderGenerator.getTmp() + cmdWriteInFileName.replace("\\", "/") + DateUtil.getDateAndRandom() + ".sh";
+			cmd1SH = cmdOrderGenerator.getTmpPath() + cmdWriteInFileName.replace("\\", "/") + DateUtil.getDateAndRandom() + ".sh";
 			if (!FileOperate.isFileExist(cmd1SH)) {
 				break;
             }

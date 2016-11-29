@@ -1309,9 +1309,6 @@ public class FileOperate {
 		if (!isFileExistAndNotDir(oldfile)) {
 			throw new ExceptionNbcFile("no file exist: " + oldfile);
 		}
-
-		Path pathNewTmp = getPath(FileOperate.changeFileSuffix(getAbsolutePath(pathNew), "_tmp", null));
-
 		if (oldfile != null && isFilePathSame(getAbsolutePath(oldfile), getAbsolutePath(pathNew)))
 			return;
 		if (!cover && Files.exists(pathNew))
@@ -1319,6 +1316,7 @@ public class FileOperate {
 		if (cover && isFileDirectory(pathNew)) {
 			throw new ExceptionFileError("cannot cover directory " + pathNew);
 		}
+		Path pathNewTmp = getPath(FileOperate.changeFileSuffix(getAbsolutePath(pathNew), "_tmp", null));
 		try {
 			Files.deleteIfExists(pathNew);
 			Files.deleteIfExists(pathNewTmp);
