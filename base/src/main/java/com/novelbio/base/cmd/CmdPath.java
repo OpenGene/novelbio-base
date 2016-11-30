@@ -226,8 +226,8 @@ public class CmdPath {
 				List<String> lsFilesInTmpNeedMove = getLsFileInTmpNeedMove(FileOperate.getPath(fileInTmp));
 				for (String file : lsFilesInTmpNeedMove) {
 					String  filePathOut = file.replaceFirst(outTmpPath, outPath);
-					cmdPathCluster.putTmpOut2Out(file, filePathOut);
 					moveSingleFileOut(file, filePathOut);
+					cmdPathCluster.putTmpOut2Out(file, filePathOut);
 				}
 			}
 		}

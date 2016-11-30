@@ -48,7 +48,8 @@ public class CmdPathAli extends CmdPath {
 		String operate = isRetainTmpFiles? "link" : "move";
 		logger.info(operate + " file from  " + filePathTmp + "  to  " + filePathOut);
 		if (isRetainTmpFiles) {
-			FileOperate.linkFile(filePathTmp, filePathOut, true);
+			FileOperate.moveFile(true, filePathTmp, filePathOut);
+			FileOperate.linkFile(filePathOut, filePathTmp, true);
 		} else {
 			//TODO 这里可能全改为move会更好些
 			FileOperate.moveFile(true, filePathTmp, filePathOut);
