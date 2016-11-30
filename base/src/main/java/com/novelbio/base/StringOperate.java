@@ -226,21 +226,16 @@ public class StringOperate {
 	 * 
 	 * @param buffer
 	 * @return
+	 * @throws UnsupportedEncodingException 
 	 */
-	public static String getString(ByteBuffer buffer) {
-		Charset charset = null;
-		CharsetDecoder decoder = null;
-		CharBuffer charBuffer = null;
-		try {
-			charset = Charset.forName("UTF-8");
-			decoder = charset.newDecoder();
-			// 用这个的话，只能输出来一次结果，第二次显示为空
-			// charBuffer = decoder.decode(buffer);
-			charBuffer = decoder.decode(buffer.asReadOnlyBuffer());
-			return charBuffer.toString();
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			return "error";
+	public static String getString(ByteBuffer buffer) throws UnsupportedEncodingException {
+		byte[] bytes = null;
+		if(buffer.hasArray()) {
+		    bytes = buffer.array();
+		} else {
+		    bytes = new byte[buffer.remaining()];
+		    buffer.get(bytes);
 		}
+		return new String(bytes, "UTF-8");
 	}
 }
