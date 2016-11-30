@@ -61,6 +61,8 @@ public class TestCmdOperateRedirect {
 	 * 会生成临时文件 /home/novelbio/tmp/myresult/test/subject/test/myfile/test.txt
 	 * 获得结果文件 /tmp/myresult/test/subject/test/myfile/test.txt
 	 * 
+	 * 并且  /home/novelbio/tmp/myresult/ 里面已经存在的文件不会被拷贝出来
+	 * 
 	 * task2 输入上一个结果文件 /tmp/myresult/test/subject/test/myfile/test.txt
 	 * 会拷贝为临时文件 /home/novelbio/tmp/myresult/test/subject/test/myfile/test.txt
 	 * 
