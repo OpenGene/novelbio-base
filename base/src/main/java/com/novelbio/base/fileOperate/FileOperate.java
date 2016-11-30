@@ -1797,7 +1797,7 @@ public class FileOperate {
 	 * @return 返回是否创建成功
 	 */
 	public static boolean linkFile(String rawFile, String linkTo, boolean cover) {
-		if (!cover && FileOperate.isFileFolderExist(linkTo)) {
+		if (!cover && (FileOperate.isFileFolderExist(linkTo) || FileOperate.isSymbolicLink(linkTo))) {
 			return true;
 		}
 		if (!FileOperate.isFileExist(rawFile)) {
