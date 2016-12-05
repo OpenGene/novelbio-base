@@ -150,6 +150,23 @@ public class MD5generate {
 	
 	}
 	
+	/**
+	 * 根据文件全路径得到指定文件的前5M内容的MD5值
+	 * @param fileName 包含文件名称的文件全路径
+	 * @return String
+	 * @throws IOException
+	 */
+	public static String getMD5ofFileHead5MB(String fileName) throws IOException {
+		InputStream in = FileOperate.getInputStream(fileName);
+		long maxSize = 1024 * 1024 * 5;//100;
+		long fileLength = 0;
+		fileLength = FileOperate.getFileSizeLong(fileName);
+		maxSize = (maxSize > fileLength ? fileLength : maxSize);
+		byte[] b = new byte[(int) maxSize];
+		in.read(b);
+		in.close();
+		return getMD5String(b);
+	}
 	
 	public static String getMD5String(String s) {
 		try {
