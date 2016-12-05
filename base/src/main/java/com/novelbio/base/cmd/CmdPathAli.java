@@ -34,7 +34,7 @@ public class CmdPathAli extends CmdPath {
 	protected void copyFileIn() {
 		for (String inFile : setInput) {
 			String inTmpName = mapName2TmpName.get(inFile);
-			logger.info("copy file from {} to {}", inFile, inTmpName);
+			logger.info("link file from {} to {}", inFile, inTmpName);
 			try {
 				FileOperate.linkFile(inFile, inTmpName, false);
 			} catch (Exception e) {
