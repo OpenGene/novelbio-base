@@ -1727,6 +1727,17 @@ public class FileOperate {
 		String olddirPathTmp = removeSplashHead(olddir.toString(), false);
 		String olddirPath = removeSplashTail(olddirPathTmp, false);
 		final boolean[] isMakeDirSameAsOld = new boolean[] { false };
+		
+		if (!FileOperate.isFileFolderExist(pathNew)) {
+			try {
+				Files.move(olddir, pathNew);
+				return;
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+		}
+		
+		
 		try {
 			createFolders(pathNew);
 			Files.list(olddir).forEach((pathOld) -> {
@@ -1743,7 +1754,7 @@ public class FileOperate {
 				}
 			});
 		} catch (Exception e) {
-			throw new ExceptionNbcFile("copy fold error", e);
+			throw new ExceptionNbcFile("move fold error", e);
 		}
 
 		if (!isMakeDirSameAsOld[0]) {
@@ -1751,6 +1762,7 @@ public class FileOperate {
 		}
 	}
 
+	
 	protected static boolean isFilePathSame(String oldfile, String newfile) {
 		if (StringOperate.isRealNull(oldfile) && StringOperate.isRealNull(newfile)) {
 			return true;
@@ -1769,16 +1781,6 @@ public class FileOperate {
 			oldFileStr = oldFileStr.replace("\\", "/");
 		if (newFileStr != null)
 			newFileStr = newFileStr.replace("\\", "/");
-
-		if (StringOperate.isEqual(oldFileStr, newFileStr)) {
-			return true;
-		}
-		if (oldFileStr == null || newFileStr == null) {
-			return false;
-		}
-
-		oldFileStr = getCanonicalPath(oldFileStr);
-		newFileStr = getCanonicalPath(newFileStr);
 
 		if (StringOperate.isEqual(oldFileStr, newFileStr)) {
 			return true;
