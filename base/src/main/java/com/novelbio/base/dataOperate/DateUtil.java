@@ -38,7 +38,7 @@ public class DateUtil {
 	/**
 	 * 年-月-日
 	 */
-	public static final String PATTERN_hhmm = "hh_mm";
+	public static final String PATTERN_hhmm = "HH_mm";
 	
 	long start = 0;
 	/**
@@ -208,7 +208,7 @@ public class DateUtil {
 	 * @return
 	 */
 	public static String getDateAndRandom() {
-	     SimpleDateFormat formatDate= new SimpleDateFormat( "yyyy_MM_dd_hh_mm_ss");
+	     SimpleDateFormat formatDate= new SimpleDateFormat( "yyyy_MM_dd_HH_mm_ss");
 	     Date currentDate = new Date(); //得到当前系统时间
 	     String date = formatDate.format(currentDate); //将日期时间格式化
 	     return date + "_" + getRandomAbs();
@@ -227,7 +227,7 @@ public class DateUtil {
 	 * @return
 	 */
 	public static String getDateDetail() {
-	     SimpleDateFormat formatDate= new SimpleDateFormat( "yyyy-MM-dd-hh-mm-ss");
+	     SimpleDateFormat formatDate= new SimpleDateFormat( "yyyy-MM-dd-HH-mm-ss");
 	     Date currentDate = new Date(); //得到当前系统时间
 	     return formatDate.format(currentDate); //将日期时间格式化
 	}

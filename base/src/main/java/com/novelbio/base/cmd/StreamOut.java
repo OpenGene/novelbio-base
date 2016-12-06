@@ -75,7 +75,6 @@ public class StreamOut extends Thread {
 	
 	public final synchronized void joinStream() throws InterruptedException {
 		long lastLine = readLine;
-		int i = 0;
 		while (isAlive()) {
 			lastLine = readLine;
 			try {
