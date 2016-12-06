@@ -310,7 +310,7 @@ public class CmdOrderGenerator {
 					continue;
 				} else if (tmpCmd.equals("2>")) {
 					errOut = true;
-					setJustDisplayErr(false);
+//					setJustDisplayErr(false);
 					continue;
 				} else if (tmpCmd.equals("<")) {
 					stdIn = true;

@@ -282,17 +282,12 @@ public class CmdOperate extends RunProcess<String> {
 		this.isStdoutInfo = isDelete;
 	}
 	/**
-	 * @deprecated 用yarn来获取log日志<br><br>
-	 * 
-	 * 设定标准错误流，如果是这里指定，则会即时刷新<br>
-	 * 本设置会被cmd中自带的 2> 重定向覆盖
-	 * @param stdErrPath
-	 * @param isDelete 完成后是否删除输出文件, 如果需要删除文件，则认为该文件只是展示信息使用，会采用txt模式输出
+	 * 输出的错误流是文本还是二进制
+	 * @param stdErrPath true: 文本 false: 二进制
+	 * 文本的话就可以通过{@link #getLsErrOut()}获取错误信息
 	 */
-	public void setStdErrPath(String stdErrPath, boolean isDelete) {
-		cmdOrderGenerator.setSaveErrPath(stdErrPath);
-		cmdOrderGenerator.setJustDisplayErr(isDelete);
-		this.isStderrInfo = isDelete;
+	public void setIsStdErrTxt(boolean isStdErrTxt) {
+		cmdOrderGenerator.setJustDisplayErr(isStdErrTxt);
 	}
 
 	/** 如果为null就不加入 */
