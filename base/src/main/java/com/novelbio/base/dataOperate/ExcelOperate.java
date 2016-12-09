@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -528,8 +527,8 @@ public class ExcelOperate implements Closeable {
 			rowStartNum = 0;
 
 		int[] readColumn = new int[columnEndNum - columnStartNum + 1];
-		for (int readColNum = columnStartNum; readColNum <= columnEndNum; readColNum++) {
-			readColumn[readColNum] = readColNum;
+		for (int i = 0; i < readColumn.length; i++) {
+			readColumn[i] = columnStartNum + i;
 		}
 
 		return readLsExcelDetail(sheetNum, rowStartNum, rowEndNum, readColumn);
