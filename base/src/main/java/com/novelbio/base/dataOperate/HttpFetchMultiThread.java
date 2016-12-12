@@ -106,14 +106,21 @@ public class HttpFetchMultiThread implements IHttpFetch, Closeable {
 	/** 好像httpclient会自动保存cookie */
 	CookieStore cookieStore;
 	
-	/** http连接超时 */
-	int connectTimeout = -1;
-	/** 数据传输超时 */
-	int socketTimeout = -1;
-	
+	 int timeoutConnect = 10000;
+	 int timeoutSocket = 60000;
+	 int timeoutConnectionRequest = 10000;
+	 
 	/** 不是单例，实际使用的时候get一次就可 */
 	public static HttpFetchMultiThread getInstance() {
 		return getInstance(200, 10, null);
+	}
+	/** 不是单例，实际使用的时候get一次就可 */
+	public static HttpFetchMultiThread getInstance(int timeoutConnect) {
+		return getInstance(timeoutConnect, timeoutConnect, timeoutConnect);
+	}
+	/** 不是单例，实际使用的时候get一次就可 */
+	public static HttpFetchMultiThread getInstance(int timeoutConnect, int timeoutSocket, int timeoutConnectionRequest) {
+		return getInstance(200, 10, null, timeoutConnect, timeoutSocket, timeoutConnectionRequest);
 	}
 	/** 不是单例，实际使用的时候get一次就可 */
 	public static HttpFetchMultiThread getInstance(int maxConnect, int maxConnectPerRoute) {
@@ -127,6 +134,12 @@ public class HttpFetchMultiThread implements IHttpFetch, Closeable {
 	public static HttpFetchMultiThread getInstance(CookieStore cookieStore) {
 		return getInstance(200, 10, cookieStore);
 	}
+	
+	/** 不是单例，实际使用的时候get一次就可 */
+	public static HttpFetchMultiThread getInstance(CookieStore cookieStore, int timeoutConnect, int timeoutSocket, int timeoutConnectionRequest) {
+		return getInstance(200, 10, cookieStore, timeoutConnect, timeoutSocket, timeoutConnectionRequest);
+	}
+	
 	/** 不是单例，实际使用的时候get一次就可
 	 * @param maxConnect 最大连接数
 	 * @param maxConnectPerRoute 最大单个网站的连接数
@@ -135,49 +148,64 @@ public class HttpFetchMultiThread implements IHttpFetch, Closeable {
 	 */
 	public static HttpFetchMultiThread getInstance(int maxConnect, int maxConnectPerRoute, CookieStore cookieStore) {
 		try {
-			return new HttpFetchMultiThread(maxConnect,maxConnectPerRoute, cookieStore);
+			return new HttpFetchMultiThread(maxConnect,maxConnectPerRoute, cookieStore, 5000, 5000, 5000);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+	/** 不是单例，实际使用的时候get一次就可
+	 * @param maxConnect 最大连接数
+	 * @param maxConnectPerRoute 最大单个网站的连接数
+	 * @param cookieStore
+	 * @return
+	 */
+	public static HttpFetchMultiThread getInstance(int maxConnect, int maxConnectPerRoute, CookieStore cookieStore, int timeoutConnect, int timeoutSocket, int timeoutConnectionRequest) {
+		try {
+			return new HttpFetchMultiThread(maxConnect,maxConnectPerRoute, cookieStore, timeoutConnect, timeoutSocket, timeoutConnectionRequest);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
+	/**
+	 * 
+	 * @param maxConnect
+	 * @param maxConnectPerRoute
+	 * @param cookieStore
+	 * @param timeoutConnect
+	 * 
+	 * 一次http请求，必定会有三个阶段，一：建立连接；二：数据传送；三，断开连接
+	 * 当建立连接在规定的时间内（ConnectionTimeOut ）没有完成，那么此次连接就结束了。
+	 * 后续的SocketTimeOutException就一定不会发生。只有当连接建立起来后，也就是没有
+	 * 发生ConnectionTimeOutException ，才会开始传输数据，如果数据在
+	 * 规定的时间内(SocketTimeOut)传输完毕,则断开连接。
+	 * 否则，触发SocketTimeOutException
+	 * @param timeoutSocket
+	 * @param timeoutConnectionRequest
+	 * @throws KeyManagementException
+	 * @throws NoSuchAlgorithmException
+	 * @throws KeyStoreException
+	 * @throws CertificateException
+	 * @throws IOException
+	 */
+	private HttpFetchMultiThread(int maxConnect, int maxConnectPerRoute, CookieStore cookieStore, int timeoutConnect, int timeoutSocket, int timeoutConnectionRequest) throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException {
+		initialCM(maxConnect,maxConnectPerRoute);
+		this.cookieStore = cookieStore == null ? new BasicCookieStore() : cookieStore;
+		initial(this.cookieStore, timeoutConnect, timeoutSocket, timeoutConnectionRequest);
+		setHeader();
+	}
 	public void setCookieStore(CookieStore cookieStore) {
 		this.cookieStore = cookieStore;
 	}
-	/**
-	 * 一次http请求，必定会有三个阶段，一：建立连接；二：数据传送；三，断开连接
-	 * 当建立连接在规定的时间内（ConnectionTimeOut ）没有完成，那么此次连接就结束了。
-	 * 后续的SocketTimeOutException就一定不会发生。只有当连接建立起来后，也就是没有
-	 * 发生ConnectionTimeOutException ，才会开始传输数据，如果数据在
-	 * 规定的时间内(SocketTimeOut)传输完毕,则断开连接。
-	 * 否则，触发SocketTimeOutException
-	 */
-	public void setTimeoutConnect(int connectTimeout) {
-		this.connectTimeout = connectTimeout;
-	}
-	/**
-	 * 一次http请求，必定会有三个阶段，一：建立连接；二：数据传送；三，断开连接
-	 * 当建立连接在规定的时间内（ConnectionTimeOut ）没有完成，那么此次连接就结束了。
-	 * 后续的SocketTimeOutException就一定不会发生。只有当连接建立起来后，也就是没有
-	 * 发生ConnectionTimeOutException ，才会开始传输数据，如果数据在
-	 * 规定的时间内(SocketTimeOut)传输完毕,则断开连接。
-	 * 否则，触发SocketTimeOutException
-	 */
-	public void setTimeoutSocket(int socketTimeout) {
-		this.socketTimeout = socketTimeout;
-	}
-	
-	private HttpFetchMultiThread(int maxConnect, int maxConnectPerRoute, CookieStore cookieStore) throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException {
-		initialCM(maxConnect,maxConnectPerRoute);
-		this.cookieStore = cookieStore == null ? new BasicCookieStore() : cookieStore;
-		initial(this.cookieStore);
-		setHeader();
-	}
-	
-	private void initial(CookieStore cookieStore) {
+
+	private void initial(CookieStore cookieStore, int timeoutConnect, int timeoutSocket, int timeoutConnectionRequest) {
 		// Use custom cookie store if necessary.
 		// Use custom credentials provider if necessary.
 		CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+		this.timeoutConnect = timeoutConnect;
+		this.timeoutSocket = timeoutSocket;
+		this.timeoutConnectionRequest = timeoutConnectionRequest;
+		
 		// Create global request configuration
 		RequestConfig defaultRequestConfig = RequestConfig.custom()
 				.setCookieSpec(CookieSpecs.DEFAULT)
@@ -185,6 +213,7 @@ public class HttpFetchMultiThread implements IHttpFetch, Closeable {
 				.setTargetPreferredAuthSchemes(Arrays.asList(AuthSchemes.NTLM, AuthSchemes.DIGEST))
 				.setProxyPreferredAuthSchemes(Arrays.asList(AuthSchemes.BASIC))
 				.setRedirectsEnabled(true)
+				.setConnectTimeout(timeoutConnect).setSocketTimeout(timeoutSocket).setConnectionRequestTimeout(timeoutConnectionRequest)
 				.build();
 		
 		httpclient = HttpClients.custom()
@@ -302,7 +331,7 @@ public class HttpFetchMultiThread implements IHttpFetch, Closeable {
 		httpRequestAndResponse.setUri(uri);
 		
 		//设置http超时
-		RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(socketTimeout).setConnectTimeout(connectTimeout).build();//设置请求和传输超时时间
+		RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(timeoutSocket).setConnectTimeout(timeoutConnect).setConnectionRequestTimeout(timeoutConnectionRequest).build();//设置请求和传输超时时间
 		HttpRequestBase httpRequest = httpRequestAndResponse.getHttpRequest();
 		httpRequest.setConfig(requestConfig);
 		
@@ -324,7 +353,7 @@ public class HttpFetchMultiThread implements IHttpFetch, Closeable {
 		httpRequestAndResponse.setUri(uri);
 		
 		//设置http超时
-		RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(socketTimeout).setConnectTimeout(connectTimeout).build();//设置请求和传输超时时间
+		RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(timeoutSocket).setConnectTimeout(timeoutConnect).setConnectionRequestTimeout(timeoutConnectionRequest).build();//.setConnectionRequestTimeout(connectTimeout);//设置请求和传输超时时间
 		HttpRequestBase httpRequest = httpRequestAndResponse.getHttpRequest();
 		httpRequest.setConfig(requestConfig);
 
