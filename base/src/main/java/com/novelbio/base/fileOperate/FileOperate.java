@@ -1207,6 +1207,12 @@ public class FileOperate {
 		if (!FileOperate.isFileFolderExist(file)) {
 			openOption = StandardOpenOption.CREATE;
 		}
+		if (append == false && FileOperate.isFileExistAndBigThan0(file)) {
+			if (FileOperate.isFileDirectory(file)) {
+				throw new ExceptionNbcFile("cannot create outputstream on folder " + file.toString());
+			}
+			FileOperate.deleteFileFolder(file);
+		}
 		return Files.newOutputStream(file, openOption);
 	}
 
