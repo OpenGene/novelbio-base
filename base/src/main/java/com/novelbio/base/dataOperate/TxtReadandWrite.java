@@ -469,6 +469,15 @@ public class TxtReadandWrite implements Closeable {
 	}
 	
 	/**
+	 * 将流写入文件
+	 * 
+	 * @param is
+	 */
+	public void writefile(InputStream is) {
+		txtWrite.writefile(is);
+	}
+	
+	/**
 	 * @param content
 	 *            ，要写入文件内容,并考虑是否刷新--也就是直接写入文件而不是进入缓存
 	 * @throws Exception

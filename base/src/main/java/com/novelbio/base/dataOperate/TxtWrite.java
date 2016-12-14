@@ -5,6 +5,7 @@ import hdfs.jsr203.HdfsConfInitiator;
 import java.io.BufferedOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -119,6 +120,27 @@ class TxtWrite implements Closeable {
 	public void writefile(String content) {
 		writefile(content, true);
 	}
+	
+	/**
+	 * 将流写入文件
+	 * 
+	 * @param is
+	 */
+	public void writefile(InputStream is) {
+		byte[] buffer = new byte[1024];
+		int len = 0,count = 0;
+		try {
+			while ((len = is.read(buffer)) > 0) {
+				outputStream.write(buffer, 0, len);
+				if (count++ == 1000) {
+					outputStream.flush();
+				}
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 	/**
 	 * 写完自动flush
 	 * @param content 要写入文件内容
