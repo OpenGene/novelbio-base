@@ -223,8 +223,8 @@ public class FileOperate {
 		if (fileName.startsWith("oss://")) {
 			try {
 				URI uri = new URI(fileName);
-				String parentPath = new OssFileSystemProvider().getPath(uri).getParent().toUri().toString();
-				return parentPath.endsWith("/") ? parentPath : parentPath + getSepPath();
+				String parentPath = new OssFileSystemProvider().getPath(uri).getParent().toString();
+				return parentPath;
 			} catch (Exception e) {
 				e.printStackTrace();
 				logger.error("getParentPathNameWithSep error.filename=" + fileName, e);
@@ -620,7 +620,7 @@ public class FileOperate {
 				name = "/hdfs:" + name;
 			}
 		} else if (path instanceof OssPath) {
-			name = path.toUri().toString();
+			name = path.toString();
 		}
 		return name;
 	}
@@ -634,7 +634,7 @@ public class FileOperate {
 				name = "/hdfs:" + name;
 			}
 		} else if (path instanceof OssPath) {
-			name = path.toUri().toString();
+			name = path.toString();
 		}
 		return name;
 	}
@@ -835,7 +835,7 @@ public class FileOperate {
 	}
 
 	/**
-	 * 获取文件夹下包含指定文件名与后缀的所有文件名，递归<br>
+	 * 获取文件夹下包含指定文件名与后缀的所有文件名<b>递归查找</b><br>
 	 * 如果文件不存在则返回空的list<br>
 	 * 如果不是文件夹，则返回该文件名<br>
 	 * 
@@ -850,7 +850,7 @@ public class FileOperate {
 		return getLsFoldPathRecur(FileOperate.getPath(file), "*", "*", isNeedFolder);
 	}
 	/**
-	 * 获取文件夹下包含指定文件名与后缀的所有文件名，仅找第一层，不递归<br>
+	 * 获取文件夹下包含指定文件名与后缀的所有文件名<b>递归查找</b><br>
 	 * 如果文件不存在则返回空的list<br>
 	 * 如果不是文件夹，则返回该文件名<br>
 	 * 
@@ -870,7 +870,7 @@ public class FileOperate {
 		return lsResult;
 	}
 	/**
-	 * 获取文件夹下包含指定文件名与后缀的所有文件名，<br>递归查找<br>
+	 * 获取文件夹下包含指定文件名与后缀的所有文件名<b>递归查找</b><br>
 	 * 如果文件不存在则返回空的list<br>
 	 * 如果不是文件夹，则返回该文件名<br>
 	 * 
@@ -909,31 +909,47 @@ public class FileOperate {
 	public static List<Path> getLsFoldPathRecur(Path file, String filename, String suffix, boolean isNeedFolder) {
 		List<Path> lsPath = new ArrayList<>();
 
+		int noNeedReg = 0;
 		if (filename == null || filename.equals("*")) {
 			filename = ".*";
+			noNeedReg++;
 		}
 		if (suffix == null || suffix.equals("*")) {
 			suffix = ".*";
+			noNeedReg++;
 		}
 		if (file == null || !Files.exists(file)) {
 			return new ArrayList<>();
 		}
-		PredicateFileName predicateFileName = new PredicateFileName(filename, suffix);
-		predicateFileName.setFilterFolder(false);
+		
+		PredicateFileName predicateFileName = null;
+		if (noNeedReg != 2) {
+			//等于2就是匹配所有，不需要正则了.
+			predicateFileName = new PredicateFileName(filename, suffix);
+			predicateFileName.setFilterFolder(false);
+		}
 
 		// 如果只是文件则返回文件名
 		if (!Files.isDirectory(file)) { // 获取文件名与后缀名
-			if (predicateFileName.test(file)) {
+			if (predicateFileName == null) {
 				lsPath.add(file);
-				return lsPath;
+			} else if (predicateFileName != null && predicateFileName.test(file)) {
+				lsPath.add(file);
 			}
+			return lsPath;
 		}
 		try {
 			Stream<Path> streamPath = Files.list(file);
-			List<Path> lsPathTmp = streamPath.filter(predicateFileName).collect(Collectors.toList());
+			 List<Path> lsPathTmp = null;
+			 if (predicateFileName != null) {
+				 lsPathTmp = streamPath.filter(predicateFileName).collect(Collectors.toList());
+			} else {
+				lsPathTmp = streamPath.collect(Collectors.toList());
+			}
 			streamPath.close();
 			for (Path path : lsPathTmp) {
-				if (Files.isDirectory(path)) {
+				if ((path instanceof OssPath && path.toString().endsWith("/")) || (!(path instanceof OssPath) && Files.isDirectory(path))) {
+					//是ossPath，只要是以/结尾的.就是文件夹。不是osspath,则需查找判断一下
 					lsPath.addAll(getLsFoldPathRecur(path, filename, suffix, isNeedFolder));
 					if (isNeedFolder) {
 						lsPath.add(path);
@@ -969,7 +985,8 @@ public class FileOperate {
 	 */
 	public static List<Path> getLsFoldPath(Path file, String filename, String suffix) {
 		List<Path> lsFilenames = new ArrayList<>();
-
+		
+		int noNeedReg = 0;
 		if (filename == null || filename.equals("*")) {
 			filename = ".*";
 		}
@@ -979,17 +996,28 @@ public class FileOperate {
 		if (file == null || !Files.exists(file)) {
 			return new ArrayList<>();
 		}
-		PredicateFileName predicateFileName = new PredicateFileName(filename, suffix);
+		
+		PredicateFileName predicateFileName = null;
+		if (noNeedReg != 2) {
+			//等于2就是匹配所有，不需要正则了.
+			predicateFileName = new PredicateFileName(filename, suffix);
+		}
 		// 如果只是文件则返回文件名
 		if (!Files.isDirectory(file)) { // 获取文件名与后缀名
-			if (predicateFileName.test(file)) {
+			if (predicateFileName == null) {
 				lsFilenames.add(file);
-				return lsFilenames;
+			} else if (predicateFileName != null && predicateFileName.test(file)) {
+				lsFilenames.add(file);
 			}
+			return lsFilenames;
 		}
 		try {
 			Stream<Path> streamPath = Files.list(file);
-			lsFilenames = streamPath.filter(predicateFileName).collect(Collectors.toList());
+			if (predicateFileName != null) {
+				lsFilenames = streamPath.filter(predicateFileName).collect(Collectors.toList());
+			} else {
+				lsFilenames = streamPath.collect(Collectors.toList());
+			}
 			streamPath.close();
 			return lsFilenames;
 		} catch (IOException e) {
@@ -2040,11 +2068,14 @@ public class FileOperate {
 	 * 判断文件是否为文件夹,null直接返回false
 	 * 
 	 * @param fileName
-	 * @return
+	 * @return true是文件夹，false不是文件夹
 	 */
 	public static boolean isFileDirectory(Path file) {
 		if (file == null) {
 			return false;
+		}
+		if (file instanceof OssPath) {
+			return file.toString().endsWith("/") ?  true : false;
 		}
 		return Files.isDirectory(file);
 	}
