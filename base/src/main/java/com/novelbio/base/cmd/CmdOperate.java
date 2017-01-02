@@ -788,13 +788,18 @@ public class CmdOperate extends RunProcess<String> {
 		}
 		
 		//不管是否跑成功，都移出文件夹
-		cmdOrderGenerator.moveFileOut();
-		cmdOrderGenerator.deleteTmpFile();
+		moveFileOut();
 		
 		runTime = dateTime.getElapseTime();
 		if (process instanceof ProcessRemote) {
 			((ProcessRemote)process).closeSession();
 		}
+	}
+	
+	/** 把文件移动出来 */
+	public void moveFileOut() {
+		cmdOrderGenerator.moveFileOut();
+		cmdOrderGenerator.deleteTmpFile();
 	}
 	
 	@Override

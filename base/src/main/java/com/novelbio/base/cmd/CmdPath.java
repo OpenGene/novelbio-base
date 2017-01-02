@@ -63,10 +63,6 @@ public class CmdPath {
 	
 	private CmdPathCluster cmdPathCluster;
 	
-	protected CmdPath() {
-		this.tmpPath = PathDetail.getTmpPathRandom();
-	}
-	
 	public void setCmdPathCluster(CmdPathCluster cmdPathCluster) {
 		this.cmdPathCluster = cmdPathCluster;
 	}
@@ -78,7 +74,10 @@ public class CmdPath {
 		}
 		this.tmpPath = FileOperate.addSep(tmpPath);
 	}
-	public String getTmpPath() {
+	public synchronized String getTmpPath() {
+		if (StringOperate.isRealNull(tmpPath)) {
+			tmpPath = PathDetail.getTmpPathRandom();
+		}
 		return tmpPath;
 	}
 	/** 临时文件夹中的文件是否删除 */
@@ -127,12 +126,12 @@ public class CmdPath {
 		
 		Map<String, String> mapPath2TmpPath = new HashMap<>();
 		if (isRedirectInToTmp) {
-			mapPath2TmpPathIn = cmdPathCluster.getMapInPath2TmpPath(setInput, tmpPath);
+			mapPath2TmpPathIn = cmdPathCluster.getMapInPath2TmpPath(setInput, getTmpPath());
 			setFileNameAll.addAll(setInput);
 			mapPath2TmpPath.putAll(mapPath2TmpPathIn);
 		}
 		if (isRedirectOutToTmp) {
-			mapPath2TmpPathOut = cmdPathCluster.getMapOutPath2TmpPath(setOutput, tmpPath);
+			mapPath2TmpPathOut = cmdPathCluster.getMapOutPath2TmpPath(setOutput, getTmpPath());
 			setFileNameAll.addAll(setOutput);
 			mapPath2TmpPath.putAll(mapPath2TmpPathOut);
 		}
@@ -168,7 +167,7 @@ public class CmdPath {
 		}
 		if (isRedirectOutToTmp) {
 			mapFileName2LastModifyTimeAndLen.clear();
-			List<Path> lsPaths = FileOperate.getLsFoldPathRecur(tmpPath, true);
+			List<Path> lsPaths = FileOperate.getLsFoldPathRecur(getTmpPath(), true);
 			lsPaths.forEach((path)->{
 				mapFileName2LastModifyTimeAndLen.put(FileOperate.getAbsolutePath(path), 
 						getLastModifyTime2Len(path));
