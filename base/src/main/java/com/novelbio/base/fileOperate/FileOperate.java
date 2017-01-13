@@ -224,7 +224,7 @@ public class FileOperate {
 			try {
 				URI uri = new URI(fileName);
 				String parentPath = new OssFileSystemProvider().getPath(uri).getParent().toString();
-				return parentPath;
+				return parentPath.endsWith("/") ? parentPath : parentPath + "/";
 			} catch (Exception e) {
 				e.printStackTrace();
 				logger.error("getParentPathNameWithSep error.filename=" + fileName, e);
@@ -409,6 +409,21 @@ public class FileOperate {
 	public static long getFileSizeLong(String filePath) {
 		return getFileSizeLong(getPath(filePath));
 	}
+	
+	/**
+	 * 给定文件路径，返回大小，单位为byte，如果有链接，则返回链接的大小<br/>
+	 * 该方法返回的实际文件大小,不是文件占用空间大小.<br/>
+	 * 如:测试实际占用185G.该方法返回172G,实际占用26G,返回24G
+	 * 
+	 * @param filePath
+	 *            如果是文件夹，则递归返回本文件夹下全体文件的大小
+	 * @return 没有文件返回-1
+	 * @throws IOException
+	 */
+	@Deprecated
+	public static long getFileSizeLong(File file) {
+		return getFileSizeLong(getPath(file));
+	}
 
 	/**
 	 * 给定文件路径，返回大小，单位为byte，如果有链接，则返回链接的大小<br/>
@@ -443,12 +458,7 @@ public class FileOperate {
 	}
 
 	public static BasicFileAttributes getFileAttribute(String filePath) {
-		Path path = getPath(filePath);
-		try {
-			return Files.readAttributes(path, BasicFileAttributes.class);
-		} catch (IOException e) {
-			throw new ExceptionFileError("cannot get attributes of file " + filePath);
-		}
+		return getFileAttribute(getPath(filePath));
 	}
 
 	public static BasicFileAttributes getFileAttribute(Path filePath) {
@@ -457,18 +467,6 @@ public class FileOperate {
 		} catch (IOException e) {
 			throw new ExceptionFileError("cannot get attributes of file " + filePath);
 		}
-	}
-
-	/**
-	 * <b>未经测试</b> 给定文件路径，返回大小，单位为byte
-	 * 
-	 * @param filePath
-	 * @return 没有文件返回0；出错返回-1000000000
-	 * @throws IOException
-	 */
-	@Deprecated
-	public static long getFileSizeLong(File file) {
-		return getFileSizeLong(getPath(file));
 	}
 
 	/**
@@ -1161,8 +1159,7 @@ public class FileOperate {
 	 * @return 返回目录创建后的路径
 	 */
 	public static void createFolders(String folderPath) {
-		Path path = getPath(folderPath);
-		createFolders(path);
+		createFolders(getPath(folderPath));
 	}
 
 	public static void createFolders(Path path) {
