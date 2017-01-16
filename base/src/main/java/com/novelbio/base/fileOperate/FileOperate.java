@@ -938,18 +938,18 @@ public class FileOperate {
 		}
 		try {
 			Stream<Path> streamPath = Files.list(file);
-			 List<Path> lsPathTmp = null;
-			 if (predicateFileName != null) {
-				 lsPathTmp = streamPath.filter(predicateFileName).collect(Collectors.toList());
+			List<Path> lsPathTmp = null;
+			if (predicateFileName != null) {
+				lsPathTmp = streamPath.filter(predicateFileName).collect(Collectors.toList());
 			} else {
 				lsPathTmp = streamPath.collect(Collectors.toList());
 			}
 			streamPath.close();
 			for (Path path : lsPathTmp) {
 				if ((path instanceof OssPath && path.toString().endsWith("/")) || (!(path instanceof OssPath) && Files.isDirectory(path))) {
-					//是ossPath，只要是以/结尾的.就是文件夹。不是osspath,则需查找判断一下
+					// 是ossPath，只要是以/结尾的.就是文件夹。不是osspath,则需查找判断一下
 					lsPath.addAll(getLsFoldPathRecur(path, filename, suffix, isNeedFolder));
-					if (isNeedFolder) {
+					if (isNeedFolder && !lsPath.contains(path)) {
 						lsPath.add(path);
 					}
 				} else {
