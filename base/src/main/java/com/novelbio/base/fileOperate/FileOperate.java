@@ -2411,7 +2411,7 @@ public class FileOperate {
 	 * @return
 	 * @throws IOException
 	 */
-	public static String getFileContent(String filePathAndName) throws IOException {
+	public static String getFileContent(String filePathAndName) {
 		if (!isFileExistAndBigThan0(filePathAndName)) {
 			return null;
 		}
