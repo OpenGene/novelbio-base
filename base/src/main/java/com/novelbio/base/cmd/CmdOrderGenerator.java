@@ -80,6 +80,10 @@ public class CmdOrderGenerator {
 	public String getTmpPath() {
 		return cmdPath.getTmpPath();
 	}
+	/** 结束后删除临时文件夹，仅当tmp文件夹为随机生成的时候才会删除 */
+	public void deleletTmpPath() {
+		cmdPath.deleteTmpPath();
+	}
 	
 	/** 临时文件夹中的文件是否删除 */
 	public void setRetainTmpFiles(boolean isRetainTmpFiles) {

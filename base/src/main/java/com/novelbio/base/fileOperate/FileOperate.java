@@ -577,24 +577,16 @@ public class FileOperate {
 		return fileNameThis;
 	}
 
-	/** 用于取代path的tostring方法，因为hdfs的path.toString() 默认返回 hdfs:/，而我们要的是 /hdfs:/ */
+	/** 等同path的tostring方法 */
 	public static String getFilePathName(Path path) {
-		boolean isAddSplashHead = false;
-		String filePathName = path.toString();
-		if (filePathName.startsWith(FileHadoop.hdfsSymbol)) {
-			if (!filePathName.startsWith("/")) {
-				filePathName = "/" + filePathName;
-				isAddSplashHead = true;
-			}
-		}
-		if (isAddSplashHead) {
-			filePathName = removeSplashHead(filePathName, true);
-		}
-		return filePathName;
+		return path.toString();
 	}
 
 	public static String getAbsolutePath(String fileName) {
 		boolean isAddSplashHead = false;
+		if (fileName.startsWith(PathDetail.getHdpHdfsHeadSymbol())) {
+			fileName = FileHadoop.convertToHdfsPath(fileName);
+		}
 		if (fileName.startsWith(FileHadoop.hdfsSymbol)) {
 			if (!fileName.startsWith("/")) {
 				fileName = "/" + fileName;
@@ -604,7 +596,7 @@ public class FileOperate {
 		File file = new File(fileName);
 		String absolutePath = file.getAbsolutePath();
 		if (isAddSplashHead) {
-			absolutePath = removeSplashHead(absolutePath, true);
+			absolutePath = removeSplashHead(absolutePath, false);
 		}
 		return absolutePath;
 	}
@@ -612,10 +604,10 @@ public class FileOperate {
 	public static String getAbsolutePath(Path path) {
 		String name = getCanonicalPath(path.toString());
 		if (path instanceof HadoopPath) {
-			if (name.startsWith(FileHadoop.hdfsSymbol)) {
-				name = "/" + name;
-			} else if (!name.startsWith(FileHadoop.getHdfsSymbol())) {
-				name = "/hdfs:" + name;
+			if (name.startsWith(PathDetail.getHdpHdfsHeadSymbol())) {
+				name = name.replaceFirst(PathDetail.getHdpHdfsHeadSymbol(), FileHadoop.hdfsSymbol);
+			} else if (!name.startsWith(FileHadoop.hdfsSymbol)) {
+				name = FileHadoop.hdfsSymbol + name;
 			}
 		} else if (path instanceof OssPath) {
 			name = path.toString();
@@ -626,10 +618,10 @@ public class FileOperate {
 	public static String getCanonicalPath(Path path) {
 		String name = getCanonicalPath(path.toString());
 		if (path instanceof HadoopPath) {
-			if (name.startsWith(FileHadoop.hdfsSymbol)) {
-				name = "/" + name;
-			} else if (!name.startsWith(FileHadoop.getHdfsSymbol())) {
-				name = "/hdfs:" + name;
+			if (name.startsWith(PathDetail.getHdpHdfsHeadSymbol())) {
+				name = name.replaceFirst(PathDetail.getHdpHdfsHeadSymbol(), FileHadoop.hdfsSymbol);
+			} else if (!name.startsWith(FileHadoop.hdfsSymbol)) {
+				name = FileHadoop.hdfsSymbol + name;
 			}
 		} else if (path instanceof OssPath) {
 			name = path.toString();
@@ -639,6 +631,9 @@ public class FileOperate {
 
 	public static String getCanonicalPath(String fileName) {
 		boolean isAddSplashHead = false;
+		if (fileName.startsWith(PathDetail.getHdpHdfsHeadSymbol())) {
+			fileName = FileHadoop.convertToHdfsPath(fileName);
+		}
 		if (fileName.startsWith(FileHadoop.hdfsSymbol)) {
 			if (!fileName.startsWith("/")) {
 				fileName = "/" + fileName;
@@ -651,7 +646,7 @@ public class FileOperate {
 		try {
 			String canonicalPath = file.getCanonicalPath();
 			if (isAddSplashHead) {
-				canonicalPath = removeSplashHead(canonicalPath, true);
+				canonicalPath = removeSplashHead(canonicalPath, false);
 			}
 			return canonicalPath;
 		} catch (IOException e) {
@@ -938,18 +933,18 @@ public class FileOperate {
 		}
 		try {
 			Stream<Path> streamPath = Files.list(file);
-			List<Path> lsPathTmp = null;
-			if (predicateFileName != null) {
-				lsPathTmp = streamPath.filter(predicateFileName).collect(Collectors.toList());
+			 List<Path> lsPathTmp = null;
+			 if (predicateFileName != null) {
+				 lsPathTmp = streamPath.filter(predicateFileName).collect(Collectors.toList());
 			} else {
 				lsPathTmp = streamPath.collect(Collectors.toList());
 			}
 			streamPath.close();
 			for (Path path : lsPathTmp) {
-				if ((path instanceof OssPath && path.toString().endsWith("/")) || (Files.isDirectory(path))) {
-					// 是ossPath，只要是以/结尾的.就是文件夹。不是osspath,则需查找判断一下
+				if ((path instanceof OssPath && path.toString().endsWith("/")) || (!(path instanceof OssPath) && Files.isDirectory(path))) {
+					//是ossPath，只要是以/结尾的.就是文件夹。不是osspath,则需查找判断一下
 					lsPath.addAll(getLsFoldPathRecur(path, filename, suffix, isNeedFolder));
-					if (isNeedFolder && !lsPath.contains(path)) {
+					if (isNeedFolder) {
 						lsPath.add(path);
 					}
 				} else {
@@ -1019,7 +1014,7 @@ public class FileOperate {
 			streamPath.close();
 			return lsFilenames;
 		} catch (IOException e) {
-			throw new ExceptionFileError("cannot get sub files of " + file.toString());
+			throw new ExceptionFileError("cannot get sub files of " + file.toString(), e);
 		}
 	}
 
@@ -1841,8 +1836,8 @@ public class FileOperate {
 			FileOperate.delFile(linkTo);
 		}
 
-		rawFile = FileHadoop.convertToHadoop(rawFile);
-		linkTo = FileHadoop.convertToHadoop(linkTo);
+		rawFile = FileHadoop.convertToHdfsPath(rawFile);
+		linkTo = FileHadoop.convertToHdfsPath(linkTo);
 		boolean isRawHdfs = FileHadoop.isHdfs(rawFile);
 		boolean isLinkHdfs = FileHadoop.isHdfs(linkTo);
 		if (isRawHdfs ^ isLinkHdfs) {
@@ -2071,8 +2066,8 @@ public class FileOperate {
 		if (file == null) {
 			return false;
 		}
-		if (file instanceof OssPath && file.toString().endsWith("/")) {
-			return true;
+		if (file instanceof OssPath) {
+			return file.toString().endsWith("/") ?  true : false;
 		}
 		return Files.isDirectory(file);
 	}

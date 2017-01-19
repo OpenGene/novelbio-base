@@ -46,10 +46,6 @@ public class HdfsInitial {
 		return conf;
 	}
 	
-	public static String getSymbol() {
-		return PathDetail.getHdpHdfsHeadSymbol();
-	}
-	
 	/**
 	 * 返回设定的文件系统
 	 * @return

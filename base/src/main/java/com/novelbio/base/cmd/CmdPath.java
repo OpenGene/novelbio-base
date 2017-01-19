@@ -63,6 +63,8 @@ public class CmdPath {
 	
 	private CmdPathCluster cmdPathCluster;
 	
+	private boolean isNeedDeleteTmpPath = false;
+	
 	public void setCmdPathCluster(CmdPathCluster cmdPathCluster) {
 		this.cmdPathCluster = cmdPathCluster;
 	}
@@ -73,13 +75,22 @@ public class CmdPath {
 			throw new ExceptionCmd("tmpPath cannot be null");
 		}
 		this.tmpPath = FileOperate.addSep(tmpPath);
+		isNeedDeleteTmpPath = false;
 	}
 	public synchronized String getTmpPath() {
 		if (StringOperate.isRealNull(tmpPath)) {
 			tmpPath = PathDetail.getTmpPathRandom();
+			isNeedDeleteTmpPath = true;
 		}
 		return tmpPath;
 	}
+	
+	public void deleteTmpPath() {
+		if (isNeedDeleteTmpPath) {
+			FileOperate.deleteFileFolder(tmpPath);
+		}
+	}
+	
 	/** 临时文件夹中的文件是否删除 */
 	public void setRetainTmpFiles(boolean isRetainTmpFiles) {
 		this.isRetainTmpFiles = isRetainTmpFiles;

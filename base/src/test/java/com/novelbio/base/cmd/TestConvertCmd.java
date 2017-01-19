@@ -16,8 +16,8 @@ public class TestConvertCmd {
 	public void cmdConvertHdfs() {
 		CmdOrderGenerator cmdPath = new CmdOrderGenerator(true);
 		List<String> lsCmd = new ArrayList<>();
-		String inFile1 = "/hdfs:/src/test/resources/testTrinity.fa";
-		String inFile2 = "/hdfs:/src/test/resources/testTrinity2.fa";
+		String inFile1 = "hdfs:/src/test/resources/testTrinity.fa";
+		String inFile2 = "hdfs:/src/test/resources/testTrinity2.fa";
 		String outFile = "/hdfs:/nbCloud/test/testCode/testCmdpath.out";
 		lsCmd.add("bwa-index");
 		lsCmd.add("--inPath=" + inFile1 + "," + inFile2);

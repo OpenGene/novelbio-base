@@ -794,6 +794,8 @@ public class CmdOperate extends RunProcess<String> {
 		if (process instanceof ProcessRemote) {
 			((ProcessRemote)process).closeSession();
 		}
+		
+		cmdOrderGenerator.deleletTmpPath();
 	}
 	
 	/** 把文件移动出来 */

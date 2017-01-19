@@ -805,7 +805,7 @@ public class TxtReadandWrite implements Closeable {
 		if(!FileHadoop.isHdfs(inputFile)) {
 			return;
 		}
-		String inputFileHdfs = FileHadoop.convertToHadoop(inputFile);
+		String inputFileHdfs = FileHadoop.convertToHdfsPath(inputFile);
 		FileOperate.deleteFileFolder(inputFileHdfs + ".index");
 
 		inputFile = FileHadoop.convertToHdfsPath(inputFile);

@@ -23,7 +23,7 @@ import com.novelbio.base.StringOperate;
 @Deprecated
 public class FileHadoop extends File {
 	private static final long serialVersionUID = 8341313247682247317L;
-	protected static final String hdfsSymbol = "hdfs:";
+	public static final String hdfsSymbol = "hdfs:";
 	private String fileName;
 	Path path;
 	
@@ -52,10 +52,10 @@ public class FileHadoop extends File {
 	}
 	
 	private static String copeToHdfsHeadSymbol(String hdfsFilePath) {
-		if (!hdfsFilePath.startsWith(FileHadoop.getHdfsSymbol()) && !hdfsFilePath.startsWith(hdfsSymbol)) {
+		if (!hdfsFilePath.startsWith(PathDetail.getHdpHdfsHeadSymbol()) && !hdfsFilePath.startsWith(hdfsSymbol)) {
 			hdfsFilePath = FileHadoop.addHdfsHeadSymbol(hdfsFilePath);
-		} else if (hdfsFilePath.startsWith(hdfsSymbol)) {
-			hdfsFilePath = hdfsFilePath.replaceFirst(hdfsSymbol, FileHadoop.getHdfsSymbol());
+		} else if (hdfsFilePath.startsWith(PathDetail.getHdpHdfsHeadSymbol())) {
+			hdfsFilePath = hdfsFilePath.replaceFirst(PathDetail.getHdpHdfsHeadSymbol(), hdfsSymbol);
 		}
 		return hdfsFilePath;
 	}
@@ -285,9 +285,16 @@ public class FileHadoop extends File {
 		return false;
 	}
 	
-	
-	/** 把 /media/nbfs这种改成hdfs的形式，如果不是/media/hdfs这种，就不要动 */
-	public static String convertToHadoop(String hdfsPath) {
+	/** 把 /media/nbfs和/hdfs:/这种改成 hdfs:/ 这种可以被hadoop识别的形式 */
+	public static String convertToHdfsPath(String hdfsPath) {
+		hdfsPath = convertToHadoop(hdfsPath);
+		if (hdfsPath.startsWith(PathDetail.getHdpHdfsHeadSymbol())) {
+			hdfsPath = hdfsPath.replaceFirst(PathDetail.getHdpHdfsHeadSymbol(), hdfsSymbol);
+        }
+		return hdfsPath;
+	}
+	/** 把 /media/nbfs这种改成hdfs:的形式，如果不是/media/hdfs这种，就不要动 */
+	private static String convertToHadoop(String hdfsPath) {
 		hdfsPath = FileOperate.removeSplashHead(hdfsPath, true);
 		if (hdfsPath.toLowerCase().startsWith(getHdfsLocalPathWithoutSep().toLowerCase())) {
 			hdfsPath = hdfsPath.replace(getHdfsLocalPathWithoutSep(), getHdfsSymbol());
@@ -295,18 +302,13 @@ public class FileHadoop extends File {
 		return hdfsPath;
 	}
 	
-	/** 把 /media/nbfs这种改成hdfs的形式，如果不是/media/hdfs这种，就不要动 */
+	/** 把 /hdfs:/nbCloud/public 这种改成 /nbCloud/public 这种，如果不是/hdfs: 或 hdfs: 打头，就跳过 */
 	public static String removeHadoopSymbol(String hdfsPath) {
-		return hdfsPath.replaceFirst(getHdfsSymbol(), "");
-	}
-	
-	/** 把 /media/nbfs和/hdfs:/这种改成 hdfs:/ 这种可以被hadoop识别的形式 */
-	public static String convertToHdfsPath(String hdfsPath) {
-		hdfsPath = convertToHadoop(hdfsPath);
-		if (hdfsPath.startsWith(getHdfsSymbol())) {
-			hdfsPath = hdfsPath.replaceFirst(getHdfsSymbol(), "hdfs:");
-        }
-		return hdfsPath;
+		String hdfsHead = FileHadoop.hdfsSymbol;
+		if (hdfsPath.startsWith(PathDetail.getHdpHdfsHeadSymbol())) {
+			hdfsHead = PathDetail.getHdpHdfsHeadSymbol();
+		}
+		return hdfsPath.replaceFirst(hdfsHead, "");
 	}
 	
 	/** 
@@ -317,8 +319,8 @@ public class FileHadoop extends File {
 			return hdfsPath;
 		}else if (FileHadoop.isHdfs(hdfsPath) || FileHadoop.isHdfs(hdfsPath.substring(1, hdfsPath.length()-2))) {
 			String parentPath = getHdfsLocalPathWithoutSep();
-			if (hdfsPath.startsWith(getHdfsSymbol())) {
-				hdfsPath = hdfsPath.replace(getHdfsSymbol(), parentPath);
+			if (hdfsPath.startsWith(PathDetail.getHdpHdfsHeadSymbol())) {
+				hdfsPath = hdfsPath.replace(PathDetail.getHdpHdfsHeadSymbol(), parentPath);
 			} else if (hdfsPath.startsWith(hdfsSymbol)) {
 				hdfsPath = hdfsPath.replace(hdfsSymbol, parentPath);
 			}
@@ -330,7 +332,7 @@ public class FileHadoop extends File {
 	 * 用{@link com.novelbio.base.fileOperate.FileHadoop#getHdfsSymbol()}替换<br>
 	 * 文件名前添加的HDFS的头，末尾没有"/" */
 	public static String getHdfsSymbol() {
-		return PathDetail.getHdpHdfsHeadSymbol();
+		return hdfsSymbol;
 	}
 	
 	/** 
@@ -369,7 +371,7 @@ public class FileHadoop extends File {
 		if (StringOperate.isRealNull(getHdfsSymbol())) {
 			return false;
 		}
-		return (fileName.startsWith(getHdfsSymbol()) || fileName.startsWith(hdfsSymbol));
+		return (fileName.startsWith(PathDetail.getHdpHdfsHeadSymbol()) || fileName.startsWith(hdfsSymbol));
 	}
 
 	@Deprecated
@@ -465,13 +467,13 @@ public class FileHadoop extends File {
     }
     
     public Path toPath() {
-    		return path;
+    	return path;
     }
     
     public org.apache.hadoop.fs.Path getHdpPath() {
-    	String hdfsFilePath = fileName.replace(FileHadoop.getHdfsSymbol(), "");
+    	String hdfsFilePath = removeHadoopSymbol(fileName);
     	org.apache.hadoop.fs.Path dst = new org.apache.hadoop.fs.Path(hdfsFilePath);
-    	return dst;
+    		return dst;
     }
     
 	

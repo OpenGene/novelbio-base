@@ -60,6 +60,7 @@ public class TestFileOperate {
 	static Path folderParent = FileOperate.getPath("/hdfs:/nbCloud/test/junittest/nbcplatform/testFileOperate/");
 	static Path folder;
 	static String hdfsFileSubFolderTest = "/hdfs:/nbCloud/test/junittest/nbcplatform/testFileOperate/";
+	static String hdfsFileSubFolderTestWithoutFirstSep = "hdfs:/nbCloud/test/junittest/nbcplatform/testFileOperate/";
 
 	@BeforeClass
 	public static void createFolderFile() {
@@ -119,13 +120,13 @@ public class TestFileOperate {
 		lsPaths = FileOperate.getLsFoldPath(folder, "file", "*");
 		Assert.assertEquals(3, lsPaths.size());
 		for (Path path : lsPaths) {
-			Assert.assertTrue(FileOperate.getAbsolutePath(path).startsWith(hdfsFileSubFolderTest));
+			Assert.assertTrue(FileOperate.getAbsolutePath(path).startsWith(hdfsFileSubFolderTestWithoutFirstSep));
         }
 		
 		List<String> lsFileName = FileOperate.getLsFoldFileName(folder, "file", "*");
 		for (String path : lsFileName) {
-			Assert.assertTrue(path.startsWith(hdfsFileSubFolderTest));
-			Assert.assertTrue(FileOperate.getAbsolutePath(path).startsWith(hdfsFileSubFolderTest));
+			Assert.assertTrue(path.startsWith(hdfsFileSubFolderTestWithoutFirstSep));
+			Assert.assertTrue(FileOperate.getAbsolutePath(path).startsWith(hdfsFileSubFolderTestWithoutFirstSep));
         }
 		
 		lsPaths = FileOperate.getLsFoldPath(folder, "*", "fa");
@@ -341,7 +342,7 @@ public class TestFileOperate {
 		Assert.assertEquals("oss:/", result);
 	}
 	
-	@Test
+//	@Test
 	public void testGetParentPathNameWithSep2() {
 		String path = "oss://novelbio/nbCloud/public/rawData/A__2016-09/project_57ea175c45ce95f1d60f8af5/small.txt";
 		String result = FileOperate.getParentPathNameWithSep(path);
