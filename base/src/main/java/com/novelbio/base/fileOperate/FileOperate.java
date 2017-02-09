@@ -931,8 +931,7 @@ public class FileOperate {
 			}
 			return lsPath;
 		}
-		try {
-			Stream<Path> streamPath = Files.list(file);
+		try(Stream<Path> streamPath = Files.list(file)) {
 			 List<Path> lsPathTmp = null;
 			 if (predicateFileName != null) {
 				 lsPathTmp = streamPath.filter(predicateFileName).collect(Collectors.toList());
@@ -1004,8 +1003,7 @@ public class FileOperate {
 			}
 			return lsFilenames;
 		}
-		try {
-			Stream<Path> streamPath = Files.list(file);
+		try(Stream<Path> streamPath = Files.list(file)) {
 			if (predicateFileName != null) {
 				lsFilenames = streamPath.filter(predicateFileName).collect(Collectors.toList());
 			} else {
