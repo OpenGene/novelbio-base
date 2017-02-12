@@ -1576,12 +1576,10 @@ public class FileOperate {
 	}
 
 	/**
-	 * @param cover
-	 *            是否覆盖
-	 * @param oldFileName
-	 *            老文件全路径
-	 * @param newFileName
-	 *            新文件全路径
+	 * 既可移动文件夹又可移动单个文件
+	 * @param cover 是否覆盖
+	 * @param oldFileName 老文件全路径
+	 * @param newFileName  新文件全路径
 	 * @return
 	 */
 	public static void moveFile(boolean cover, String oldFileName, String newFileName) {
@@ -2226,9 +2224,6 @@ public class FileOperate {
 
 	/**
 	 * 删除目录（文件夹）以及目录下的文件，包括本文件夹
-	 * 
-	 * @param sPath
-	 *            被删除目录的文件路径，最后无所谓加不加"/"
 	 */
 	private static void deleteFolder(Path dirFile) {
 		try {
@@ -2247,12 +2242,8 @@ public class FileOperate {
 
 	/**
 	 * 根据路径删除指定的目录或文件，无论存在与否
-	 * 
-	 * @param sPath
-	 *            要删除的目录或文件
-	 * @return 删除成功返回 true，否则返回 false 不存在文件也返回true
+	 * @param sPath 要删除的目录或文件
 	 */
-	// TODO 需要重命名方法名，把首字母D小写
 	public static void deleteFileFolder(String sPath) {
 		if (StringOperate.isRealNull(sPath)) {
 			return;
@@ -2260,7 +2251,23 @@ public class FileOperate {
 		Path file = getPath(sPath);
 		deleteFileFolder(file);
 	}
-
+	
+	/**
+	 * 根据路径清空本路径下的全部文件，本文件夹不删除。如果输入的路径是文件，则直接返回 */
+	public static void deleteFolderInfo(String sPath) {
+		if (StringOperate.isRealNull(sPath)) {
+			return;
+		}
+		Path file = getPath(sPath);
+		if (FileOperate.isFileExist(file)) {
+			return;
+		}
+		List<Path> lsSubFiles = getLsFoldPath(file);
+		for (Path path : lsSubFiles) {
+			deleteFileFolder(path);
+		}
+	}
+	
 	/**
 	 * 根据路径删除指定的目录或文件，无论存在与否
 	 * 
