@@ -923,7 +923,7 @@ public class FileOperate {
 		}
 
 		// 如果只是文件则返回文件名
-		if (!Files.isDirectory(file)) { // 获取文件名与后缀名
+		if (!FileOperate.isFileDirectory(file)) { // 获取文件名与后缀名
 			if (predicateFileName == null) {
 				lsPath.add(file);
 			} else if (predicateFileName != null && predicateFileName.test(file)) {
