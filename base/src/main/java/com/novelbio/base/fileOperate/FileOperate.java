@@ -8,10 +8,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -111,7 +113,24 @@ public class FileOperate {
 		}
 		return file;
 	}
-
+	public static Path getPath(String first, String... rest) {
+		try {
+			if (first == null || rest == null || rest.length == 0) {
+				throw new IllegalArgumentException("params can not be null");
+			}
+			if (first.startsWith(HadoopFileSystemProvider.SCHEME + ":/")) {
+				return hdfsProvider.getFileSystem(new URI(first)).getPath(new URI(first).getPath(), rest);
+			} else if (first.startsWith(ossProvider.getScheme() + ":/")) {
+				return ossProvider.getFileSystem(new URI(first)).getPath(new URI(first).getPath(), rest);
+			} else {
+				System.out.println("default Path");
+				return Paths.get(first, rest);
+			}
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 	public static Path getPath(String fileName) {
 		if (StringOperate.isRealNull(fileName))
 			return null;
@@ -124,6 +143,7 @@ public class FileOperate {
 				if (!fileName.contains(" ")) {
 					uri = new URI(fileName);
 				} else {
+					
 					fileName = fileName.replace(FileHadoop.hdfsSymbol, "");
 					if (fileName.startsWith(":"))
 						fileName.replaceFirst(":", "");
