@@ -36,5 +36,11 @@ public class TestCmdPathAli {
 		outPath = CmdPathAli.convertAli2Loc(path, false);
 		Assert.assertEquals("/home/novelbio/oss/.inmap./mypath/.inmap./file", inPath);
 		Assert.assertEquals("/home/novelbio/oss/.outmap./mypath/.inmap./file", outPath);
+		
+		path = "/home/novelbio/mypath/.inmap./file";
+		inPath = CmdPathAli.convertAli2Loc(path, true);
+		outPath = CmdPathAli.convertAli2Loc(path, false);
+		Assert.assertEquals(path, inPath);
+		Assert.assertEquals(path, outPath);
 	}
 }

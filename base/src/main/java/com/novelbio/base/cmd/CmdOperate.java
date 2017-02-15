@@ -442,11 +442,7 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	public List<String> getLsErrOut() {
 		int i = 0;
-		while (errorGobbler == null) {
-			if (i++ > 10) break;
-			try { Thread.sleep(100); } catch (InterruptedException e) { 	e.printStackTrace(); 	}
-		}
-		
+		waitStreamOutErr();
 		if (errorGobbler == null) {
 			return new ArrayList<>();
 		}
@@ -480,17 +476,7 @@ public class CmdOperate extends RunProcess<String> {
 	 * 内部实现为linkedlist
 	 */
 	public List<String> getLsStdOut() {
-		int i  = 0;
-		while (outputGobbler == null) {
-			if (i++ > 10) {
-				break;
-			}
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
+		waitStreamOutStd();
 		if (outputGobbler == null) {
 			return new ArrayList<>();
 		}
@@ -509,27 +495,49 @@ public class CmdOperate extends RunProcess<String> {
 	/** 获得命令行的标准输出流， <br>
 	 * 设定了{@link #setGetCmdInStdStream(boolean)} 为true才有用 */
 	public InputStream getStreamStd() {
-		while (outputGobbler == null) {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
+		waitStreamOutStd();
 		return outputGobbler.getCmdOutStream();
 	}
 	/** 获得命令行的错误输出流， <br>
 	 * 设定了{@link #setGetCmdInErrStream(boolean)} 为true才有用 */
 	public InputStream getStreamErr() {
-		while (errorGobbler == null) {
+		waitStreamOutErr();
+		return errorGobbler.getCmdOutStream();
+	}
+	
+	private void waitStreamOutStd() {
+		while (outputGobbler == null) {
+			if (finishFlag != null && finishFlag.isFinish()) {
+				break;
+			}
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
-		return errorGobbler.getCmdOutStream();
+
+		if (outputGobbler == null) {
+			throw new ExceptionCmd("cmd doesn't have output stream: " + getCmdExeStr());
+		}
 	}
+	private void waitStreamOutErr() {
+		while (errorGobbler == null) {
+			if (finishFlag != null && finishFlag.isFinish()) {
+				break;
+			}
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		if (errorGobbler == null) {
+			throw new ExceptionCmd("cmd doesn't have output stream: " + getCmdExeStr());
+		}
+	}
+	
+
 	/**
 	 * 直接运行cmd，可能会出错 返回两个arraylist-string 第一个是Info 第二个是error
 	 * 
@@ -541,10 +549,9 @@ public class CmdOperate extends RunProcess<String> {
 	private void doInBackgroundB() throws Exception {
 		cmdOrderGenerator.setIsSaveStdFile(!getCmdInStdStream);
 		cmdOrderGenerator.setIsSaveErrFile(!getCmdInErrStream);
-
-		finishFlag = new FinishFlag();
-		String[] cmdRun = cmdOrderGenerator.getRunCmd();
 		
+		String[] cmdRun = cmdOrderGenerator.getRunCmd();
+		finishFlag.start();
 		process.exec(cmdRun);
 		
 		//等待30ms，如果不等待，某些命令会阻塞输出流，不知道为什么，譬如以下这个命令
@@ -752,6 +759,8 @@ public class CmdOperate extends RunProcess<String> {
 	
 	@Override
 	protected void running() {
+		finishFlag = new FinishFlag();
+
 		cmdOrderGenerator.generateTmPath();
 		cmdOrderGenerator.copyFileInAndRecordFiles();
 		
@@ -806,7 +815,7 @@ public class CmdOperate extends RunProcess<String> {
 	
 	@Override
 	public boolean isRunning() {
-		if(finishFlag != null && finishFlag.flag == null)
+		if(finishFlag != null && finishFlag.isStart() && finishFlag.flag == null)
 			return true;
 		return false;
 	}
@@ -891,7 +900,18 @@ public class CmdOperate extends RunProcess<String> {
 	}
 	
 	static class FinishFlag {
+		boolean isStart = false;
 		Integer flag = null;
+		
+		public void start() {
+			this.isStart = true;
+		}
+		public boolean isStart() {
+			return isStart;
+		}
+		public boolean isFinish() {
+			return flag != null;
+		}
 	}
 	
 	public static String getExceptionInfo(Throwable t) {

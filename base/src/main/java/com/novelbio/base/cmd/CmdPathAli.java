@@ -68,6 +68,8 @@ public class CmdPathAli extends CmdPath {
 		String pathLocal = PathDetailOs.changeOsToLocal(path);
 		if (pathLocal.startsWith(PathDetailOs.getOsMountPathWithSep())) {		//	/home/novelbio/oss
 			pathLocal = pathLocal.replaceFirst(PathDetailOs.getOsMountPathWithSep(), "");
+		} else {
+			return path;
 		}
 		if (pathLocal.startsWith(IN_MAP)) {
 			pathLocal = FileOperate.removeSplashHead(pathLocal.replaceFirst(IN_MAP, ""), false);

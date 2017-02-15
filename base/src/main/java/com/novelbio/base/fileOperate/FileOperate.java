@@ -2254,7 +2254,7 @@ public class FileOperate {
 	
 	/**
 	 * 根据路径清空本路径下的全部文件，本文件夹不删除。如果输入的路径是文件，则直接返回 */
-	public static void deleteFolderInfo(String sPath) {
+	public static void deleteFolderClean(String sPath) {
 		if (StringOperate.isRealNull(sPath)) {
 			return;
 		}
