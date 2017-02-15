@@ -2082,8 +2082,8 @@ public class FileOperate {
 		if (file == null) {
 			return false;
 		}
-		if (file instanceof OssPath) {
-			return file.toString().endsWith("/") ?  true : false;
+		if (file instanceof OssPath && file.toString().endsWith("/")) {
+			return true;
 		}
 		return Files.isDirectory(file);
 	}
