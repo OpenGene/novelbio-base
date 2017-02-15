@@ -8,10 +8,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -111,7 +113,24 @@ public class FileOperate {
 		}
 		return file;
 	}
-
+	public static Path getPath(String first, String... rest) {
+		try {
+			if (first == null || rest == null || rest.length == 0) {
+				throw new IllegalArgumentException("params can not be null");
+			}
+			if (first.startsWith(HadoopFileSystemProvider.SCHEME + ":/")) {
+				return hdfsProvider.getFileSystem(new URI(first)).getPath(new URI(first).getPath(), rest);
+			} else if (first.startsWith(ossProvider.getScheme() + ":/")) {
+				return ossProvider.getFileSystem(new URI(first)).getPath(new URI(first).getPath(), rest);
+			} else {
+				System.out.println("default Path");
+				return Paths.get(first, rest);
+			}
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 	public static Path getPath(String fileName) {
 		if (StringOperate.isRealNull(fileName))
 			return null;
@@ -124,6 +143,7 @@ public class FileOperate {
 				if (!fileName.contains(" ")) {
 					uri = new URI(fileName);
 				} else {
+					
 					fileName = fileName.replace(FileHadoop.hdfsSymbol, "");
 					if (fileName.startsWith(":"))
 						fileName.replaceFirst(":", "");
@@ -923,7 +943,7 @@ public class FileOperate {
 		}
 
 		// 如果只是文件则返回文件名
-		if (!Files.isDirectory(file)) { // 获取文件名与后缀名
+		if (!FileOperate.isFileDirectory(file)) { // 获取文件名与后缀名
 			if (predicateFileName == null) {
 				lsPath.add(file);
 			} else if (predicateFileName != null && predicateFileName.test(file)) {
@@ -2062,8 +2082,8 @@ public class FileOperate {
 		if (file == null) {
 			return false;
 		}
-		if (file instanceof OssPath) {
-			return file.toString().endsWith("/") ?  true : false;
+		if (file instanceof OssPath && file.toString().endsWith("/")) {
+			return true;
 		}
 		return Files.isDirectory(file);
 	}
