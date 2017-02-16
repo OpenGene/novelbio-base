@@ -1581,21 +1581,6 @@ public class FileOperate {
 	}
 
 	/**
-	 * 移动文件或文件夹，如果新地址有同名文件，则不移动并返回<br>
-	 * 可以创建一级新文件夹<br>
-	 * 如果没有文件则返回<br>
-	 * 
-	 * @param oldPath
-	 *            文件路径
-	 * @param newPath
-	 *            新文件所在的文件夹
-	 * @return 是否移动成功
-	 */
-	public static void moveFile(String oldPath, String newPath, boolean cover) {
-		moveFile(cover, oldPath, newPath);
-	}
-
-	/**
 	 * 既可移动文件夹又可移动单个文件
 	 * @param cover 是否覆盖
 	 * @param oldFileName 老文件全路径
@@ -1694,10 +1679,6 @@ public class FileOperate {
 			e.printStackTrace();
 			throw new ExceptionFileError("cannot move file " + oldPath + " to " + newPath, e);
 		}
-	}
-
-	public static void moveFoldFile(String olddir, String newfolder, boolean cover) {
-		moveFoldFile(olddir, newfolder, "", cover);
 	}
 
 	/**

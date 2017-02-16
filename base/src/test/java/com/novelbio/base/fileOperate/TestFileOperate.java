@@ -202,7 +202,7 @@ public class TestFileOperate {
 		}
 		
 		String folderMove = FileOperate.changeFileSuffix(folderParent.toString(), "move", null);
-		FileOperate.moveFile(folderCopy, folderMove, true);
+		FileOperate.moveFile(true, folderCopy, folderMove);
 		lsPaths = FileOperate.getLsFoldPath(folder);
 		Assert.assertEquals(5, lsPaths.size());
 		Assert.assertFalse(FileOperate.isFileExist(folderCopy));
