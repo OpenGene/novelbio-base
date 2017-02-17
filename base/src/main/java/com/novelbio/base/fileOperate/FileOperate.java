@@ -2115,6 +2115,7 @@ public class FileOperate {
 	 * @param filePathAndName
 	 *            文本文件完整绝对路径及文件名
 	 */
+	@Deprecated
 	public static void delFile(String filePathAndName) {
 		try {
 			Files.deleteIfExists(getPath(filePathAndName));
@@ -2130,6 +2131,7 @@ public class FileOperate {
 	 *            文本文件完整绝对路径及文件名 文件不存在则返回false
 	 * @return Boolean 成功删除返回true遭遇异常返回false
 	 */
+	@Deprecated
 	public static void delFile(Path myDelFile) {
 		try {
 			Files.deleteIfExists(myDelFile);
@@ -2140,11 +2142,10 @@ public class FileOperate {
 
 	/**
 	 * 删除文件夹
-	 * 
-	 * @param folderPath
-	 *            文件夹完整绝对路径
+	 * @param folderPath 文件夹完整绝对路径
 	 * @return
 	 */
+	@Deprecated
 	public static void delFolder(String folderPath) {
 		if (StringOperate.isRealNull(folderPath))
 			return;
@@ -2163,8 +2164,8 @@ public class FileOperate {
 	 *            文件夹完整绝对路径,最后无所谓加不加\\或/
 	 */
 	// TODO 待测试
-	public static void delAllFile(String path) {
-		delAllFile(getPath(path));
+	public static void deleteFolderClean(String path) {
+		deleteFolderClean(getPath(path));
 	}
 
 	@Deprecated
@@ -2202,7 +2203,7 @@ public class FileOperate {
 	 * @return
 	 * @return
 	 */
-	public static void delAllFile(Path path) {
+	public static void deleteFolderClean(Path path) {
 		if (path == null || !Files.exists(path)) {
 			return;
 		}
@@ -2213,7 +2214,7 @@ public class FileOperate {
 		try {
 			Files.list(path).forEach((insidePath) -> {
 				if (isFileDirectory(insidePath)) {
-					delAllFile(insidePath);
+					deleteFolderClean(insidePath);
 				} else {
 					delFile(insidePath);
 				}
@@ -2251,22 +2252,6 @@ public class FileOperate {
 		}
 		Path file = getPath(sPath);
 		deleteFileFolder(file);
-	}
-	
-	/**
-	 * 根据路径清空本路径下的全部文件，本文件夹不删除。如果输入的路径是文件，则直接返回 */
-	public static void deleteFolderClean(String sPath) {
-		if (StringOperate.isRealNull(sPath)) {
-			return;
-		}
-		Path file = getPath(sPath);
-		if (FileOperate.isFileExist(file)) {
-			return;
-		}
-		List<Path> lsSubFiles = getLsFoldPath(file);
-		for (Path path : lsSubFiles) {
-			deleteFileFolder(path);
-		}
 	}
 	
 	/**

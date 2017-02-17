@@ -212,7 +212,7 @@ public class TestFileOperate {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		FileOperate.delAllFile(folderMove);
+		FileOperate.deleteFolderClean(folderMove);
 		Assert.assertTrue(FileOperate.isFileDirectory(folderMove));
 		Assert.assertEquals(0, FileOperate.getFileSizeLong(folderMove));
 		
