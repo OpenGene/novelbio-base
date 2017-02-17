@@ -960,7 +960,7 @@ public class FileOperate {
 			}
 			streamPath.close();
 			for (Path path : lsPathTmp) {
-				if ((path instanceof OssPath && path.toString().endsWith("/")) || (!(path instanceof OssPath) && Files.isDirectory(path))) {
+				if (Files.isDirectory(path)) {
 					//是ossPath，只要是以/结尾的.就是文件夹。不是osspath,则需查找判断一下
 					lsPath.addAll(getLsFoldPathRecur(path, filename, suffix, isNeedFolder));
 					if (isNeedFolder) {
