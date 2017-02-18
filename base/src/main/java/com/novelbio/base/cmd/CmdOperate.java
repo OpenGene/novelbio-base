@@ -53,7 +53,7 @@ public class CmdOperate extends RunProcess<String> {
 	//====================================================
 	
 	/** 结束标志，0表示正常退出 */
-	FinishFlag finishFlag;
+	protected FinishFlag finishFlag;
 	long runTime = 0;
 	/** 标准输出的信息 */
 	LinkedList<String> lsOutInfo;
@@ -74,7 +74,7 @@ public class CmdOperate extends RunProcess<String> {
 	boolean getCmdInErrStream = false;
 	
 	/** 用来传递参数，拷贝输入输出文件夹的类 */
-	CmdOrderGenerator cmdOrderGenerator = new CmdOrderGenerator(!ServiceEnvUtil.isAliyunEnv());
+	protected CmdOrderGenerator cmdOrderGenerator = new CmdOrderGenerator(!ServiceEnvUtil.isAliyunEnv());
 	
 	/** 如果选择用list来保存结果输出，最多保存500行的输出信息 */
 	int lineNumStd = 1000;
@@ -546,7 +546,7 @@ public class CmdOperate extends RunProcess<String> {
 	 * @throws Exception
 	 * @throws Exception
 	 */
-	private void doInBackgroundB() throws Exception {
+	protected void doInBackgroundB() throws Exception {
 		cmdOrderGenerator.setIsSaveStdFile(!getCmdInStdStream);
 		cmdOrderGenerator.setIsSaveErrFile(!getCmdInErrStream);
 		
@@ -899,7 +899,7 @@ public class CmdOperate extends RunProcess<String> {
 		return input;
 	}
 	
-	static class FinishFlag {
+	public static class FinishFlag {
 		boolean isStart = false;
 		Integer flag = null;
 		
@@ -911,6 +911,9 @@ public class CmdOperate extends RunProcess<String> {
 		}
 		public boolean isFinish() {
 			return flag != null;
+		}
+		public void setFlag(Integer flag) {
+			this.flag = flag;
 		}
 	}
 	
