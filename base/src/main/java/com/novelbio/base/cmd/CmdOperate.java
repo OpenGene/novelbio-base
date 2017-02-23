@@ -236,7 +236,7 @@ public class CmdOperate extends RunProcess<String> {
 	public void setLsCmd(List<String> lsCmd) {
 		cmdOrderGenerator.setLsCmd(lsCmd);
 	}
-	protected void setNeedLog(boolean isNeedLog) {
+	public void setNeedLog(boolean isNeedLog) {
 		this.needLog = isNeedLog;
 	}
 	

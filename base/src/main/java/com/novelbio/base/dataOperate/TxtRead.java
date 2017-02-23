@@ -25,6 +25,7 @@ import org.apache.log4j.Logger;
 import com.hadoop.compression.lzo.LzopCodec;
 import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
 import com.novelbio.base.dataStructure.PatternOperate;
+import com.novelbio.base.fileOperate.ExceptionNbcFile;
 import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.base.fileOperate.PositionInputStream;
 
@@ -37,7 +38,7 @@ class TxtRead implements Closeable {
 	
 	PositionInputStream inputStreamRaw;
 	InputStream inputStream;
-	BufferedReader bufread;
+	BufferedReaderNBC bufread;
 	
 	/** 抓取文件中特殊的信息 */
 	String grepContent = "";
@@ -155,6 +156,7 @@ class TxtRead implements Closeable {
 	private Iterable<String> readPerlines() throws Exception {
 		bufread =  readfile(); 
 		return new Iterable<String>() {
+			int linNum = 0;
 			public Iterator<String> iterator() {
 				return new Iterator<String>() {
 					public boolean hasNext() {
@@ -169,11 +171,14 @@ class TxtRead implements Closeable {
 						throw new UnsupportedOperationException();
 					}
 					String getLine() {
+						linNum++;
 						String line = null;
 						try {
 							line = bufread.readLine();
 						} catch (IOException ioEx) {
 							line = null;
+						} catch (ExceptionNBCReadLineTooLong e) {
+							throw new ExceptionNbcFile("file " + getFileName() + " have a very long line on line " + linNum, e);
 						}
 						if (line == null) {
 							close();
@@ -219,8 +224,7 @@ class TxtRead implements Closeable {
 		String firstLine = "";
 		try {
 			firstLine = readlines().iterator().next();
-		} catch (Exception e) { }
-		finally{
+		} finally{
 			close();
 		}
 		return firstLine;
@@ -333,7 +337,7 @@ class TxtRead implements Closeable {
 	 */
 	public String ExcelRead(String sep, int rowNum, int columnNum)
 			throws Exception {
-		BufferedReader readasexcel = readfile();
+		BufferedReaderNBC readasexcel = readfile();
 		// 先跳过前面的好多行
 		for (int i = 0; i < rowNum - 1; i++) {
 			if (readasexcel.readLine() == null) {
@@ -460,7 +464,7 @@ class TxtRead implements Closeable {
 		// 保存最后的结果
 		ArrayList<String> lsResult = new ArrayList<String>();
 		String content = "";
-		BufferedReader reader = readfile();
+		BufferedReaderNBC reader = readfile();
 		while ((content = reader.readLine()) != null) {
 			if (grepInfo(patternOperate, content, caseSensitive, isRegx)) {
 				int num = 0;// 计数器，将前面的几行全部加入list
@@ -529,9 +533,9 @@ class TxtRead implements Closeable {
 	 * @return 返回BufferedReader，记得读完后要关闭Buffer流
 	 * @throws Exception
 	 */
-	BufferedReader readfile() {
+	BufferedReaderNBC readfile() {
 		try { initialReading(); 	} catch (IOException e) { e.printStackTrace(); }
-		bufread = new BufferedReader(new InputStreamReader(inputStream));
+		bufread = new BufferedReaderNBC(new InputStreamReader(inputStream));
 		return bufread;
 	}
 	/**
