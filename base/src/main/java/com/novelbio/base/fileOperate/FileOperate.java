@@ -1175,6 +1175,11 @@ public class FileOperate {
 		createFolders(getPath(folderPath));
 	}
 
+	/**
+	 * 如果存在直接返回
+	 * 
+	 * @param path
+	 */
 	public static void createFolders(Path path) {
 		try {
 			if (path == null) {
