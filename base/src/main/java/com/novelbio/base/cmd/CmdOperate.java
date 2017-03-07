@@ -759,6 +759,21 @@ public class CmdOperate extends RunProcess<String> {
 	
 	@Override
 	protected void running() {
+		running(true);
+	}
+	
+	/**
+	 * 目前仅用于Script中move  > Bam文件
+	 * 因为通过流输出的bam文件是一个独立线程，很可能cmd运行结束后，
+	 * bam文件还没处理完。这时候就需要在外部等bam文件线程结束后再移动文件。
+	 * 因此这里就不把输出文件移出去。
+	 */
+	public void runWithoutMoveFileOut() {
+		running(false);
+	}
+	
+	
+	private void running(boolean isMoveFileOut) {
 		finishFlag = new FinishFlag();
 
 		cmdOrderGenerator.generateTmPath();
@@ -797,7 +812,9 @@ public class CmdOperate extends RunProcess<String> {
 		}
 		
 		//不管是否跑成功，都移出文件夹
-		moveFileOut();
+		if (isMoveFileOut) {
+			moveFileOut();
+		}
 		
 		runTime = dateTime.getElapseTime();
 		if (process instanceof ProcessRemote) {
@@ -806,7 +823,6 @@ public class CmdOperate extends RunProcess<String> {
 		
 		cmdOrderGenerator.deleletTmpPath();
 	}
-	
 	/** 把文件移动出来 */
 	public void moveFileOut() {
 		cmdOrderGenerator.moveFileOut();
