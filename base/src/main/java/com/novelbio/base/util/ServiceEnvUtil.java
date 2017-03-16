@@ -1,6 +1,7 @@
 package com.novelbio.base.util;
 
 import com.novelbio.base.PathDetail;
+import com.novelbio.base.StringOperate;
 
 /**
  * 服务运行环境判定.是hadoop还是阿里云
@@ -31,4 +32,16 @@ public class ServiceEnvUtil {
 		return ENV_ALIYUN.equals(env);
 	}
 
+	/**
+	 * 是否阿里云批量计算环境. 批量计算中会有下面这个环境变量
+	 * @return 是则返回true. 不是返回false
+	 */
+	public static boolean isBatchCompute() {
+		return !StringOperate.isRealNull(System.getenv("BATCH_COMPUTE_OSS_HOST"));
+	}
+	
+	public static void main(String[] args) {
+		System.out.println(isBatchCompute());
+	}
+	
 }
