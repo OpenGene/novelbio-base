@@ -239,7 +239,7 @@ public class TxtReadandWrite implements Closeable {
 	}
 	
 	/**
-	 * @param Num 读取前几列，实际列。如果文本没有那么多列，那么只读取所有列
+	 * @param Num 读取前几行，实际行。如果文本没有那么多行，那么只读取所有行
 	 * @return 返回 String，内部close
 	 * @throws Exception
 	 */
