@@ -21,8 +21,11 @@ public class  ZipOperate {
 	private static final Logger logger = Logger.getLogger(ZipOperate.class);
 	public static void main(String[] args) {
 		try {
-			unZipFiles("/hdfs:/nbCloud/public/experiment/RNA0617.zip", "/hdfs:/nbCloud/public/experiment/out");
+			zip("/home/novelbio/Desktop/taskModule", "/home/novelbio/Desktop/taskModule.zip");
 		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -94,7 +97,19 @@ public class  ZipOperate {
     		logger.info("start zip file: " + zipOutName);
     		OutputStream outFileStream = FileOperate.getOutputStream(zipOutName);
     		ZipOutputStream out = new ZipOutputStream(outFileStream);
+    		/*
+    		 * modify by fans.fan 170320 原来的压缩默认会加入一个空的文件夹.修正
     		zip(out, inputFile, "");
+    		 */
+    		if (FileOperate.isFileDirectory(inputFile)) {	//判断是否为目录
+    			List<Path> fl = FileOperate.getLsFoldPath(inputFile);
+    			for (Path path : fl) {
+    				zip(out, path, FileOperate.getFileName(path)); 
+                }
+    		} else {
+    			zip(out, inputFile, "");
+    		}
+    		//end by fans.fan
     		logger.info("zip done");
     		out.close();
     	}
@@ -113,9 +128,6 @@ public class  ZipOperate {
     			for (Path path : fl) {
     				zip(out, path, base + FileOperate.getFileName(path)); 
                 }
-    			for (int i = 0; i < fl.size(); i++) {
-    				
-    			}
     		} else {				//压缩目录中的所有文件
     			out.putNextEntry(new ZipEntry(base));
     			InputStream in = FileOperate.getInputStream(f);
