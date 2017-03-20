@@ -740,6 +740,7 @@ public class FileOperate {
 
 	/**
 	 * 获取文件夹下全部文件名
+	 * 已过期,建议使用getLsFoldPath
 	 * 
 	 * @return 返回包含目标文件全名的List
 	 * @throws IOException
