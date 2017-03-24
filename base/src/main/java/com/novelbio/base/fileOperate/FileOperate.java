@@ -1048,6 +1048,9 @@ public class FileOperate {
 				patName = new PatternOperate(fileNameRegex, false);
 			}
 			if (!StringOperate.isRealNull(suffixRegex) && !suffixRegex.equalsIgnoreCase("*")) {
+				if (!suffixRegex.endsWith("$")) {
+					suffixRegex += "$";
+				}
 				patSuffix = new PatternOperate(suffixRegex, false);
 			}
 		}
@@ -1069,7 +1072,7 @@ public class FileOperate {
 			}
 
 			boolean isNameOk = (patName == null || patName.getPatFirst(fileNameSep[0]) != null);
-			boolean isSuffixOk = (patSuffix == null || patSuffix.getPatFirst(fileNameSep[1]) != null);
+			boolean isSuffixOk = (patSuffix == null || patSuffix.getPatFirst(fileName) != null);
 			return isNameOk && isSuffixOk;
 		}
 	}
