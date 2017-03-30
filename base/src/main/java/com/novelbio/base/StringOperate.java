@@ -238,4 +238,17 @@ public class StringOperate {
 		}
 		return new String(bytes, "UTF-8");
 	}
+
+	/**
+	 * 首字母转大写
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public static String toUpperCaseFirstOne(String s) {
+		if(Character.isUpperCase(s.charAt(0)))
+            return s;
+        else
+            return (new StringBuilder()).append(Character.toUpperCase(s.charAt(0))).append(s.substring(1)).toString();
+	}
 }

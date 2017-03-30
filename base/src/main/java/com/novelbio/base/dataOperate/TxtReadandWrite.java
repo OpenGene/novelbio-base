@@ -1,12 +1,9 @@
 package com.novelbio.base.dataOperate;
 
-import hdfs.jsr203.HdfsConfInitiator;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -38,6 +35,8 @@ import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.base.fileOperate.RandomFileInt;
 import com.novelbio.base.fileOperate.RandomFileInt.RandomFileFactory;
+
+import hdfs.jsr203.HdfsConfInitiator;
 
 /**
  * 新建read没关系
@@ -90,6 +89,7 @@ public class TxtReadandWrite implements Closeable {
 	TxtWrite txtWrite;
 	
 	boolean read = true;
+	
 	
 	public TxtReadandWrite(File file) {
 		this(file, false);
@@ -253,11 +253,11 @@ public class TxtReadandWrite implements Closeable {
 	 */
 	@Deprecated
 	public String readAllAsString() {
-		String content = "";
+		StringBuffer content = new StringBuffer();
 		for (String line : readlines()) {
-			content += line;
+			content.append(line);
 		}
-		return content;
+		return content.toString();
 	}
 	/**
 	 * 按照excel方法读取文本时使用，用于 获得txt文本的行数，如果最后一行是""，则忽略最后一行
