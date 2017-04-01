@@ -33,7 +33,6 @@ class TxtRead implements Closeable {
 	private static final Logger logger = Logger.getLogger(TxtRead.class);
 	
 	/** 读取本地文件时设定 */
-//	String txtfile;
 	Path file;
 	
 	PositionInputStream inputStreamRaw;
@@ -47,7 +46,10 @@ class TxtRead implements Closeable {
 	boolean isStream = false;
 	
 	long filesize = 0;
-
+	
+	/** 单行最多不能超过这么长，否则就报错 */
+	private int maxLineNum = 100000;
+	
 	public TxtRead(Path file) {
 		txTtype = TXTtype.getTxtType(file.toString());
 		this.file = file;
@@ -65,6 +67,11 @@ class TxtRead implements Closeable {
 		this.inputStreamRaw = new PositionInputStream(inputStream);
 		txTtype = txtTtype;
 		isStream = true;
+	}
+	
+	/** 单行最多不能超过这么长，否则就报错 */
+	public void setMaxLineNum(int maxLineNum) {
+		this.maxLineNum = maxLineNum;
 	}
 	
 	/** 如果读取的是流，则返回null */
@@ -536,6 +543,7 @@ class TxtRead implements Closeable {
 	BufferedReaderNBC readfile() {
 		try { initialReading(); 	} catch (IOException e) { e.printStackTrace(); }
 		bufread = new BufferedReaderNBC(new InputStreamReader(inputStream));
+		bufread.setMaxLineNum(maxLineNum);
 		return bufread;
 	}
 	/**

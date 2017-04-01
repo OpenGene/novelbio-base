@@ -81,6 +81,7 @@ public class TxtReadandWrite implements Closeable {
 	public final static String ENTER_LINUX = "\n";
 	public final static String ENTER_WINDOWS = "\r\n";
 	
+	/** inputStream的缓冲长度 */
 	public static int bufferLen = 100000;
 
 	static String sep = "\t";
@@ -89,7 +90,6 @@ public class TxtReadandWrite implements Closeable {
 	TxtWrite txtWrite;
 	
 	boolean read = true;
-	
 	
 	public TxtReadandWrite(File file) {
 		this(file, false);
@@ -149,6 +149,13 @@ public class TxtReadandWrite implements Closeable {
 	public TxtReadandWrite(InputStream inputStream, TXTtype txtTtype) {
 		txtRead = new TxtRead(inputStream, txtTtype);
 		read = true;
+	}
+	
+	/** 读取文本的单行最多不能超过这么长，否则就报错 */
+	public void setReadMaxLineNum(int maxLineNum) {
+		if (txtRead != null) {
+			txtRead.setMaxLineNum(maxLineNum);
+		}
 	}
 
 	public String getFileName() {

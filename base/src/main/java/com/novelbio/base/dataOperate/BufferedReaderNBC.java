@@ -17,7 +17,7 @@ import java.util.stream.StreamSupport;
 public class BufferedReaderNBC extends BufferedReader {
 
 	/** 单行最多不能超过这么长，否则就报错 */
-	private static final int MAX_LINE_NUM = 100000;
+	private int maxLineNum = 100000;
 
 	private Reader in;
 
@@ -69,7 +69,10 @@ public class BufferedReaderNBC extends BufferedReader {
 	public BufferedReaderNBC(Reader in) {
 		this(in, defaultCharBufferSize);
 	}
-
+	/** 单行最多不能超过这么长，否则就报错 */
+	public void setMaxLineNum(int maxLineNum) {
+		this.maxLineNum = maxLineNum;
+	}
 	/** Checks to make sure that the stream has not been closed */
 	private void ensureOpen() throws IOException {
 		if (in == null)
@@ -338,7 +341,7 @@ public class BufferedReaderNBC extends BufferedReader {
 				if (s == null)
 					s = new StringBuffer(defaultExpectedLineLength);
 				s.append(cb, startChar, i - startChar);
-				if (s.length() > MAX_LINE_NUM) {
+				if (s.length() > maxLineNum) {
 					throw new ExceptionNBCReadLineTooLong(
 							"read line is too long, maybe error on line: "
 									+ s.toString().substring(0, 100) + "...");
