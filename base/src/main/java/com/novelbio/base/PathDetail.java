@@ -157,7 +157,7 @@ public class PathDetail {
 		if (FileOperate.isFileExistAndNotDir(file)) {
 			long createTime = DateUtil.getNowTimeLong() - FileOperate.getTimeLastModify(file);
 			if (createTime > tmpFileRemainDay * 24*3600 * 1000) {
-				FileOperate.delFile(file);
+				FileOperate.deleteFileFolder(file);
 			}
 		} else if (FileOperate.isFileDirectory(file)) {
 			List<String> lsFile = FileOperate.getLsFoldFileName(file);
@@ -166,7 +166,7 @@ public class PathDetail {
 				deleteFileFolder(file2, parentPath);
 			}
 			if (isClear && !FileOperate.getCanonicalPath(file).equals(parentPath)) {
-				FileOperate.delFile(file);
+				FileOperate.deleteFileFolder(file);
 			}
 		}
 		return;
@@ -232,7 +232,6 @@ public class PathDetail {
 		
 		return rworkspace;
 	}
-	
 	/** 取得hdfs挂载的本地文件夹路径 */
 	public static String getHdfsLocalPath() {
 		return properties.getProperty("hdfsLocalPath");

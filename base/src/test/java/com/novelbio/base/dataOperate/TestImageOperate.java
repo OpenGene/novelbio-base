@@ -18,7 +18,7 @@ public class TestImageOperate extends TestCase {
 		FileOperate.delFile(pngImagePath);
 		BufferedImage bufferedImage = ImageUtils.read(tiffImagePath);
 		ImageUtils.saveBufferedImage(bufferedImage, pngImagePath);
-		assertEquals(true, FileOperate.isFileExist(pngImagePath));
+		assertEquals(true, FileOperate.isFileExistAndNotDir(pngImagePath));
 		FileOperate.delFile(pngImagePath);
 
 	}

@@ -205,7 +205,7 @@ public class TestFileOperate {
 		FileOperate.moveFile(true, folderCopy, folderMove);
 		lsPaths = FileOperate.getLsFoldPath(folder);
 		Assert.assertEquals(5, lsPaths.size());
-		Assert.assertFalse(FileOperate.isFileExist(folderCopy));
+		Assert.assertFalse(FileOperate.isFileExistAndNotDir(folderCopy));
 		try {
 			List<Path> lsPathSub = Files.walk(FileOperate.getPath(folderMove)).collect(Collectors.toList());
 			Assert.assertEquals(12, lsPathSub.size());
@@ -227,9 +227,9 @@ public class TestFileOperate {
 	public void tsetIsFileExistAndSize() {
 		Assert.assertFalse(FileOperate.isFileExistAndNotDir(folder));
 		Assert.assertTrue(FileOperate.isFileDirectory(folder));
-		Assert.assertTrue(FileOperate.isFileExist(folder + "/file1.fa"));
+		Assert.assertTrue(FileOperate.isFileExistAndNotDir(folder + "/file1.fa"));
 		Assert.assertFalse(FileOperate.isFileDirectory(folder + "/file1.fa"));
-		Assert.assertFalse(FileOperate.isFileExist(folder+"/fsees"));
+		Assert.assertFalse(FileOperate.isFileExistAndNotDir(folder+"/fsees"));
 		Assert.assertFalse(FileOperate.isFileDirectory(folder+"/fsees"));
 		
 		Assert.assertTrue(FileOperate.isFileExistAndBigThanSize(folder + "/file1.fa", 0));
@@ -239,7 +239,7 @@ public class TestFileOperate {
 		
 		
 		String path = "hdfs:/apps/simple/appYarn.zip";
-		Assert.assertTrue(FileOperate.isFileExist(path));
+		Assert.assertTrue(FileOperate.isFileExistAndNotDir(path));
 	}
 	
 	@Test

@@ -36,8 +36,8 @@ public class TestExcelOperate {
 			ExcelStyle style = ExcelStyle.getThreeLineTable(1, endRowNum);
 			excelOperate.writeExcel(1, 1, lsData, style);
 			excelOperate.close();
-			Assert.assertEquals(true, FileOperate.isFileExist(filename));
-			Assert.assertEquals(true, FileOperate.isFileExist(filename));
+			Assert.assertEquals(true, FileOperate.isFileExistAndNotDir(filename));
+			Assert.assertEquals(true, FileOperate.isFileExistAndNotDir(filename));
 			
 			List<String> lsSheetTxt = ExcelOperate.getLsSheetTxtFiles(filename);
 			Assert.assertEquals(1, lsSheetTxt.size());
@@ -77,7 +77,7 @@ public class TestExcelOperate {
 			excelOperate.writeExcel(1, 1, lsData, style);
 			excelOperate.close();
 			
-			Assert.assertEquals(true, FileOperate.isFileExist(filename));
+			Assert.assertEquals(true, FileOperate.isFileExistAndNotDir(filename));
 			
 			FileOperate.deleteFileFolder(filename);
 		}catch(Exception e){
@@ -92,7 +92,7 @@ public class TestExcelOperate {
 		ExcelOperate excelOperate= new ExcelOperate(tempFilePath);
 		excelOperate.writeExcel(new ArrayList<String[]>());
 		excelOperate.close();
-		Assert.assertTrue(FileOperate.isFileExist(tempFilePath));
+		Assert.assertTrue(FileOperate.isFileExistAndNotDir(tempFilePath));
 	}
 
 	@Test
