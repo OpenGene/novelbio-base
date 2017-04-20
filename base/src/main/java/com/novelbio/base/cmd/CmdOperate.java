@@ -213,7 +213,7 @@ public class CmdOperate extends RunProcess<String> {
 	private void setCmdFile(String cmd, String cmdWriteInFileName) {
 		while (true) {
 			cmd1SH = cmdOrderGenerator.getTmpPath() + cmdWriteInFileName.replace("\\", "/") + DateUtil.getDateAndRandom() + ".sh";
-			if (!FileOperate.isFileExist(cmd1SH)) {
+			if (!FileOperate.isFileExistAndNotDir(cmd1SH)) {
 				break;
             }
         }
@@ -731,7 +731,7 @@ public class CmdOperate extends RunProcess<String> {
 	/** 运行但并不报错，适合获取软件版本信息等。因为有些软件在获取版本时会返回错误，譬如bwa，输入bwa就是返回错误 */
 	public void run() {
 		super.run();
-		if (FileOperate.isFileExist(cmd1SH)) {
+		if (FileOperate.isFileExistAndNotDir(cmd1SH)) {
 			FileOperate.deleteFileFolder(cmd1SH);
         }
 	}
@@ -742,7 +742,7 @@ public class CmdOperate extends RunProcess<String> {
 		if (!isFinishedNormal()) {
 			throw new ExceptionCmd(this);
 		}
-		if (FileOperate.isFileExist(cmd1SH)) {
+		if (FileOperate.isFileExistAndNotDir(cmd1SH)) {
 			FileOperate.deleteFileFolder(cmd1SH);
         }
 	}

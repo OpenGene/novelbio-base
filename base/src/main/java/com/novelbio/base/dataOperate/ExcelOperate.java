@@ -201,7 +201,7 @@ public class ExcelOperate implements Closeable {
 		}
 		
 		try {
-			if (FileOperate.isFileExist(filePathAndName)) {
+			if (FileOperate.isFileExistAndNotDir(filePathAndName)) {
 				InputStream is = FileOperate.getInputStream(filename);
 				if (version == EXCEL2003) {
 					wb = new HSSFWorkbook(is);

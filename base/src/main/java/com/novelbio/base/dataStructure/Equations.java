@@ -35,7 +35,7 @@ public class Equations {
 	 */
 	public void setXYFile(String file, int colX, int colY, int rowStart)
 	{
-		if (!FileOperate.isFileExist(file)) {
+		if (!FileOperate.isFileExistAndNotDir(file)) {
 			lsXY.clear();
 			return;
 		}

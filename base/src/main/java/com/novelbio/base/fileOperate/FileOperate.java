@@ -55,10 +55,7 @@ public class FileOperate {
 			isWindowsOS = true;
 		}
 	}
-
-	/**
-	 * 是否是windows操作系统
-	 */
+	/** 是否是windows操作系统 */
 	public static boolean isWindows() {
 		return isWindowsOS;
 	}
@@ -457,7 +454,7 @@ public class FileOperate {
 	 */
 	// TODO 测试
 	public static long getFileSizeLong(Path path) {
-		if (path == null || !Files.exists(path)) {
+		if (path == null || !isFileFolderExist(path)) {
 			return -1;
 		}
 		if (!isFileDirectory(path)) {
@@ -932,7 +929,7 @@ public class FileOperate {
 			suffix = ".*";
 			noNeedReg++;
 		}
-		if (file == null || !Files.exists(file)) {
+		if (file == null || !isFileFolderExist(file)) {
 			return new ArrayList<>();
 		}
 		
@@ -961,7 +958,7 @@ public class FileOperate {
 			}
 			streamPath.close();
 			for (Path path : lsPathTmp) {
-				if (Files.isDirectory(path)) {
+				if (isFileDirectory(path)) {
 					//是ossPath，只要是以/结尾的.就是文件夹。不是osspath,则需查找判断一下
 					lsPath.addAll(getLsFoldPathRecur(path, filename, suffix, isNeedFolder));
 					if (isNeedFolder) {
@@ -1006,7 +1003,7 @@ public class FileOperate {
 		if (suffix == null || suffix.equals("*")) {
 			suffix = ".*";
 		}
-		if (file == null || !Files.exists(file)) {
+		if (file == null || !isFileFolderExist(file)) {
 			return new ArrayList<>();
 		}
 		
@@ -1016,7 +1013,7 @@ public class FileOperate {
 			predicateFileName = new PredicateFileName(filename, suffix);
 		}
 		// 如果只是文件则返回文件名
-		if (!Files.isDirectory(file)) { // 获取文件名与后缀名
+		if (!isFileDirectory(file)) { // 获取文件名与后缀名
 			if (predicateFileName == null) {
 				lsFilenames.add(file);
 			} else if (predicateFileName != null && predicateFileName.test(file)) {
@@ -1062,7 +1059,7 @@ public class FileOperate {
 
 		@Override
 		public boolean test(Path t) {
-			if (!isFilterFolder && Files.isDirectory(t)) {
+			if (!isFilterFolder && isFileDirectory(t)) {
 				return true;
 			}
 			String fileName = getFileName(t);
@@ -1364,7 +1361,7 @@ public class FileOperate {
 		}
 		if (oldfile != null && isFilePathSame(getAbsolutePath(oldfile), getAbsolutePath(pathNew)))
 			return;
-		if (!cover && Files.exists(pathNew))
+		if (!cover && isFileFolderExist(pathNew))
 			return;
 		if (cover && isFileDirectory(pathNew)) {
 			throw new ExceptionFileError("cannot cover directory " + pathNew);
@@ -1413,7 +1410,7 @@ public class FileOperate {
 		if (isFilePathSame(oldFile.toString(), fnew.toString())) {
 			return;
 		}
-		if (Files.exists(fnew) && !cover) {
+		if (isFileFolderExist(fnew) && !cover) {
 			return;
 		}
 		deleteFileFolder(fnew);
@@ -1678,7 +1675,7 @@ public class FileOperate {
 		Path fnewpathParent = newPath.getParent();
 		createFolders(fnewpathParent);
 		try {
-			if (Files.exists(newPath)) {
+			if (isFileFolderExist(newPath)) {
 				if (!cover)
 					return;
 				Files.deleteIfExists(newPath);
@@ -1834,11 +1831,11 @@ public class FileOperate {
 		if (!cover && (FileOperate.isFileFolderExist(linkTo) || FileOperate.isSymbolicLink(linkTo))) {
 			return true;
 		}
-		if (!FileOperate.isFileExist(rawFile)) {
+		if (!FileOperate.isFileExistAndNotDir(rawFile)) {
 			return false;
 		}
 		FileOperate.createFolders(FileOperate.getParentPathNameWithSep(linkTo));
-		if (FileOperate.isFileExist(linkTo) && cover) {
+		if (FileOperate.isFileExistAndNotDir(linkTo) && cover) {
 			FileOperate.delFile(linkTo);
 		}
 
@@ -1864,6 +1861,82 @@ public class FileOperate {
 		cmdOperate.runWithExp();
 		return true;
 	}
+	
+	/**判断文件是否为文件夹,null直接返回false */
+	public static boolean isFileDirectory(String fileName) {
+		if (StringOperate.isRealNull(fileName)) {
+			return false;
+		}
+		Path file = getPath(fileName);
+		return isFileDirectory(file);
+	}
+
+	/** 如果file是文件夹，并且为空，则返回true，否则返回false */
+	public static boolean isFileDirectoryEmpty(String file) {
+		return isFileDirectory(getPath(file));
+	}
+
+	/** 如果file是文件夹，并且为空，则返回true，否则返回false */
+	public static boolean isFileDirectoryEmpty(Path file) {
+		if (file == null) {
+			return false;
+		}
+		if (!isFileDirectory(file)) {// 没有文件，则返回空
+			return false;
+		}
+		return getLsFoldPath(file).isEmpty();
+	}
+
+	/** 判断文件是否为文件夹,null直接返回false */
+	@Deprecated
+	public static boolean isFileDirectory(File file) {
+		if (file == null) return false;
+		
+		return file.isDirectory();
+	}
+
+	/** 判断文件是否为文件夹,null直接返回false */
+	public static boolean isFileDirectory(Path file) {
+		return file != null && Files.isDirectory(file);
+	}
+
+	/**
+	 * 判断文件或文件夹是否存在，给的是绝对路径
+	 * @param fileName 如果为null, 直接返回false
+	 * @return
+	 */
+	public static boolean isFileFolderExist(String fileName) {
+		return isFileExist(fileName);
+	}
+
+	/**
+	 * 判断文件或文件夹是否存在，给的是绝对路径
+	 * @param file 如果为null, 直接返回false
+	 */
+	public static boolean isFileFolderExist(File file) {
+		return file != null && isFileExist(getPath(file));
+	}
+
+	/** @param fileName  如果为null, 直接返回false */
+	public static boolean isFileFolderExist(Path path) {
+		return isFileExist(path);
+	}
+	/**
+	 * 判断文件是否存在，可以是文件夹，给的是绝对路径
+	 * @param fileName  如果为null, 直接返回false
+	 * @return 文件存在,返回true.否则,返回false
+	 */
+	public static boolean isFileExist(String file) {
+		return !StringOperate.isRealNull(file) && isFileExist(getPath(file));
+	}
+	/**
+	 * 判断文件是否存在，并且不是文件夹，给的是绝对路径
+	 * @param fileName 如果为null, 直接返回false
+	 * @return 文件存在,返回true.否则,返回false
+	 */
+	public static boolean isFileExist(Path path) {
+		return path != null && Files.exists(path);
+	}
 
 	/**
 	 * 判断文件是否存在，并且不是文件夹，给的是绝对路径
@@ -1872,8 +1945,7 @@ public class FileOperate {
 	 *            如果为null, 直接返回false
 	 * @return 文件存在,返回true.否则,返回false
 	 */
-	// TODO 修改method名字为 isFileExistAndNotDir
-	public static boolean isFileExist(String fileName) {
+	public static boolean isFileExistAndNotDir(String fileName) {
 		if (StringOperate.isRealNull(fileName)) {
 			return false;
 		}
@@ -1886,25 +1958,11 @@ public class FileOperate {
 	 * 
 	 * @param fileName
 	 *            如果为null, 直接返回false
-	 * @return 文件存在,返回true.否则,返回false
-	 */
-	public static boolean isFileExist(Path path) {
-		if (path == null) {
-			return false;
-		}
-		return isFileExistAndNotDir(path);
-	}
-
-	/**
-	 * 判断文件是否存在，并且不是文件夹，给的是绝对路径
-	 * 
-	 * @param fileName
-	 *            如果为null, 直接返回false
 	 * @return
 	 */
 	// TODO 修改method名字为 isFileExistAndNotDir
 	public static boolean isFileExistAndNotDir(Path file) {
-		return file != null && Files.exists(file) && !Files.isDirectory(file);
+		return file != null && isFileFolderExist(file) && !isFileDirectory(file);
 	}
 
 	/**
@@ -1998,122 +2056,16 @@ public class FileOperate {
 	 */
 	@Deprecated
 	public static boolean isFileExistAndLossless(String filePath, long realSize) {
-		File file = getFile(filePath);
-		if (!file.exists()) {
+		Path file = FileOperate.getPath(filePath);
+		if (FileOperate.isFileFolderExist(file)) {
 			return false;
 		}
-		if (file.isFile()) {
-			return file.length() == realSize;
+		if (isFileExistAndNotDir(file)) {
+			return getFileSizeLong(file) == realSize;
 		}
 		return false;
 	}
 
-	/**
-	 * 判断文件是否为文件夹,null直接返回false
-	 * 
-	 * @param fileName
-	 * @return
-	 */
-	public static boolean isFileDirectory(String fileName) {
-		if (StringOperate.isRealNull(fileName)) {
-			return false;
-		}
-		Path file = getPath(fileName);
-		return isFileDirectory(file);
-	}
-
-	/**
-	 * 如果file是文件夹，并且为空，则返回true，否则返回false
-	 * 
-	 * @param fileName
-	 * @return
-	 */
-	public static boolean isFileDirectoryEmpty(String file) {
-		return isFileDirectory(getPath(file));
-	}
-
-	/**
-	 * 如果file是文件夹，并且为空，则返回true，否则返回false
-	 * 
-	 * @param fileName
-	 * @return
-	 */
-	public static boolean isFileDirectoryEmpty(Path file) {
-		if (file == null) {
-			return false;
-		}
-		if (!Files.isDirectory(file)) {// 没有文件，则返回空
-			return false;
-		}
-		return getLsFoldPath(file).isEmpty();
-	}
-
-	/**
-	 * 判断文件是否为文件夹,null直接返回false
-	 * 
-	 * @param fileName
-	 * @return
-	 */
-	@Deprecated
-	public static boolean isFileDirectory(File file) {
-		if (file == null) {
-			return false;
-		}
-		return file.isDirectory();
-	}
-
-	/**
-	 * 判断文件是否为文件夹,null直接返回false
-	 * 
-	 * @param fileName
-	 * @return true是文件夹，false不是文件夹
-	 */
-	public static boolean isFileDirectory(Path file) {
-		if (file == null) {
-			return false;
-		}
-		return Files.isDirectory(file);
-	}
-
-	/**
-	 * 判断文件或文件夹是否存在，给的是绝对路径
-	 * 
-	 * @param fileName
-	 *            如果为null, 直接返回false
-	 * @return
-	 */
-	public static boolean isFileFolderExist(String fileName) {
-		if (StringOperate.isRealNull(fileName)) {
-			return false;
-		}
-		return isFileFolderExist(getPath(fileName));
-	}
-
-	/**
-	 * 判断文件或文件夹是否存在，给的是绝对路径
-	 * 
-	 * @param file
-	 *            如果为null, 直接返回false
-	 * @return
-	 */
-	public static boolean isFileFolderExist(File file) {
-		if (file == null)
-			return false;
-		Path path = getPath(file);
-		return isFileFolderExist(path);
-	}
-
-	/**
-	 * <<<<<<< HEAD 判断文件是否存在，给的是绝对路径 ======= 判断文件或文件夹是否存在，给的是绝对路径 >>>>>>> branch
-	 * 'master' of https://github.com/NovelBioCloud/base.git
-	 * 
-	 * @param fileName
-	 *            如果为null, 直接返回false
-	 * @return
-	 */
-	public static boolean isFileFolderExist(Path file) {
-		return file != null && Files.exists(file);
-	}
 
 	/**
 	 * 删除文件.文件不存在不会报错.
@@ -2210,7 +2162,7 @@ public class FileOperate {
 	 * @return
 	 */
 	public static void deleteFolderClean(Path path) {
-		if (path == null || !Files.exists(path)) {
+		if (path == null || !isFileFolderExist(path)) {
 			return;
 		}
 		if (!isFileDirectory(path)) {
@@ -2271,8 +2223,8 @@ public class FileOperate {
 		if (file == null)
 			return;
 
-		if (Files.exists(file)) {
-			if (Files.isDirectory(file)) {
+		if (isFileFolderExist(file)) {
+			if (isFileDirectory(file)) {
 				deleteFolder(file);
 			} else {
 				delFile(file);
