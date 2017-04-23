@@ -1444,7 +1444,11 @@ public class FileOperate {
 
 		return parentPath + append + fileNameNoSuffix + suffix;
 	}
-
+	
+	/** 生成文件临时名字 */
+	public static String getFileTmpName(String fileName) {
+		return fileName + ".tmp";
+	}
 	/**
 	 * 直接操作文件 文件添加<b>前缀</b>并改后缀名，如果一样则不修改
 	 * 
