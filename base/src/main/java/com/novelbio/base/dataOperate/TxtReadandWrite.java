@@ -646,8 +646,8 @@ public class TxtReadandWrite implements Closeable {
 	 * 关闭，关闭后依然可以读文件
 	 */
 	public void close() {
-		try { txtRead.close(); } catch (Exception e) { }
-		try { txtWrite.close(); } catch (Exception e) { }
+		try { if (txtRead != null) txtRead.close(); } catch (Exception e) { }
+		try { if (txtWrite != null) txtWrite.close(); } catch (Exception e) { }
 		if (!read) {
 			try {
 				txtRead = new TxtRead(FileOperate.getPath(txtWrite.getFileName()));
