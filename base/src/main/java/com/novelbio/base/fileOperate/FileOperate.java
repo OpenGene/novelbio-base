@@ -594,7 +594,7 @@ public class FileOperate {
 		return fileNameThis;
 	}
 
-	/** 等同path的tostring方法 */
+	/** 等同path的tostring方法，获得文件全名 */
 	public static String getFilePathName(Path path) {
 		return path.toString();
 	}
