@@ -36,22 +36,15 @@ public class CmdOrderGenerator {
 	
 	CmdPath cmdPath;
 	
-	/** 是否保存stdout文件, <b>默认为true</b><br>
-	 * stdout的保存有几种：<br>
-	 * 1. 在cmd命令中添加 > 然后得到标准输出文件<br>
-	 * 2. 通过 {@link #setSaveFilePath(String)} 外部设置stdout的文件名<br>
-	 * 3. 从cmdOperate中获得标准输出流，自行保存<br>
-	 * 其中1,2需要保存std文件，并且在最后需要把std的临时文件修改为最终文件<br>
-	 * 3不需要保存std文件<br>
-	 *  */
-	boolean isSaveStdFile = true;
+	/** 是否在外部获取stdout的流文件, <b>默认为false</b>*/
+	boolean isGetStdoutStream = false;
 	/** 截获标准输出流的输出文件名 */
 	String saveFilePath = null;
 	/** 输出文件是否为txt，如果命令中含有 >，则认为输出的可能不是txt，为二进制 */
 	boolean isJustDisplayStd = false;
 	
-	/** 是否保存stderr文件，同 {@link #isSaveStdFile} */
-	boolean isSaveErrFile = true;
+	/** 是否在外部获取stderr的流文件，同 {@link #isGetStdoutStream} */
+	boolean isGetStderrStream = true;
 	/** 截获标准错误流的错误文件名 */
 	String saveErrPath = null;
 	/** 输出错误文件是否为txt，如果命令中含有 2>，则认为输出的可能不是txt，为二进制 */
@@ -181,11 +174,6 @@ public class CmdOrderGenerator {
 		return stdInput;
 	}
 	
-	/** 设定最后保存的标准输出流文件名，注意会设定 {@link #setIsSaveStdFile(boolean)}为true */
-	public void setSaveFilePath(String saveFilePath) {
-		this.saveFilePath = saveFilePath;
-		this.isSaveStdFile = true;
-	}
 	public String getSaveStdPath() {
 		return saveFilePath;
 	}
@@ -194,17 +182,11 @@ public class CmdOrderGenerator {
 		if (saveFilePath == null) {
 			return null;
 		}
-		if (isSaveStdFile) {
+		if (!isGetStdoutStream) {
 			return FileOperate.changeFileSuffix(saveFilePath, "_tmp", null);
 		} else {
 			return saveFilePath;
 		}
-	}
-
-	/** 设定最后保存的标准错误流文件名，注意会设定 {@link #setIsSaveErrFile(boolean)}为true */
-	public void setSaveErrPath(String saveErrPath) {
-		this.saveErrPath = saveErrPath;
-		this.isSaveErrFile = true;
 	}
 
 	public String getSaveErrPath() {
@@ -214,42 +196,28 @@ public class CmdOrderGenerator {
 		if (saveErrPath == null) {
 			return null;
 		}
-		if (isSaveErrFile) {
+		if (!isGetStderrStream) {
 			return FileOperate.changeFileSuffix(saveErrPath, "_tmp", null);
 		} else {
 			return saveErrPath;
 		}
 	}
 	
-	/** 是否保存stdout文件，<b>默认为true</b><br>
-	 * stdout的保存有几种：<br>
-	 * 1. 在cmd命令中添加 > 然后得到标准输出文件<br>
-	 * 2. 通过 {@link #setSaveFilePath(String)} 外部设置stdout的文件名<br>
-	 * 3. 从cmdOperate中获得标准输出流，自行保存<br>
-	 * 其中1,2需要保存std文件，并且在最后需要把std的临时文件修改为最终文件<br>
-	 * 3不需要保存std文件<br>
-	 *  */
-	protected void setIsSaveStdFile(boolean isSaveStdFile) {
-		this.isSaveStdFile = isSaveStdFile;
+	/** 是否从cmdOperate中获得标准输出流，自行保存 */
+	protected void setIsGetStdoutStream(boolean isSaveStdFile) {
+		this.isGetStdoutStream = isSaveStdFile;
 	}
 	
-	/** 是否保存stderr文件， <b>默认为true</b><br>
-	 * stderr的保存有几种：<br>
-	 * 1. 在cmd命令中添加 2> 然后得到标准输出文件<br>
-	 * 2. 通过 {@link #setSaveErrPath(String)} 外部设置stdout的文件名<br>
-	 * 3. 从cmdOperate中获得标准输出流，自行保存<br>
-	 * 其中1,2需要保存std文件，并且在最后需要把std的临时文件修改为最终文件<br>
-	 * 3不需要保存std文件<br>
-	 *  */
-	protected void setIsSaveErrFile(boolean isSaveErrFile) {
-		this.isSaveErrFile = isSaveErrFile;
+	/** 是否 从cmdOperate中获得标准错误流，自行保存 */
+	protected void setIsGetStderrStream(boolean isSaveErrFile) {
+		this.isGetStderrStream = isSaveErrFile;
 	}
 	
 	public void moveStdFiles() {
-		if (isSaveStdFile && getSaveStdTmp() != null) {
+		if (!isGetStdoutStream && getSaveStdTmp() != null) {
 			FileOperate.moveFile(true, getSaveStdTmp(), saveFilePath);
 		}
-		if (isSaveErrFile && getSaveErrPath() != null) {
+		if (!isGetStderrStream && getSaveErrPath() != null) {
 			FileOperate.moveFile(true, getSaveErrTmp(), saveErrPath);
 		}
 	}
@@ -325,13 +293,13 @@ public class CmdOrderGenerator {
 			tmpCmd = convertCmdTmp.convertSubCmd(tmpCmd);
 			
 			if (stdOut) {
-				if (isSaveStdFile && StringOperate.isRealNull(saveFilePath)) {
+				if (!isGetStdoutStream && StringOperate.isRealNull(saveFilePath)) {
 					saveFilePath = tmpCmd;
 				}
 				stdOut = false;
 				continue;
 			} else if (errOut) {
-				if (isSaveErrFile && StringOperate.isRealNull(saveErrPath)) {
+				if (!isGetStderrStream && StringOperate.isRealNull(saveErrPath)) {
 					saveErrPath = tmpCmd;
 				}
 				errOut = false;

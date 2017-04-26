@@ -147,9 +147,9 @@ public class StreamOut extends Thread {
 				}
 				if (isToTermiate) {
 					if (isStd) {
-						System.out.println(line);
+						System.out.println(DateUtil.getDate(DateUtil.PATTERN_DATETIME) + " " + line);
 					} else {
-						System.err.println(line);
+						System.err.println(DateUtil.getDate(DateUtil.PATTERN_DATETIME) + " " + line);
 					}
 				}
 			}
