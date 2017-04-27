@@ -18,7 +18,7 @@ import com.novelbio.base.dataOperate.TxtReadandWrite;
 public class StreamOut extends Thread {
 	private static final Logger logger = Logger.getLogger(StreamOut.class);
 	/** 每2000ms刷新一次txt文本，这是因为写入错误行会很慢，刷新就可以做到及时看结果 */
-	private static final int timeTxtFlush = 2000;
+	private static final int timeTxtFlush = 20000;
 	
 	/** 运行进程的pid */
 	IntProcess process;
@@ -118,13 +118,13 @@ public class StreamOut extends Thread {
 			if (os == null) {
 				exhaustInStream(is);
 			} else {
-				initialTxtFlush();
 				if (isJustDisplay) {
+					initialTxtFlush();
 					writeToTxt(is, os);
+					finishFlush();
 				} else {
 					copyLarge(is, os);
 				}
-				finishFlush();
 			}
 			isFinished = true;
 		}
@@ -263,10 +263,10 @@ public class StreamOut extends Thread {
 	
 	/** 关闭输出流 */
 	public synchronized void close() {
-		//不用关闭输入流，因为process会自动关闭该流
+		if (os == null) return;
 		try {
-			if (os != System.out) {
-				os.flush();
+			os.flush();
+			if (os != System.out && os != System.err) {
 				os.close();	
 			}
 		} catch (Exception e) { }
@@ -281,19 +281,27 @@ public class StreamOut extends Thread {
 	 * 如果本输出流没有东西，就不会把文字写进去
 	 *  */
 	public synchronized void close(String finishInfo) {
+		if (os == null) return;
 		if (isJustDisplay) {
 			try {
 				if (isStartWrite) {
 					os.write((DateUtil.getNowTimeStr() + " " + finishInfo).getBytes());
 				}
-				os.flush();
-				os.close();
 				process = null;
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
+		try {
+			os.flush();
+			if (os != System.out && os != System.err) {
+				os.close();	
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+
 	}
 	
 }

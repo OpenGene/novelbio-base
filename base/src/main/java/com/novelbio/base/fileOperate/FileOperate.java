@@ -1245,7 +1245,7 @@ public class FileOperate {
 	public static OutputStream getOutputStream(Path file) throws IOException {
 		return getOutputStream(file, false);
 	}
-
+	
 	public static OutputStream getOutputStream(Path file, boolean append) throws IOException {
 		StandardOpenOption openOption = append ? StandardOpenOption.APPEND : StandardOpenOption.CREATE;
 		if (!FileOperate.isFileFolderExist(file)) {
@@ -2344,32 +2344,11 @@ public class FileOperate {
 			throw new ExceptionNbcFile("fileName is not valide " + fileName);
 		}
 		if (StringOperate.isContainerSpecialCode(fileName)) {
+			//这里写中文是因为后面会把这个异常信息贴到前端网页
 			throw new ExceptionNbcFile("文件名只允许包含汉字,字母,数字,中划线和下划线.");
+			//file name can only contains letters, Chinese, numbers, underline(_), middleline(-)
 		}
 		return fileName;
-	}
-
-	/**
-	 * 获取文件内容<br>
-	 * <b>只允许对小于5M的文件读取</b>
-	 * 
-	 * @date 2016年8月24日
-	 * @author novelbio fans.fan
-	 * @param fileName
-	 * @return
-	 * @throws IOException
-	 */
-	public static String getFileContent(String filePathAndName) {
-		if (!isFileExistAndBigThan0(filePathAndName)) {
-			return null;
-		}
-		if (getFileSizeLong(filePathAndName) > 5242880) {
-			throw new RuntimeException("file size more than 5M");
-		}
-		StringBuffer stringBuffer = new StringBuffer();
-		TxtReadandWrite.readfileLs(filePathAndName).forEach(str -> stringBuffer.append(str).append("\n"));
-
-		return stringBuffer.toString();
 	}
 
 	public static class ExceptionFileNotExist extends RuntimeException {

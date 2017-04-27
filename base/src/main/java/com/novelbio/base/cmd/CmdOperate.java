@@ -1,5 +1,6 @@
 package com.novelbio.base.cmd;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -64,8 +65,13 @@ public class CmdOperate extends RunProcess<String> {
 	StreamIn streamIn;
 	StreamOut errorGobbler;
 	StreamOut outputGobbler;
-	/** 是否将本该输出到控制台的结果依然写入控制台 */
+	/** 
+	 * 是否将标准流写入标准流，有些类似获取ip或者获取软件版本，获取进程ps-ef
+	 * 这时候我们会截取标准流到list中，如果再写入标准流，在日志中看就会很麻烦。
+	 */
 	boolean isOutToTerminate = true;
+	/** 是否打印cmd命令，如果是类似获取ip或者ps-ef
+	 * 这种定时任务就不需要打印cmd命令了 */
 	boolean isPrintCmd = true;
 	
 	/** 是否需要获取cmd的标准输出流 */
@@ -549,28 +555,32 @@ public class CmdOperate extends RunProcess<String> {
 		if (threadInStream != null) {
 			threadInStream.start();
 		}
-		setStdStream();
-		setErrorStream();
-		
-		errorGobbler.setDaemon(true);
-		outputGobbler.setDaemon(true);
-		errorGobbler.start();
-		outputGobbler.start();
+		try {
+			setStdStream();
+			setErrorStream();
+			
+			errorGobbler.setDaemon(true);
+			outputGobbler.setDaemon(true);
+			errorGobbler.start();
+			outputGobbler.start();
 
-		finishFlag.flag = process.waitFor();
-		
-		if (needLog) logger.info("finish running cmd, finish flag is: " + finishFlag.flag);
-		
-		//这几个感觉跟cmd是直接绑定的，如果cmd关闭了似乎这几个都会自动停止
-		if (threadInStream != null) {
-			threadInStream.join();
+			finishFlag.flag = process.waitFor();
+			
+			if (needLog) logger.info("finish running cmd, finish flag is: " + finishFlag.flag);
+			
+			//这几个感觉跟cmd是直接绑定的，如果cmd关闭了似乎这几个都会自动停止
+			if (threadInStream != null) {
+				threadInStream.join();
+			}
+			outputGobbler.joinStream();
+			errorGobbler.joinStream();
+			
+			if (needLog) logger.info("close out stream");
+		} finally {
+			closeOutStream();
 		}
-		outputGobbler.joinStream();
-		errorGobbler.joinStream();
+
 		
-		if (needLog) logger.info("close out stream");
-		
-		closeOutStream();
 	}
 	
 	private Thread setAndGetInStream() {
@@ -598,8 +608,9 @@ public class CmdOperate extends RunProcess<String> {
 	 * 定时的刷新文本，以保证能及时看到输出信息结果
 	 * @param isWriteStdTxt 是否是写入文本并需要定时刷新
 	 * @param isWriteStdTips 是否需要每隔几分钟写一小段话以表示程序还在运行中
+	 * @throws IOException 
 	 */
-	private void setStdStream() {
+	private void setStdStream() throws IOException {
 		String outPath = cmdOrderGenerator.getSaveStdTmp(); 
 		outputGobbler = new StreamOut(process.getStdOut(), process, isOutToTerminate, true);
 		outputGobbler.setDaemon(true);
@@ -607,9 +618,7 @@ public class CmdOperate extends RunProcess<String> {
 		if (!getCmdInStdStream) {
 			if (outPath != null) {
 				FileOperate.createFolders(FileOperate.getPathName(outPath));
-				//标准输出流不能被关闭，从txt拿流是因为如果输出写为.gz，txt会给流套上gz流的壳
-				TxtReadandWrite txtWrite = new TxtReadandWrite(outPath, true);
-				outputGobbler.setOutputStream(txtWrite.getOutputStream(), cmdOrderGenerator.isJustDisplayStd());
+				outputGobbler.setOutputStream(FileOperate.getOutputStream(outPath), cmdOrderGenerator.isJustDisplayStd());
 				if (cmdOrderGenerator.isJustDisplayStd() && lsOutInfo != null) {
 					outputGobbler.setLsInfo(lsOutInfo, lineNumStd);
 				}
@@ -629,8 +638,9 @@ public class CmdOperate extends RunProcess<String> {
 	 * 定时的刷新文本，以保证能及时看到输出信息结果
 	 * @param isWriteErrTxt 是否是写入文本并需要定时刷新
 	 * @param isWriteErrTips 是否需要每隔几分钟写一小段话以表示程序还在运行中
+	 * @throws IOException 
 	 */
-	private void setErrorStream() {
+	private void setErrorStream() throws IOException {
 		String errPath = cmdOrderGenerator.getSaveErrTmp();
 		errorGobbler = new StreamOut(process.getStdErr(), process, isOutToTerminate, false);
 		errorGobbler.setDaemon(true);
@@ -638,15 +648,14 @@ public class CmdOperate extends RunProcess<String> {
 		if (!getCmdInErrStream) {
 			if (errPath != null) {
 				FileOperate.createFolders(FileOperate.getPathName(errPath));
-				//标准输出流不能被关闭
-				TxtReadandWrite txtWrite = new TxtReadandWrite(errPath, true);
-				errorGobbler.setOutputStream(txtWrite.getOutputStream(), cmdOrderGenerator.isJustDisplayErr());
+				errorGobbler.setOutputStream(FileOperate.getOutputStream(errPath), cmdOrderGenerator.isJustDisplayErr());
 				if (cmdOrderGenerator.isJustDisplayErr() && lsErrorInfo != null) {
 					errorGobbler.setLsInfo(lsErrorInfo, lineNumErr);
 				}
 			} else if (lsErrorInfo != null) {
 				errorGobbler.setLsInfo(lsErrorInfo, lineNumErr);
 			} else {
+				//标准输出流不能被关闭
 				errorGobbler.setOutputStream(System.err, false);
 			}
 		} else {
