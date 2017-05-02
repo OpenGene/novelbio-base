@@ -398,7 +398,7 @@ public class MathComput {
 	 * 用于获得每10个bp的tag堆积数的中位数
 	 * @return
 	 */
-	public static double min(ArrayList<? extends Number> lsNum) {
+	public static double min(List<? extends Number> lsNum) {
 		double min = lsNum.get(0).doubleValue();
 		for (Number number : lsNum) {
 			double tmp = number.doubleValue();

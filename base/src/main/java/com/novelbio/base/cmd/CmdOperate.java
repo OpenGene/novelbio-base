@@ -618,7 +618,7 @@ public class CmdOperate extends RunProcess<String> {
 		if (!getCmdInStdStream) {
 			if (outPath != null) {
 				FileOperate.createFolders(FileOperate.getPathName(outPath));
-				outputGobbler.setOutputStream(FileOperate.getOutputStream(outPath), cmdOrderGenerator.isJustDisplayStd());
+				outputGobbler.setOutputStream(FileOperate.getOutputStreamWithSuffix(outPath), cmdOrderGenerator.isJustDisplayStd());
 				if (cmdOrderGenerator.isJustDisplayStd() && lsOutInfo != null) {
 					outputGobbler.setLsInfo(lsOutInfo, lineNumStd);
 				}
@@ -648,7 +648,7 @@ public class CmdOperate extends RunProcess<String> {
 		if (!getCmdInErrStream) {
 			if (errPath != null) {
 				FileOperate.createFolders(FileOperate.getPathName(errPath));
-				errorGobbler.setOutputStream(FileOperate.getOutputStream(errPath), cmdOrderGenerator.isJustDisplayErr());
+				errorGobbler.setOutputStream(FileOperate.getOutputStreamWithSuffix(errPath), cmdOrderGenerator.isJustDisplayErr());
 				if (cmdOrderGenerator.isJustDisplayErr() && lsErrorInfo != null) {
 					errorGobbler.setLsInfo(lsErrorInfo, lineNumErr);
 				}

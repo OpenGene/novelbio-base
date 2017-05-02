@@ -1,5 +1,6 @@
 package com.novelbio.base.fileOperate;
 
+import java.io.BufferedOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileFilter;
@@ -28,20 +29,27 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
 
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
 import org.apache.commons.io.IOUtils;
+import org.apache.hadoop.io.compress.CompressionOutputStream;
 import org.apache.log4j.Logger;
 
+import com.hadoop.compression.lzo.LzopCodec;
 import com.novelbio.base.PathDetail;
 import com.novelbio.base.SerializeKryo;
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.cmd.CmdOperate;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
+import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
 import com.novelbio.base.dataStructure.PatternOperate;
 import com.novelbio.jsr203.bos.OssFileSystemProvider;
 import com.novelbio.jsr203.bos.OssPath;
 
 import hdfs.jsr203.HadoopFileSystemProvider;
 import hdfs.jsr203.HadoopPath;
+import hdfs.jsr203.HdfsConfInitiator;
 
 public class FileOperate {
 	private static final Logger logger = Logger.getLogger(FileOperate.class);
@@ -1229,7 +1237,34 @@ public class FileOperate {
 	public static OutputStream getOutputStream(String filePath) throws IOException {
 		return getOutputStream(filePath, false);
 	}
-
+	/** 根据给定的后缀，产生相应的流，譬如如果后缀是gz，就包装为gz格式 */
+	public static OutputStream getOutputStreamWithSuffix(String filePath) throws IOException {
+		OutputStream os = getOutputStream(filePath, false);
+		return modifyOutputStream(TXTtype.getTxtType(filePath), os, FileOperate.getFileName(filePath));
+	}
+	
+	public static OutputStream modifyOutputStream(TXTtype txtTtype, OutputStream outputStreamRaw, String zipfileName) throws IOException {
+		OutputStream outputStream = null;
+		if (txtTtype == TXTtype.Txt) {
+			outputStream = new BufferedOutputStream(outputStreamRaw, TxtReadandWrite.bufferLen);
+		} else if (txtTtype == TXTtype.Gzip) {
+			outputStream = new BufferedOutputStream(new GZIPOutputStream(outputStreamRaw, TxtReadandWrite.bufferLen), TxtReadandWrite.bufferLen);
+		} else if (txtTtype == TXTtype.Bzip2) {
+			outputStream = new BufferedOutputStream(new BZip2CompressorOutputStream(outputStreamRaw), TxtReadandWrite.bufferLen);
+		} else if (txtTtype == TXTtype.Zip) {
+			ZipArchiveOutputStream zipOutputStream = new ZipArchiveOutputStream(outputStreamRaw);
+			ZipArchiveEntry entry = new ZipArchiveEntry(FileOperate.getFileNameSep(zipfileName)[0]);
+			zipOutputStream.putArchiveEntry(entry);
+			outputStream = new BufferedOutputStream(zipOutputStream, TxtReadandWrite.bufferLen);
+		} else if (txtTtype == TXTtype.Lzo) {
+			LzopCodec lzo = new LzopCodec();
+			lzo.setConf(HdfsConfInitiator.getConf());
+			CompressionOutputStream outputStreamCmp =lzo.createOutputStream(outputStreamRaw);
+			outputStream = new BufferedOutputStream(outputStreamCmp);
+		}
+		return outputStream;
+	}
+	
 	public static OutputStream getOutputStream(String filePath, boolean append) throws IOException {
 		return getOutputStream(getPath(filePath), append);
 	}
