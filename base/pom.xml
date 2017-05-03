@@ -164,6 +164,12 @@
 			<artifactId>ftp4j</artifactId>
 			<version>1.7.2</version>
 		</dependency>
+		
+		<dependency>
+		  <groupId>org.apache.commons</groupId>
+		  <artifactId>commons-compress</artifactId>
+		  <version>1.13</version>
+		</dependency>
 
 		<!-- svg转png <dependency> <groupId>batik</groupId> <artifactId>batik-rasterizer</artifactId> 
 			<version>1.6-1</version> <exclusions> <exclusion> <artifactId>xercesImpl</artifactId> 
