@@ -1,30 +1,32 @@
 package com.novelbio.base.fileOperate;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
-import java.util.Enumeration;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-import org.apache.tools.zip.ZipEntry;
-import org.apache.tools.zip.ZipFileNBC;
-import org.apache.tools.zip.ZipOutputStream;
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.zip.Zip64Mode;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
  * 可以处理中文文件名
+ * update by fans.fan 170503 使用Apache commons-compress 支持大于4G的文件压缩和中文名称
  */
 public class  ZipOperate {
-	private static final Logger logger = Logger.getLogger(ZipOperate.class);
+	private static final Logger logger = LoggerFactory.getLogger(ZipOperate.class);
 	public static void main(String[] args) {
 		try {
-			zip("/home/novelbio/Desktop/taskModule", "/home/novelbio/Desktop/taskModule.zip");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			zip("/home/novelbio/Downloads/gnome-commander", "/home/novelbio/tmp/gnome-commander.zip");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -32,124 +34,159 @@ public class  ZipOperate {
 	}
 
 	/**
-     * 解压到指定目录
-     * @param zipPath
-     * @param descDir
-     * @author isea533
-     */ 
-    public static void unZipFiles(String zipPath,String descDir)throws IOException{ 
-        unZipFiles(FileOperate.getFile(zipPath), descDir); 
-    } 
+	 * zip压缩文件
+	 * @param dir 要压缩的文件或文件夹
+	 * @param zippath 压缩文件
+	 */
+	public static void zip(String dir ,String zippath){
+		zip(dir, FileOperate.getLsFoldPathRecur(dir, true), zippath);
+	}
+	
     /**
-     * 解压文件到指定目录
-     * @param zipFile
-     * @param descDir
-     * @author isea533
-     */ 
-    @SuppressWarnings("rawtypes") 
-    public static void unZipFiles(File zipFile,String descDir)throws IOException{
-    	descDir = FileOperate.addSep(descDir);
-        FileOperate.createFolders(descDir);
-        ZipFileNBC zip = new ZipFileNBC(zipFile);
-        for(Enumeration entries = zip.getEntries();entries.hasMoreElements();){ 
-            ZipEntry entry = (ZipEntry)entries.nextElement(); 
-            String zipEntryName = entry.getName(); 
-            InputStream in = zip.getInputStream(entry); 
-            String outPath = (descDir + zipEntryName).replaceAll("\\*", FileOperate.getSepPath());
-            FileOperate.createFolders(FileOperate.getPathName(outPath));
-            //判断文件全路径是否为文件夹,如果是上面已经上传,不需要解压 
-            if(FileOperate.isFileDirectory(outPath)){ 
-                continue; 
-            } 
-            //输出文件路径信息 
-            logger.info(outPath); 
-             
-            OutputStream out = FileOperate.getOutputStream(outPath); 
-            byte[] buf1 = new byte[1024]; 
-            int len; 
-            while((len=in.read(buf1))>0){ 
-                out.write(buf1,0,len); 
-            } 
-            in.close(); 
-            out.close(); 
-            } 
-        logger.info("finish unzip file " + zipFile.getName()); 
-    } 
-  
-    	/**
-    	 * 
-    	 * @param inputFileName 输入一个文件夹
-    	 * @param zipOutName	输出一个压缩文件夹，打包后文件名字
-    	 * @throws Exception
-    	 */
-    	public static void zip(String inputFileName, String zipOutName) throws Exception {
-    		zip( FileOperate.getPath(inputFileName), zipOutName);
-    	}
-    	
-    	/**
-    	 *
-    	 *  @param inputFile 输入一个文件或件夹
-    	 * @param zipOutName	输出一个压缩文件夹，打包后文件名字
-    	 * @throws Exception
-    	 * 
-    	 */
-    	public static void zip(Path inputFile, String zipOutName) throws Exception {
-    		logger.info("start zip file: " + zipOutName);
-    		OutputStream outFileStream = FileOperate.getOutputStream(zipOutName);
-    		ZipOutputStream out = new ZipOutputStream(outFileStream);
-    		/*
-    		 * modify by fans.fan 170320 原来的压缩默认会加入一个空的文件夹.修正
-    		zip(out, inputFile, "");
-    		 */
-    		if (FileOperate.isFileDirectory(inputFile)) {	//判断是否为目录
-    			List<Path> fl = FileOperate.getLsFoldPath(inputFile);
-    			for (Path path : fl) {
-    				zip(out, path, FileOperate.getFileName(path)); 
-                }
-    		} else {
-    			zip(out, inputFile, "");
-    		}
-    		//end by fans.fan
-    		logger.info("zip done");
-    		out.close();
-    	}
-    	
-    	/**
-    	 * @param out 输出流
-    	 * @param f 文件
-    	 * @param base 保存在zip中的路径
-    	 * @throws Exception
-    	 */
-    	private static void zip(ZipOutputStream out, Path f, String base) throws Exception {
-    		if (FileOperate.isFileDirectory(f)) {	//判断是否为目录
-    			List<Path> fl = FileOperate.getLsFoldPath(f);
-    			out.putNextEntry(new ZipEntry(base + FileOperate.getSepPath()));
-    			base = base.length() == 0 ? "" : base + FileOperate.getSepPath();
-    			for (Path path : fl) {
-    				zip(out, path, base + FileOperate.getFileName(path)); 
-                }
-    		} else {				//压缩目录中的所有文件
-    			out.putNextEntry(new ZipEntry(base));
-    			InputStream in = FileOperate.getInputStream(f);
-    			int b;
-    			logger.info("zipping " + base);
-    			while ((b = in.read()) != -1) {
-    				out.write(b);
-    			}
-    			in.close();
-    		}
-    	}
-
-//    	public static void main(String[] temp) {
-//    		String inputFileName = "/home/gaozhu/桌面/abc";	//你要压缩的文件夹
-//    		String zipFileName = "/home/gaozhu/桌面/report.zip";	//压缩后的zip文件
-//
-//    		try {
-//				ZipOperate.zip(inputFileName, zipFileName);
-//			} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//    	}
+     * 把文件压缩成zip格式
+     * @param dir		lsPaths所在的文件夹
+     * @param lsPaths         需要压缩的文件
+     * @param zipFilePath 压缩后的zip文件路径   ,如"D:/test/aa.zip";
+     */
+    private static void zip(String dir, List<Path> lsPaths, String zipFilePath) {
+        if(lsPaths == null || lsPaths.size() <= 0) {
+            return ;
+        }
+        try {
+        	zip(dir, lsPaths, FileOperate.getOutputStream(zipFilePath));
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+    }
+    
+    /**
+     * 该方法主要用于web前端下载文件使用,数据写入outputStream中,流没有关闭
+     * 
+     * @param dir			lsPaths所在的文件夹
+     * @param lsPaths		需要压缩的文件
+     * @param outputStream	压缩数据写入的流
+     */
+    public static void zip(String dir, List<Path> lsPaths, OutputStream outputStream) {
+    	 try (ZipArchiveOutputStream zaos = new ZipArchiveOutputStream(outputStream);) {
+             zaos.setUseZip64(Zip64Mode.AsNeeded);
+             //将每个文件用ZipArchiveEntry封装
+             //再用ZipArchiveOutputStream写到压缩文件中
+             for(Path strfile : lsPaths) {
+                 String name = getFilePathName(dir,strfile.toString());
+                 if(FileOperate.isFileDirectory(strfile)){
+                 	ZipArchiveEntry zipArchiveEntry  = new ZipArchiveEntry(name + FileOperate.getSepPath());
+                 	zaos.putArchiveEntry(zipArchiveEntry);
+                 	zaos.closeArchiveEntry(); 
+                 	continue;
+                 }
+                 ZipArchiveEntry zipArchiveEntry  = new ZipArchiveEntry(name);
+                 zaos.putArchiveEntry(zipArchiveEntry);
+                 try (InputStream is = new BufferedInputStream(FileOperate.getInputStream(strfile));) {
+                 	byte[] buffer = new byte[1024]; 
+                 	int len = -1;
+                 	while((len = is.read(buffer)) != -1) {
+                 		//把缓冲区的字节写入到ZipArchiveEntry
+                 		zaos.write(buffer, 0, len);
+                 	}
+                 	zaos.closeArchiveEntry(); 
+                 }catch(Exception e) {
+                 	throw new RuntimeException(e);
+                 }
+             }
+             zaos.finish();
+         }catch(Exception e){
+             throw new RuntimeException(e);
+         }
+    }
+    
+    
+    /**
+     * 把zip文件解压到指定的文件夹
+     * @param zipFile zip文件路径, 如 "D:/test/aa.zip"
+     * @param tmpPath 解压后的文件存放路径, 如"D:/test/" ()
+     */
+    public static void unZipFiles(File zipFile, String tmpPath) {
+		unzip(zipFile.toString(), tmpPath);
+	}
+   
+    /**
+    * 把zip文件解压到指定的文件夹
+    * @param zipFilePath zip文件路径, 如 "D:/test/aa.zip"
+    * @param saveFileDir 解压后的文件存放路径, 如"D:/test/" ()
+    */
+	public static void unzip(String zipFilePath, String saveFileDir) {
+		if (!FileOperate.isFileExistAndNotDir(zipFilePath)) {
+			logger.warn("zip file={} not exist or not dir", zipFilePath);
+			return;
+		}
+		if(!saveFileDir.endsWith("\\") && !saveFileDir.endsWith("/") ){
+			saveFileDir += File.separator;
+		}
+		FileOperate.createFolders(saveFileDir);
+		
+		InputStream is = null; 
+		ZipArchiveInputStream zais = null;
+		try {
+			is = FileOperate.getInputStream(zipFilePath);
+			zais = new ZipArchiveInputStream(is);
+			ArchiveEntry archiveEntry = null;
+			while ((archiveEntry = zais.getNextEntry()) != null) { 
+				// 获取文件名
+				String entryFileName = archiveEntry.getName();
+				// 构造解压出来的文件存放路径
+				String entryFilePath = saveFileDir + entryFileName;
+				OutputStream os = null;
+				try {
+					// 把解压出来的文件写到指定路径
+					if(entryFileName.endsWith("/")){
+						FileOperate.createFolders(entryFilePath);
+					}else{
+						FileOperate.createFolders(FileOperate.getPathName(entryFilePath));
+						os = new BufferedOutputStream(FileOperate.getOutputStream(entryFilePath));							
+						byte[] buffer = new byte[1024]; 
+                        int len = -1; 
+                        while((len = zais.read(buffer)) != -1) {
+                        	os.write(buffer, 0, len); 
+                        }
+					}
+				} catch (IOException e) {
+					throw new IOException(e);
+				} finally {
+					if (os != null) {
+						os.flush();
+						os.close();
+					}
+				}
+			} 
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		} finally {
+			try {
+				if (zais != null) {
+					zais.close();
+				}
+				if (is != null) {
+					is.close();
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+	
+	/**
+	 * 文件名处理
+	 * @param dir
+	 * @param path
+	 * @return
+	 */
+	public static String getFilePathName(String dir,String path){
+		if (dir != null && !dir.endsWith(File.separator)) {
+			dir = dir + File.separator;
+		}
+		String p = path.replace(dir, "");
+		p = p.replace("\\", "/");
+		return p;
+	}
 
 }
