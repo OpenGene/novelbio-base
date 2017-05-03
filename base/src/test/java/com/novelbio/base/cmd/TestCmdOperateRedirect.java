@@ -23,7 +23,7 @@ public class TestCmdOperateRedirect {
 	
 	@Test
 	public void testCmdRealCopyToTmp() {
-		CmdPathCluster cmdPathCluster = new CmdPathCluster();
+		CmdPathCluster cmdPathCluster = new CmdPathCluster(false);
 		cmdPathCluster.putTmpOut2Out("/home/novelbio/mytest/result/test.bam", "/hdfs:/nbcloud/result/test.bam");
 		cmdPathCluster.putTmpOut2Out("/home/novelbio/mytest/result2/test.bam", "/hdfs:/nbcloud22/test.bam");
  
@@ -51,7 +51,8 @@ public class TestCmdOperateRedirect {
 		assertEquals("/home/novelbio/tmp/nbcloud22/test.bam", cmdOperate.getSaveStdOutFile());
 		String cmd = cmdOperate.getCmdExeStrReal();
 		
-		assertEquals("samtools index /home/novelbio/mytest/result/test.bam /home/novelbio/tmp/nbcloud/test.bam > /home/novelbio/tmp/nbcloud22/test.bam 2> /home/novelbio/tmp/nbcloud22/test.log", cmd);
+		assertEquals("samtools index /home/novelbio/mytest/result/test.bam /home/novelbio/tmp/nbcloud/test.bam "
+				+ "> /home/novelbio/tmp/nbcloud22/test.bam 2> /home/novelbio/tmp/nbcloud22/test.log", cmd);
 	}
 	
 	
@@ -76,62 +77,81 @@ public class TestCmdOperateRedirect {
 		String script = "/tmp/script-test.sh";
 		generateScript(script);
 
-		String out = "/tmp/myresult/test/";
-		
-		String tmpRealPath = tmpPath + "/myresult/test/" + "/subject/test/myfile/";
-		FileOperate.deleteFileFolder(tmpPath + "/myresult/test/");
-		FileOperate.deleteFileFolder(out);
-		FileOperate.createFolders(tmpRealPath);
-		
-		FileOperate.copyFile(script, tmpRealPath + "file1", true);
-		FileOperate.copyFile(script, tmpPath + "/myresult/test/subject/test/" + "file2", true);
-		FileOperate.copyFile(script, tmpPath + "/myresult/test/subject/test2/" + "file3", true);
+		String out1 = "/tmp/myresult1/mytmp/test/";
+		String out2 = "/tmp/myresult2/mytmp/test/";
 
-		CmdPathCluster cmdPathCluster = new CmdPathCluster();
-		FileOperate.createFolders(FileOperate.getParentPathNameWithSep(out));
+		String tmpRealPath1 = tmpPath + "/mytmp/test/subject/test/myfile/";
+		String tmpRealPath2 = tmpPath + "/mytmp1/test/subject/test/myfile/";
+		String resultPath1 = out1 + "subject/test/myfile/";
+		String resultPath2 = out2 + "subject/test/myfile/";
+
+		FileOperate.deleteFileFolder(tmpPath + "/myresult/test/");
+		FileOperate.deleteFileFolder(out1);
+		FileOperate.deleteFileFolder(out2);
+		FileOperate.createFolders(tmpRealPath1);
+		FileOperate.createFolders(tmpRealPath2);
+
+		FileOperate.copyFile(script, tmpRealPath1 + "file1", true);
+		FileOperate.copyFile(script, FileOperate.getParentPathNameWithSep(tmpRealPath1) + "file2", true);
+		FileOperate.copyFile(script, tmpRealPath2 + "file3", true);
+
+		CmdPathCluster cmdPathCluster = new CmdPathCluster(false);
+		FileOperate.createFolders(FileOperate.getParentPathNameWithSep(out1));
+		FileOperate.createFolders(FileOperate.getParentPathNameWithSep(out2));
 		List<String> lsCmd = new ArrayList<>();
 		lsCmd.add("sh");
 		lsCmd.add(script);
-		lsCmd.add(out);
+		lsCmd.add(out1);
+		lsCmd.add(out2);
 		CmdOperate cmdOperate = new CmdOperate(lsCmd);
 		cmdOperate.setCmdPathCluster(cmdPathCluster);
 		cmdOperate.setCmdTmpPath(tmpPath);
 		cmdOperate.setRedirectOutToTmp(true);
 		cmdOperate.setRetainTmpFiles(true);
-		cmdOperate.addCmdParamOutput(out);
+		cmdOperate.addCmdParamOutput(out1);
+		cmdOperate.addCmdParamOutput(out2);
+
 		cmdOperate.runWithExp();
 		
-		assertEquals("sh /tmp/script-test.sh /home/novelbio/tmp/myresult/test/", cmdOperate.getCmdExeStrReal());
-		String tmpPath = cmdPathCluster.getTmpPathAlreadyExist(out + "subject/test/myfile/test.txt");
-		assertEquals("/home/novelbio/tmp/myresult/test/subject/test/myfile/", tmpPath);
-		assertTrue(FileOperate.isFileExistAndBigThan0("/home/novelbio/tmp/myresult/test/subject/test/myfile/test.txt"));
-		assertTrue(FileOperate.isFileExistAndBigThan0("/tmp/myresult/test/subject/test/myfile/test.txt"));
-		assertEquals(1, cmdPathCluster.mapOutPath2TmpOutPath.size());
-		assertEquals("/tmp/myresult/test/subject/test/myfile/", cmdPathCluster.mapOutPath2TmpOutPath.keySet().iterator().next());
+		assertEquals("sh /tmp/script-test.sh /home/novelbio/tmp/mytmp/test/ /home/novelbio/tmp/mytmp1/test/", cmdOperate.getCmdExeStrReal());
+		String tmpPath1 = cmdPathCluster.getTmpPathAlreadyExist(out1 + "subject/test/myfile/test.txt");
+		assertEquals("/home/novelbio/tmp/mytmp/test/subject/test/myfile/", tmpPath1);
+		String tmpPath2 = cmdPathCluster.getTmpPathAlreadyExist(out2 + "subject/test/myfile/test.txt");
+		assertEquals("/home/novelbio/tmp/mytmp1/test/subject/test/myfile/", tmpPath2);
+		assertTrue(FileOperate.isFileExistAndBigThan0(tmpRealPath1+ "test1.txt"));
+		assertTrue(FileOperate.isFileExistAndBigThan0(tmpRealPath2 + "test2.txt"));
+		assertTrue(FileOperate.isFileExistAndBigThan0(resultPath1 + "test1.txt"));
+		assertTrue(FileOperate.isFileExistAndBigThan0(resultPath2 + "test2.txt"));
+		
+		assertEquals(2, cmdPathCluster.mapOutPath2TmpOutPath.size());
 		//之前存在的文件不会被拷贝出来
-		Assert.assertFalse(FileOperate.isFileExistAndBigThan0("/tmp/myresult/test/subject/test/myfile/file1"));
-		Assert.assertFalse(FileOperate.isFileExistAndBigThan0("/tmp/myresult/test/subject/test/file2"));
-		Assert.assertFalse(FileOperate.isFileExistAndBigThan0("/tmp/myresult/test/subject/test2/file3"));
+		Assert.assertFalse(FileOperate.isFileExistAndBigThan0(resultPath1 + "file1"));
+		Assert.assertFalse(FileOperate.isFileExistAndBigThan0(FileOperate.getParentPathNameWithSep(resultPath1) + "file2"));
+		Assert.assertFalse(FileOperate.isFileExistAndBigThan0(resultPath2 + "file3"));
 
 		lsCmd = new ArrayList<>();
 		lsCmd.add("cat");
-		lsCmd.add(out + "subject/test/myfile/test.txt");
+		lsCmd.add(resultPath1 + "test1.txt");
+		lsCmd.add(resultPath2 + "test2.txt");
+		
 		cmdOperate = new CmdOperate(lsCmd);
 		cmdOperate.setCmdPathCluster(cmdPathCluster);
 		cmdOperate.setRedirectInToTmp(true);
-		cmdOperate.addCmdParamInput(out + "subject/test/myfile/test.txt");
+		cmdOperate.addCmdParamInput(resultPath1 + "test1.txt");
+		cmdOperate.addCmdParamInput(resultPath2 + "test2.txt");
 		cmdOperate.prepare();
 		String cmd = cmdOperate.getCmdExeStrReal();
-		cmdOperate.runWithExp();
-		assertEquals("cat /home/novelbio/tmp/myresult/test/subject/test/myfile/test.txt", cmd);
+		assertEquals("cat " + tmpRealPath1 +  "test1.txt " + tmpRealPath2 +  "test2.txt", cmd);
 	}
 	
 	public void generateScript(String script) {
 		TxtReadandWrite txtWrite = new TxtReadandWrite(script, true);
 		txtWrite.writefileln("#!/bin/bash");
-		txtWrite.writefileln("outpath=$1");
-		txtWrite.writefileln("mkdir ${outpath}/subject/test/myfile/");
-		txtWrite.writefileln("echo \"12345\t23456\t34567\" > ${outpath}/subject/test/myfile/test.txt");;
+		txtWrite.writefileln("outpath1=$1");
+		txtWrite.writefileln("outpath2=$2");
+		txtWrite.writefileln("mkdir ${outpath1}/subject/test/myfile/");
+		txtWrite.writefileln("echo \"12345\t23456\t34567\" > ${outpath1}/subject/test/myfile/test1.txt");;
+		txtWrite.writefileln("echo \"1234\t2345\t3456\" > ${outpath2}/subject/test/myfile/test2.txt");;
 		txtWrite.close();
 	}
 }

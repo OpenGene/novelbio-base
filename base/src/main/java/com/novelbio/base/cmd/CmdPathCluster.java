@@ -27,15 +27,26 @@ import com.novelbio.base.fileOperate.FileOperate;
  * @author zong0jie
  */
 public class CmdPathCluster {
+	/** 是否为阿里云 */
+	boolean isAliyun;
 	
 	/** key 实际输出文件夹
 	 * value 该实际输出文件夹当时的临时文件夹
 	 */
 	Map<String, String> mapOutPath2TmpOutPath = new HashMap<>();
 	
+	public CmdPathCluster(boolean isAliyun) {
+		this.isAliyun = isAliyun;
+	}
+	
 	/** 某个文件从tmp拷贝到输出文件夹中 */
 	public void putTmpOut2Out(String tmpOut, String out) {
-		mapOutPath2TmpOutPath.put(FileOperate.getParentPathNameWithSep(out), FileOperate.getParentPathNameWithSep(tmpOut));
+		String outTmp = FileOperate.getParentPathNameWithSep(tmpOut);
+		String outReal = FileOperate.getParentPathNameWithSep(out);
+		mapOutPath2TmpOutPath.put(outReal, outTmp);
+		if (isAliyun) {
+			mapOutPath2TmpOutPath.put(CmdPathAli.convertAli2Loc(outReal, true), outTmp);
+		}
 	}
 	
 	/**

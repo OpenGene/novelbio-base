@@ -131,7 +131,7 @@ public class CmdPath {
 		if (isGenerateTmpPath) {
 			return;
 		}
-		if (cmdPathCluster == null) cmdPathCluster = new CmdPathCluster();
+		if (cmdPathCluster == null) cmdPathCluster = new CmdPathCluster(false);
 		
 		Set<String> setFileNameAll = new HashSet<>();
 		

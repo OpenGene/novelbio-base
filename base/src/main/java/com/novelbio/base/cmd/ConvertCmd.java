@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.fileOperate.FileHadoop;
@@ -109,7 +112,13 @@ public abstract class ConvertCmd {
 			return subCmd;
 		}
 	}
+	/** 
+	 * 应该用不到
+	 * @author zong0jie
+	 * @data 2017年5月3日
+	 */
 	public static class ConvertOss extends ConvertCmd {
+		private static final Logger logger = LoggerFactory.getLogger(ConvertOss.class);
 		boolean isReadMap = true;
 		public void setIsReadMap(boolean isReadMap) {
 			this.isReadMap = isReadMap;
@@ -123,7 +132,9 @@ public abstract class ConvertCmd {
 			} 
 			if(subCmd.startsWith("oss://")) {
 				// TODO 这里是有bug的.测试先这么写.
-				return CmdPathAli.convertAli2Loc(subCmd, isReadMap);
+				String convertCmd = CmdPathAli.convertAli2Loc(subCmd, isReadMap);
+				logger.info("convert oss cmd unit from {} to {}", subCmd, convertCmd);
+				return convertCmd;
 			} else {
 				return subCmd;
 			}

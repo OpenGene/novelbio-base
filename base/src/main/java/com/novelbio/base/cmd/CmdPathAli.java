@@ -34,8 +34,8 @@ public class CmdPathAli extends CmdPath {
 	protected void copyFileIn() {
 		for (String inFile : setInput) {
 			String inTmpName = mapName2TmpName.get(inFile);
-			logger.info("link file from {} to {}", inFile, inTmpName);
 			try {
+				logger.info("link file from {} to {}", inFile, inTmpName);
 				FileOperate.linkFile(inFile, inTmpName, false);
 			} catch (Exception e) {
 				logger.error("link file from " + inFile + " to " + inTmpName + "error", e);
@@ -45,10 +45,10 @@ public class CmdPathAli extends CmdPath {
 		
 	protected void moveSingleFileOut(String filePathTmp, String filePathOut) {
 		filePathOut = convertAli2Loc(filePathOut, false);
-		String operate = isRetainTmpFiles? "link" : "move";
-		logger.info(operate + " file from  " + filePathTmp + "  to  " + filePathOut);
 		if (isRetainTmpFiles) {
+			logger.info("move file from  " + filePathTmp + "  to  " + filePathOut);
 			FileOperate.moveFile(true, filePathTmp, filePathOut);
+			logger.info("link file from  " + filePathOut + "  to  " + filePathTmp);
 			FileOperate.linkFile(filePathOut, filePathTmp, true);
 		} else {
 			//TODO 这里可能全改为move会更好些

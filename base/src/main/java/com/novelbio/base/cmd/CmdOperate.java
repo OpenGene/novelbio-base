@@ -197,7 +197,10 @@ public class CmdOperate extends RunProcess<String> {
 		((ProcessRemote)process).setKeyFile(keyFile);
 		cmdOrderGenerator.setLsCmd(lsCmd);
 	}
-	
+	/**
+	 * 上一个task所输出的文件与临时文件的对照表
+	 * @param cmdPathCluster
+	 */
 	public void setCmdPathCluster(CmdPathCluster cmdPathCluster) {
 		cmdOrderGenerator.setCmdPathCluster(cmdPathCluster);
 	}
