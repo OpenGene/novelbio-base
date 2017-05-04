@@ -22,7 +22,11 @@ public class ServiceEnvUtil {
 	private static void init() {
 		env = PathDetail.getEnvName();
 	}
-
+	
+	public static void setEnv(String env) {
+		ServiceEnvUtil.env = env;
+	}
+	
 	public static boolean isHadoopEnvRun() {
 		return ENV_HADOOP.equals(env);
 	}

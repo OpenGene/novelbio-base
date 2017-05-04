@@ -3,6 +3,7 @@ package com.novelbio.base.cmd;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.novelbio.base.StringOperate;
 import com.novelbio.base.cmd.ConvertCmd.ConvertCmdTmp;
 import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.jsr203.bos.PathDetailOs;
@@ -80,6 +81,30 @@ public class CmdPathAli extends CmdPath {
 		pathLocal = PathDetailOs.getOsMountPathWithSep() + head + "/" + pathLocal;
 		
 		return pathLocal;
+	}
+	
+	/**
+	 * 主要应付aliyun oss的变态特性。<br>
+	 * <br>
+	 * 一般来说输入文件都要从只读挂载中获取，但是也不排除特殊情况<br>
+	 * 譬如有3个xml，A.xml输出文件.outmap./result.bam<br>
+	 * B.xml需要 mv .outmap./result.bam --> .outmap./move.result.bam<br>
+	 * 如果A.xml运行完接着运行B.xml 这时候输入文件为 .outmap./result.bam<br>
+	 * 如果A.xml运行完后task中断，然后重跑task，这时候 .outmap./result.bam是不存在的，反而由于重新挂载， .inmap./result.bam是存在的<br>
+	 * <br>
+	 * 因此这里需要判断 <br>
+	 * 1. 是否为oss，就是比较 pathRead和pathWrite是否相同<br>
+	 * 2. pathRead和pathWrite哪个文件存在，哪个存在就用哪个。如果两个都不存在，就用pathRead。当然这种情况也可以抛出异常。<br>
+	 * @param path
+	 * @return
+	 */
+	public static String convertPathAliRead(String path) {
+		String pathRead = CmdPathAli.convertAli2Loc(path, true);
+		String pathWrite = CmdPathAli.convertAli2Loc(path, false);
+		if (!StringOperate.isEqual(pathWrite, pathRead)) {
+			path = FileOperate.isFileExistAndNotDir(pathRead) || !FileOperate.isFileExistAndNotDir(pathWrite) ? pathRead : pathWrite;
+		}
+		return path;
 	}
 }
 
