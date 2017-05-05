@@ -152,7 +152,7 @@ public class PathDetail {
 	 * @return 文件夹是否被清空
 	 */
 	private static void deleteFileFolder(Path file, String parentPath) {
-		parentPath = FileOperate.getCanonicalPath(parentPath);
+		parentPath = FileOperate.getAbsolutePath(parentPath);
 		boolean isClear = true;
 		if (FileOperate.isFileExistAndNotDir(file)) {
 			long createTime = DateUtil.getNowTimeLong() - FileOperate.getTimeLastModify(file);
@@ -165,7 +165,7 @@ public class PathDetail {
 				Path file2 = FileOperate.getPath(string);
 				deleteFileFolder(file2, parentPath);
 			}
-			if (isClear && !FileOperate.getCanonicalPath(file).equals(parentPath)) {
+			if (isClear && !FileOperate.getAbsolutePath(file).equals(parentPath)) {
 				FileOperate.deleteFileFolder(file);
 			}
 		}

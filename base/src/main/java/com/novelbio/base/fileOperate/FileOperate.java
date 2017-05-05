@@ -608,26 +608,12 @@ public class FileOperate {
 	}
 
 	public static String getAbsolutePath(String fileName) {
-		boolean isAddSplashHead = false;
-		if (fileName.startsWith(PathDetail.getHdpHdfsHeadSymbol())) {
-			fileName = FileHadoop.convertToHdfsPath(fileName);
-		}
-		if (fileName.startsWith(FileHadoop.hdfsSymbol)) {
-			if (!fileName.startsWith("/")) {
-				fileName = "/" + fileName;
-				isAddSplashHead = true;
-			}
-		}
-		File file = new File(fileName);
-		String absolutePath = file.getAbsolutePath();
-		if (isAddSplashHead) {
-			absolutePath = removeSplashHead(absolutePath, false);
-		}
-		return absolutePath;
+		Path path = getPath(fileName);
+		return getAbsolutePath(path);
 	}
 
 	public static String getAbsolutePath(Path path) {
-		String name = getCanonicalPath(path.toString());
+		String name = path.toAbsolutePath().toString();
 		if (path instanceof HadoopPath) {
 			if (name.startsWith(PathDetail.getHdpHdfsHeadSymbol())) {
 				name = name.replaceFirst(PathDetail.getHdpHdfsHeadSymbol(), FileHadoop.hdfsSymbol);
@@ -639,7 +625,12 @@ public class FileOperate {
 		}
 		return name;
 	}
-
+	
+	/**
+	 * 如果path是软连接，会返回实际的文件路径
+	 * @param path
+	 * @return
+	 */
 	public static String getCanonicalPath(Path path) {
 		String name = getCanonicalPath(path.toString());
 		if (path instanceof HadoopPath) {
