@@ -613,7 +613,7 @@ public class FileOperate {
 	}
 
 	public static String getAbsolutePath(Path path) {
-		String name = path.toAbsolutePath().toString();
+		String name = path.toAbsolutePath().normalize().toString();
 		if (path instanceof HadoopPath) {
 			if (name.startsWith(PathDetail.getHdpHdfsHeadSymbol())) {
 				name = name.replaceFirst(PathDetail.getHdpHdfsHeadSymbol(), FileHadoop.hdfsSymbol);
