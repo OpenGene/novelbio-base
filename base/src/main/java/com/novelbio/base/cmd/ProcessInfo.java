@@ -226,7 +226,6 @@ public class ProcessInfo {
 		CmdOperate cmdOperate = new CmdOperate(lsCmd);
 		cmdOperate.setTerminateWriteTo(false);
 		cmdOperate.setGetLsStdOut();
-		cmdOperate.setNeedLog(false);
 		cmdOperate.runWithExp();
 		List<String> lsStd = cmdOperate.getLsStdOut();
 		return getLsPid(lsStd, pid, isGetChild);

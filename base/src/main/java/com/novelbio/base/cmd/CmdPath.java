@@ -142,7 +142,9 @@ public class CmdPath {
 			mapPath2TmpPath.putAll(mapPath2TmpPathIn);
 		}
 		if (isRedirectOutToTmp) {
+			logger.info("cmdPathCluster.mapOutPath2TmpOutPath: " + cmdPathCluster.mapOutPath2TmpOutPath);
 			mapPath2TmpPathOut = cmdPathCluster.getMapOutPath2TmpPath(setOutput, getTmpPath());
+			logger.info("mapPath2TmpPathOut: " + mapPath2TmpPathOut);
 			setFileNameAll.addAll(setOutput);
 			mapPath2TmpPath.putAll(mapPath2TmpPathOut);
 		}
@@ -221,12 +223,14 @@ public class CmdPath {
 		if (!mapPath2TmpPathOut.isEmpty()) {
 			logger.info("start move files");
 		}
+		logger.info("mapPath2TmpPathIn: " + mapPath2TmpPathIn.toString());
 		
 		for (String outPath : mapPath2TmpPathOut.keySet()) {
 			String outTmpPath = mapPath2TmpPathOut.get(outPath);
 			//遍历某个输出临时文件夹下的全体文件，看是否是cmd运行之前就保存的文件
 			//如果是新生成的文件，就可以拷贝出去
 			List<String> lsFilesFinish = FileOperate.getLsFoldFileName(outTmpPath);
+			logger.info("outpath: " + outPath + " outTmpPath: " + outTmpPath + " lsFilesFinish: " + lsFilesFinish.toString());
 			for (String fileInTmp : lsFilesFinish) {
 				String  filePathResult = fileInTmp.replaceFirst(outTmpPath, outPath);
 				if (setInput.contains(filePathResult) && FileOperate.isFileExistAndBigThanSize(filePathResult, 0)) {
@@ -234,6 +238,7 @@ public class CmdPath {
 				}
 				
 				List<String> lsFilesInTmpNeedMove = getLsFileInTmpNeedMove(FileOperate.getPath(fileInTmp));
+				logger.info("fileInTmp: " + fileInTmp + " filePathResult: " + filePathResult + " lsFilesInTmpNeedMove: " + lsFilesInTmpNeedMove);
 				for (String file : lsFilesInTmpNeedMove) {
 					String  filePathOut = file.replaceFirst(outTmpPath, outPath);
 					moveSingleFileOut(file, filePathOut);

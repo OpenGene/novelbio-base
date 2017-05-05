@@ -34,8 +34,6 @@ import com.novelbio.base.util.ServiceEnvUtil;
  */
 public class CmdOperate extends RunProcess<String> {
 	private static final Logger logger = Logger.getLogger(CmdOperate.class);
-	/** 一般都需要打印日志的，除非像 ps -ef 类似的工作就不需要打印日志 */
-	boolean needLog = true;
 	/** 进程 */
 	IntProcess process;
 	
@@ -68,11 +66,10 @@ public class CmdOperate extends RunProcess<String> {
 	/** 
 	 * 是否将标准流写入标准流，有些类似获取ip或者获取软件版本，获取进程ps-ef
 	 * 这时候我们会截取标准流到list中，如果再写入标准流，在日志中看就会很麻烦。
+	 * 
+	 * 这个关闭后，就不会打印log日志，也不会把命令写入标准流
 	 */
-	boolean isOutToTerminate = true;
-	/** 是否打印cmd命令，如果是类似获取ip或者ps-ef
-	 * 这种定时任务就不需要打印cmd命令了 */
-	boolean isPrintCmd = true;
+	boolean needLog = true;
 	
 	/** 是否需要获取cmd的标准输出流 */
 	boolean getCmdInStdStream = false;
@@ -209,9 +206,8 @@ public class CmdOperate extends RunProcess<String> {
 	 * 往控制台写了
 	 * @param isOutToTerminate 默认是true
 	 */
-	public void setTerminateWriteTo(boolean isOutToTerminate) {
-		this.isOutToTerminate = isOutToTerminate;
-		this.isPrintCmd = isOutToTerminate;
+	public void setTerminateWriteTo(boolean needLog) {
+		this.needLog = needLog;
 	}
 	
 	/**
@@ -615,7 +611,7 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	private void setStdStream() throws IOException {
 		String outPath = cmdOrderGenerator.getSaveStdTmp(); 
-		outputGobbler = new StreamOut(process.getStdOut(), process, isOutToTerminate, true);
+		outputGobbler = new StreamOut(process.getStdOut(), process, needLog, true);
 		outputGobbler.setDaemon(true);
 		
 		if (!getCmdInStdStream) {
@@ -645,7 +641,7 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	private void setErrorStream() throws IOException {
 		String errPath = cmdOrderGenerator.getSaveErrTmp();
-		errorGobbler = new StreamOut(process.getStdErr(), process, isOutToTerminate, false);
+		errorGobbler = new StreamOut(process.getStdErr(), process, needLog, false);
 		errorGobbler.setDaemon(true);
 		
 		if (!getCmdInErrStream) {
@@ -780,7 +776,7 @@ public class CmdOperate extends RunProcess<String> {
 		
 		String cmd = "";
 		String realCmd = getCmdExeStr();
-		if (isPrintCmd) {
+		if (needLog) {
 			logger.info("run cmd: " + realCmd);
 		}
 
