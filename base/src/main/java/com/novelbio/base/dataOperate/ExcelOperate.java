@@ -816,6 +816,7 @@ public class ExcelOperate implements Closeable {
 	public void writeExcel2OutputStream(List<String[]> content, OutputStream outputStream){
 		writeExcel(content);
 		try {
+			isWrite = false;
 			wb.write(outputStream);
 		} catch (IOException e) {
 			e.printStackTrace();
