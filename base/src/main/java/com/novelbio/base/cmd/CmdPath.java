@@ -187,6 +187,14 @@ public class CmdPath {
 						getLastModifyTime2Len(path));
 			}); 
 		}
+		
+		List<String> lsInfo = new ArrayList<>();
+
+		for (String fileName : mapFileName2LastModifyTimeAndLen.keySet()) {
+			String[] ss = new String[]{fileName, mapFileName2LastModifyTimeAndLen.get(fileName)[0]+"", mapFileName2LastModifyTimeAndLen.get(fileName)[1]+""};
+			lsInfo.add(ArrayOperate.cmbString(ss, "|"));
+		}
+		logger.info("mapFileName2LastModifyTimeAndLen: " + lsInfo);
 	}
 	
 	/** 把要输入的文件拷贝到临时文件夹中 */
@@ -230,7 +238,7 @@ public class CmdPath {
 			String[] ss = new String[]{fileName, mapFileName2LastModifyTimeAndLen.get(fileName)[0]+"", mapFileName2LastModifyTimeAndLen.get(fileName)[1]+""};
 			lsInfo.add(ArrayOperate.cmbString(ss, "|"));
 		}
-		logger.info("mapFileName2LastModifyTimeAndLen", lsInfo);
+		logger.info("mapFileName2LastModifyTimeAndLen: " + lsInfo);
 		
 		for (String outPath : mapPath2TmpPathOut.keySet()) {
 			String outTmpPath = mapPath2TmpPathOut.get(outPath);
@@ -277,6 +285,8 @@ public class CmdPath {
 		logger.info("this file " + lastModifyTime2LenThis[0] + " " + lastModifyTime2LenThis[1]);
 
 		if (lastModifyTime2LenThis[0] != lastModifyTime2Len[0] || lastModifyTime2LenThis[1] != lastModifyTime2Len[1]) {
+			logger.info("pathInTmp not exist " + pathInTmp);
+			logger.info("add file " + FileOperate.getAbsolutePath(pathInTmp));
 			lsFileNeedMove.add(FileOperate.getAbsolutePath(pathInTmp));
 			return lsFileNeedMove;
 		}
