@@ -16,6 +16,7 @@ import com.novelbio.base.StringOperate;
 import com.novelbio.base.cmd.ConvertCmd.ConvertCmdTmp;
 import com.novelbio.base.cmd.ConvertCmd.ConvertHdfs;
 import com.novelbio.base.cmd.ConvertCmd.ConvertOss;
+import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.base.util.ServiceEnvUtil;
 
@@ -224,6 +225,12 @@ public class CmdPath {
 			logger.info("start move files");
 		}
 		logger.info("mapPath2TmpPathIn: " + mapPath2TmpPathIn.toString());
+		List<String> lsInfo = new ArrayList<>();
+		for (String fileName : mapFileName2LastModifyTimeAndLen.keySet()) {
+			String[] ss = new String[]{fileName, mapFileName2LastModifyTimeAndLen.get(fileName)[0]+"", mapFileName2LastModifyTimeAndLen.get(fileName)[1]+""};
+			lsInfo.add(ArrayOperate.cmbString(ss, "|"));
+		}
+		logger.info("mapFileName2LastModifyTimeAndLen", lsInfo);
 		
 		for (String outPath : mapPath2TmpPathOut.keySet()) {
 			String outTmpPath = mapPath2TmpPathOut.get(outPath);
@@ -258,13 +265,17 @@ public class CmdPath {
 		String pathStr = FileOperate.getAbsolutePath(pathInTmp);
 		//全新的文件，则直接返回表示需要移动
 		if (!mapFileName2LastModifyTimeAndLen.containsKey(pathStr)) {
+			logger.info("file not exist " + pathStr);
 			lsFileNeedMove.add(FileOperate.getAbsolutePath(pathInTmp));
 			return lsFileNeedMove;
 		}
 		
 		//文件修改过了，修改时间和文件大小都不同了，也直接返回
 		long[] lastModifyTime2Len = mapFileName2LastModifyTimeAndLen.get(pathStr);
-		long[] lastModifyTime2LenThis = getLastModifyTime2Len(pathInTmp);			
+		long[] lastModifyTime2LenThis = getLastModifyTime2Len(pathInTmp);
+		logger.info("last file " + lastModifyTime2Len[0] + " " + lastModifyTime2Len[1]);
+		logger.info("this file " + lastModifyTime2LenThis[0] + " " + lastModifyTime2LenThis[1]);
+
 		if (lastModifyTime2LenThis[0] != lastModifyTime2Len[0] || lastModifyTime2LenThis[1] != lastModifyTime2Len[1]) {
 			lsFileNeedMove.add(FileOperate.getAbsolutePath(pathInTmp));
 			return lsFileNeedMove;
