@@ -1857,12 +1857,12 @@ public class FileOperate {
 	 *            是否覆盖
 	 * @return 返回是否创建成功
 	 */
-	public static boolean linkFile(String rawFile, String linkTo, boolean cover) {
+	public static void linkFile(String rawFile, String linkTo, boolean cover) {
 		if (!cover && (FileOperate.isFileFolderExist(linkTo) || FileOperate.isSymbolicLink(linkTo))) {
-			return true;
+			return;
 		}
 		if (!FileOperate.isFileExistAndNotDir(rawFile)) {
-			return false;
+			return;
 		}
 		FileOperate.createFolders(FileOperate.getParentPathNameWithSep(linkTo));
 		if (FileOperate.isFileExistAndNotDir(linkTo) && cover) {
@@ -1878,18 +1878,22 @@ public class FileOperate {
 					+ "\nLinkTo: " + linkTo);
 		}
 		if (isRawHdfs) {
-			throw new ExceptionNbcFile("could not creat symbolic link on hdfs");
+			throw new ExceptionNbcFile("could not creat symbolic link on hdfs from " + rawFile + " to " + linkTo);
 		}
-
-		List<String> lsCmd = new ArrayList<>();
-		lsCmd.add("ln");
-		lsCmd.add("-s");
-		lsCmd.add(rawFile);
-		lsCmd.add(linkTo);
-		CmdOperate cmdOperate = new CmdOperate(lsCmd);
-		cmdOperate.setTerminateWriteTo(false);
-		cmdOperate.runWithExp();
-		return true;
+		try {
+			Files.createSymbolicLink(FileOperate.getPath(linkTo), FileOperate.getPath(rawFile));
+		} catch (IOException e) {
+			throw new ExceptionNbcFile("could not creat symbolic link from " + rawFile + " to " + linkTo, e);
+		}
+//		List<String> lsCmd = new ArrayList<>();
+//		lsCmd.add("ln");
+//		lsCmd.add("-s");
+//		lsCmd.add(rawFile);
+//		lsCmd.add(linkTo);
+//		CmdOperate cmdOperate = new CmdOperate(lsCmd);
+//		cmdOperate.setTerminateWriteTo(false);
+//		cmdOperate.runWithExp();
+//		return true;
 	}
 	
 	/**判断文件是否为文件夹,null直接返回false */

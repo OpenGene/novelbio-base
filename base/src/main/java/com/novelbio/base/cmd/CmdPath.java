@@ -143,9 +143,7 @@ public class CmdPath {
 			mapPath2TmpPath.putAll(mapPath2TmpPathIn);
 		}
 		if (isRedirectOutToTmp) {
-			logger.info("cmdPathCluster.mapOutPath2TmpOutPath: " + cmdPathCluster.mapOutPath2TmpOutPath);
 			mapPath2TmpPathOut = cmdPathCluster.getMapOutPath2TmpPath(setOutput, getTmpPath());
-			logger.info("mapPath2TmpPathOut: " + mapPath2TmpPathOut);
 			setFileNameAll.addAll(setOutput);
 			mapPath2TmpPath.putAll(mapPath2TmpPathOut);
 		}
@@ -187,14 +185,6 @@ public class CmdPath {
 						getLastModifyTime2Len(path));
 			}); 
 		}
-		
-		List<String> lsInfo = new ArrayList<>();
-
-		for (String fileName : mapFileName2LastModifyTimeAndLen.keySet()) {
-			String[] ss = new String[]{fileName, mapFileName2LastModifyTimeAndLen.get(fileName)[0]+"", mapFileName2LastModifyTimeAndLen.get(fileName)[1]+""};
-			lsInfo.add(ArrayOperate.cmbString(ss, "|"));
-		}
-		logger.info("mapFileName2LastModifyTimeAndLen: " + lsInfo);
 	}
 	
 	/** 把要输入的文件拷贝到临时文件夹中 */
@@ -232,20 +222,14 @@ public class CmdPath {
 		if (!mapPath2TmpPathOut.isEmpty()) {
 			logger.info("start move files");
 		}
-		logger.info("mapPath2TmpPathIn: " + mapPath2TmpPathIn.toString());
-		List<String> lsInfo = new ArrayList<>();
-		for (String fileName : mapFileName2LastModifyTimeAndLen.keySet()) {
-			String[] ss = new String[]{fileName, mapFileName2LastModifyTimeAndLen.get(fileName)[0]+"", mapFileName2LastModifyTimeAndLen.get(fileName)[1]+""};
-			lsInfo.add(ArrayOperate.cmbString(ss, "|"));
-		}
-		logger.info("mapFileName2LastModifyTimeAndLen: " + lsInfo);
+		logger.debug("mapPath2TmpPathIn: " + mapPath2TmpPathIn.toString());
 		
 		for (String outPath : mapPath2TmpPathOut.keySet()) {
 			String outTmpPath = mapPath2TmpPathOut.get(outPath);
 			//遍历某个输出临时文件夹下的全体文件，看是否是cmd运行之前就保存的文件
 			//如果是新生成的文件，就可以拷贝出去
 			List<String> lsFilesFinish = FileOperate.getLsFoldFileName(outTmpPath);
-			logger.info("outpath: " + outPath + " outTmpPath: " + outTmpPath + " lsFilesFinish: " + lsFilesFinish.toString());
+			logger.debug("outpath: " + outPath + " outTmpPath: " + outTmpPath + " lsFilesFinish: " + lsFilesFinish.toString());
 			for (String fileInTmp : lsFilesFinish) {
 				String  filePathResult = fileInTmp.replaceFirst(outTmpPath, outPath);
 				if (setInput.contains(filePathResult) && FileOperate.isFileExistAndBigThanSize(filePathResult, 0)) {
@@ -253,7 +237,7 @@ public class CmdPath {
 				}
 				
 				List<String> lsFilesInTmpNeedMove = getLsFileInTmpNeedMove(FileOperate.getPath(fileInTmp));
-				logger.info("fileInTmp: " + fileInTmp + " filePathResult: " + filePathResult + " lsFilesInTmpNeedMove: " + lsFilesInTmpNeedMove);
+				logger.debug("fileInTmp: " + fileInTmp + " filePathResult: " + filePathResult + " lsFilesInTmpNeedMove: " + lsFilesInTmpNeedMove);
 				for (String file : lsFilesInTmpNeedMove) {
 					String  filePathOut = file.replaceFirst(outTmpPath, outPath);
 					moveSingleFileOut(file, filePathOut);
@@ -273,7 +257,7 @@ public class CmdPath {
 		String pathStr = FileOperate.getAbsolutePath(pathInTmp);
 		//全新的文件，则直接返回表示需要移动
 		if (!mapFileName2LastModifyTimeAndLen.containsKey(pathStr)) {
-			logger.info("file not exist " + pathStr);
+			logger.debug("file {} not exist, so it is a new file and need to move to result file", pathStr);
 			lsFileNeedMove.add(FileOperate.getAbsolutePath(pathInTmp));
 			return lsFileNeedMove;
 		}
@@ -281,12 +265,8 @@ public class CmdPath {
 		//文件修改过了，修改时间和文件大小都不同了，也直接返回
 		long[] lastModifyTime2Len = mapFileName2LastModifyTimeAndLen.get(pathStr);
 		long[] lastModifyTime2LenThis = getLastModifyTime2Len(pathInTmp);
-		logger.info("last file " + lastModifyTime2Len[0] + " " + lastModifyTime2Len[1]);
-		logger.info("this file " + lastModifyTime2LenThis[0] + " " + lastModifyTime2LenThis[1]);
 
 		if (lastModifyTime2LenThis[0] != lastModifyTime2Len[0] || lastModifyTime2LenThis[1] != lastModifyTime2Len[1]) {
-			logger.info("pathInTmp not exist " + pathInTmp);
-			logger.info("add file " + FileOperate.getAbsolutePath(pathInTmp));
 			lsFileNeedMove.add(FileOperate.getAbsolutePath(pathInTmp));
 			return lsFileNeedMove;
 		}
