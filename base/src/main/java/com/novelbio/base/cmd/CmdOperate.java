@@ -408,7 +408,6 @@ public class CmdOperate extends RunProcess<String> {
 		this.getCmdInErrStream = getCmdInErrStream;
 	}
 
-
 	/** 
 	 * 默认不启用
 	 * 只有当{@link #setGetCmdInErrStream(boolean)} 为false时才有用 <br>
@@ -515,7 +514,7 @@ public class CmdOperate extends RunProcess<String> {
 	}
 	private void waitStreamOutErr() {
 		while (errorGobbler == null) {
-			if (finishFlag != null && finishFlag.isFinish()) {
+			if (finishFlag != null && (!finishFlag.isStart() || finishFlag.isFinish())) {
 				break;
 			}
 			try {
@@ -524,7 +523,7 @@ public class CmdOperate extends RunProcess<String> {
 				e.printStackTrace();
 			}
 		}
-		if (errorGobbler == null) {
+		if (errorGobbler == null && finishFlag.isStart()) {
 			throw new ExceptionCmd("cmd doesn't have output stream: " + getCmdExeStr());
 		}
 	}
@@ -575,6 +574,10 @@ public class CmdOperate extends RunProcess<String> {
 			errorGobbler.joinStream();
 			
 			if (needLog) logger.info("close out stream");
+		} catch (Throwable t) {
+			//说明还没运行到  process.waitFor(); 就报错了
+			if (!finishFlag.isFinish()) finishFlag.setFinishError();
+			throw t;
 		} finally {
 			closeOutStream();
 		}
@@ -787,7 +790,6 @@ public class CmdOperate extends RunProcess<String> {
 		} catch (Exception e) {
 			try {
 				if (streamIn != null) streamIn.threadStop();
-				
 			} catch (Exception e2) {
 				// TODO: handle exception
 			}
@@ -922,6 +924,10 @@ public class CmdOperate extends RunProcess<String> {
 		}
 		public boolean isFinish() {
 			return flag != null;
+		}
+		/** 设定为运行失败 */
+		public void setFinishError() {
+			flag = 1;
 		}
 		public void setFlag(Integer flag) {
 			this.flag = flag;
