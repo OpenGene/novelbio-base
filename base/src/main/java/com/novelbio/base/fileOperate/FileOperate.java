@@ -1964,7 +1964,7 @@ public class FileOperate {
 		return !StringOperate.isRealNull(file) && isFileExist(getPath(file));
 	}
 	/**
-	 * 判断文件是否存在，并且不是文件夹，给的是绝对路径
+	 * 判断文件是否存在，不论是文件还是文件夹,只要存在就是true，给的是绝对路径
 	 * @param fileName 如果为null, 直接返回false
 	 * @return 文件存在,返回true.否则,返回false
 	 */
