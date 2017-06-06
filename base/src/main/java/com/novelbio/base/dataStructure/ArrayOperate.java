@@ -17,19 +17,23 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
+import com.novelbio.base.StringOperate;
+
 public class ArrayOperate {
 	private static final Logger logger = Logger.getLogger(ArrayOperate.class);
-	
-	
-	public static<T> boolean isEmpty(Collection<T> collection) {
+
+	public static <T> boolean isEmpty(Collection<T> collection) {
 		return (collection == null || collection.isEmpty());
 	}
-	public static<K, V> boolean isEmpty(Map<K, V> collection) {
+
+	public static <K, V> boolean isEmpty(Map<K, V> collection) {
 		return (collection == null || collection.isEmpty());
 	}
-	public static<T> boolean isEmpty(T[] array) {
+
+	public static <T> boolean isEmpty(T[] array) {
 		return (array == null || array.length == 0);
 	}
+
 	/**
 	 * 合并字符串数组
 	 * @param ss 待合并的字符串数组
@@ -47,7 +51,7 @@ public class ArrayOperate {
 		}
 		return result.toString();
 	}
-	
+
 	public static String cmbString(double[] values, String sep) {
 		StringBuffer result = new StringBuffer();
 		if (values.length < 1) {
@@ -59,7 +63,26 @@ public class ArrayOperate {
 		}
 		return result.toString();
 	}
-	
+
+	/**
+	 * 将字符串ids按照分隔符sep拆分为Set对象
+	 * @param ids 待拆分的字符串，例如：1,2,2,3,3,4
+	 * @param sep 为null时则默认为逗号
+	 * @return Set<String> 返回值例如：[1,2,3,4]
+	 */
+	public static Set<String> splitStringToSet(String ids, String sep) {
+		if(StringOperate.isRealNull(ids)) return null;
+		
+		String[] idArr = ids.split(null == sep ? "," : sep);
+		Set<String> setIds = new HashSet<>();
+		for (String id : idArr) {
+			if (!StringOperate.isRealNull(id)) {
+				setIds.add(id);
+			}
+		}
+		return setIds;
+	}
+
 	/**
 	 * 合并字符串数组
 	 * 
@@ -69,7 +92,7 @@ public class ArrayOperate {
 	 *            分隔符
 	 * @return
 	 */
-	public static<T> String cmbString(Collection<T> ss, String sep) {
+	public static <T> String cmbString(Collection<T> ss, String sep) {
 		StringBuffer result = new StringBuffer();
 		if (ArrayOperate.isEmpty(ss)) {
 			return "";
@@ -85,19 +108,20 @@ public class ArrayOperate {
 		}
 		return result.toString();
 	}
-	
-	public static<T> ArrayList<T> converArray2List(T[] array) {
+
+	public static <T> ArrayList<T> converArray2List(T[] array) {
 		ArrayList<T> lsResult = new ArrayList<T>();
 		for (T t : array) {
 			lsResult.add(t);
 		}
 		return lsResult;
 	}
-	public static<T> T[] converList2Array(List<T> ls) {
-		if(ls.size() == 0)
+
+	public static <T> T[] converList2Array(List<T> ls) {
+		if (ls.size() == 0)
 			return null;
 		@SuppressWarnings("unchecked")
-		T[]  result = (T[]) Array.newInstance(ls.get(0).getClass(),ls.size());
+		T[] result = (T[]) Array.newInstance(ls.get(0).getClass(), ls.size());
 		int index = 0;
 		for (T t : ls) {
 			result[index] = t;
@@ -105,17 +129,18 @@ public class ArrayOperate {
 		}
 		return result;
 	}
+
 	/**
 	 * 打乱一个数组
 	 * @param array
 	 * @return
 	 */
-	public static <T> T[] shuffle(T[] array){
+	public static <T> T[] shuffle(T[] array) {
 		T tmp;
 		int length = array.length;
 		for (int i = 0; i < array.length; i++) {
-			int index = (int)Math.floor(Math.random()*(length-i))+i;
-			if(index == i || index >= length)
+			int index = (int) Math.floor(Math.random() * (length - i)) + i;
+			if (index == i || index >= length)
 				continue;
 			tmp = array[i];
 			array[i] = tmp;
@@ -124,22 +149,24 @@ public class ArrayOperate {
 		}
 		return array;
 	}
+
 	/**
 	 * 给定lsString，将lsString看作ArrayList-String[]，纵向将其合并为String[][]，也就是类似cbind
 	 * @param lsStrings
 	 * @return
 	 */
 	public static String[][] combCol(ArrayList<String[][]> lsStrings) {
-		int rowNum=lsStrings.get(0).length;
-		int columnNum=lsStrings.size();
-		String[][] result=new String[rowNum][columnNum];
+		int rowNum = lsStrings.get(0).length;
+		int columnNum = lsStrings.size();
+		String[][] result = new String[rowNum][columnNum];
 		for (int i = 0; i < columnNum; i++) {
 			for (int j = 0; j < rowNum; j++) {
-				result[j][i]=lsStrings.get(i)[j][0];
+				result[j][i] = lsStrings.get(i)[j][0];
 			}
 		}
 		return result;
 	}
+
 	/**
 	 * 二维[][]的合并，给定AT[][]和BT[][]
 	 * 将AT[][]和BT[][]合并，可以指定BT插入在AT的哪一列中
@@ -150,28 +177,29 @@ public class ArrayOperate {
 	 * @return
 	 * 
 	 */
-	public static <T> T[][] combArray(T[][] AT,T[][] BT,int instNum) {
-		int rowNum=AT.length;
-		int colNum=AT[0].length+BT[0].length;
-		if (instNum<1) {
-			instNum=AT[0].length;
+	public static <T> T[][] combArray(T[][] AT, T[][] BT, int instNum) {
+		int rowNum = AT.length;
+		int colNum = AT[0].length + BT[0].length;
+		if (instNum < 1) {
+			instNum = AT[0].length;
 		}
 		instNum--;
 		//通过反射的方法新建数组
-		T[][]  result = (T[][]) Array.newInstance(AT.getClass().getComponentType().getComponentType(),rowNum,colNum);
+		T[][] result = (T[][]) Array.newInstance(AT.getClass().getComponentType().getComponentType(), rowNum, colNum);
 		for (int i = 0; i < rowNum; i++) {
 			for (int j = 0; j < colNum; j++) {
-				if (j<=instNum) {
-					result[i][j]=AT[i][j];
-				} else if (j>instNum&&j<=instNum+BT[0].length) {
-					result[i][j]=BT[i][j-instNum-1];
+				if (j <= instNum) {
+					result[i][j] = AT[i][j];
+				} else if (j > instNum && j <= instNum + BT[0].length) {
+					result[i][j] = BT[i][j - instNum - 1];
 				} else {
-					result[i][j]=AT[i][j-BT[0].length];
+					result[i][j] = AT[i][j - BT[0].length];
 				}
 			}
 		}
 		return result;
 	}
+
 	/**
 	 * 二维[][]的合并，给定AT[][]和BT[][]
 	 * 将AT[][]和BT[][]合并，可以指定BT插入在AT的哪一列中
@@ -182,31 +210,31 @@ public class ArrayOperate {
 	 * @return
 	 * 
 	 */
-	public static <T> ArrayList<T[]> combArray(List<T[]> lsAT,List<T[]> lsBT,int instNum) {
+	public static <T> ArrayList<T[]> combArray(List<T[]> lsAT, List<T[]> lsBT, int instNum) {
 		int rowNum = lsAT.size();
-		int colNum = lsAT.get(0).length+lsBT.get(0).length;
-		if (instNum<1) {
+		int colNum = lsAT.get(0).length + lsBT.get(0).length;
+		if (instNum < 1) {
 			instNum = lsAT.get(0).length;
 		}
 		instNum--;
 		//通过反射的方法新建数组
 		ArrayList<T[]> lsResult = new ArrayList<T[]>();
-		T[][]  result = (T[][]) Array.newInstance(lsAT.get(0).getClass().getComponentType(),rowNum,colNum);
+		T[][] result = (T[][]) Array.newInstance(lsAT.get(0).getClass().getComponentType(), rowNum, colNum);
 		for (int i = 0; i < rowNum; i++) {
 			for (int j = 0; j < colNum; j++) {
-				if (j<=instNum) {
-					result[i][j]=lsAT.get(i)[j];
-				} else if (j>instNum&&j<=instNum+lsBT.get(0).length) {
-					result[i][j]=lsBT.get(i)[j-instNum-1];
+				if (j <= instNum) {
+					result[i][j] = lsAT.get(i)[j];
+				} else if (j > instNum && j <= instNum + lsBT.get(0).length) {
+					result[i][j] = lsBT.get(i)[j - instNum - 1];
 				} else {
-					result[i][j]=lsAT.get(i)[j-lsBT.get(i).length];
+					result[i][j] = lsAT.get(i)[j - lsBT.get(i).length];
 				}
 				lsResult.add(result[i]);
 			}
 		}
 		return lsResult;
 	}
-	
+
 	public static boolean compareString(String str1, String str2) {
 		if (str1 == str2) {
 			return true;
@@ -217,15 +245,15 @@ public class ArrayOperate {
 		}
 		return true;
 	}
-	
-	public static<T> LinkedHashSet<T> removeDuplicate(Collection<T> colToverrideHashCode) {
+
+	public static <T> LinkedHashSet<T> removeDuplicate(Collection<T> colToverrideHashCode) {
 		LinkedHashSet<T> setRemoveDuplicate = new LinkedHashSet<T>();
 		for (T t : setRemoveDuplicate) {
 			setRemoveDuplicate.add(t);
 		}
 		return setRemoveDuplicate;
 	}
-	
+
 	/**
 	 * 将数组中小于smallNum的项目全部删除
 	 * @param column
@@ -233,20 +261,20 @@ public class ArrayOperate {
 	 * @return
 	 */
 	public static int[] removeSmallValue(int[] column, int smallNum) {
-		 ArrayList<Integer> lsReadColNum = new ArrayList<Integer>();
-		 for (int i : column) {
+		ArrayList<Integer> lsReadColNum = new ArrayList<Integer>();
+		for (int i : column) {
 			if (i < smallNum) {
 				continue;
 			}
 			lsReadColNum.add(i);
-		 }
-		 int[] column2 = new int[lsReadColNum.size()];
-		 for (int i = 0; i < lsReadColNum.size(); i++) {
-			 column2[i] = lsReadColNum.get(i);
-		 }
-		 return column2;
+		}
+		int[] column2 = new int[lsReadColNum.size()];
+		for (int i = 0; i < lsReadColNum.size(); i++) {
+			column2[i] = lsReadColNum.get(i);
+		}
+		return column2;
 	}
-	
+
 	/**
 	 * String[]的合并，给定Astring[]和Bstring[]
 	 * 将Astring[]和Bstring[]合并，可以指定Bstring插入在Astring的哪一列后
@@ -256,25 +284,25 @@ public class ArrayOperate {
 	 * @param instNum 插入到Astring的第几列之后，是Astring的实际列,如果instNum<1则仅仅将Bobject并到Aobject的后面。
 	 * @return
 	 */
-	public static<T> T[] combArray(T[] Aarray,T[] Barray,int instNum) {
-		if (instNum<1) {
-			instNum=Aarray.length;
+	public static <T> T[] combArray(T[] Aarray, T[] Barray, int instNum) {
+		if (instNum < 1) {
+			instNum = Aarray.length;
 		}
 		instNum--;
-		T[] result=(T[]) Array.newInstance(Aarray.getClass().getComponentType(), Aarray.length + Barray.length);//new T[Astring.length+Bstring.length];
+		T[] result = (T[]) Array.newInstance(Aarray.getClass().getComponentType(), Aarray.length + Barray.length);//new T[Astring.length+Bstring.length];
 		for (int i = 0; i < result.length; i++) {
-			if (i<=instNum) {
-				result[i]=Aarray[i];
-			} else if (i>instNum&&i<=instNum+Barray.length) {
-				result[i]=Barray[i-instNum-1];
+			if (i <= instNum) {
+				result[i] = Aarray[i];
+			} else if (i > instNum && i <= instNum + Barray.length) {
+				result[i] = Barray[i - instNum - 1];
 			} else {
-				result[i]=Aarray[i-Barray.length];
+				result[i] = Aarray[i - Barray.length];
 			}
 		}
 		return result;
 	}
-	
-	public static<T> T[] deletElement(T[] Aarray, List<Integer> deletNum) {
+
+	public static <T> T[] deletElement(T[] Aarray, List<Integer> deletNum) {
 		TreeSet<Integer> treeRemove = new TreeSet<Integer>();
 		for (int i : deletNum) {
 			if (i < 0 || i >= Aarray.length) {
@@ -282,19 +310,19 @@ public class ArrayOperate {
 			}
 			treeRemove.add(i);
 		}
-		
-		T[] result=(T[]) Array.newInstance(Aarray.getClass().getComponentType(), Aarray.length - treeRemove.size());//new T[Astring.length+Bstring.length];
+
+		T[] result = (T[]) Array.newInstance(Aarray.getClass().getComponentType(), Aarray.length - treeRemove.size());//new T[Astring.length+Bstring.length];
 		int resultNum = 0;
 		for (int i = 0; i < Aarray.length; i++) {
 			if (treeRemove.contains(i)) {
 				continue;
 			}
 			result[resultNum] = Aarray[i];
-			resultNum++ ;
+			resultNum++;
 		}
 		return result;
 	}
-	
+
 	/**
 	 * 删除数组中的一些项目
 	 * @param <T>
@@ -302,7 +330,7 @@ public class ArrayOperate {
 	 * @param deletNum 需要删除哪几项，从0开始计算，如果超出数组项，则忽略
 	 * @return
 	 */
-	public static<T> T[] deletElement(T[] Aarray,int[] deletNum) {
+	public static <T> T[] deletElement(T[] Aarray, int[] deletNum) {
 		TreeSet<Integer> treeRemove = new TreeSet<Integer>();
 		for (int i : deletNum) {
 			if (i < 0 || i >= Aarray.length) {
@@ -310,27 +338,29 @@ public class ArrayOperate {
 			}
 			treeRemove.add(i);
 		}
-		
-		T[] result=(T[]) Array.newInstance(Aarray.getClass().getComponentType(), Aarray.length - treeRemove.size());//new T[Astring.length+Bstring.length];
+
+		T[] result = (T[]) Array.newInstance(Aarray.getClass().getComponentType(), Aarray.length - treeRemove.size());//new T[Astring.length+Bstring.length];
 		int resultNum = 0;
 		for (int i = 0; i < Aarray.length; i++) {
 			if (treeRemove.contains(i)) {
 				continue;
 			}
 			result[resultNum] = Aarray[i];
-			resultNum++ ;
+			resultNum++;
 		}
 		return result;
 	}
-	
+
 	/**
 	 * 将array中的元素添加到list中 如果参数是null的话，就不加进去
 	 * @param ls 如果为null则新建一个list
 	 * @param array 如果为null则返回
 	 */
-	public static<T> void addArrayToList(List<T> ls, T[] array) {
-		if (array == null) return;
-		if (ls == null) ls = new ArrayList<>();
+	public static <T> void addArrayToList(List<T> ls, T[] array) {
+		if (array == null)
+			return;
+		if (ls == null)
+			ls = new ArrayList<>();
 		boolean flag = true;
 		for (T t : array) {
 			if (t == null) {
@@ -344,7 +374,7 @@ public class ArrayOperate {
 			}
 		}
 	}
-	
+
 	/**
 	 * <b>没有添加范围检测功能</b>
 	 * <b>同一列最多只能添加删除各一次</b><br>
@@ -360,7 +390,7 @@ public class ArrayOperate {
 	 * @param filling 默认填充的元素
 	 * @return
 	 */
-	public static<T> T[] indelElement(T[] Aarray,ArrayList<int[]> lsIndelInfo, T filling) {
+	public static <T> T[] indelElement(T[] Aarray, ArrayList<int[]> lsIndelInfo, T filling) {
 		// 0：修正第几位，1.负数删除，正数在前面添加一位
 		HashMap<Integer, TreeSet<Integer>> hashIndelInfo = new HashMap<Integer, TreeSet<Integer>>();
 		for (int[] i : lsIndelInfo) {
@@ -369,8 +399,7 @@ public class ArrayOperate {
 			if (hashIndelInfo.containsKey(Math.abs(i[0]))) {
 				TreeSet<Integer> lsDetail = hashIndelInfo.get(Math.abs(i[0]));
 				lsDetail.add(i[1]);
-			}
-			else {
+			} else {
 				TreeSet<Integer> lsDetail = new TreeSet<Integer>();
 				lsDetail.add(i[1]);
 				hashIndelInfo.put(Math.abs(i[0]), lsDetail);
@@ -381,12 +410,12 @@ public class ArrayOperate {
 		for (TreeSet<Integer> treeSet : hashIndelInfo.values()) {
 			for (Integer integer : treeSet) {
 				if (integer < 0)
-					finalLen --;//负数表示仅将该位点删除
+					finalLen--;//负数表示仅将该位点删除
 				else
 					finalLen = finalLen + integer;//正数表示在该位点之前添加若干个空位
 			}
 		}
-		T[] result=(T[]) Array.newInstance(Aarray.getClass().getComponentType(), finalLen);//new T[Astring.length+Bstring.length];
+		T[] result = (T[]) Array.newInstance(Aarray.getClass().getComponentType(), finalLen);//new T[Astring.length+Bstring.length];
 		int resultNum = 0;//输出array的坐标
 		for (int i = 0; i < Aarray.length; i++) {
 			boolean flagDel = false;//是否跳过该ID
@@ -396,8 +425,7 @@ public class ArrayOperate {
 				for (Integer integer : treeIndelInfo) {
 					if (integer > 0) {
 						resultNum = resultNum + integer;
-					}
-					else {
+					} else {
 						flagDel = true;
 					}
 				}
@@ -405,7 +433,7 @@ public class ArrayOperate {
 			//如果没有跳过
 			if (!flagDel) {
 				result[resultNum] = Aarray[i];
-				resultNum++ ;
+				resultNum++;
 			}
 		}
 		for (int i = 0; i < result.length; i++) {
@@ -415,6 +443,7 @@ public class ArrayOperate {
 		}
 		return result;
 	}
+
 	/**
 	 * 用hash的方法来合并两个List<br>
 	 * 给定lsA、lsB<br>
@@ -423,7 +452,7 @@ public class ArrayOperate {
 	 * 如果相同，则将AcolNum全部添加到lsB后面，最后返回添加好的lsA<br>
 	 * @return
 	 */
-	public static ArrayList<String[]> combArrayListHash(List<String[]> lsA ,List<String[]> lsB, int AcolNum, int BcolNum) {
+	public static ArrayList<String[]> combArrayListHash(List<String[]> lsA, List<String[]> lsB, int AcolNum, int BcolNum) {
 		ArrayList<String[]> lsResult = new ArrayList<String[]>();
 		Hashtable<String, String[]> hashLsA = new Hashtable<String, String[]>();
 		for (String[] strings : lsA) {
@@ -434,7 +463,7 @@ public class ArrayOperate {
 			String tmpKeyB = strings[BcolNum];
 			String[] tmpA = hashLsA.get(tmpKeyB.trim());
 			if (tmpA == null) {
-				logger.error("no lsA element equals lsB: "+tmpKeyB);
+				logger.error("no lsA element equals lsB: " + tmpKeyB);
 				continue;
 			}
 			String[] tmpResult = combArray(strings, tmpA, 0);
@@ -442,7 +471,6 @@ public class ArrayOperate {
 		}
 		return lsResult;
 	}
-	
 
 	/**
 	 * 用之前要看清楚指定的column是否在ls内 <br>
@@ -454,26 +482,26 @@ public class ArrayOperate {
 	public static ArrayList<String[]> listCope(ArrayList<String[]> ls, int[] colNum, boolean include) {
 		if (include) {
 			return listCope(ls, colNum);
-		}
-		else {
+		} else {
 			HashSet<Integer> hashCol = new HashSet<Integer>();
 			for (int i = 0; i < colNum.length; i++) {
 				hashCol.add(colNum[i]);
 			}
-			int[] colNumResult = new int[ls.get(0).length - colNum.length]; 
-			int k=0;//给最后结果计数，也就是需要哪几列
+			int[] colNumResult = new int[ls.get(0).length - colNum.length];
+			int k = 0;//给最后结果计数，也就是需要哪几列
 			//遍历所有列数
 			for (int i = 0; i < ls.get(0).length; i++) {
 				//如果该列在去除项中，则跳过
-				if (hashCol.contains(i))
-				{
+				if (hashCol.contains(i)) {
 					continue;
 				}
-				colNumResult[k] = i; k++;
+				colNumResult[k] = i;
+				k++;
 			}
 			return listCope(ls, colNumResult);
 		}
 	}
+
 	/**
 	 * 给定List，获得其中指定的某几列,获得的某几列按照指定的列进行排列，从0开始记数<br>
 	 * @param ls
@@ -491,8 +519,7 @@ public class ArrayOperate {
 		}
 		return lsResult;
 	}
-	
-	
+
 	/**
 	 * 将lsInfo里面的double叠加起来，最后加成一个double[]
 	 * @param lsInfo 里面的double[] 可以不等长，里面不可以包括null
@@ -517,7 +544,7 @@ public class ArrayOperate {
 		}
 		return result;
 	}
-	
+
 	/** 给定一系列double[]，计算覆盖度，
 	 * 因为输入的double[] 是不等长的
 	 * 就要知道第一位有几个 double[]，第二位有几个 double[]
@@ -528,7 +555,7 @@ public class ArrayOperate {
 		if (lsInfo.size() == 0) {
 			return null;
 		}
-		
+
 		int longestLen = 0;
 		for (double[] ds : lsInfo) {
 			if (longestLen < ds.length) {
@@ -547,12 +574,12 @@ public class ArrayOperate {
 		}
 		return lsResult;
 	}
-	
+
 	/**
 	 * 两个list取交集,注意lsA和lsB里面不要有重复项
 	 * @return
 	 */
-	public static ArrayList<String> getCoLs(List<String>  lsA, List<String> lsB) {
+	public static ArrayList<String> getCoLs(List<String> lsA, List<String> lsB) {
 		ArrayList<String> lsResult = new ArrayList<String>();
 		HashSet<String> hashA = new HashSet<String>();
 		for (String string : lsA) {
@@ -565,7 +592,7 @@ public class ArrayOperate {
 		}
 		return lsResult;
 	}
-	
+
 	/**
 	 * 给定一个数组，以及它的中点坐标，和上游下游坐标，切割或者扩充该数组
 	 * @param array 数组
@@ -578,7 +605,7 @@ public class ArrayOperate {
 	 */
 	public static double[] cuttArray(double[] array, int center, int up, int down, double thisdefault) {
 		center--;
-		double[] result = new double[up + down +1];
+		double[] result = new double[up + down + 1];
 		for (int i = 0; i < result.length; i++) {
 			result[i] = thisdefault;
 		}
@@ -600,48 +627,49 @@ public class ArrayOperate {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * 颠倒数组，直接性将传入的数组倒置，不返回东西
 	 * @param array
 	 */
 	public static void convertArray(int[] array) {
-		int tmpValue=0;
-		int arrayLength=array.length;
-		for (int i = 0; i < arrayLength/2; i++) {
-			tmpValue=array[arrayLength-1-i];
-			array[arrayLength-1-i]=array[i];
-			array[i]=tmpValue;
+		int tmpValue = 0;
+		int arrayLength = array.length;
+		for (int i = 0; i < arrayLength / 2; i++) {
+			tmpValue = array[arrayLength - 1 - i];
+			array[arrayLength - 1 - i] = array[i];
+			array[i] = tmpValue;
 		}
 	}
-	
+
 	/**
 	 * 颠倒数组，直接性将传入的数组倒置，不返回东西
 	 * @param array
 	 */
 	public static void convertArray(double[] array) {
-		double tmpValue=0;
-		int arrayLength=array.length;
-		for (int i = 0; i < arrayLength/2; i++) {
-			tmpValue=array[arrayLength-1-i];
-			array[arrayLength-1-i]=array[i];
-			array[i]=tmpValue;
+		double tmpValue = 0;
+		int arrayLength = array.length;
+		for (int i = 0; i < arrayLength / 2; i++) {
+			tmpValue = array[arrayLength - 1 - i];
+			array[arrayLength - 1 - i] = array[i];
+			array[i] = tmpValue;
 		}
 	}
-	
+
 	/**
 	 * 颠倒数组，直接性将传入的数组倒置，不返回东西
 	 * @param array
 	 */
-	public static<T> void convertArray(T[] array) {
-		T tmpValue=null;
-		int arrayLength=array.length;
-		for (int i = 0; i < arrayLength/2; i++) {
-			tmpValue=array[arrayLength-1-i];
-			array[arrayLength-1-i]=array[i];
-			array[i]=tmpValue;
+	public static <T> void convertArray(T[] array) {
+		T tmpValue = null;
+		int arrayLength = array.length;
+		for (int i = 0; i < arrayLength / 2; i++) {
+			tmpValue = array[arrayLength - 1 - i];
+			array[arrayLength - 1 - i] = array[i];
+			array[i] = tmpValue;
 		}
 	}
+
 	/**
 	 * 将hashmap的key提取出来
 	 * @param <K> key
@@ -649,18 +677,18 @@ public class ArrayOperate {
 	 * @param hashMap
 	 * 	 * 没有返回null
 	 */
-	public static<K,V> ArrayList<K> getArrayListKey(Map<K, V> hashMap) {
+	public static <K, V> ArrayList<K> getArrayListKey(Map<K, V> hashMap) {
 		if (hashMap == null || hashMap.size() == 0) {
 			return null;
 		}
 		ArrayList<K> lsResult = new ArrayList<K>();
 		Set<K> keys = hashMap.keySet();
-		for(K key:keys)
-		{
+		for (K key : keys) {
 			lsResult.add(key);
 		}
 		return lsResult;
 	}
+
 	/**
 	 * 将hashmap的value提取出来
 	 * @param <K> key
@@ -668,46 +696,46 @@ public class ArrayOperate {
 	 * @param hashMap
 	 * 	 * 没有返回 空的 list
 	 */
-	public static<K,V> ArrayList<V> getArrayListValue(Map<K, V> hashMap) {
+	public static <K, V> ArrayList<V> getArrayListValue(Map<K, V> hashMap) {
 		if (hashMap == null || hashMap.size() == 0) {
 			return new ArrayList<V>();
 		}
 		ArrayList<V> lsResult = new ArrayList<V>();
 		Collection<V> values = hashMap.values();
-		for(V value:values) {
+		for (V value : values) {
 			lsResult.add(value);
 		}
 		return lsResult;
 	}
-	
+
 	/**
 	 * 将hashset的value提取出来
 	 * @param <K> key
 	 * @param hashset
 	 * 没有返回一个空的arraylist
 	 */
-	public static<K> ArrayList<K> getArrayListValue(Set<K> hashset) {
+	public static <K> ArrayList<K> getArrayListValue(Set<K> hashset) {
 		if (hashset == null || hashset.size() == 0) {
 			return new ArrayList<K>();
 		}
-		
+
 		ArrayList<K> lsResult = new ArrayList<K>();
-		for(K value:hashset)
-		{
+		for (K value : hashset) {
 			lsResult.add(value);
 		}
 		return lsResult;
 	}
-	
+
 	/**
 	 * 复制数组
 	 * @param <T>
 	 * @param array
 	 * @return
 	 */
-	public static<T> T[] copyArray(T[] array) {
+	public static <T> T[] copyArray(T[] array) {
 		return copyArray(array, array.length);
 	}
+
 	/**
 	 * using {@link #indelElement(Object[], int[])} replace<br>
 	 * 复制数组
@@ -717,8 +745,8 @@ public class ArrayOperate {
 	 * @return
 	 * 最后生成Length长度的array
 	 */
-	public static<T> T[] copyArray(T[] array, int Length) {
-		T[] result=(T[]) Array.newInstance(array.getClass().getComponentType(), Length);
+	public static <T> T[] copyArray(T[] array, int Length) {
+		T[] result = (T[]) Array.newInstance(array.getClass().getComponentType(), Length);
 		for (int i = 0; i < array.length; i++) {
 			if (i >= Length) {
 				continue;
@@ -727,6 +755,7 @@ public class ArrayOperate {
 		}
 		return result;
 	}
+
 	/**
 	 * 复制数组
 	 * @param <T>
@@ -736,8 +765,8 @@ public class ArrayOperate {
 	 * @return
 	 * 最后生成Length长度的array
 	 */
-	public static<T> T[] copyArray(T[] array, int Length,boolean start) {
-		T[] result=(T[]) Array.newInstance(array.getClass().getComponentType(), Length);
+	public static <T> T[] copyArray(T[] array, int Length, boolean start) {
+		T[] result = (T[]) Array.newInstance(array.getClass().getComponentType(), Length);
 		if (start) {
 			for (int i = 0; i < array.length; i++) {
 				if (i >= Length) {
@@ -745,12 +774,10 @@ public class ArrayOperate {
 				}
 				result[i] = array[i];
 			}
-		}
-		else
-		{
+		} else {
 			int j = 0;
 			for (int i = array.length - 1; i >= 0; i--) {
-				j ++;
+				j++;
 				if (j >= Length) {
 					continue;
 				}
@@ -759,6 +786,7 @@ public class ArrayOperate {
 		}
 		return result;
 	}
+
 	/**
 	 * 比较两个区域之间的overlap的数值和比例
 	 * 数组必须只有两个值，并且是闭区间
@@ -782,8 +810,7 @@ public class ArrayOperate {
 		region1m[0] = Math.min(region1[0], region1[1]);
 		region1m[1] = Math.max(region1[0], region1[1]);
 		double lenReg1 = region1m[1] - region1m[0] + 1;
-		
-		
+
 		double[] region2m = new double[2];
 		region2m[0] = Math.min(region2[0], region2[1]);
 		region2m[1] = Math.max(region2[0], region2[1]);
@@ -804,34 +831,33 @@ public class ArrayOperate {
 			if (region1m[1] <= region2m[1]) {
 				result[0] = 2;
 				result[1] = region1m[1] - region2m[0] + 1;
-				result[2] = result[1]/lenReg1;
-				result[3] = result[1]/lenReg2;
+				result[2] = result[1] / lenReg1;
+				result[3] = result[1] / lenReg2;
 			}
 			//     |----------|       region2m            4
 			//  |-----------------|   region1m
 			else {
 				result[0] = 4;
 				result[1] = lenReg2;
-				result[2] = lenReg2/lenReg1;
+				result[2] = lenReg2 / lenReg1;
 				result[3] = 1;
 			}
-		}
-		else if (region1m[0] > region2m[0] && region1m[0] < region2m[1]) {
+		} else if (region1m[0] > region2m[0] && region1m[0] < region2m[1]) {
 			//   |---------------|   region2m               3
 			//        |-------|      region1m
 			if (region1m[1] <= region2m[1]) {
 				result[0] = 3;
 				result[1] = lenReg1;
 				result[2] = 1;
-				result[3] = lenReg1/lenReg2;
+				result[3] = lenReg1 / lenReg2;
 			}
 			//   0---------1           region2m            5
 			//        0----------1     region1m
 			else {
 				result[0] = 5;
 				result[1] = region2m[1] - region1m[0] + 1;
-				result[2] = result[1]/lenReg1;
-				result[3] = result[1]/lenReg2;
+				result[2] = result[1] / lenReg1;
+				result[3] = result[1] / lenReg2;
 			}
 		}
 		//before
@@ -846,20 +872,19 @@ public class ArrayOperate {
 		//after 
 		//       |------|             region2m             6
 		//                 |------|   region1m
-		else if (region1m[0] >= region2m[1] ) {
+		else if (region1m[0] >= region2m[1]) {
 			result[0] = 6;
 			result[1] = 0;
 			result[2] = 0;
 			result[3] = 0;
-		}
-		else {
-			logger.error("出现未知错误，不可能存在的region特征："+ region1m[0] + " " +region1m[1 ] + "     " + region2m[0] + " "+ region2m[1]);
+		} else {
+			logger.error("出现未知错误，不可能存在的region特征：" + region1m[0] + " " + region1m[1] + "     " + region2m[0] + " " + region2m[1]);
 			result[0] = -1;
 			result[1] = -1;
 			result[2] = -1;
 			result[3] = -1;
 		}
-	
+
 		return result;
 	}
 
@@ -902,34 +927,33 @@ public class ArrayOperate {
 			if (region1m[1] >= region2m[1]) {
 				result[0] = 2;
 				result[1] = region2m[0] - region1m[1] + 1;
-				result[2] = result[1]/lenReg1;
-				result[3] = result[1]/lenReg2;
+				result[2] = result[1] / lenReg1;
+				result[3] = result[1] / lenReg2;
 			}
 			//     1----------0       region2m
 			//  1------------------0   region1m
 			else {
 				result[0] = 4;
 				result[1] = lenReg2;
-				result[2] = lenReg2/lenReg1;
+				result[2] = lenReg2 / lenReg1;
 				result[3] = 1;
 			}
-		}
-		else if (region1m[0] < region2m[0] && region1m[0] > region2m[1]) {
+		} else if (region1m[0] < region2m[0] && region1m[0] > region2m[1]) {
 			//   1---------------0  region2m
 			//        1-------0     region1m
 			if (region1m[1] >= region2m[1]) {
 				result[0] = 3;
 				result[1] = lenReg1;
 				result[2] = 1;
-				result[3] = lenReg1/lenReg2;
+				result[3] = lenReg1 / lenReg2;
 			}
 			//            1---------0  region2m
 			//       1----------0     region1m
 			else {
 				result[0] = 5;
 				result[1] = region1m[0] - region2m[1] + 1;
-				result[2] = result[1]/lenReg1;
-				result[3] = result[1]/lenReg2;
+				result[2] = result[1] / lenReg1;
+				result[3] = result[1] / lenReg2;
 			}
 		}
 		//before
@@ -944,14 +968,13 @@ public class ArrayOperate {
 		//after
 		//                  1------0       region2m
 		//        1------0                 region1m
-		else if (region1m[0] <= region2m[1] ) {
+		else if (region1m[0] <= region2m[1]) {
 			result[0] = 6;
 			result[1] = 0;
 			result[2] = 0;
 			result[3] = 0;
-		}
-		else {
-			logger.error("出现未知错误，不可能存在的region特征："+ region1m[0] + " " +region1m[1 ] + "     " + region2m[0] + " "+ region2m[1]);
+		} else {
+			logger.error("出现未知错误，不可能存在的region特征：" + region1m[0] + " " + region1m[1] + "     " + region2m[0] + " " + region2m[1]);
 			result[0] = -1;
 			result[1] = -1;
 			result[2] = -1;
@@ -959,8 +982,7 @@ public class ArrayOperate {
 		}
 		return result;
 	}
-	
-	
+
 	public static <T, K> boolean compareMapStrArray(Map<T, K[]> map1, Map<T, K[]> map2) {
 		if (map1 == null && map2 != null || map1 != null && map2 == null) {
 			return false;
@@ -968,35 +990,35 @@ public class ArrayOperate {
 		if (map1 == null && map2 == null) {
 			return true;
 		}
-        if (map1.size() != map2.size())
-            return false;
+		if (map1.size() != map2.size())
+			return false;
 
-        try {
-            Iterator<Entry<T, K[]>> i = map1.entrySet().iterator();
-            while (i.hasNext()) {
-                Entry<T, K[]> e = i.next();
-                T key = e.getKey();
-                K[] value = e.getValue();
-                if (value == null) {
-                    if (!(map2.get(key)==null && map2.containsKey(key)))
-                        return false;
-                } else {
-                	K[] value2 = map2.get(key);
-                	if (value2.length != value.length) {
+		try {
+			Iterator<Entry<T, K[]>> i = map1.entrySet().iterator();
+			while (i.hasNext()) {
+				Entry<T, K[]> e = i.next();
+				T key = e.getKey();
+				K[] value = e.getValue();
+				if (value == null) {
+					if (!(map2.get(key) == null && map2.containsKey(key)))
+						return false;
+				} else {
+					K[] value2 = map2.get(key);
+					if (value2.length != value.length) {
 						return false;
 					}
-                	for (int j = 0; j < value.length; j++) {
+					for (int j = 0; j < value.length; j++) {
 						if (!value[j].equals(value2[j])) {
-							 return false;
+							return false;
 						}
-					}                       
-                }
-            }
-        } catch (ClassCastException unused) {
-            return false;
-        } catch (NullPointerException unused) {
-        	return false;
-        }
-        return true;
+					}
+				}
+			}
+		} catch (ClassCastException unused) {
+			return false;
+		} catch (NullPointerException unused) {
+			return false;
+		}
+		return true;
 	}
 }
