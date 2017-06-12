@@ -34,13 +34,13 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.io.compress.CompressionOutputStream;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.hadoop.compression.lzo.LzopCodec;
 import com.novelbio.base.PathDetail;
 import com.novelbio.base.SerializeKryo;
 import com.novelbio.base.StringOperate;
-import com.novelbio.base.cmd.CmdOperate;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
 import com.novelbio.base.dataStructure.PatternOperate;
@@ -52,7 +52,7 @@ import hdfs.jsr203.HadoopPath;
 import hdfs.jsr203.HdfsConfInitiator;
 
 public class FileOperate {
-	private static final Logger logger = Logger.getLogger(FileOperate.class);
+	private static final Logger logger = LoggerFactory.getLogger(FileOperate.class);
 	static HadoopFileSystemProvider hdfsProvider = new HadoopFileSystemProvider();
 	static OssFileSystemProvider ossProvider = new OssFileSystemProvider();
 	static PatternOperate patternOperate = new PatternOperate("^[/\\\\]{0,2}[^/]+\\:[/\\\\]{0,2}");
@@ -1285,7 +1285,20 @@ public class FileOperate {
 		}
 		return Files.newOutputStream(file, openOption);
 	}
-
+	
+	/**
+	 * 拷贝文件
+	 * 输入为 /home/novelbio/test
+	 * 输出为 hdfs:/nbCloud/result
+	 * 则会把 test 中的内容全拷贝到result中。注意<b>不会</b>在result中创建test文件夹。
+	 * 
+	 * 输入为 /home/novelbio/test
+	 * 输出为 hdfs:/nbCloud/result/test
+	 * 则会把 test 中的内容全拷贝到result/test中。注意<b>会</b>在result中创建test文件夹。
+	 * @param oldPathFile
+	 * @param newPathFile
+	 * @param cover
+	 */
 	public static void copyFileFolder(String oldPathFile, String newPathFile, boolean cover) {
 		boolean isFolder = FileOperate.isFileDirectory(oldPathFile);
 		Path oldfile = getPath(oldPathFile);
@@ -1397,6 +1410,7 @@ public class FileOperate {
 			Files.deleteIfExists(pathNew);
 			Files.deleteIfExists(pathNewTmp);
 			createFolders(FileOperate.getPathName(pathNew));
+			logger.info("start copy from {} to {}", oldfile, pathNew);
 			Files.copy(oldfile, pathNewTmp, StandardCopyOption.REPLACE_EXISTING);
 			Files.move(pathNewTmp, pathNew, StandardCopyOption.REPLACE_EXISTING);
 		} catch (Exception e) {
