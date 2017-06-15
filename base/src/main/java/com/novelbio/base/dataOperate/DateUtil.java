@@ -268,4 +268,18 @@ public class DateUtil {
 		return Integer.parseInt(String.valueOf(between_days));
 	}
 	
+	/**
+	 * 获取两个事件之间相差的分钟数
+	 * 
+	 * @param startDate
+	 * @param endDate
+	 * @return
+	 */
+	public static Long getDateBetween(Date startDate, Date endDate) {
+		if (startDate == null || endDate == null) {
+			return null;
+		}
+		return (startDate.getTime() - endDate.getTime()) / 60_000; 
+	}
+	
 }
