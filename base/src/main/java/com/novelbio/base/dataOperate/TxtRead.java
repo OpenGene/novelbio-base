@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,6 +24,7 @@ import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.log4j.Logger;
 
 import com.hadoop.compression.lzo.LzopCodec;
+import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
 import com.novelbio.base.dataStructure.PatternOperate;
 import com.novelbio.base.fileOperate.ExceptionNbcFile;
@@ -120,16 +122,17 @@ class TxtRead implements Closeable {
 	public Iterable<String> readlines() {
 		try {
 			return readPerlines();
-		} catch (Exception e) {
+		} catch (ExceptionNbcFile e) {
+			throw e;
+		}catch (Exception e) {
 			String fileName = getFileName();
 			if (fileName == null) {
-				logger.error("read stream error", e);
+				close();
+				throw new ExceptionNbcFile("read stream error", e);
 			} else {
-				logger.error("read file " + getFileName() + " error", e);
-
+				close();
+				throw new ExceptionNbcFile("read file " + getFileName() + " error", e);
 			}
-			close();
-			return null;
 		}
 	}
 	/**
@@ -541,7 +544,17 @@ class TxtRead implements Closeable {
 	 * @throws Exception
 	 */
 	BufferedReaderNBC readfile() {
-		try { initialReading(); 	} catch (IOException e) { e.printStackTrace(); }
+		try { initialReading(); 	}
+		catch (NoSuchFileException e) {
+			throw new ExceptionNbcFile("cannot file file: " + getFileName());
+		} catch (IOException e) {
+			String fileName = getFileName();
+			if (StringOperate.isRealNull(fileName) && inputStreamRaw != null) {
+				throw	new ExceptionNbcFile("read inputstream error ", e);
+			} else {
+				throw	new ExceptionNbcFile("read file error " + fileName, e);
+			}
+		}
 		bufread = new BufferedReaderNBC(new InputStreamReader(inputStream));
 		bufread.setMaxLineNum(maxLineNum);
 		return bufread;
