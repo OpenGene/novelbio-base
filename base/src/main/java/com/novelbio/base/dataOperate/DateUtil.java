@@ -282,4 +282,31 @@ public class DateUtil {
 		return (startDate.getTime() - endDate.getTime()) / 60_000; 
 	}
 	
+	/**
+	 * 获取date日期所在月的开始时间.即该月的1号0时0分0秒
+	 * 
+	 * @param date
+	 * @return
+	 */
+	public static long getDateMonthStart(Date date) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(date.getYear(), date.getMonth(), 1, 0, 0, 0);
+		return calendar.getTimeInMillis();
+	}
+
+	/**
+	 * 获取该月的结束时间.即该月最后一天的23点59分59秒
+	 * 
+	 * @param date
+	 * @return
+	 */
+	public static long getDateMonthEnd(Date date) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(date.getYear(), date.getMonth());
+		int MaxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+		// 按你的要求设置时间
+		calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), MaxDay, 23, 59, 59);
+		return calendar.getTimeInMillis();
+	}
+	
 }
