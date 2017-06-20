@@ -189,40 +189,59 @@ public class ExcelOperate implements Closeable {
 	 * @param imputfilename 文件路径和名称
 	 * @param isExcel2003
 	 */
-	public ExcelOperate(String imputfilename, boolean isExcel2003) {		
+	public ExcelOperate(String imputfilename, boolean isExcel2003) {
 		version = isExcel2003 ? EXCEL2003 : EXCEL2007;
 		initialExcel(imputfilename);
+	}
+	
+	/**
+	 * <b>注意:该构造方法只能用于excel的读取</b>
+	 * 
+	 * @param fileName
+	 * @param is
+	 */
+	public ExcelOperate(String fileName, InputStream is) {
+		version = fileName.endsWith("xlsx") ? EXCEL2007 : EXCEL2003;
+		initExistExcel(is);
 	}
 
 	private void initialExcel(String filePathAndName) {
 		filename = filePathAndName;
-		if (version != EXCEL2003 && version != EXCEL2007){
-			throw new ExceptionNbcExcel("excel version error.please check it. filename=" + filePathAndName);
-		}
-		
 		try {
 			if (FileOperate.isFileExistAndNotDir(filePathAndName)) {
-				InputStream is = FileOperate.getInputStream(filename);
-				if (version == EXCEL2003) {
-					wb = new HSSFWorkbook(is);
-				} else if (version == EXCEL2007) {
-					wb = new XSSFWorkbook(is);
-				}
-				sheet = wb.getSheetAt(0);
-				FileOperate.close(is);
+				initExistExcel(FileOperate.getInputStream(filename));
 			} else {
-				if (version == EXCEL2003) {
-					wb = new HSSFWorkbook();
-				} else if (version == EXCEL2007) {
-					wb = new XSSFWorkbook();
-				}
+				initNewExcel();
 			}
 		} catch (Exception e) {
 			logger.error("initialExcel error.", e);
 			//TODO 这里主要是不想显式的往外声明抛出异常,所以改为RuntimeException,是否合适,待考虑.
 			throw new ExceptionNbcExcel("initialExcel error " + filename, e);
 		}
+	}
 	
+	private void initExistExcel(InputStream is) {
+		try {
+			if (version == EXCEL2003) {
+				wb = new HSSFWorkbook(is);
+			} else if (version == EXCEL2007) {
+				wb = new XSSFWorkbook(is);
+			}
+			sheet = wb.getSheetAt(0);
+			FileOperate.close(is);
+		} catch (Exception e) {
+			logger.error("initialExcel error.", e);
+			// TODO 这里主要是不想显式的往外声明抛出异常,所以改为RuntimeException,是否合适,待考虑.
+			throw new ExceptionNbcExcel("initialExcel error " + filename, e);
+		}
+	}
+	
+	private void initNewExcel(){
+		if (version == EXCEL2003) {
+			wb = new HSSFWorkbook();
+		} else if (version == EXCEL2007) {
+			wb = new XSSFWorkbook();
+		}
 	}
 	
 	/**
