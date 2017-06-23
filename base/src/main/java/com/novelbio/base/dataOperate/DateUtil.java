@@ -288,7 +288,7 @@ public class DateUtil {
 	 * @param date
 	 * @return
 	 */
-	public static long getDateMonthStart(Date date) {
+	public static long getMonthStart(Date date) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), 1, 0, 0, 0);
@@ -301,7 +301,7 @@ public class DateUtil {
 	 * @param date
 	 * @return
 	 */
-	public static long getDateMonthEnd(Date date) {
+	public static long getMonthEnd(Date date) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		int MaxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
@@ -316,7 +316,7 @@ public class DateUtil {
 	 * @param date
 	 * @return
 	 */
-	public static long getDateDayStart(Date date) {	
+	public static long getDayStart(Date date) {	
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -331,7 +331,7 @@ public class DateUtil {
 	 * @param date
 	 * @return
 	 */
-	public static long getDateDayEnd(Date date) {
+	public static long getDayEnd(Date date) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.set(Calendar.HOUR_OF_DAY, 23);
