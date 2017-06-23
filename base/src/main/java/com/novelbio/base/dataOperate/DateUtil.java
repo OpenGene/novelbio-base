@@ -290,7 +290,8 @@ public class DateUtil {
 	 */
 	public static long getDateMonthStart(Date date) {
 		Calendar calendar = Calendar.getInstance();
-		calendar.set(date.getYear(), date.getMonth(), 1, 0, 0, 0);
+		calendar.setTime(date);
+		calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), 1, 0, 0, 0);
 		return calendar.getTimeInMillis();
 	}
 
@@ -302,10 +303,40 @@ public class DateUtil {
 	 */
 	public static long getDateMonthEnd(Date date) {
 		Calendar calendar = Calendar.getInstance();
-		calendar.set(date.getYear(), date.getMonth());
+		calendar.setTime(date);
 		int MaxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
 		// 按你的要求设置时间
 		calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), MaxDay, 23, 59, 59);
+		return calendar.getTimeInMillis();
+	}
+	
+	/**
+	 * 获取一天时间的开始.即当天的0时0分0秒
+	 * 
+	 * @param date
+	 * @return
+	 */
+	public static long getDateDayStart(Date date) {	
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		return calendar.getTimeInMillis();
+	}
+	
+	/**
+	 * 获取一天结束的时间.即当天的23点59分59秒
+	 * 
+	 * @param date
+	 * @return
+	 */
+	public static long getDateDayEnd(Date date) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.set(Calendar.HOUR_OF_DAY, 23);
+		calendar.set(Calendar.MINUTE, 59);
+		calendar.set(Calendar.SECOND, 59);
 		return calendar.getTimeInMillis();
 	}
 	
