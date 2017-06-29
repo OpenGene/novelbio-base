@@ -15,6 +15,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.charset.Charset;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +32,7 @@ import org.apache.log4j.Logger;
 
 import com.hadoop.compression.lzo.DistributedLzoIndexer;
 import com.novelbio.base.dataStructure.ArrayOperate;
+import com.novelbio.base.fileOperate.ExceptionNbcFile;
 import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.base.fileOperate.RandomFileInt;
@@ -127,7 +129,13 @@ public class TxtReadandWrite implements Closeable {
 		if (isNeedWriteFile) {
 			txtWrite = new TxtWrite(path);
 			txtWrite.setAppend(isAppend);
-			try { txtWrite.createFile(); } catch (Exception e) { e.printStackTrace(); }
+			try {
+				txtWrite.createFile(); 
+			} catch (NoSuchFileException e) {
+				throw new ExceptionNbcFile("cannot creat file, because the directory is not exist " + path.toString());
+			} catch (Exception e) {
+				throw new ExceptionNbcFile("cannot creat file " + path.toString(), e);
+			}
 			read = false;
 		} else {
 			txtRead = new TxtRead(path);
