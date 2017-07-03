@@ -1875,11 +1875,11 @@ public class FileOperate {
 		if (!cover && (FileOperate.isFileFolderExist(linkTo) || FileOperate.isSymbolicLink(linkTo))) {
 			return;
 		}
-		if (!FileOperate.isFileExistAndNotDir(rawFile)) {
+		if (!FileOperate.isFileExist(rawFile)) {
 			return;
 		}
 		FileOperate.createFolders(FileOperate.getParentPathNameWithSep(linkTo));
-		if (FileOperate.isFileExistAndNotDir(linkTo) && cover) {
+		if (FileOperate.isFileExist(linkTo) && cover) {
 			FileOperate.delFile(linkTo);
 		}
 
