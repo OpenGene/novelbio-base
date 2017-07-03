@@ -137,19 +137,37 @@ public class CmdPath {
 		Set<String> setFileNameAll = new HashSet<>();
 		
 		Map<String, String> mapPath2TmpPath = new HashMap<>();
+		String tmpPath = getTmpPath();
+		logger.debug("tmp path is " + tmpPath);
+		
 		if (isRedirectInToTmp) {
-			mapPath2TmpPathIn = cmdPathCluster.getMapInPath2TmpPath(setInput, getTmpPath());
+			mapPath2TmpPathIn = cmdPathCluster.getMapInPath2TmpPath(setInput, tmpPath);
+			logger.debug("print mapPath2TmpPathIn");
+
+			logMapInfo(mapPath2TmpPathIn);
 			setFileNameAll.addAll(setInput);
 			mapPath2TmpPath.putAll(mapPath2TmpPathIn);
 		}
+		
 		if (isRedirectOutToTmp) {
-			mapPath2TmpPathOut = cmdPathCluster.getMapOutPath2TmpPath(setOutput, getTmpPath());
+			mapPath2TmpPathOut = cmdPathCluster.getMapOutPath2TmpPath(setOutput, tmpPath);
+			logger.debug("print mapPath2TmpPathOut");
+
+			logMapInfo(mapPath2TmpPathOut);
 			setFileNameAll.addAll(setOutput);
 			mapPath2TmpPath.putAll(mapPath2TmpPathOut);
 		}
 		
 		mapName2TmpName = getMapName2TmpName(setFileNameAll, mapPath2TmpPath);
+		logger.debug("print mapName2TmpName");
+		logMapInfo(mapName2TmpName);
 		isGenerateTmpPath = true;
+	}
+	
+	private void logMapInfo(Map<String, String> mapName2TmpName) {
+		for (String name : mapName2TmpName.keySet()) {
+			logger.debug(name + "=" + mapName2TmpName.get(name));
+		}
 	}
 	
 	private Map<String, String> getMapName2TmpName(Set<String> setFileNameAll, Map<String, String> mapPath2TmpPath) {
@@ -195,7 +213,7 @@ public class CmdPath {
 				FileOperate.copyFileFolder(inFile, inTmpName, false);
 				logger.info("copy file from {} to {}", inFile, inTmpName);
 			} catch (Exception e) {
-				logger.error("copy file from " + inFile + " to " + inTmpName + "error", e);
+				logger.error("copy file from " + inFile + " to " + inTmpName + " error", e);
 			}
 		}
 	}

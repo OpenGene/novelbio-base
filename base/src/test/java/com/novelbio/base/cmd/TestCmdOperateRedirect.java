@@ -114,10 +114,13 @@ public class TestCmdOperateRedirect {
 		cmdOperate.runWithExp();
 		
 		assertEquals("sh /tmp/script-test.sh /home/novelbio/tmp/mytmp/test/ /home/novelbio/tmp/mytmp1/test/", cmdOperate.getCmdExeStrReal());
-		String tmpPath1 = cmdPathCluster.getTmpPathAlreadyExist(out1 + "subject/test/myfile/test.txt");
-		assertEquals("/home/novelbio/tmp/mytmp/test/subject/test/myfile/", tmpPath1);
-		String tmpPath2 = cmdPathCluster.getTmpPathAlreadyExist(out2 + "subject/test/myfile/test.txt");
-		assertEquals("/home/novelbio/tmp/mytmp1/test/subject/test/myfile/", tmpPath2);
+		String tmpPath1 = cmdPathCluster.getTmpPathAlreadyExist(out1 + "subject/test/myfile/mytest/test.txt");
+		assertEquals("/home/novelbio/tmp/mytmp/test/subject/test/myfile/mytest/test.txt", tmpPath1);
+		String tmpPath2 = cmdPathCluster.getTmpPathAlreadyExist(out2 + "subject/test/myfile/mytest/tmp/");
+		assertEquals("/home/novelbio/tmp/mytmp1/test/subject/test/myfile/mytest/tmp/", tmpPath2);
+		String tmpPath3 = cmdPathCluster.getTmpPathAlreadyExist(out2 + "subject/test/myfile/");
+		assertEquals("/home/novelbio/tmp/mytmp1/test/subject/test/myfile/", tmpPath3);
+		
 		assertTrue(FileOperate.isFileExistAndBigThan0(tmpRealPath1+ "test1.txt"));
 		assertTrue(FileOperate.isFileExistAndBigThan0(tmpRealPath2 + "test2.txt"));
 		assertTrue(FileOperate.isFileExistAndBigThan0(resultPath1 + "test1.txt"));

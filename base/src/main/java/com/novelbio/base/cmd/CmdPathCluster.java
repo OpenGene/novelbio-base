@@ -5,6 +5,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.fileOperate.FileOperate;
@@ -27,16 +30,35 @@ import com.novelbio.base.fileOperate.FileOperate;
  * @author zong0jie
  */
 public class CmdPathCluster {
+	private static final Logger logger = LoggerFactory.getLogger(CmdPathCluster.class);
+	
 	/** 是否为阿里云 */
 	boolean isAliyun;
 	
 	/** key 实际输出文件夹
-	 * value 该实际输出文件夹当时的临时文件夹
+	 * value 该实际输出文件夹当时的临时文件夹，以 "/" 结尾
 	 */
 	Map<String, String> mapOutPath2TmpOutPath = new HashMap<>();
 	
 	public CmdPathCluster(boolean isAliyun) {
 		this.isAliyun = isAliyun;
+	}
+	
+	/** 目前仅用于打印日志 */
+	public void printLogMapOutPath2TmpOutPath(boolean isDebug) {
+		if (isDebug) {
+			logger.debug("start print CmdPathCluster MapOutPath2TmpOutPath");
+		} else {
+			logger.info("start print CmdPathCluster MapOutPath2TmpOutPath");
+		}
+		
+		for (String outPath : mapOutPath2TmpOutPath.keySet()) {
+			if (isDebug) {
+				logger.debug("{}={}", outPath, mapOutPath2TmpOutPath.get(outPath));
+			} else {
+				logger.info("{}={}", outPath, mapOutPath2TmpOutPath.get(outPath));
+			}
+		}
 	}
 	
 	/** 某个文件从tmp拷贝到输出文件夹中 */
@@ -76,7 +98,7 @@ public class CmdPathCluster {
 			//这样相同文件名的就可以跳过了
 			String tmpPath = getTmpPathAlreadyExist(path);
 			if (tmpPath != null) {
-				mapPath2TmpPath.put(path, mapOutPath2TmpOutPath.get(path));
+				mapPath2TmpPath.put(path, tmpPath);
 			} else {
 				setPathNotExist.add(path);
 			}
@@ -99,26 +121,38 @@ public class CmdPathCluster {
 		return setPath;
 	}
 	
-	/** 获得前面已经生成过的结果文件
-	 * 譬如给定的文件路径是 /nbCloud/public/project1/task1/mypath/to/the/file.txt
-	 * 然后 mapOutPath2TmpOutPath 中有路径 nbCloud/public/project1/task1/ : /home/novelbio/tmp/mypath/
+	/** 获得前面已经生成过的结果文件<br>
+	 * 譬如给定的文件路径是 /nbCloud/public/project1/task1/mypath/to/the/file.txt<br>
+	 * 然后 mapOutPath2TmpOutPath 中有路径 nbCloud/public/project1/task1/ : /home/novelbio/tmp/mypath/<br>
 	 * 则把/nbCloud/public/project1/task1/mypath/to/the/ 对应到 /home/novelbio/tmp/mypath/to/the
-	 * @param inputPath
+	 * @param inputPath 输入的文件夹，以"/"结尾
 	 * @return
 	 */
 	@VisibleForTesting
 	protected String getTmpPathAlreadyExist(String inputPath) {
-		String lastPath = null;
-		String resultTmpPath = null;
+		//inputPath=/media/nbfs/nbCloud/public/task/mytest/result
+		//map: /media/nbfs/nbCloud/public/=/home/novelbio/tmp/
+		//loop...
+		//resultPath=/home/novelbio/tmp/task/mytest/result
+		//remainPath=task/mytest/result
+		String lastPath = null;//上一层文件夹
+		String resultPath = null;//对照得到的临时文件夹
+		String remainPath = "";//之后的路径
 		while (!StringOperate.isRealNull(inputPath) && !StringOperate.isEqual(inputPath, lastPath)) {
 			if (mapOutPath2TmpOutPath.containsKey(inputPath)) {
-				resultTmpPath = mapOutPath2TmpOutPath.get(inputPath);
+				resultPath = mapOutPath2TmpOutPath.get(inputPath) + remainPath;
 				break;
 			}
 			lastPath = inputPath;
+			//获取当前文件的文件名，如果以"/"结尾，也把这个加上
+			String tmpFileName = FileOperate.getFileName(inputPath);
+			if (inputPath.endsWith("/") || inputPath.endsWith("\\")) {
+				tmpFileName = FileOperate.addSep(tmpFileName);
+			}
+			remainPath = tmpFileName + remainPath;
 			inputPath = FileOperate.getParentPathNameWithSep(inputPath);
 		}
-		return resultTmpPath;
+		return resultPath;
 	}
 	
 	private Map<String, String> getMapPath2TmpPath(Set<String> setPath, String pathTmp) {
@@ -137,7 +171,5 @@ public class CmdPathCluster {
 		}
 		return mapPath2TmpPath;
 	}
-	
-
 	
 }
