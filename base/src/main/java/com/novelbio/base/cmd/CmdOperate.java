@@ -58,6 +58,10 @@ public class CmdOperate extends RunProcess<String> {
 	LinkedList<String> lsOutInfo;
 	/** 出错输出的信息 */
 	LinkedList<String> lsErrorInfo = new LinkedList<>();
+	/** 如果选择用list来保存结果输出，最多保存500行的输出信息 */
+	int lineNumStd = 1000;
+	/** 如果选择用list来保存错误输出，最多保存500行的输出信息 */
+	int lineNumErr = 5000;//最多保存5000行的输出信息
 	
 	/** 标准输入到cmd命令的流，一个cmd命令一般只有这一个流 */
 	StreamIn streamIn;
@@ -79,10 +83,7 @@ public class CmdOperate extends RunProcess<String> {
 	/** 用来传递参数，拷贝输入输出文件夹的类 */
 	protected CmdOrderGenerator cmdOrderGenerator = new CmdOrderGenerator(!ServiceEnvUtil.isAliyunEnv());
 	
-	/** 如果选择用list来保存结果输出，最多保存500行的输出信息 */
-	int lineNumStd = 1000;
-	/** 如果选择用list来保存错误输出，最多保存500行的输出信息 */
-	int lineNumErr = 5000;//最多保存5000行的输出信息
+
 	
 	/** 输出本程序正在运行时的参数等信息，本功能也用docker替换了 */
 	@Deprecated
@@ -424,6 +425,15 @@ public class CmdOperate extends RunProcess<String> {
 	 * 用getStdOut获得标准输出的结果， */
 	public void setGetLsStdOut() {
 		lsOutInfo = new LinkedList<>();
+	}
+	
+	/** 
+	 * 默认不启用
+	 * 只有当{@link #setGetCmdInErrStream(boolean)} 为false时才有用 <br>
+	 * 用getStdOut获得标准输出的结果， */
+	public void setGetLsStdOut(int lineNum) {
+		lsOutInfo = new LinkedList<>();
+		this.lineNumStd = lineNum;
 	}
 	
 	/** 默认不启用，将错误信息输出到标准错误流 */
