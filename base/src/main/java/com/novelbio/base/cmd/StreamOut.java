@@ -52,7 +52,7 @@ public class StreamOut extends Thread {
 	/**
 	 * @param is 从cmd获取的输出流
 	 * @param process 
-	 * @param isSysout 是否打印到控制台
+	 * @param isToTermiate 是否打印到控制台
 	 * @param isStd 是打印到标准输出还是错误输出
 	 */
 	StreamOut(InputStream is, IntProcess process, boolean isToTermiate, boolean isStd) {
@@ -93,7 +93,7 @@ public class StreamOut extends Thread {
     }
 	
 	/** 是否要获取输入流，默认为false<br>
-	 * {@link #setOutputStream(OutputStream, boolean)} 会覆盖该方法
+	 * 会覆盖方法 {@link #setOutputStream(OutputStream, boolean)}
 	 *  */
 	public void setGetInputStream(boolean getInputStream) {
 		this.getInputStream = getInputStream;
@@ -112,6 +112,15 @@ public class StreamOut extends Thread {
 	public InputStream getCmdOutStream() {
 		return is;
 	}
+	
+	/**
+	 * 外部需要获取标准流，则直接返回
+	 * 
+	 * 不需要获取标准流，直接消耗掉，则按照文本读取标准流，并且写入 {@link #lsInfo}
+	 * 
+	 * 需要把标准流写入os的情况，如果输出的os类似文本，则按照文本读取标准流，并且写入os，否则调用IOUtil方式拷贝进入os
+	 * 
+	 */
 	public void run() {
 		isFinished = false;
 		if (!getInputStream) {

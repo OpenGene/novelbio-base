@@ -174,10 +174,12 @@ public class CmdOrderGenerator {
 		return stdInput;
 	}
 	
+	/** 如果命令存在 ">"或"1>"，则返回之后根的文件名 */
 	public String getSaveStdPath() {
 		return saveFilePath;
 	}
 	
+	/** 如果命令存在 ">"或"1>"，则返回之后根的文件名的临时文件 */
 	protected String getSaveStdTmp() {
 		if (saveFilePath == null) {
 			return null;
@@ -188,10 +190,12 @@ public class CmdOrderGenerator {
 			return saveFilePath;
 		}
 	}
-
+	
+	/** 如果命令存在"2>"，则返回之后根的文件名  */
 	public String getSaveErrPath() {
 		return saveErrPath;
 	}
+	/** 如果命令存在 "2>"，则返回之后根的文件名的临时文件 */
 	protected String getSaveErrTmp() {
 		if (saveErrPath == null) {
 			return null;
@@ -278,11 +282,9 @@ public class CmdOrderGenerator {
 			if (redirectStdAndErr) {
 				if (tmpCmd.equals(">")  || tmpCmd.equals("1>")) {
 					stdOut = true;
-					setJustDisplayStd(false);
 					continue;
 				} else if (tmpCmd.equals("2>")) {
 					errOut = true;
-//					setJustDisplayErr(false);
 					continue;
 				} else if (tmpCmd.equals("<")) {
 					stdIn = true;

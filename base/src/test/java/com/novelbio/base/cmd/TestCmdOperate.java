@@ -98,7 +98,6 @@ public class TestCmdOperate {
 
 		lsCmd = Lists.newArrayList("echo", "hello,world");
 		cmdOperate = new CmdOperate(lsCmd);
-		cmdOperate.setGetLsStdOut();
 		cmd = ArrayOperate.cmbString(cmdOperate.cmdOrderGenerator.getRunCmd(), " ");
 		soft.assertThat("echo hello,world").isEqualTo(cmd.trim());
 

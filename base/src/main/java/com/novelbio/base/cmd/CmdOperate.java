@@ -55,7 +55,7 @@ public class CmdOperate extends RunProcess<String> {
 	protected FinishFlag finishFlag;
 	long runTime = 0;
 	/** 标准输出的信息 */
-	LinkedList<String> lsOutInfo;
+	LinkedList<String> lsOutInfo = new LinkedList<>();
 	/** 出错输出的信息 */
 	LinkedList<String> lsErrorInfo = new LinkedList<>();
 	/** 如果选择用list来保存结果输出，最多保存500行的输出信息 */
@@ -82,9 +82,7 @@ public class CmdOperate extends RunProcess<String> {
 	
 	/** 用来传递参数，拷贝输入输出文件夹的类 */
 	protected CmdOrderGenerator cmdOrderGenerator = new CmdOrderGenerator(!ServiceEnvUtil.isAliyunEnv());
-	
 
-	
 	/** 输出本程序正在运行时的参数等信息，本功能也用docker替换了 */
 	@Deprecated
 	String outRunInfoFileName;
@@ -252,9 +250,6 @@ public class CmdOperate extends RunProcess<String> {
 	public void setLsCmd(List<String> lsCmd) {
 		cmdOrderGenerator.setLsCmd(lsCmd);
 	}
-	public void setNeedLog(boolean isNeedLog) {
-		this.needLog = isNeedLog;
-	}
 	
 	/** 设定输出信息，默认保存在stdout文件夹下
 	 * 使用docker remote替换
@@ -285,14 +280,28 @@ public class CmdOperate extends RunProcess<String> {
 	}
 
 	/**
-	 * 输出的错误流是文本还是二进制
-	 * @param stdErrPath true: 文本 false: 二进制
-	 * 文本的话就可以通过{@link #getLsErrOut()}获取错误信息
+	 * 默认false，也就是说当"2>"存在就无法通过{@link #getLsStdOut()}获取信息 <br>
+	 * <br>
+	 * 当"2>"存在时仍然想要通过{@link #getLsErrOut()}获取信息时设置为true。<br>
+	 * 当为true时，则会按照文本格式获取stderr，并且保存起来，最后可以通过{@link #getLsErrOut()}获取错误信息<br>
+	 * <br>
+	 * 注意如果设置为true，并且 "2>" 输出的是二进制文件譬如bam文件，则会报错。
 	 */
 	public void setIsStdErrTxt(boolean isStdErrTxt) {
 		cmdOrderGenerator.setJustDisplayErr(isStdErrTxt);
 	}
-
+	/**
+	 * 默认false，也就是说当">"存在就无法通过{@link #getLsStdOut()}获取信息<br>
+	 * <br>
+	 * 当">"存在时仍然想要通过{@link #getLsStdOut()}获取信息时设置为true。<br>
+	 * 当为true时，则会按照文本格式获取stdout，并且保存起来，最后可以通过{@link #getLsStdOut()}获取错误信息<br>
+	 * <br>
+	 * 注意如果设置为true，并且 ">" 输出的是二进制文件譬如bam文件，则会报错。
+	 */
+	public void setIsStdoutTxt(boolean isStdoutTxt) {
+		cmdOrderGenerator.setJustDisplayStd(isStdoutTxt);
+	}
+	
 	/** 如果为null就不加入 */
 	public void addCmdParam(String param) {
 		if (!StringOperate.isRealNull(param)) {
@@ -418,41 +427,30 @@ public class CmdOperate extends RunProcess<String> {
 	public void setGetCmdInErrStream(boolean getCmdInErrStream) {
 		this.getCmdInErrStream = getCmdInErrStream;
 	}
-
-	/** 
-	 * 默认不启用
-	 * 只有当{@link #setGetCmdInErrStream(boolean)} 为false时才有用 <br>
-	 * 用getStdOut获得标准输出的结果， */
-	public void setGetLsStdOut() {
-		lsOutInfo = new LinkedList<>();
-	}
 	
 	/** 
-	 * 默认不启用
-	 * 只有当{@link #setGetCmdInErrStream(boolean)} 为false时才有用 <br>
-	 * 用getStdOut获得标准输出的结果， */
+	 * 默认获取最后1000行标准输出流。
+	 * 如果命令中存在 ">, 1>" 或 {@link #setGetCmdInStdStream(boolean)} 为true，则不起作用
+	 */
 	public void setGetLsStdOut(int lineNum) {
-		lsOutInfo = new LinkedList<>();
 		this.lineNumStd = lineNum;
 	}
-	
-	/** 默认不启用，将错误信息输出到标准错误流 */
-	public void setPutErrToStderr() {
-		lsErrorInfo = null;
-	}
-	/** 需要获得多少行错误输出流 */
+	/** 需要获得多少行错误输出流，默认可查看5000行
+	 * 如果命令中存在 "2>" 或 {@link #setGetCmdInErrStream(boolean)} 为true，则不起作用
+	 */
 	public void setGetLsErrOut(int lineNum) {
 		this.lineNumErr = lineNum;
 	}
 	
-	/** 程序执行完后可以看错误输出<br>
-	 * 仅返回最多{@link #lineNum}行的信息
-	 * 内部实现为linkedlist
-	 * <br/>
-	 * <b>调用此方法时,参数{@link #getCmdInStdStream}必须是false.否则不能获得所需结果.</b>
+	/**
+	 * 程序执行完后可以看错误输出<br>
+	 * 仅返回最多{@link #lineNum}行的信息<br>
+	 * 内部实现为linkedlist<br>
+	 * <br>
+	 * 如果命令中存在 "2>" 或 {@link #setGetCmdInErrStream(boolean)} 为true，则不起作用<br>
+	 * 此时可以通过设置{@link #setIsStdErrTxt(boolean)}为true强行打开该功能
 	 */
 	public List<String> getLsErrOut() {
-		int i = 0;
 		waitStreamOutErr();
 		if (errorGobbler == null) {
 			return new ArrayList<>();
@@ -482,9 +480,13 @@ public class CmdOperate extends RunProcess<String> {
 		}
 		return errInfo.toString();
 	}
+	
 	/** 程序执行完后可以看标准输出<br>
-	 * 仅返回最多{@link #lineNum}行的信息
-	 * 内部实现为linkedlist
+	 * 仅返回最多{@link #lineNum}行的信息<br>
+	 * 内部实现为linkedlist<br>
+	 * <br>
+	 * 如果命令中存在 ">" 或 {@link #setGetCmdInStdStream(boolean)} 为true，则不起作用<br>
+	 * 此时可以通过设置{@link #setIsStdoutTxt(boolean)}为true强行打开该功能
 	 */
 	public List<String> getLsStdOut() {
 		waitStreamOutStd();
@@ -646,8 +648,6 @@ public class CmdOperate extends RunProcess<String> {
 				}
 			} else if (lsOutInfo != null) {
 				outputGobbler.setLsInfo(lsOutInfo, lineNumStd);
-			} else {
-				outputGobbler.setOutputStream(System.out, false);
 			}
 		} else {
 			outputGobbler.setGetInputStream(true);
@@ -676,9 +676,6 @@ public class CmdOperate extends RunProcess<String> {
 				}
 			} else if (lsErrorInfo != null) {
 				errorGobbler.setLsInfo(lsErrorInfo, lineNumErr);
-			} else {
-				//标准输出流不能被关闭
-				errorGobbler.setOutputStream(System.err, false);
 			}
 		} else {
 			errorGobbler.setGetInputStream(true);
