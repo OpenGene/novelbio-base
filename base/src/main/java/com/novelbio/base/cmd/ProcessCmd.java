@@ -1,5 +1,6 @@
 package com.novelbio.base.cmd;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
@@ -8,16 +9,30 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.novelbio.base.StringOperate;
+
 /** 本地版的cmd进程 */
 public class ProcessCmd implements IntProcess {
 	private static final Logger logger = Logger.getLogger(ProcessCmd.class);
-	
+	File runPath;
 	Process process;
+	
+	public ProcessCmd() {	}
+	
+	public ProcessCmd(String runPath) {
+		if (!StringOperate.isRealNull(runPath)) {
+			this.runPath = new File(runPath);
+		}
+	}
+	
+	public void setRunPath(File runPath) {
+		this.runPath = runPath;
+	}
 	
 	/** 第一个执行 */
 	public void exec(String[] cmd) throws Exception {
 		Runtime runtime = Runtime.getRuntime();
-		process = runtime.exec(cmd);
+		process = runtime.exec(cmd, null, runPath);
 	}
 	
 	public int waitFor() throws InterruptedException {

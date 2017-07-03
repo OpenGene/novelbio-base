@@ -119,6 +119,16 @@ public class CmdOperate extends RunProcess<String> {
 		process = new ProcessCmd();
 		cmdOrderGenerator.setLsCmd(lsCmd);
 	}
+	
+	/**
+	 * @param lsCmd 给定命令
+	 * @param path 指定在哪个文件夹下运行命令，注意不支持hdfs和oss
+	 */
+	public CmdOperate(List<String> lsCmd, String path) {
+		process = new ProcessCmd(path);
+		cmdOrderGenerator.setLsCmd(lsCmd);
+	}
+	
 	public CmdOperate(String ip, String user, List<String> lsCmd, String idrsa) {
 		process = new ProcessRemote(ip, user);
 		((ProcessRemote)process).setKeyFile(idrsa);
