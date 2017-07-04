@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 
 import com.hadoop.compression.lzo.LzopCodec;
 import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
+import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.fileOperate.ExceptionNbcFile;
 import com.novelbio.base.fileOperate.FileOperate;
 
@@ -222,10 +223,7 @@ class TxtWrite implements Closeable {
 	 * @throws Exception
 	 */
 	public void writefileln(String[] content) {
-		String content2 = content[0];
-		for (int i = 1; i < content.length; i++) {
-			content2 = content2 + TxtReadandWrite.sep + content[i];
-		}
+		String content2 = ArrayOperate.cmbString(content, TxtReadandWrite.sep);
 		try {
 			outputStream.write((content2 + TxtReadandWrite.ENTER_LINUX).getBytes());
 		} catch (Exception e) {

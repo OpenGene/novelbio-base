@@ -99,10 +99,15 @@ public class CmdPathAli extends CmdPath {
 	 * @return
 	 */
 	public static String convertPathAliRead(String path) {
-		String pathRead = CmdPathAli.convertAli2Loc(path, true);
-		String pathWrite = CmdPathAli.convertAli2Loc(path, false);
+		String pathIn = CmdPathAli.convertAli2Loc(path, true);
+		String pathOut = CmdPathAli.convertAli2Loc(path, false);
 		if (!StringOperate.isEqual(pathWrite, pathRead)) {
-			path = FileOperate.isFileExistAndNotDir(pathRead) || !FileOperate.isFileExistAndNotDir(pathWrite) ? pathRead : pathWrite;
+			boolean isPathInExist = FileOperate.isFileExist(pathIn);
+			boolean isPathOutExist = FileOperate.isFileExist(pathOut);
+			logger.debug("pathIn {} is exist: {}", pathIn, isPathInExist);
+			logger.debug("pathOut {} is exist: {}", pathOut, isPathOutExist);
+			path = isPathInExist || !isPathOutExist ? pathIn : pathOut;
+			logger.debug("result is {}", path);
 		}
 		return path;
 	}
