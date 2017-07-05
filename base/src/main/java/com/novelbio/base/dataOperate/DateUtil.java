@@ -245,9 +245,13 @@ public class DateUtil {
 	 * @return
 	 */
 	public static String getDateMM() {
-	     SimpleDateFormat formatDate= new SimpleDateFormat( "yyyy-MM");
 	     Date currentDate = new Date(); //得到当前系统时间
-	     return formatDate.format(currentDate); //将日期时间格式化
+	     return getDateMM(currentDate); //将日期时间格式化
+	}
+	
+	public static String getDateMM(Date date) {
+	     SimpleDateFormat formatDate= new SimpleDateFormat( "yyyy-MM");
+	     return formatDate.format(date); //将日期时间格式化
 	}
 	
 	/**
