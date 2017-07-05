@@ -47,10 +47,15 @@ public class CmdPathAli extends CmdPath {
 	protected void moveSingleFileOut(String filePathTmp, String filePathOut) {
 		filePathOut = convertAli2Loc(filePathOut, false);
 		if (isRetainTmpFiles) {
-			logger.info("move file from  " + filePathTmp + "  to  " + filePathOut);
+			logger.info("move file from {} to {} ",  filePathTmp, filePathOut);
 			FileOperate.moveFile(true, filePathTmp, filePathOut);
+			logger.debug("is file {} exist {}", filePathTmp, FileOperate.isFileExist(filePathTmp));
+			logger.debug("is file {} exist {}", filePathOut, FileOperate.isFileExist(filePathOut));
 			logger.info("link file from  " + filePathOut + "  to  " + filePathTmp);
 			FileOperate.linkFile(filePathOut, filePathTmp, true);
+			
+			logger.debug("is file {} link {}", filePathTmp, FileOperate.isSymbolicLink(filePathTmp));
+			logger.debug("is file {} link {}", filePathOut, FileOperate.isSymbolicLink(filePathOut));
 		} else {
 			//TODO 这里可能全改为move会更好些
 			FileOperate.moveFile(true, filePathTmp, filePathOut);
@@ -101,7 +106,7 @@ public class CmdPathAli extends CmdPath {
 	public static String convertPathAliRead(String path) {
 		String pathIn = CmdPathAli.convertAli2Loc(path, true);
 		String pathOut = CmdPathAli.convertAli2Loc(path, false);
-		if (!StringOperate.isEqual(pathWrite, pathRead)) {
+		if (!StringOperate.isEqual(pathIn, pathOut)) {
 			boolean isPathInExist = FileOperate.isFileExist(pathIn);
 			boolean isPathOutExist = FileOperate.isFileExist(pathOut);
 			logger.debug("pathIn {} is exist: {}", pathIn, isPathInExist);

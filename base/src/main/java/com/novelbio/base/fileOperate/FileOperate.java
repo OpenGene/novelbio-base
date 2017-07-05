@@ -1801,14 +1801,14 @@ public class FileOperate {
 		String olddirPath = removeSplashTail(olddirPathTmp, false);
 		final boolean[] isMakeDirSameAsOld = new boolean[] { false };
 		
-		if (!FileOperate.isFileFolderExist(pathNew)) {
-			try {
-				Files.move(olddir, pathNew);
-				return;
-			} catch (Exception e) {
-				// TODO: handle exception
-			}
-		}
+//		if (!FileOperate.isFileFolderExist(pathNew)) {
+//			try {
+//				Files.move(olddir, pathNew);
+//				return;
+//			} catch (Exception e) {
+//				// TODO: handle exception
+//			}
+//		}
 		
 		
 		try {

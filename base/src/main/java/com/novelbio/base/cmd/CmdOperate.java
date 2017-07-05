@@ -227,7 +227,7 @@ public class CmdOperate extends RunProcess<String> {
 	private void setCmdFile(String cmd, String cmdWriteInFileName) {
 		while (true) {
 			cmd1SH = cmdOrderGenerator.getTmpPath() + cmdWriteInFileName.replace("\\", "/") + DateUtil.getDateAndRandom() + ".sh";
-			if (!FileOperate.isFileExistAndNotDir(cmd1SH)) {
+			if (!FileOperate.isFileExist(cmd1SH)) {
 				break;
             }
         }
