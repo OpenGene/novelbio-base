@@ -71,7 +71,7 @@ public class CodeCounter {
 	 * @param filePath java文件路径
 	 */
 	public CodeCounter(String filePath, String txtOutFile){
-		if (!FileOperate.isFileFolderExist(filePath)) {
+		if (!FileOperate.isFileExist(filePath)) {
 			return;
 		}
 		try {

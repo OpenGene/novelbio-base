@@ -2,21 +2,20 @@ package com.novelbio.base.fileOperate;
 
 import java.nio.file.Path;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 
-import junit.framework.Assert;
-
-public class TestFileOperate2 {
+public class TestFileOperateOss {
 	@Test
 	public void testGetPath0() {
 		Path path = FileOperate.getPath("hdfs://cluster/home/novelbio/testHadoop", "fileName3");
 
-		if (!FileOperate.isFileFolderExist(path)) {
+		if (!FileOperate.isFileExist(path)) {
 			FileOperate.createFolders(path);
 		}
-		Assert.assertEquals(true, FileOperate.isFileFolderExist(path));
+		Assert.assertEquals(true, FileOperate.isFileExist(path));
 
 	}
 
@@ -31,6 +30,6 @@ public class TestFileOperate2 {
 
 		}
 		Assert.assertEquals(true, FileOperate.isFileExist(path));
-
 	}
+	
 }

@@ -218,8 +218,8 @@ public class TestFileOperate {
 		
 		FileOperate.deleteFileFolder(folderMove);
 		FileOperate.deleteFileFolder(folderCopy);
-		Assert.assertFalse(FileOperate.isFileFolderExist(folderCopy));
-		Assert.assertFalse(FileOperate.isFileFolderExist(folderMove));
+		Assert.assertFalse(FileOperate.isFileExist(folderCopy));
+		Assert.assertFalse(FileOperate.isFileExist(folderMove));
 
 	}
 	
@@ -357,7 +357,7 @@ public class TestFileOperate {
 
 	@Test
 	public void testDelFile() {
-		FileOperate.delFile("/home/novelbio/abc.def");
+		FileOperate.deleteFileFolder("/home/novelbio/abc.def");
 	}
 	
 	@Test

@@ -15,11 +15,11 @@ public class TestImageOperate extends TestCase {
 	public void testConvertTiff2Png() throws IOException {
 		String tiffImagePath = "src/test/resources/images/intersection.tiff";
 		String pngImagePath = "src/test/resources/images/intersection.png";
-		FileOperate.delFile(pngImagePath);
+		FileOperate.deleteFileFolder(pngImagePath);
 		BufferedImage bufferedImage = ImageUtils.read(tiffImagePath);
 		ImageUtils.saveBufferedImage(bufferedImage, pngImagePath);
 		assertEquals(true, FileOperate.isFileExistAndNotDir(pngImagePath));
-		FileOperate.delFile(pngImagePath);
+		FileOperate.deleteFileFolder(pngImagePath);
 
 	}
 

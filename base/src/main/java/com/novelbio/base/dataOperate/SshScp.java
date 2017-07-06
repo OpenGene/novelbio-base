@@ -106,7 +106,7 @@ public class SshScp {
 		SCPClient scpClient = conn.createSCPClient();
 		String fileName = FileOperate.getFileName(remoteFile);
 		String outFile = FileOperate.addSep(localPath) + fileName;
-		if (!isCover && FileOperate.isFileFolderExist(outFile)) {
+		if (!isCover && FileOperate.isFileExist(outFile)) {
 			return;
 		}
 		FileOperate.deleteFileFolder(outFile);
@@ -126,7 +126,7 @@ public class SshScp {
 	 */
 	public void downloadFile(String remoteFile, String localFile, boolean isCover) throws IOException {
 		SCPClient scpClient = conn.createSCPClient();
-		if (!isCover && FileOperate.isFileFolderExist(localFile)) {
+		if (!isCover && FileOperate.isFileExist(localFile)) {
 			return;
 		}
 		FileOperate.deleteFileFolder(localFile);
