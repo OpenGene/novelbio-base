@@ -1730,8 +1730,9 @@ public class FileOperate {
 				Files.move(oldPath, pathNewTmp);
 				Files.deleteIfExists(newPath);
 				Files.move(pathNewTmp, newPath);
+			} else {
+				Files.move(oldPath, newPath);
 			}
-			Files.move(oldPath, newPath);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new ExceptionFileError("cannot move file " + oldPath + " to " + newPathStr, e);

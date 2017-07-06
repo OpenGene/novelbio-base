@@ -49,13 +49,8 @@ public class CmdPathAli extends CmdPath {
 		if (isRetainTmpFiles) {
 			logger.info("move file from {} to {} ",  filePathTmp, filePathOut);
 			FileOperate.moveFile(true, filePathTmp, filePathOut);
-			logger.debug("is file {} exist {}", filePathTmp, FileOperate.isFileExist(filePathTmp));
-			logger.debug("is file {} exist {}", filePathOut, FileOperate.isFileExist(filePathOut));
 			logger.info("link file from  " + filePathOut + "  to  " + filePathTmp);
-			FileOperate.linkFile(filePathOut, filePathTmp, true);
-			
-			logger.debug("is file {} link {}", filePathTmp, FileOperate.isSymbolicLink(filePathTmp));
-			logger.debug("is file {} link {}", filePathOut, FileOperate.isSymbolicLink(filePathOut));
+			FileOperate.linkFile(filePathOut, filePathTmp, false);
 		} else {
 			//TODO 这里可能全改为move会更好些
 			FileOperate.moveFile(true, filePathTmp, filePathOut);
