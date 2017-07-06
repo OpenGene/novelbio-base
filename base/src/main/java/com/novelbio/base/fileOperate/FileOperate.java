@@ -41,6 +41,7 @@ import com.hadoop.compression.lzo.LzopCodec;
 import com.novelbio.base.PathDetail;
 import com.novelbio.base.SerializeKryo;
 import com.novelbio.base.StringOperate;
+import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
 import com.novelbio.base.dataStructure.PatternOperate;
@@ -462,7 +463,7 @@ public class FileOperate {
 	 */
 	// TODO 测试
 	public static long getFileSizeLong(Path path) {
-		if (path == null || !isFileFolderExist(path)) {
+		if (path == null || !isFileExist(path)) {
 			return -1;
 		}
 		if (!isFileDirectory(path)) {
@@ -928,7 +929,7 @@ public class FileOperate {
 			suffix = ".*";
 			noNeedReg++;
 		}
-		if (file == null || !isFileFolderExist(file)) {
+		if (file == null || !isFileExist(file)) {
 			return new ArrayList<>();
 		}
 		
@@ -1002,7 +1003,7 @@ public class FileOperate {
 		if (suffix == null || suffix.equals("*")) {
 			suffix = ".*";
 		}
-		if (file == null || !isFileFolderExist(file)) {
+		if (file == null || !isFileExist(file)) {
 			return new ArrayList<>();
 		}
 		
@@ -1274,7 +1275,7 @@ public class FileOperate {
 	
 	public static OutputStream getOutputStream(Path file, boolean append) throws IOException {
 		StandardOpenOption openOption = append ? StandardOpenOption.APPEND : StandardOpenOption.CREATE;
-		if (!FileOperate.isFileFolderExist(file)) {
+		if (!FileOperate.isFileExist(file)) {
 			openOption = StandardOpenOption.CREATE;
 		}
 		if (append == false && FileOperate.isFileExistAndBigThan0(file)) {
@@ -1329,7 +1330,7 @@ public class FileOperate {
 	 */
 	public static boolean copyFolder(Path oldFilePath, String newPath, boolean cover) {
 		final String newPathSep = addSep(newPath);
-		if (!FileOperate.isFileFolderExist(oldFilePath)) {
+		if (!FileOperate.isFileExist(oldFilePath)) {
 			logger.error(oldFilePath + " is not exist");
 		}
 		if (!FileOperate.isFileDirectory(oldFilePath)) {
@@ -1400,18 +1401,18 @@ public class FileOperate {
 		}
 		if (oldfile != null && isFilePathSame(getAbsolutePath(oldfile), getAbsolutePath(pathNew)))
 			return;
-		if (!cover && isFileFolderExist(pathNew))
+		if (!cover && isFileExist(pathNew))
 			return;
 		if (cover && isFileDirectory(pathNew)) {
 			throw new ExceptionFileError("cannot cover directory " + pathNew);
 		}
 		Path pathNewTmp = getPath(FileOperate.changeFileSuffix(getAbsolutePath(pathNew), "_tmp", null));
 		try {
-			Files.deleteIfExists(pathNew);
 			Files.deleteIfExists(pathNewTmp);
 			createFolders(FileOperate.getPathName(pathNew));
 			logger.info("start copy from {} to {}", oldfile, pathNew);
 			Files.copy(oldfile, pathNewTmp, StandardCopyOption.REPLACE_EXISTING);
+			Files.deleteIfExists(pathNew);
 			Files.move(pathNewTmp, pathNew, StandardCopyOption.REPLACE_EXISTING);
 		} catch (Exception e) {
 			throw new ExceptionNbcFile("copy file from " + oldfile + " to " + pathNew + " error", e);
@@ -1450,7 +1451,7 @@ public class FileOperate {
 		if (isFilePathSame(oldFile.toString(), fnew.toString())) {
 			return;
 		}
-		if (isFileFolderExist(fnew) && !cover) {
+		if (isFileExist(fnew) && !cover) {
 			return;
 		}
 		deleteFileFolder(fnew);
@@ -1684,9 +1685,8 @@ public class FileOperate {
 	 */
 	// TODO 待测试
 	private static void moveFile(Path oldFile, String newPathName, boolean cover) {
-		Path pathNew = FileOperate.getPath(newPathName);
 		if (isFileExistAndNotDir(oldFile)) {
-			moveSingleFile(oldFile, pathNew, cover);
+			moveSingleFile(oldFile, newPathName, cover);
 		} else if (isFileDirectory(oldFile)) {
 			moveFoldFile(oldFile, newPathName, cover);
 		}
@@ -1700,16 +1700,18 @@ public class FileOperate {
 	 * 
 	 * @param oldPath
 	 *            文件路径
-	 * @param newPath
+	 * @param newPathStr
 	 *            新文件名
 	 * @param cover
 	 *            是否覆盖
 	 * @return true 成功 false 失败
 	 */
 	// TODO 待测试
-	private static void moveSingleFile(Path oldPath, Path newPath, boolean cover) {
+	private static void moveSingleFile(Path oldPath, String newPathStr, boolean cover) {
 		if (!isFileExistAndNotDir(oldPath))
 			return;
+		
+		Path newPath = getPath(newPathStr);
 		if (isFilePathSame(oldPath.toUri().toString(), newPath.toUri().toString())) {
 			return;
 		}
@@ -1719,15 +1721,20 @@ public class FileOperate {
 		Path fnewpathParent = newPath.getParent();
 		createFolders(fnewpathParent);
 		try {
-			if (isFileFolderExist(newPath)) {
+			if (isFileExist(newPath)) {
 				if (!cover)
 					return;
+				
+				Path pathNewTmp = getPath(newPathStr + ".tmp" + DateUtil.getDateAndRandom());
+				Files.deleteIfExists(pathNewTmp);
+				Files.move(oldPath, pathNewTmp);
 				Files.deleteIfExists(newPath);
+				Files.move(pathNewTmp, newPath);
 			}
 			Files.move(oldPath, newPath);
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new ExceptionFileError("cannot move file " + oldPath + " to " + newPath, e);
+			throw new ExceptionFileError("cannot move file " + oldPath + " to " + newPathStr, e);
 		}
 	}
 
@@ -1772,7 +1779,7 @@ public class FileOperate {
 	 * @throws Exception
 	 */
 	private static void moveFoldFile(Path olddir, String newfolder, String prix, boolean cover) {
-		if (!FileOperate.isFileFolderExist(olddir)) {
+		if (!FileOperate.isFileExist(olddir)) {
 			logger.error(olddir + " is not exist");
 		}
 		if (!FileOperate.isFileDirectory(olddir)) {
@@ -1801,14 +1808,14 @@ public class FileOperate {
 		String olddirPath = removeSplashTail(olddirPathTmp, false);
 		final boolean[] isMakeDirSameAsOld = new boolean[] { false };
 		
-//		if (!FileOperate.isFileFolderExist(pathNew)) {
-//			try {
-//				Files.move(olddir, pathNew);
-//				return;
-//			} catch (Exception e) {
-//				// TODO: handle exception
-//			}
-//		}
+		if (!FileOperate.isFileExist(pathNew)) {
+			try {
+				Files.move(olddir, pathNew);
+				return;
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+		}
 		
 		
 		try {
@@ -1822,8 +1829,8 @@ public class FileOperate {
 					}
 					moveFoldFile(pathOld, newPathSep + pathOld.getFileName(), prefix, cover);
 				} else {
-					Path newPath = getPath(newPathSep + prefix + pathOld.getFileName());
-					moveSingleFile(pathOld, newPath, cover);
+					String newPathStr = newPathSep + prefix + pathOld.getFileName();
+					moveSingleFile(pathOld, newPathStr, cover);
 				}
 			});
 		} catch (Exception e) {
@@ -1872,7 +1879,7 @@ public class FileOperate {
 	 * @return 返回是否创建成功
 	 */
 	public static void linkFile(String rawFile, String linkTo, boolean cover) {
-		if (!cover && (FileOperate.isFileFolderExist(linkTo) || FileOperate.isSymbolicLink(linkTo))) {
+		if (!cover && (FileOperate.isFileExist(linkTo) || FileOperate.isSymbolicLink(linkTo))) {
 			return;
 		}
 		if (!FileOperate.isFileExist(rawFile)) {
@@ -1880,7 +1887,7 @@ public class FileOperate {
 		}
 		FileOperate.createFolders(FileOperate.getParentPathNameWithSep(linkTo));
 		if (FileOperate.isFileExist(linkTo) && cover) {
-			FileOperate.delFile(linkTo);
+			FileOperate.deleteFileFolder(linkTo);
 		}
 
 		rawFile = FileHadoop.convertToHdfsPath(rawFile);
@@ -1950,27 +1957,6 @@ public class FileOperate {
 
 	/**
 	 * 判断文件或文件夹是否存在，给的是绝对路径
-	 * @param fileName 如果为null, 直接返回false
-	 * @return
-	 */
-	public static boolean isFileFolderExist(String fileName) {
-		return isFileExist(fileName);
-	}
-
-	/**
-	 * 判断文件或文件夹是否存在，给的是绝对路径
-	 * @param file 如果为null, 直接返回false
-	 */
-	public static boolean isFileFolderExist(File file) {
-		return file != null && isFileExist(getPath(file));
-	}
-
-	/** @param fileName  如果为null, 直接返回false */
-	public static boolean isFileFolderExist(Path path) {
-		return isFileExist(path);
-	}
-	/**
-	 * 判断文件是否存在，可以是文件夹，给的是绝对路径
 	 * @param fileName  如果为null, 直接返回false
 	 * @return 文件存在,返回true.否则,返回false
 	 */
@@ -1978,7 +1964,7 @@ public class FileOperate {
 		return !StringOperate.isRealNull(file) && isFileExist(getPath(file));
 	}
 	/**
-	 * 判断文件是否存在，不论是文件还是文件夹,只要存在就是true，给的是绝对路径
+	 * 判断文件或文件夹是否存在，给的是绝对路径
 	 * @param fileName 如果为null, 直接返回false
 	 * @return 文件存在,返回true.否则,返回false
 	 */
@@ -2010,7 +1996,7 @@ public class FileOperate {
 	 */
 	// TODO 修改method名字为 isFileExistAndNotDir
 	public static boolean isFileExistAndNotDir(Path file) {
-		return file != null && isFileFolderExist(file) && !isFileDirectory(file);
+		return file != null && isFileExist(file) && !isFileDirectory(file);
 	}
 
 	/**
@@ -2027,6 +2013,9 @@ public class FileOperate {
 	}
 	public static boolean isSymbolicLink(String fileName) {
 		return Files.isSymbolicLink(FileOperate.getPath(fileName));
+	}
+	public static boolean isSymbolicLink(Path path) {
+		return Files.isSymbolicLink(path);
 	}
 	/**
 	 * 判断文件是否存在，并且有一定的大小而不是空文件
@@ -2105,29 +2094,13 @@ public class FileOperate {
 	@Deprecated
 	public static boolean isFileExistAndLossless(String filePath, long realSize) {
 		Path file = FileOperate.getPath(filePath);
-		if (FileOperate.isFileFolderExist(file)) {
+		if (FileOperate.isFileExist(file)) {
 			return false;
 		}
 		if (isFileExistAndNotDir(file)) {
 			return getFileSizeLong(file) == realSize;
 		}
 		return false;
-	}
-
-
-	/**
-	 * 删除文件.文件不存在不会报错.
-	 * 
-	 * @param filePathAndName
-	 *            文本文件完整绝对路径及文件名
-	 */
-	@Deprecated
-	public static void delFile(String filePathAndName) {
-		try {
-			Files.deleteIfExists(getPath(filePathAndName));
-		} catch (IOException e) {
-			throw new ExceptionFileError("cannot delete path " + filePathAndName, e);
-		}
 	}
 
 	/**
@@ -2137,29 +2110,11 @@ public class FileOperate {
 	 *            文本文件完整绝对路径及文件名 文件不存在则返回false
 	 * @return Boolean 成功删除返回true遭遇异常返回false
 	 */
-	@Deprecated
-	public static void delFile(Path myDelFile) {
+	private static void delFile(Path myDelFile) {
 		try {
 			Files.deleteIfExists(myDelFile);
 		} catch (IOException e) {
 			throw new ExceptionFileError("cannot delete path " + myDelFile, e);
-		}
-	}
-
-	/**
-	 * 删除文件夹
-	 * @param folderPath 文件夹完整绝对路径
-	 * @return
-	 */
-	@Deprecated
-	public static void delFolder(String folderPath) {
-		if (StringOperate.isRealNull(folderPath))
-			return;
-		try {
-			Path folder = getPath(folderPath);
-			deleteFolder(folder); // 删除完里面所有内容
-		} catch (Exception e) {
-			logger.error("删除文件夹操作出错");
 		}
 	}
 
@@ -2210,7 +2165,7 @@ public class FileOperate {
 	 * @return
 	 */
 	public static void deleteFolderClean(Path path) {
-		if (path == null || !isFileFolderExist(path)) {
+		if (path == null || !isFileExist(path)) {
 			return;
 		}
 		if (!isFileDirectory(path)) {
@@ -2270,8 +2225,10 @@ public class FileOperate {
 	public static void deleteFileFolder(Path file) {
 		if (file == null)
 			return;
-
-		if (isFileFolderExist(file)) {
+		if (isSymbolicLink(file)) {
+			delFile(file);
+		}
+		if (isFileExist(file)) {
 			if (isFileDirectory(file)) {
 				deleteFolder(file);
 			} else {

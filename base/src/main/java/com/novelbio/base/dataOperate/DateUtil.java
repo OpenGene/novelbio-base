@@ -217,7 +217,7 @@ public class DateUtil {
 	/** 获得随机的正数，不用负数的原因是会在tmp路径中加入 - ，类似 2016_10_29_12_31_23_-2345
 	 * 部分生物信息算法会根据 - 进行截取，然后会报错 */
 	private static int getRandomAbs() {
-		  Random random = new Random(System.currentTimeMillis());
+		  Random random = new Random();
 		  int tmp = (short)random.nextInt();
 		  tmp = Math.abs(tmp);
 		  return tmp;
