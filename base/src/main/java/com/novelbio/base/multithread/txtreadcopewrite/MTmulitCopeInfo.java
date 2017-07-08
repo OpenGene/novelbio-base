@@ -3,9 +3,10 @@ package com.novelbio.base.multithread.txtreadcopewrite;
 import java.util.ArrayList;
 
 import com.novelbio.base.multithread.RunGetInfo;
+import com.novelbio.base.multithread.RunInfo;
 import com.novelbio.base.multithread.RunProcess;
 
-public abstract class MTmulitCopeInfo<T extends MTrecordCoper<K>, K extends MTRecordCope> implements RunGetInfo<K> {
+public abstract class MTmulitCopeInfo<T extends MTrecordCoper<K>, K extends MTRecordCope> implements RunGetInfo<T> {
 	int threadStopNum = 0;
 	Boolean isFinished = false;
 	/** 一个线程读取 */
@@ -36,7 +37,7 @@ public abstract class MTmulitCopeInfo<T extends MTrecordCoper<K>, K extends MTRe
 		}
 	}
 	@Override
-	public void done(RunProcess<K> runProcess) {
+	public void done(RunProcess runProcess) {
 		synchronized (this) {
 			doneOneThread(runProcess);
 			threadStopNum ++;
@@ -55,7 +56,7 @@ public abstract class MTmulitCopeInfo<T extends MTrecordCoper<K>, K extends MTRe
 	}
 	
 	@Override
-	public void setRunningInfo(K info) {
+	public void setRunningInfo(T info) {
 		synchronized (this) {
 			copeReadInfo(info);
 		}
@@ -63,7 +64,7 @@ public abstract class MTmulitCopeInfo<T extends MTrecordCoper<K>, K extends MTRe
 	/** 设定想要做的工作，不需要加锁 
 	 * 想写入的文本可以在这里写入
 	 * */
-	protected abstract void copeReadInfo(K info);
+	protected  abstract void copeReadInfo(T info);
 	
 	public void suspendThread() {
 		mtOneThreadReader.threadSuspend();
@@ -88,13 +89,13 @@ public abstract class MTmulitCopeInfo<T extends MTrecordCoper<K>, K extends MTRe
 	}
 	
 	@Override
-	public void threadSuspended(RunProcess<K> runProcess) {}
+	public void threadSuspended(RunProcess runProcess) {}
 
 	@Override
-	public void threadResumed(RunProcess<K> runProcess) {}
+	public void threadResumed(RunProcess runProcess) {}
 
 	@Override
-	public void threadStop(RunProcess<K> runProcess) {}
+	public void threadStop(RunProcess runProcess) {}
 	
 	/** 在启动前做的准备工作 */
 	protected abstract void beforeExecute();		
@@ -113,7 +114,7 @@ public abstract class MTmulitCopeInfo<T extends MTrecordCoper<K>, K extends MTRe
 	}
 	
 	/** 某个线程完成时的工作，不需要synchronized */
-	protected abstract void doneOneThread(RunProcess<K> runProcess);
+	protected abstract void doneOneThread(RunProcess runProcess);
 	
 	/** 全部线程完成时的工作，不需要synchronized, 不需要关闭reader */
 	protected abstract void doneAllThread();

@@ -55,12 +55,25 @@ public class StreamOut extends Thread {
 	 * @param isToTermiate 是否打印到控制台
 	 * @param isStd 是打印到标准输出还是错误输出
 	 */
-	StreamOut(InputStream is, IntProcess process, boolean isToTermiate, boolean isStd) {
+	public StreamOut(InputStream is, IntProcess process, boolean isToTermiate, boolean isStd) {
 		this.is = is;
 		this.process = process;
 		this.isToTermiate = isToTermiate;
 		this.isStd = isStd;
 	}
+	
+	/**
+	 * 直接获取一个标记为完成状态的StreamOut
+	 * @param is 从cmd获取的输出流
+	 * @param process 
+	 * @param isToTermiate 是否打印到控制台
+	 * @param isStd 是打印到标准输出还是错误输出
+	 */
+	public void setFinish() {
+		this.isFinished = true;
+	}
+	
+	
 	/**
 	 *  指定一个out流，cmd的输出流就会定向到该流中<br>
 	 * 该方法和{@link #setGetInputStream(boolean)} 冲突

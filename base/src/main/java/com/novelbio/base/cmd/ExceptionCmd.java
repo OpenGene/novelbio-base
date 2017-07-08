@@ -14,11 +14,15 @@ public class ExceptionCmd extends RuntimeException{
 	public ExceptionCmd(String info, CmdOperate cmdOperate) {
 		super(info + "\n" + cmdOperate.getCmdExeStrReal() + "\n" + cmdOperate.getErrOut());
 	}
-	
+	public ExceptionCmd(String info, CmdOperate cmdOperate, Throwable t) {
+		super(info + "\n" + cmdOperate.getCmdExeStrReal() + "\n" + cmdOperate.getErrOut(), t);
+	}
 	public ExceptionCmd(CmdOperate cmdOperate) {
 		super(cmdOperate.getCmdExeStrReal() + "\n" + cmdOperate.getErrOut());
 	}
-	
+	public ExceptionCmd(CmdOperate cmdOperate, Throwable t) {
+		super(cmdOperate.getCmdExeStrReal() + "\n" + cmdOperate.getErrOut(), t);
+	}
 	public ExceptionCmd(String info, Exception e) {
 		super(info, e);
 	}

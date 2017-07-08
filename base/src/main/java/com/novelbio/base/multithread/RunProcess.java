@@ -9,7 +9,7 @@ package com.novelbio.base.multithread;
  * @author zong0jie
  *
  */
-public abstract class RunProcess<T> implements Runnable {
+public abstract class RunProcess implements Runnable {
 	protected RunGetInfo runGetInfo;
 	byte[] lock = new byte[0];
 
@@ -17,18 +17,18 @@ public abstract class RunProcess<T> implements Runnable {
 	protected volatile boolean flagStop = false;
 	protected volatile RunThreadStat runThreadStat = RunThreadStat.notStart;
 	protected boolean suspendFlag = false;
-	Throwable exception;
+	protected Throwable exception;
 	
 	/** 给定运行中需要修改的信息 */
 	public void setRunGetInfo(RunGetInfo runGetInfo) {
 		this.runGetInfo = runGetInfo;
 	}
-	/** 程序暂停 */
+	/** 程序暂停，需要在实现类中根据  suspendFlag 去暂停*/
 	public void threadSuspend() {
 		this.suspendFlag = true;
 		runThreadStat = RunThreadStat.threadSuspend;
 	}
-	/** 进程恢复 */
+	/** 进程恢复，需要在实现类中根据  suspendFlag 去恢复 */
 	public void threadResume() {
 		threadResume(false);
 	}
@@ -46,7 +46,7 @@ public abstract class RunProcess<T> implements Runnable {
 		}
 		lock.notify();
 	}
-	/** 终止线程，需要在循环中添加<br>
+	/** 终止线程，需要在实现类中根据  suspendFlag 去在循环中添加<br>
 	 * if (flagStop)<br>
 	*			break; */
 	public synchronized void threadStop() {
@@ -58,7 +58,7 @@ public abstract class RunProcess<T> implements Runnable {
 		threadResume(true);
 	}
 	/**
-	 * 放在循环中，检查是否终止线程
+	 * 放在实现类的循环中，检查是否终止线程
 	 */
 	protected void suspendCheck() {
 		synchronized (lock) {
@@ -91,10 +91,12 @@ public abstract class RunProcess<T> implements Runnable {
 	/** 给run方法调用。运行模块写在这个里面，这样结束后自动会将flagFinish设定为true */
 	protected abstract void running();
 	/**
-	 * 设定输入的信息，内部回调
+	 * 设定输入的信息，内部回调<br>
+	 * 只有当 {@link #setRunGetInfo(RunGetInfo)} 设置了参数时，才会把该参数传递给 {@link RunGetInfo}<br>
+	 * 这里可以设定任意类，但是注意输入的类必须和 {@link RunGetInfo#setRunningInfo(Object)}保持一致，否则会报类型转换错误<br>
 	 * @param runInfo
 	 */
-	protected void setRunInfo(T runInfo) {
+	protected<T> void setRunInfo(T runInfo) {
 		if (runGetInfo != null) {
 			runGetInfo.setRunningInfo(runInfo);
 		}

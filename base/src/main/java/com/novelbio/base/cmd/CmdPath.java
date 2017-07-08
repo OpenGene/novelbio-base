@@ -192,32 +192,16 @@ public class CmdPath {
 	 * 同时记录临时文件夹下有多少文件，用于后面删除时跳过 */
 	public void copyFileInAndRecordFiles() {
 		createFoldTmp();
-		if (isRedirectInToTmp) {
-			copyFileIn();
-		}
-		if (isRedirectOutToTmp) {
-			mapFileName2LastModifyTimeAndLen.clear();
-			List<Path> lsPaths = FileOperate.getLsFoldPathRecur(getTmpPath(), true);
-			lsPaths.forEach((path)->{
-				mapFileName2LastModifyTimeAndLen.put(FileOperate.getAbsolutePath(path), 
-						getLastModifyTime2Len(path));
-			}); 
-		}
+		copyFileIn();
+		recordFilesWhileRedirectOutToTmp();
 	}
 	
-	/** 把要输入的文件拷贝到临时文件夹中 */
-	protected void copyFileIn() {
-		for (String inFile : setInput) {
-			String inTmpName = mapName2TmpName.get(inFile);
-			try {
-				FileOperate.copyFileFolder(inFile, inTmpName, false);
-				logger.info("copy file from {} to {}", inFile, inTmpName);
-			} catch (Exception e) {
-				logger.error("copy file from " + inFile + " to " + inTmpName + " error", e);
-			}
-		}
+	/** 在cmd运行前，将输入文件拷贝到临时文件夹下 */
+	public void copyFileInTmp() {
+		createFoldTmp();
+		copyFileIn();
 	}
-	
+
 	/** 将已有的输出文件夹在临时文件夹中创建好 */
 	protected void createFoldTmp() {
 		for (String filePathName : mapName2TmpName.keySet()) {
@@ -228,6 +212,36 @@ public class CmdPath {
 				FileOperate.createFolders(FileOperate.getParentPathNameWithSep(tmpPath));
 			}
 		}
+	}
+	
+	/** 把要输入的文件拷贝到临时文件夹中 */
+	protected void copyFileIn() {
+		if (!isRedirectInToTmp) return;
+		
+		for (String inFile : setInput) {
+			String inTmpName = mapName2TmpName.get(inFile);
+			try {
+				FileOperate.copyFileFolder(inFile, inTmpName, false);
+				logger.info("copy file from {} to {}", inFile, inTmpName);
+			} catch (Exception e) {
+				logger.error("copy file from " + inFile + " to " + inTmpName + " error", e);
+			}
+		}
+	}
+
+	/**
+	 * 记录临时文件夹下有多少文件，主要用于 {@link #isRedirectOutToTmp}的情况
+	 * 就是如果需要把结果文件拷贝到临时文件夹下，那么拷贝完成后需要运行该命令
+	 */
+	public void recordFilesWhileRedirectOutToTmp() {
+		if (!isRedirectOutToTmp) return;
+		
+		mapFileName2LastModifyTimeAndLen.clear();
+		List<Path> lsPaths = FileOperate.getLsFoldPathRecur(getTmpPath(), true);
+		lsPaths.forEach((path)->{
+			mapFileName2LastModifyTimeAndLen.put(FileOperate.getAbsolutePath(path), 
+					getLastModifyTime2Len(path));
+		}); 
 	}
 	
 	protected ConvertCmd getConvertOs2Local() {

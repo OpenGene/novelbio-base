@@ -17,7 +17,7 @@ import com.novelbio.base.multithread.RunProcess;
  * @author zong0jie
  *
  */
-public abstract class MTRecoreReader <T, K extends MTRecordRead> extends RunProcess<K> {
+public abstract class MTRecoreReader <T, K extends MTRecordRead> extends RunProcess {
 	long readsNum = 0;
 		
 	protected int maxNumReadInLs = 5000;

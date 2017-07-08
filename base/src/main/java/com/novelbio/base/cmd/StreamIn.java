@@ -15,7 +15,7 @@ import com.novelbio.base.multithread.RunProcess;
  * @author zong0jie
  *
  */
-public class StreamIn extends RunProcess<Integer> {
+public class StreamIn extends RunProcess {
 	private Path inputFile;
 	protected InputStream inStream;
 	/** 输入cmd的流 */

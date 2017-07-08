@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,7 @@ public class CmdPathCluster {
 	/** key 实际输出文件夹
 	 * value 该实际输出文件夹当时的临时文件夹，以 "/" 结尾
 	 */
-	Map<String, String> mapOutPath2TmpOutPath = new HashMap<>();
+	Map<String, String> mapOutPath2TmpOutPath = new ConcurrentHashMap<>();
 	
 	public CmdPathCluster(boolean isAliyun) {
 		this.isAliyun = isAliyun;
@@ -62,7 +63,7 @@ public class CmdPathCluster {
 	}
 	
 	/** 某个文件从tmp拷贝到输出文件夹中 */
-	public void putTmpOut2Out(String tmpOut, String out) {
+	public synchronized void putTmpOut2Out(String tmpOut, String out) {
 		String outTmp = FileOperate.getParentPathNameWithSep(tmpOut);
 		String outReal = FileOperate.getParentPathNameWithSep(out);
 		mapOutPath2TmpOutPath.put(outReal, outTmp);

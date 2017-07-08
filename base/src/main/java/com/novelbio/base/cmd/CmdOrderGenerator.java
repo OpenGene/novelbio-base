@@ -253,6 +253,14 @@ public class CmdOrderGenerator {
 	public void copyFileInAndRecordFiles() {
 		cmdPath.copyFileInAndRecordFiles();
 	}
+	/** 在cmd运行前，将输入文件拷贝到临时文件夹下 */
+	public void copyFileIn() {
+		cmdPath.copyFileInTmp();
+	}
+	/** 记录临时文件夹下有多少文件，用于后面删除时跳过 */
+	public void recordFilesWhileRedirectOutToTmp() {
+		cmdPath.recordFilesWhileRedirectOutToTmp();
+	}
 	
 	/** 必须先调用{@link #copyFileInAndRecordFiles()}，
 	 * 等运行cmd结束后还需要调用{@link #moveFileOut()} 来完成运行 */
@@ -263,7 +271,7 @@ public class CmdOrderGenerator {
 		
 	/** 返回实际运行的cmd string数组
 	 * 必须设定好lcCmd后才能使用
-	 * @param redirectStdErr 是否重定向标准输出和错误输出，如果只是获得命令，那不需要重定向<br>
+	 * @param redirectStdAndErr 是否重定向标准输出和错误输出，如果只是获得命令，那不需要重定向<br>
 	 * 如果是实际执行的cmd，就需要重定向
 	 * @return
 	 */

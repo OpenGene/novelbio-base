@@ -4,7 +4,7 @@ import java.util.AbstractQueue;
 
 import com.novelbio.base.multithread.RunProcess;
 
-public abstract class MTrecordCoper<T extends MTRecordCope> extends RunProcess<MTRecordCope>{
+public abstract class MTrecordCoper<T extends MTRecordCope> extends RunProcess{
 	
 	protected MTRecoreReader<?, ? extends MTRecordRead> mtOneThreadReader;
 	/** 读取得到的内容就保存在这里面 */

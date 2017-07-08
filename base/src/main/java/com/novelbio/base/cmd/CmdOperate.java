@@ -32,7 +32,7 @@ import com.novelbio.base.util.ServiceEnvUtil;
  * <b>不支持这种</b> "bwa aaa bbb | grep sd &gt; ccc"
  * @author zong0jie
  */
-public class CmdOperate extends RunProcess<String> {
+public class CmdOperate extends RunProcess {
 	private static final Logger logger = Logger.getLogger(CmdOperate.class);
 	/** 进程 */
 	IntProcess process;
@@ -65,8 +65,8 @@ public class CmdOperate extends RunProcess<String> {
 	
 	/** 标准输入到cmd命令的流，一个cmd命令一般只有这一个流 */
 	StreamIn streamIn;
-	StreamOut errorGobbler;
-	StreamOut outputGobbler;
+	protected StreamOut errorGobbler;
+	protected StreamOut outputGobbler;
 	/** 
 	 * 是否将标准流写入标准流，有些类似获取ip或者获取软件版本，获取进程ps-ef
 	 * 这时候我们会截取标准流到list中，如果再写入标准流，在日志中看就会很麻烦。
@@ -546,7 +546,7 @@ public class CmdOperate extends RunProcess<String> {
 			}
 		}
 		if (errorGobbler == null && finishFlag.isStart()) {
-			throw new ExceptionCmd("cmd doesn't have output stream: " + getCmdExeStr());
+			throw new ExceptionCmd("cmd doesn't have stderr stream: " + getCmdExeStr());
 		}
 	}
 	
@@ -634,7 +634,7 @@ public class CmdOperate extends RunProcess<String> {
 	 * @param isWriteStdTips 是否需要每隔几分钟写一小段话以表示程序还在运行中
 	 * @throws IOException 
 	 */
-	private void setStdStream() throws IOException {
+	protected void setStdStream() throws IOException {
 		String outPath = cmdOrderGenerator.getSaveStdTmp(); 
 		outputGobbler = new StreamOut(process.getStdOut(), process, needLog, true);
 		outputGobbler.setDaemon(true);
@@ -662,7 +662,7 @@ public class CmdOperate extends RunProcess<String> {
 	 * @param isWriteErrTips 是否需要每隔几分钟写一小段话以表示程序还在运行中
 	 * @throws IOException 
 	 */
-	private void setErrorStream() throws IOException {
+	protected void setErrorStream() throws IOException {
 		String errPath = cmdOrderGenerator.getSaveErrTmp();
 		errorGobbler = new StreamOut(process.getStdErr(), process, needLog, false);
 		errorGobbler.setDaemon(true);
@@ -735,12 +735,7 @@ public class CmdOperate extends RunProcess<String> {
 	 */
 	public void runWithExp(String info) {
 		run();
-		if (!isFinishedNormal()) {
-			if (!StringOperate.isRealNull(info) && !info.endsWith("\n")) {
-				info = info + "\n";
-			}
-			throw new ExceptionCmd(info, this);
-		}
+		validateIsFinishNormally(info);
 	}
 	
 	/** 运行但并不报错，适合获取软件版本信息等。因为有些软件在获取版本时会返回错误，譬如bwa，输入bwa就是返回错误 */
@@ -751,50 +746,116 @@ public class CmdOperate extends RunProcess<String> {
         }
 	}
 	
-	/** 运行，出错会抛出异常 */
+	/**
+	 * 运行，出错会抛出异常
+	 * 
+	 * 可用于ScriptXml中move  > Bam文件
+	 * 因为通过流输出的bam文件是一个独立线程，很可能cmd运行结束后，
+	 * bam文件还没处理完。这时候就需要在外部等bam文件线程结束后再移动文件。
+	 * 因此这里就选择不把输出文件移出去。
+	 * 
+	 * @param isCopyFileInAndRecordFiles false 则需要手动调用 {@link #copyFileIn()} 和 {@link #recordFilesWhileRedirectOutToTmp()}
+	 * @param isMoveFileOut false 则需要手动调用 {@link #moveFileOut()}
+	 */
+	public void runWithExp(boolean isCopyFileInAndRecordFiles, boolean isMoveFileOut) {
+		runWithExp(null, isCopyFileInAndRecordFiles, isMoveFileOut);
+	}
+	
+	/** 运行，出错会抛出异常，不需要调用方法
+	 *  {@link #copyFileIn()} 
+	 *   {@link #recordFilesWhileRedirectOutToTmp()} 
+	 *   和 {@link #moveFileOut()} */
 	public void runWithExp() {
 		super.run();
+		validateIsFinishNormally(null);
+	}
+	
+	@Override
+	protected void running() {
+		running(true, true);
+	}
+	
+	/**
+	 * 可用于Script中move  > Bam文件
+	 * 因为通过流输出的bam文件是一个独立线程，很可能cmd运行结束后，
+	 * bam文件还没处理完。这时候就需要在外部等bam文件线程结束后再移动文件。
+	 * 因此这里就选择不把输出文件移出去。
+	 * 
+	 * @param isCopyFileInAndRecordFiles false 则需要手动调用 {@link #copyFileIn()} 和 {@link #recordFilesWhileRedirectOutToTmp()}
+	 * @param isMoveFileOut false 则需要手动调用 {@link #moveFileOut()}
+	 */
+	private void runWithExp(String info, boolean isCopyFileInAndRecordFiles, boolean isMoveFileOut) {
+		flagStop = false;
+		runThreadStat = RunThreadStat.running;
+		
+		try {
+			running(isCopyFileInAndRecordFiles, isMoveFileOut);
+			runThreadStat = RunThreadStat.finishNormal;
+		} catch (Throwable e) {
+			exception = e;
+			runThreadStat = RunThreadStat.finishAbnormal;
+		}
+		flagStop = true;
+		
+		validateIsFinishNormally(info);
+	}
+	
+	private void validateIsFinishNormally(String info) {
+		if (!StringOperate.isRealNull(info) && !info.endsWith("\n")) {
+			info = info + "\n";
+		}
+		if (runThreadStat == RunThreadStat.finishAbnormal) {
+			if (!StringOperate.isRealNull(info)) {
+				throw new ExceptionCmd(info, this, exception);
+			} else {
+				throw new ExceptionCmd(this, exception);
+			}
+		}
 		if (!isFinishedNormal()) {
-			throw new ExceptionCmd(this);
+			if (!StringOperate.isRealNull(info)) {
+				throw new ExceptionCmd(info, this);
+			} else {
+				throw new ExceptionCmd(this);
+			}
 		}
 		if (FileOperate.isFileExistAndNotDir(cmd1SH)) {
 			FileOperate.deleteFileFolder(cmd1SH);
         }
 	}
 	
-	/** 把{@link CmdOperate#runWithExp()} 拆成两个方法
-	 * 分别是 {@link CmdOperate#prepare()} 和 {@link CmdOperate#runWithExpNoPrepare()}
-	 * 
-	 * 本步骤解析cmd命令，并拷贝需要的文件到指定文件夹中
+	/**
+	 * 把{@link CmdOperate#runWithExp()} 拆成两个方法<br>
+	 * 分别是 {@link CmdOperate#prepare()} 和 {@link CmdOperate#runWithExpNoPrepare()}<br>
+	 * <br>
+	 * 本步骤是解析cmd命令，主要目的是获取 > 之后所跟的路径<br>
 	 */
 	public void prepare() {
 		cmdOrderGenerator.generateTmPath();
 		cmdOrderGenerator.generateRunCmd(true);
 	}
 	
-	@Override
-	protected void running() {
-		running(true);
-	}
-	
 	/**
-	 * 目前仅用于Script中move  > Bam文件
-	 * 因为通过流输出的bam文件是一个独立线程，很可能cmd运行结束后，
-	 * bam文件还没处理完。这时候就需要在外部等bam文件线程结束后再移动文件。
-	 * 因此这里就不把输出文件移出去。
+	 * 复制文件到临时文件夹<br>
+	 * 当{@link #runWithExp(boolean, boolean)} 第一个参数为false时调用
 	 */
-	public void runWithoutMoveFileOut() {
-		running(false);
+	public void copyFileIn() {
+		cmdOrderGenerator.generateTmPath();
+		cmdOrderGenerator.copyFileIn();
+	}
+	/** 记录临时文件夹下有多少文件，用于后面删除时跳过 <br>
+	 * 当{@link #runWithExp(boolean, boolean)} 第一个参数为false时调用，在 {@link #copyFileIn()} 之后调用
+	 */
+	public void recordFilesWhileRedirectOutToTmp() {
+		cmdOrderGenerator.recordFilesWhileRedirectOutToTmp();
 	}
 	
-	
-	private void running(boolean isMoveFileOut) {
+	private void running(boolean isCopyFileInAndRecordFiles, boolean isMoveFileOut) {
 		finishFlag = new FinishFlag();
-
-		cmdOrderGenerator.generateTmPath();
-		cmdOrderGenerator.copyFileInAndRecordFiles();
+		if (isCopyFileInAndRecordFiles) {
+			cmdOrderGenerator.generateTmPath();
+			cmdOrderGenerator.copyFileInAndRecordFiles();
+		}
 		
-		String cmd = "";
 		String realCmd = getCmdExeStr();
 		if (needLog) {
 			logger.info("run cmd: " + realCmd);
@@ -802,16 +863,16 @@ public class CmdOperate extends RunProcess<String> {
 
 		DateUtil dateTime = new DateUtil();
 		dateTime.setStartTime();
+		
+		RuntimeException runtimeException = null;
 		try {
 			doInBackgroundB();
+		} catch (RuntimeException e) {
+			runtimeException = e;
+			try { if (streamIn != null) streamIn.threadStop(); } catch (Exception e2) { }
 		} catch (Exception e) {
-			try {
-				if (streamIn != null) streamIn.threadStop();
-			} catch (Exception e2) {
-				// TODO: handle exception
-			}
-			e.printStackTrace();
-			logger.error("cmd cannot executed correctly: " + cmd, e);
+			runtimeException = new ExceptionCmd(e);
+			try { if (streamIn != null) streamIn.threadStop(); } catch (Exception e2) { }
 		}
 		
 		if (isFinishedNormal()) {
@@ -836,8 +897,18 @@ public class CmdOperate extends RunProcess<String> {
 		}
 		
 		cmdOrderGenerator.deleletTmpPath();
+		
+		//最后才抛出异常
+		if (runtimeException != null) {
+			throw runtimeException;
+		}
+		
 	}
-	/** 把文件移动出来 */
+	
+	/** 记录临时文件夹下有多少文件，用于后面删除时跳过 
+	 * 当{@link #runWithExp(boolean, boolean)} 第二个参数为false时调用<br>
+	 * 在 {@link #runWithExp(boolean, boolean)} 之后调用
+	 */
 	public void moveFileOut() {
 		cmdOrderGenerator.moveFileOut();
 		cmdOrderGenerator.deleteTmpFile();

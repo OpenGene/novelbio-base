@@ -1,6 +1,6 @@
 package com.novelbio.base.multithread;
 
-public interface RunGetInfo<T> {
+public interface RunGetInfo <T> {
 	/** 获得正在运行的程序信息，然后根据这些信息可以做想做的事情
 	 * 内部需要 synchronized<br>
 	 * @param info 自定义的输入信息
@@ -12,11 +12,11 @@ public interface RunGetInfo<T> {
 	 * <br>
 	 * 内部需要 synchronized 类似<br>
 	 */
-	public  void done(RunProcess<T> runProcess);
+	public  void done(RunProcess runProcess);
 	/** 线程挂起进行的操作，是被线程所调用而不是调用线程 */
-	public void threadSuspended(RunProcess<T> runProcess);
+	public void threadSuspended(RunProcess runProcess);
 	/** 线程恢复进行的操作，是被线程所调用而不是调用线程 */
-	public void threadResumed(RunProcess<T> runProcess);
+	public void threadResumed(RunProcess runProcess);
 	/** 线程中断进行的操作，是被线程所调用而不是调用线程 */
-	public void threadStop(RunProcess<T> runProcess);
+	public void threadStop(RunProcess runProcess);
 }
