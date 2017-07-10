@@ -6,9 +6,11 @@ public class ExceptionCmd extends RuntimeException{
 	public ExceptionCmd(Throwable t) {
 		super(t);
 	}
-	
 	public ExceptionCmd(String info) {
 		super(info);
+	}
+	public ExceptionCmd(String info, Throwable t) {
+		super(info, t);
 	}
 
 	public ExceptionCmd(String info, CmdOperate cmdOperate) {

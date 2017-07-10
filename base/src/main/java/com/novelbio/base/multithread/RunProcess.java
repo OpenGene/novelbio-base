@@ -9,7 +9,7 @@ package com.novelbio.base.multithread;
  * @author zong0jie
  *
  */
-public abstract class RunProcess implements Runnable {
+public abstract class RunProcess extends Thread {
 	protected RunGetInfo runGetInfo;
 	byte[] lock = new byte[0];
 
