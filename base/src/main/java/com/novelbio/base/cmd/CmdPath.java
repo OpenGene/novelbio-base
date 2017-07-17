@@ -143,7 +143,7 @@ public class CmdPath {
 		if (isRedirectInToTmp) {
 			mapPath2TmpPathIn = cmdPathCluster.getMapInPath2TmpPath(setInput, tmpPath);
 			logger.debug("print mapPath2TmpPathIn");
-
+			
 			logMapInfo(mapPath2TmpPathIn);
 			setFileNameAll.addAll(setInput);
 			mapPath2TmpPath.putAll(mapPath2TmpPathIn);

@@ -2,6 +2,7 @@ package com.novelbio.base.cmd;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ArrayListMultimap;
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.fileOperate.FileOperate;
 
@@ -157,9 +159,17 @@ public class CmdPathCluster {
 	}
 	
 	private Map<String, String> getMapPath2TmpPath(Set<String> setPath, String pathTmp) {
+		//输入的set中 /home/novelbio/oss/.inmap./test 和 /home/novelbio/oss/.outmap./test 是两个不同的文件夹
+		//如果直接跑会产生 一个 test文件夹， 一个test1文件夹
+		//而实际上这两个应该只产生一个test文件夹，所以在这里做一个合并的工作
+		ArrayListMultimap<String, String> mapPath2LsConvertPath = ArrayListMultimap.create();
+		for (String path : setPath) {
+			mapPath2LsConvertPath.put(CmdPathAli.convertAli2Loc(path, true), path);
+		}
+		//====================
 		Map<String, String> mapPath2TmpPath = new HashMap<>();
 		Set<String> setPathNoDup = new HashSet<>();
-		for (String path : setPath) {
+		for (String path : mapPath2LsConvertPath.keySet()) {
 			String parentPath = FileOperate.getFileName(path);
 			String parentPathFinal = parentPath;
 			int i = 1;//防止产生同名文件夹的措施
@@ -168,7 +178,10 @@ public class CmdPathCluster {
 			}
 			setPathNoDup.add(parentPathFinal);
 			String tmpPathThis = pathTmp + parentPathFinal+ FileOperate.getSepPath();
-			mapPath2TmpPath.put(path, tmpPathThis);
+			List<String> lsPaths = mapPath2LsConvertPath.get(path);
+			for (String pathRaw : lsPaths) {
+				mapPath2TmpPath.put(pathRaw, tmpPathThis);
+			}
 		}
 		return mapPath2TmpPath;
 	}
