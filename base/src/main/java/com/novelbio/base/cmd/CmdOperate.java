@@ -16,6 +16,7 @@ import org.apache.log4j.Logger;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.novelbio.base.StringOperate;
+import com.novelbio.base.cmd.StreamOut.EnumCmdStreamStat;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.dataStructure.ArrayOperate;
@@ -519,7 +520,7 @@ public class CmdOperate extends RunProcess {
 	}
 	
 	private void waitStreamOutStd() {
-		while (outputGobbler == null) {
+		while (outputGobbler == null || !outputGobbler.isStarted()) {
 			if (finishFlag != null && finishFlag.isFinish()) {
 				break;
 			}
@@ -537,7 +538,7 @@ public class CmdOperate extends RunProcess {
 		}
 	}
 	private void waitStreamOutErr() {
-		while (errorGobbler == null) {
+		while (errorGobbler == null || !errorGobbler.isStarted()) {
 			if (finishFlag != null && (!finishFlag.isStart() || finishFlag.isFinish())) {
 				break;
 			}
@@ -608,8 +609,6 @@ public class CmdOperate extends RunProcess {
 		} finally {
 			closeOutStream();
 		}
-
-		
 	}
 	
 	private Thread setAndGetInStream() {
@@ -797,6 +796,7 @@ public class CmdOperate extends RunProcess {
 			running(isCopyFileInAndRecordFiles, isMoveFileOut);
 			runThreadStat = RunThreadStat.finishNormal;
 		} catch (Throwable e) {
+			e.printStackTrace();
 			exception = e;
 			runThreadStat = RunThreadStat.finishAbnormal;
 		}

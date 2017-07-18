@@ -21,6 +21,10 @@ public class StreamOut extends RunProcess {
 	/** 每2000ms刷新一次txt文本，这是因为写入错误行会很慢，刷新就可以做到及时看结果 */
 	private static final int timeTxtFlush = 20000;
 	
+	public static enum EnumCmdStreamStat {
+		Initial, Running, Finish 
+	}
+	
 	/** 运行进程的pid */
 	IntProcess process;
 	InputStream is;
@@ -32,7 +36,7 @@ public class StreamOut extends RunProcess {
 	/** lsInfo中最多存储500条信息 */
 	int lineNum = 500;
 	
-	boolean isFinished = false;
+	EnumCmdStreamStat runStat = EnumCmdStreamStat.Initial;
 	boolean getInputStream = false;
 
 	/** 如果将输出信息写入lsInfo中，是否还将这些信息打印到控制台 */
@@ -64,18 +68,6 @@ public class StreamOut extends RunProcess {
 	}
 	
 	/**
-	 * 直接获取一个标记为完成状态的StreamOut
-	 * @param is 从cmd获取的输出流
-	 * @param process 
-	 * @param isToTermiate 是否打印到控制台
-	 * @param isStd 是打印到标准输出还是错误输出
-	 */
-	public void setFinish() {
-		this.isFinished = true;
-	}
-	
-	
-	/**
 	 *  指定一个out流，cmd的输出流就会定向到该流中<br>
 	 * 该方法和{@link #setGetInputStream(boolean)} 冲突
 	 * @param os 输出流
@@ -103,7 +95,7 @@ public class StreamOut extends RunProcess {
 			}
 		}
 		  
-		isFinished = true;
+		runStat = EnumCmdStreamStat.Finish;
     }
 	
 	/** 是否要获取输入流，默认为false<br>
@@ -121,7 +113,17 @@ public class StreamOut extends RunProcess {
 		this.lineNum = linNum;
 	}
 	public boolean isFinished() {
-		return isFinished;
+		return runStat == EnumCmdStreamStat.Finish;
+	}
+	/**
+	 * 已经运行起来了，包括运行中和运行结束两个状态
+	 * @return
+	 */
+	public boolean isStarted() {
+		return runStat == EnumCmdStreamStat.Running || runStat == EnumCmdStreamStat.Finish;
+	}
+	public EnumCmdStreamStat getEnumRunStat() {
+		return runStat;
 	}
 	public InputStream getCmdOutStream() {
 		return is;
@@ -136,7 +138,7 @@ public class StreamOut extends RunProcess {
 	 * 
 	 */
 	protected void running() {
-		isFinished = false;
+		runStat = EnumCmdStreamStat.Running;
 		if (!getInputStream) {
 			if (os == null) {
 				exhaustInStream(is);
@@ -149,7 +151,7 @@ public class StreamOut extends RunProcess {
 					copyLarge(is, os);
 				}
 			}
-			isFinished = true;
+			runStat = EnumCmdStreamStat.Finish;
 		}
 	}
 	
