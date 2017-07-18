@@ -53,7 +53,7 @@ public class ClassFinder {
                String protocol = url.getProtocol();  
                // 如果是以文件的形式保存在服务器上  
                if ("file".equals(protocol)) {
-            	   logger.info("file类型的扫描");  
+            	   logger.info("file scan");  
                    // 获取包的物理路径  
                    String filePath = URLDecoder.decode(url.getFile(), "UTF-8");  
                    // 以文件的方式扫描整个包下的文件 并添加到集合中  
@@ -62,7 +62,7 @@ public class ClassFinder {
                } else if ("jar".equals(protocol)) {
                    // 如果是jar包文件  
                    // 定义一个JarFile  
-            	   logger.info("jar类型的扫描");  
+            	   logger.info("jar scan");  
                    JarFile jar;  
                    try {  
                        // 获取jar  
