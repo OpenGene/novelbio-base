@@ -1639,7 +1639,7 @@ public class FileOperate {
 	 * @return
 	 */
 	public static void moveFile(boolean cover, String oldFileName, String newFileName) {
-		moveFile(FileOperate.getPath(oldFileName), newFileName, cover);
+		moveFile(cover, FileOperate.getPath(oldFileName), newFileName);
 	}
 
 	/**
@@ -1653,7 +1653,7 @@ public class FileOperate {
 	 */
 	public static void moveFile(boolean cover, Path oldPath, Path newFileName) {
 		String newPath = getAbsolutePath(newFileName);
-		moveFile(oldPath, newPath, cover);
+		moveFile(cover, oldPath, newPath);
 	}
 
 	/**
@@ -1672,7 +1672,7 @@ public class FileOperate {
 		}
 		String newFileName = newPath + NewName;
 		Path oldFile = getPath(oldFileName);
-		moveFile(oldFile, newFileName, cover);
+		moveFile(cover, oldFile, newFileName);
 	}
 
 	/**
@@ -1683,8 +1683,7 @@ public class FileOperate {
 	 * @param cover
 	 * @return
 	 */
-	// TODO 待测试
-	private static void moveFile(Path oldFile, String newPathName, boolean cover) {
+	private static void moveFile(boolean cover, Path oldFile, String newPathName) {
 		if (isFileExistAndNotDir(oldFile)) {
 			moveSingleFile(oldFile, newPathName, cover);
 		} else if (isFileDirectory(oldFile)) {
