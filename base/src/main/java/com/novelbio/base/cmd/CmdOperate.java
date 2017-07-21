@@ -928,6 +928,12 @@ public class CmdOperate extends RunProcess {
 		return false;
 	}
 
+	public boolean isFinished() {
+		if (finishFlag != null && finishFlag.flag != null) {
+			return true;
+		}
+		return false;
+	}
 	/** 是否正常结束 */
 	public boolean isFinishedNormal() {
 		if (finishFlag != null && finishFlag.flag != null && finishFlag.flag == 0) {
