@@ -2,6 +2,9 @@ package com.novelbio.base.security;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -11,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.novelbio.base.StringOperate;
+import com.novelbio.base.dataOperate.DateUtil;
 
 public class Crypter {
 	private static Logger logger = LoggerFactory.getLogger(Crypter.class);
@@ -147,6 +151,7 @@ public class Crypter {
 			String output = Coder.encryptBASE64(DESCoder.encryptAES(input.getBytes(), key));
 			return output;
 		} catch (Exception e) {
+			e.printStackTrace();
 			logger.error("encryptAES error.", e);
 		}
 		return null;
@@ -248,4 +253,30 @@ public class Crypter {
 			return null;
 		}
 	}
+	
+	/**
+	 * 读http请求的参数加密和签名。<br/>
+	 * 1.先对请求的参数构成的json字符串用AES加密.秘钥为16位的任意字符串;<br/>
+	 * 2.对秘钥用RSA算法加密;<br/>
+	 * 3.对请求的url+请求时间+加密后的请求参数,用md5进行签名.<br/>
+	 * 
+	 * @param url
+	 * @param paramJson
+	 * @return
+	 */
+	public static Map<String, Object> encryptHttpParams(String url, String paramJson) {
+		long st = Long.parseLong(("" + System.currentTimeMillis()).substring(7));
+		String key = DateUtil.getDateMSAndRandom().substring(0, 16);
+		System.out.println(key.length());
+		String paramEn = encryptAESonCBC(paramJson, key);
+		String keyEn = encryptByPublicKey(key);
+		String sign = signByMD5(url + st + paramEn);
+
+		Map<String, Object> params = new HashMap<>();
+		params.put("st", st);
+		params.put("params", paramEn);
+		params.put("key", keyEn);
+		params.put("sign", sign);
+		return params;
+	} 
 }

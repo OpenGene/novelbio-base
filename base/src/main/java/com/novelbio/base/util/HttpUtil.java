@@ -16,6 +16,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -35,13 +36,16 @@ import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
+import com.alibaba.fastjson.JSON;
 import com.novelbio.base.fileOperate.FileOperate;
+import com.novelbio.base.security.Crypter;
 
 /**
  * HTTP 请求工具类
@@ -158,7 +162,11 @@ public class HttpUtil {
 				}
 				httpPost.setEntity(new UrlEncodedFormEntity(pairList, Charset.forName("UTF-8")));
 			}
-			httpClient = SeeSSLCloseableHttpClient.getCloseableHttpClient();
+			if (apiUrl.startsWith("https")) {
+				httpClient = SeeSSLCloseableHttpClient.getCloseableHttpClient();
+			} else {
+				httpClient = HttpClients.createDefault();
+			}
 			response = httpClient.execute(httpPost);
 			HttpEntity entity = response.getEntity();
 			httpStr = EntityUtils.toString(entity, "UTF-8");
@@ -201,11 +209,12 @@ public class HttpUtil {
 	}
 
 	public static void main(String[] args) {
-		String sessionId = "c78d3412-e0d1-4495-870e-6106b7d3ef28";
-		Map<String, String> header = new HashMap<String, String>();
-		header.put("Cookie", "sid=" + sessionId);
-		String res = doPost("https://cloud.novelbrain.com/gold_getdaliygold", null, header);
-		System.out.println("res=" + res);
+		Map<String, Object> params = new HashMap<>();
+		params.put("taskId", "taskId");
+		String requestUrl = "http://pay.test.com/api/freezing_Frozen";
+		Map<String, Object> paramsEn = Crypter.encryptHttpParams(requestUrl.substring(requestUrl.lastIndexOf("/") + 1), JSON.toJSONString(params));
+		String resultStr = HttpUtil.doPost(requestUrl, paramsEn, null);
+		System.out.println("res=" + resultStr);
 	}
 }
 
