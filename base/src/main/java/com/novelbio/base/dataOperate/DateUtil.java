@@ -286,7 +286,7 @@ public class DateUtil {
 		if (startDate == null || endDate == null) {
 			return null;
 		}
-		return (startDate.getTime() - endDate.getTime()) / 60_000; 
+		return (endDate.getTime() - startDate.getTime()) / 60_000; 
 	}
 	
 	/**
