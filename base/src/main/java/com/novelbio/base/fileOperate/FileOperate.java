@@ -2175,7 +2175,7 @@ public class FileOperate {
 		try {
 			Files.list(path).forEach((insidePath) -> {
 				if (isFileDirectory(insidePath)) {
-					deleteFolderClean(insidePath);
+					deleteFolder(insidePath);
 				} else {
 					delFile(insidePath);
 				}
@@ -2189,6 +2189,11 @@ public class FileOperate {
 	 * 删除目录（文件夹）以及目录下的文件，包括本文件夹
 	 */
 	private static void deleteFolder(Path dirFile) {
+		if (isSymbolicLink(dirFile)) {
+			delFile(dirFile);
+			return;
+		}
+		
 		try {
 			Files.list(dirFile).forEach((file) -> {
 				if (isFileDirectory(file)) {
@@ -2223,11 +2228,8 @@ public class FileOperate {
 	 * @return 删除成功返回 true，否则返回 false 不存在文件也返回true
 	 */
 	public static void deleteFileFolder(Path file) {
-		if (file == null)
-			return;
-		if (isSymbolicLink(file)) {
-			delFile(file);
-		}
+		if (file == null) return;
+		
 		if (isFileExist(file)) {
 			if (isFileDirectory(file)) {
 				deleteFolder(file);

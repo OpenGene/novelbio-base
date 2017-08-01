@@ -112,5 +112,3 @@ public class CmdPathAli extends CmdPath {
 		return path;
 	}
 }
-
-
