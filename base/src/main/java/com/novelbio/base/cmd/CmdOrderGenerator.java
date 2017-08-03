@@ -34,7 +34,6 @@ public class CmdOrderGenerator {
 	
 	List<String> lsCmd = new ArrayList<>();
 	
-	CmdPath cmdPath;
 	
 	/** 是否在外部获取stdout的流文件, <b>默认为false</b>*/
 	boolean isGetStdoutStream = false;
@@ -63,28 +62,25 @@ public class CmdOrderGenerator {
 	 */
 	boolean isConvertHdfs2Loc = true;	
 	
-	public CmdOrderGenerator(boolean isLocal) {
-		cmdPath = CmdPath.getInstance(isLocal);
-	}
-	/** 设定复制输入输出文件所到的临时文件夹 */
-	public void setTmpPath(String tmpPath) {
-		cmdPath.setTmpPath(tmpPath);
-	}
-	public String getTmpPath() {
-		return cmdPath.getTmpPath();
-	}
-	/** 结束后删除临时文件夹，仅当tmp文件夹为随机生成的时候才会删除 */
-	public void deleletTmpPath() {
-		cmdPath.deleteTmpPath();
-	}
-	
-	/** 临时文件夹中的文件是否删除 */
-	public void setRetainTmpFiles(boolean isRetainTmpFiles) {
-		cmdPath.setRetainTmpFiles(isRetainTmpFiles);
-	}
-	public void setCmdPathCluster(CmdPathCluster cmdPathCluster) {
-		cmdPath.setCmdPathCluster(cmdPathCluster);
-	}
+//	/** 设定复制输入输出文件所到的临时文件夹 */
+//	public void setTmpPath(String tmpPath) {
+//		cmdPath.setTmpPath(tmpPath);
+//	}
+//	public String getTmpPath() {
+//		return cmdPath.getTmpPath();
+//	}
+//	/** 结束后删除临时文件夹，仅当tmp文件夹为随机生成的时候才会删除 */
+//	public void deleletTmpPath() {
+//		cmdPath.deleteTmpPath();
+//	}
+//	
+//	/** 临时文件夹中的文件是否删除 */
+//	public void setRetainTmpFiles(boolean isRetainTmpFiles) {
+//		cmdPath.setRetainTmpFiles(isRetainTmpFiles);
+//	}
+//	public void setCmdPathCluster(CmdPathCluster cmdPathCluster) {
+//		cmdPath.setCmdPathCluster(cmdPathCluster);
+//	}
 	/** 如果为null就不加入 */
 	public void addCmdParam(String param) {
 		if (!StringOperate.isRealNull(param)) {
@@ -125,29 +121,29 @@ public class CmdOrderGenerator {
 		this.isConvertHdfs2Loc = isConvertHdfs2Loc;
 	}
 	
-	/** 是否将输入文件拷贝到临时文件夹，默认为false */
-	public void setRedirectInToTmp(boolean isRedirectInToTmp) {
-		cmdPath.setRedirectInToTmp(isRedirectInToTmp);
-	}
-	/** 是否将输出先重定位到临时文件夹，再拷贝回实际文件夹，默认为false */
-	public void setRedirectOutToTmp(boolean isRedirectOutToTmp) {
-		cmdPath.setRedirectOutToTmp(isRedirectOutToTmp);
-	}
-
-	/**
-	 * 添加输入文件路径的参数，配合{@link #setRedirectInToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
-	 * @param input 输入文件的哪个参数
-	 */
-	public void addCmdParamInput(String input) {
-		cmdPath.addCmdParamInput(input);
-	}
-	/**
-	 * 添加输出文件路径的参数，配合{@link #setRedirectOutToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
-	 * @param output 输出文件的哪个参数，如果输入参数类似 "--outPath=/hdfs:/test.fa"，这里填写 "/hdfs:/test.fa"
-	 */
-	public void addCmdParamOutput(String output) {
-		cmdPath.addCmdParamOutput(output);
-	}
+//	/** 是否将输入文件拷贝到临时文件夹，默认为false */
+//	public void setRedirectInToTmp(boolean isRedirectInToTmp) {
+//		cmdPath.setRedirectInToTmp(isRedirectInToTmp);
+//	}
+//	/** 是否将输出先重定位到临时文件夹，再拷贝回实际文件夹，默认为false */
+//	public void setRedirectOutToTmp(boolean isRedirectOutToTmp) {
+//		cmdPath.setRedirectOutToTmp(isRedirectOutToTmp);
+//	}
+//
+//	/**
+//	 * 添加输入文件路径的参数，配合{@link #setRedirectInToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
+//	 * @param input 输入文件的哪个参数
+//	 */
+//	public void addCmdParamInput(String input) {
+//		cmdPath.addCmdParamInput(input);
+//	}
+//	/**
+//	 * 添加输出文件路径的参数，配合{@link #setRedirectOutToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
+//	 * @param output 输出文件的哪个参数，如果输入参数类似 "--outPath=/hdfs:/test.fa"，这里填写 "/hdfs:/test.fa"
+//	 */
+//	public void addCmdParamOutput(String output) {
+//		cmdPath.addCmdParamOutput(output);
+//	}
 	
 	/** 如果param为null则返回 */
 	public void addCmdParam(List<String> lsCmd) {
@@ -227,46 +223,46 @@ public class CmdOrderGenerator {
 	}
 	
 	/** 返回执行的具体cmd命令，不会将文件路径删除，仅给相对路径 */
-	public String[] getCmdExeStr() {
-		return getCmdExeStrModify();
+	public String[] getCmdExeStr(CmdMoveFile cmdMoveFile) {
+		return getCmdExeStrModify(cmdMoveFile);
 	}
 	
 	/** 返回执行的具体cmd命令，会将文件路径删除，仅给相对路径 */
-	public String[] getCmdExeStrModify() {
-		cmdPath.generateTmPath();
+	public String[] getCmdExeStrModify(CmdMoveFile cmdMoveFile) {
+		cmdMoveFile.generateTmPath();
 		ConvertCmdGetFileName convertGetFileName = new ConvertCmdGetFileName();
-		return convertGetFileName.convertCmd(generateRunCmd(false));
+		return convertGetFileName.convertCmd(generateRunCmd(false, cmdMoveFile));
 	}
 	
-	public void generateTmPath() {
-		cmdPath.generateTmPath();
-	}
+//	public void generateTmPath() {
+//		cmdPath.generateTmPath();
+//	}
 	
 	/** 返回执行的具体cmd命令，实际cmd命令 */
-	public String[] getCmdExeStrReal() {
-		cmdPath.generateTmPath();
-		return generateRunCmd(false);
+	public String[] getCmdExeStrReal(CmdMoveFile cmdMoveFile) {
+		cmdMoveFile.generateTmPath();
+		return generateRunCmd(false, cmdMoveFile);
 	}
 
-	/** 在cmd运行前，将输入文件拷贝到临时文件夹下
-	 * 同时记录临时文件夹下有多少文件，用于后面删除时跳过 */
-	public void copyFileInAndRecordFiles() {
-		cmdPath.copyFileInAndRecordFiles();
-	}
-	/** 在cmd运行前，将输入文件拷贝到临时文件夹下 */
-	public void copyFileIn() {
-		cmdPath.copyFileInTmp();
-	}
-	/** 记录临时文件夹下有多少文件，用于后面删除时跳过 */
-	public void recordFilesWhileRedirectOutToTmp() {
-		cmdPath.recordFilesWhileRedirectOutToTmp();
-	}
+//	/** 在cmd运行前，将输入文件拷贝到临时文件夹下
+//	 * 同时记录临时文件夹下有多少文件，用于后面删除时跳过 */
+//	public void copyFileInAndRecordFiles() {
+//		cmdPath.copyFileInAndRecordFiles();
+//	}
+//	/** 在cmd运行前，将输入文件拷贝到临时文件夹下 */
+//	public void copyFileIn() {
+//		cmdPath.copyFileInTmp();
+//	}
+//	/** 记录临时文件夹下有多少文件，用于后面删除时跳过 */
+//	public void recordFilesWhileRedirectOutToTmp() {
+//		cmdPath.recordFilesWhileRedirectOutToTmp();
+//	}
 	
 	/** 必须先调用{@link #copyFileInAndRecordFiles()}，
 	 * 等运行cmd结束后还需要调用{@link #moveFileOut()} 来完成运行 */
-	public String[] getRunCmd() {
-		cmdPath.generateTmPath();
-		return generateRunCmd(true);
+	public String[] getRunCmd(CmdMoveFile cmdMoveFile) {
+		cmdMoveFile.generateTmPath();
+		return generateRunCmd(true, cmdMoveFile);
 	}
 		
 	/** 返回实际运行的cmd string数组
@@ -275,7 +271,7 @@ public class CmdOrderGenerator {
 	 * 如果是实际执行的cmd，就需要重定向
 	 * @return
 	 */
-	protected String[] generateRunCmd(boolean redirectStdAndErr) {
+	protected String[] generateRunCmd(boolean redirectStdAndErr, CmdMoveFile cmdMoveFile) {
 		List<String> lsReal = new ArrayList<>();
 		boolean stdOut = false;
 		boolean errOut = false;
@@ -283,7 +279,7 @@ public class CmdOrderGenerator {
 		saveFilePath = null;
 		saveErrPath = null;
 		
-		ConvertCmdTmp convertCmdTmp = cmdPath.generateConvertCmdTmp();
+		ConvertCmdTmp convertCmdTmp = cmdMoveFile.generateConvertCmdTmp();
 		ConvertCmd convertOs2Local = getConvertOs2Local();
 		
 		for (String tmpCmd : lsCmd) {
@@ -334,20 +330,20 @@ public class CmdOrderGenerator {
 		return ServiceEnvUtil.isAliyunEnv() ? new ConvertOss() : new ConvertHdfs();
 	}
 	
-	/**
-	 * 将tmpPath文件夹中的内容全部移动到resultPath中 */
-	public void moveFileOut() {
-		cmdPath.moveFileOut();
-	}
-	
-	/** 删除中间文件，会把临时的input文件也删除 */
-	public void deleteTmpFile() {
-		cmdPath.deleteTmpFile();
-	}
-	
-	public void clearLsCmd() {
-		lsCmd.clear();
-		cmdPath.clearLsCmd();
-	}
+//	/**
+//	 * 将tmpPath文件夹中的内容全部移动到resultPath中 */
+//	public void moveFileOut() {
+//		cmdPath.moveFileOut();
+//	}
+//	
+//	/** 删除中间文件，会把临时的input文件也删除 */
+//	public void deleteTmpFile() {
+//		cmdPath.deleteTmpFile();
+//	}
+//	
+//	public void clearLsCmd() {
+//		lsCmd.clear();
+//		cmdPath.clearLsCmd();
+//	}
 
 }

@@ -14,7 +14,8 @@ public class TestConvertCmd {
 	
 	@Test
 	public void cmdConvertHdfs() {
-		CmdOrderGenerator cmdPath = new CmdOrderGenerator(true);
+		CmdOrderGenerator cmdPath = new CmdOrderGenerator();
+		CmdMoveFile cmdMoveFile = CmdMoveFile.getInstance(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile1 = "hdfs:/src/test/resources/testTrinity.fa";
 		String inFile2 = "hdfs:/src/test/resources/testTrinity2.fa";
@@ -24,7 +25,7 @@ public class TestConvertCmd {
 		lsCmd.add("--outPath=" + outFile);
 		cmdPath.setLsCmd(lsCmd);
 		
-		String[] ss = cmdPath.getRunCmd();
+		String[] ss = cmdPath.getRunCmd(cmdMoveFile);
 		String inFileLocal1 = FileHadoop.convertToLocalPath(inFile1);
 		String inFileLocal2 = FileHadoop.convertToLocalPath(inFile2);
 		String outLocal = FileHadoop.convertToLocalPath(outFile);

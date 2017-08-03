@@ -82,7 +82,8 @@ public class CmdOperate extends RunProcess {
 	boolean getCmdInErrStream = false;
 	
 	/** 用来传递参数，拷贝输入输出文件夹的类 */
-	protected CmdOrderGenerator cmdOrderGenerator = new CmdOrderGenerator(!ServiceEnvUtil.isAliyunEnv());
+	protected CmdOrderGenerator cmdOrderGenerator = new CmdOrderGenerator();
+	protected CmdMoveFile cmdMoveFile =CmdMoveFile.getInstance(!ServiceEnvUtil.isAliyunEnv());
 
 	/** 输出本程序正在运行时的参数等信息，本功能也用docker替换了 */
 	@Deprecated
@@ -204,12 +205,21 @@ public class CmdOperate extends RunProcess {
 		((ProcessRemote)process).setKeyFile(keyFile);
 		cmdOrderGenerator.setLsCmd(lsCmd);
 	}
+	
+	/**
+	 * 如果要外部移动数据，可以把这个配置进来，
+	 * 但是必须在{@link CmdOperate}创建完毕后第一时间设置
+	 */
+	public void setCmdMoveFile(CmdMoveFile cmdMoveFile) {
+		this.cmdMoveFile = cmdMoveFile;
+	}
+	
 	/**
 	 * 上一个task所输出的文件与临时文件的对照表
 	 * @param cmdPathCluster
 	 */
 	public void setCmdPathCluster(CmdPathCluster cmdPathCluster) {
-		cmdOrderGenerator.setCmdPathCluster(cmdPathCluster);
+		cmdMoveFile.setCmdPathCluster(cmdPathCluster);
 	}
 	/** 是否将本该输出到控制台的结果依然写入控制台，一般在运行长时间任务的时候，
 	 * 譬如 tophat等，需要写入控制台，如果一些譬如获得version之类的命令，就不需要
@@ -227,7 +237,7 @@ public class CmdOperate extends RunProcess {
 	 */
 	private void setCmdFile(String cmd, String cmdWriteInFileName) {
 		while (true) {
-			cmd1SH = cmdOrderGenerator.getTmpPath() + cmdWriteInFileName.replace("\\", "/") + DateUtil.getDateAndRandom() + ".sh";
+			cmd1SH = cmdMoveFile.getTmpPath() + cmdWriteInFileName.replace("\\", "/") + DateUtil.getDateAndRandom() + ".sh";
 			if (!FileOperate.isFileExist(cmd1SH)) {
 				break;
             }
@@ -235,18 +245,18 @@ public class CmdOperate extends RunProcess {
 		TxtReadandWrite txtCmd1 = new TxtReadandWrite(cmd1SH, true);
 		txtCmd1.writefile(cmd);
 		txtCmd1.close();
-		cmdOrderGenerator.clearLsCmd();
+		cmdMoveFile.clearLsCmd();
 		cmdOrderGenerator.addCmdParam("sh");
 		cmdOrderGenerator.addCmdParam(cmd1SH);
 	}
 	
 	/** 设定临时文件夹，会把重定向的文件拷贝到这个文件夹中 */
 	public void setCmdTmpPath(String tmpPath) {
-		cmdOrderGenerator.setTmpPath(tmpPath);
+		cmdMoveFile.setTmpPath(tmpPath);
 	}
 	/** 是否删除临时文件夹中的文件，如果连续的cmd需要顺序执行，考虑不删除 */
 	public void setRetainTmpFiles(boolean isRetainTmpFiles) {
-		cmdOrderGenerator.setRetainTmpFiles(isRetainTmpFiles);
+		cmdMoveFile.setRetainTmpFiles(isRetainTmpFiles);
 	}
 	public void setLsCmd(List<String> lsCmd) {
 		cmdOrderGenerator.setLsCmd(lsCmd);
@@ -316,7 +326,7 @@ public class CmdOperate extends RunProcess {
 	 * @param output
 	 */
 	public void addCmdParamInput(String input) {
-		cmdOrderGenerator.addCmdParamInput(input);
+		cmdMoveFile.addCmdParamInput(input);
 	}
 	/**
 	 * 添加输入文件路径的参数，配合{@link #setRedirectInToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
@@ -325,7 +335,7 @@ public class CmdOperate extends RunProcess {
 	 */
 	public void addCmdParamInput(List<String> lsInput) {
 		for (String path : lsInput) {
-			cmdOrderGenerator.addCmdParamInput(path);
+			cmdMoveFile.addCmdParamInput(path);
 		}
 	}
 	/**
@@ -334,7 +344,7 @@ public class CmdOperate extends RunProcess {
 	 * @param output 输出文件的哪个参数，默认不加入参数list，仅仅标记一下
 	 */
 	public void addCmdParamOutput(String output) {
-		cmdOrderGenerator.addCmdParamOutput(output);
+		cmdMoveFile.addCmdParamOutput(output);
 	}
 	/**
 	 * 添加输入文件路径的参数，配合{@link #setRedirectInToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
@@ -343,7 +353,7 @@ public class CmdOperate extends RunProcess {
 	 */
 	public void addCmdParamOutput(List<String> lsOut) {
 		for (String path : lsOut) {
-			cmdOrderGenerator.addCmdParamOutput(path);
+			cmdMoveFile.addCmdParamOutput(path);
 		}
 	}
 	
@@ -357,11 +367,11 @@ public class CmdOperate extends RunProcess {
 	
 	/** 是否将输入文件拷贝到临时文件夹，默认为false */
 	public void setRedirectInToTmp(boolean isRedirectInToTmp) {
-		cmdOrderGenerator.setRedirectInToTmp(isRedirectInToTmp);
+		cmdMoveFile.setRedirectInToTmp(isRedirectInToTmp);
 	}
 	/** 是否将输出先重定位到临时文件夹，再拷贝回实际文件夹，默认为false */
 	public void setRedirectOutToTmp(boolean isRedirectOutToTmp) {
-		cmdOrderGenerator.setRedirectOutToTmp(isRedirectOutToTmp);
+		cmdMoveFile.setRedirectOutToTmp(isRedirectOutToTmp);
 	}
 	
 	/** 如果param为null则返回 */
@@ -380,14 +390,14 @@ public class CmdOperate extends RunProcess {
 	
 	/** 返回执行的具体cmd命令，会将文件路径删除，仅给相对路径 */
 	public String getCmdExeStrModify() {
-		String[] resultCmd = cmdOrderGenerator.getCmdExeStrModify();
+		String[] resultCmd = cmdOrderGenerator.getCmdExeStrModify(cmdMoveFile);
 		replaceInputStreamFile(resultCmd);
 		return ArrayOperate.cmbString(resultCmd, " ");
 	}
 	
 	/** 返回执行的具体cmd命令，实际cmd命令 */
 	public String getCmdExeStrReal() {
-		String[] resultCmd = cmdOrderGenerator.getCmdExeStrReal();
+		String[] resultCmd = cmdOrderGenerator.getCmdExeStrReal(cmdMoveFile);
 		replaceInputStreamFile(resultCmd);
 		return ArrayOperate.cmbString(resultCmd, " ");
 	}
@@ -395,7 +405,7 @@ public class CmdOperate extends RunProcess {
 	/** 返回执行的具体cmd命令，实际cmd命令 */
 	@VisibleForTesting
 	public String getRunCmd() {
-		String[] resultCmd = cmdOrderGenerator.getRunCmd();
+		String[] resultCmd = cmdOrderGenerator.getRunCmd(cmdMoveFile);
 		replaceInputStreamFile(resultCmd);
 		return ArrayOperate.cmbString(resultCmd, " ");
 	}
@@ -569,7 +579,7 @@ public class CmdOperate extends RunProcess {
 		cmdOrderGenerator.setIsGetStdoutStream(getCmdInStdStream);
 		cmdOrderGenerator.setIsGetStderrStream(getCmdInErrStream);
 		
-		String[] cmdRun = cmdOrderGenerator.getRunCmd();
+		String[] cmdRun = cmdOrderGenerator.getRunCmd(cmdMoveFile);
 		finishFlag.start();
 		process.exec(cmdRun);
 		
@@ -758,7 +768,8 @@ public class CmdOperate extends RunProcess {
 	 * bam文件还没处理完。这时候就需要在外部等bam文件线程结束后再移动文件。
 	 * 因此这里就选择不把输出文件移出去。
 	 * 
-	 * @param isCopyFileInAndRecordFiles false 则需要手动调用 {@link #copyFileIn()} 和 {@link #recordFilesWhileRedirectOutToTmp()}
+	 * @param isCopyFileInAndRecordFiles false 则需要手动调用 {@link #prepare()},  {@link #copyFileIn()} 和 {@link #recordFilesWhileRedirectOutToTmp()}
+	 * 或者调用方法 {@link #setCmdMoveFile(CmdMoveFile)} 从外部传入 {@link CmdMoveFile} 对象
 	 * @param isMoveFileOut false 则需要手动调用 {@link #moveFileOut()}
 	 */
 	public void runWithExp(boolean isCopyFileInAndRecordFiles, boolean isMoveFileOut) {
@@ -835,32 +846,35 @@ public class CmdOperate extends RunProcess {
 	 * 本步骤是解析cmd命令，主要目的是获取 > 之后所跟的路径<br>
 	 */
 	public void prepare() {
-		cmdOrderGenerator.generateTmPath();
-		cmdOrderGenerator.generateRunCmd(true);
+		cmdMoveFile.generateTmPath();
+		cmdOrderGenerator.generateRunCmd(true, cmdMoveFile);
 	}
-	
+	/**
+	 * 生成cmd命令，仅用于ScriptBuildFacade中的多线程部分
+	 */
+	public void generateRunCmd() {
+		cmdOrderGenerator.generateRunCmd(true, cmdMoveFile);
+	}
 	/**
 	 * 复制文件到临时文件夹<br>
 	 * 当{@link #runWithExp(boolean, boolean)} 第一个参数为false时调用
 	 * 包含{@link #prepare()}的功能
 	 */
 	public void copyFileIn() {
-		cmdOrderGenerator.generateTmPath();
-		cmdOrderGenerator.copyFileIn();
-		cmdOrderGenerator.generateRunCmd(true);
+		cmdMoveFile.copyFileIn();
 	}
 	/** 记录临时文件夹下有多少文件，用于后面删除时跳过 <br>
 	 * 当{@link #runWithExp(boolean, boolean)} 第一个参数为false时调用，在 {@link #copyFileIn()} 之后调用
 	 */
 	public void recordFilesWhileRedirectOutToTmp() {
-		cmdOrderGenerator.recordFilesWhileRedirectOutToTmp();
+		cmdMoveFile.recordFilesWhileRedirectOutToTmp();
 	}
 	
 	private void running(boolean isCopyFileInAndRecordFiles, boolean isMoveFileOut) {
 		finishFlag = new FinishFlag();
 		if (isCopyFileInAndRecordFiles) {
-			cmdOrderGenerator.generateTmPath();
-			cmdOrderGenerator.copyFileInAndRecordFiles();
+			cmdMoveFile.generateTmPath();
+			cmdMoveFile.copyFileInAndRecordFiles();
 		}
 		
 		String realCmd = getCmdExeStr();
@@ -902,8 +916,9 @@ public class CmdOperate extends RunProcess {
 		if (process instanceof ProcessRemote) {
 			((ProcessRemote)process).closeSession();
 		}
-		
-		cmdOrderGenerator.deleletTmpPath();
+		if (isMoveFileOut) {
+			cmdMoveFile.deleteTmpPath();
+		}
 		
 		//最后才抛出异常
 		if (runtimeException != null) {
@@ -917,8 +932,8 @@ public class CmdOperate extends RunProcess {
 	 * 在 {@link #runWithExp(boolean, boolean)} 之后调用
 	 */
 	public void moveFileOut() {
-		cmdOrderGenerator.moveFileOut();
-		cmdOrderGenerator.deleteTmpFile();
+		cmdMoveFile.moveFileOut();
+		cmdMoveFile.deleteTmpFile();
 	}
 	
 	@Override

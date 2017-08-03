@@ -16,8 +16,8 @@ import com.novelbio.jsr203.bos.PathDetailOs;
  * 同时还产生相应的cmd命令参数
  * @author zong0jie
  */
-public class CmdPathAli extends CmdPath {
-	private static final Logger logger = LoggerFactory.getLogger(CmdPathAli.class);
+public class CmdMoveFileAli extends CmdMoveFile {
+	private static final Logger logger = LoggerFactory.getLogger(CmdMoveFileAli.class);
 	
 	/** 只读挂载相对路径 */
 	public static final String IN_MAP = ".inmap.";
@@ -99,8 +99,8 @@ public class CmdPathAli extends CmdPath {
 	 * @return
 	 */
 	public static String convertPathAliRead(String path) {
-		String pathIn = CmdPathAli.convertAli2Loc(path, true);
-		String pathOut = CmdPathAli.convertAli2Loc(path, false);
+		String pathIn = CmdMoveFileAli.convertAli2Loc(path, true);
+		String pathOut = CmdMoveFileAli.convertAli2Loc(path, false);
 		if (!StringOperate.isEqual(pathIn, pathOut)) {
 			boolean isPathInExist = FileOperate.isFileExist(pathIn);
 			boolean isPathOutExist = FileOperate.isFileExist(pathOut);

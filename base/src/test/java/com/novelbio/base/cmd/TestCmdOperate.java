@@ -86,7 +86,7 @@ public class TestCmdOperate {
 		List<String> lsCmd = Lists.newArrayList("java", "-version");
 		CmdOperate cmdOperate = new CmdOperate(lsCmd);
 
-		String cmd = ArrayOperate.cmbString(cmdOperate.cmdOrderGenerator.getRunCmd(), " ");
+		String cmd = ArrayOperate.cmbString(cmdOperate.cmdOrderGenerator.getRunCmd(cmdOperate.cmdMoveFile), " ");
 		assertTrue("java -version".equals(cmd));
 
 		cmdOperate.runWithExp();
@@ -98,7 +98,7 @@ public class TestCmdOperate {
 
 		lsCmd = Lists.newArrayList("echo", "hello,world");
 		cmdOperate = new CmdOperate(lsCmd);
-		cmd = ArrayOperate.cmbString(cmdOperate.cmdOrderGenerator.getRunCmd(), " ");
+		cmd = ArrayOperate.cmbString(cmdOperate.cmdOrderGenerator.getRunCmd(cmdOperate.cmdMoveFile), " ");
 		soft.assertThat("echo hello,world").isEqualTo(cmd.trim());
 
 		cmdOperate.runWithExp();

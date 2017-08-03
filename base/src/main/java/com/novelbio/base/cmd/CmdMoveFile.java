@@ -21,15 +21,14 @@ import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.base.util.ServiceEnvUtil;
 
 /**
- * 输入cmdlist，将其整理为相应的cmd string array<br>
- * 并且移动输入文件到临时文件夹<br>
+ * 移动输入文件到临时文件夹<br>
  * 以及将输出文件移到目标文件夹<br>
  * 同时还产生相应的cmd命令参数
  * @author zong0jie
  *
  */
-public class CmdPath {
-	private static final Logger logger = LoggerFactory.getLogger(CmdPath.class);
+public class CmdMoveFile {
+	private static final Logger logger = LoggerFactory.getLogger(CmdMoveFile.class);
 		
 	private boolean isRedirectInToTmp = false;
 	private boolean isRedirectOutToTmp = false;
@@ -50,7 +49,7 @@ public class CmdPath {
 	 * key: 输入或输出的文件(夹)全名
 	 * value: 临时文件(夹)全名
 	 */
-	protected Map<String, String> mapName2TmpName = new HashMap<>();	
+	protected Map<String, String> mapName2TmpName = new HashMap<>();
 	/** 输入文件夹对应的输出文件夹，可以将输入文件夹里的文件直接复制到输出文件夹中 */
 	private Map<String, String> mapPath2TmpPathIn = new HashMap<>();
 	/** 输出文件夹对应的临时输出文件夹 */
@@ -128,8 +127,9 @@ public class CmdPath {
 	}
 	
 	//============================ 生成临时文件夹和配对路径 ============================
-	protected synchronized void generateTmPath() {
-		if (isGenerateTmpPath) {
+	/** 生成实际文件和临时文件对照表 */
+	public synchronized void generateTmPath() {
+  		if (isGenerateTmpPath) {
 			return;
 		}
 		if (cmdPathCluster == null) cmdPathCluster = new CmdPathCluster(false);
@@ -158,8 +158,8 @@ public class CmdPath {
 			mapPath2TmpPath.putAll(mapPath2TmpPathOut);
 		}
 		
-		mapName2TmpName = getMapName2TmpName(setFileNameAll, mapPath2TmpPath);
-		logger.debug("print mapName2TmpName");
+  		mapName2TmpName = getMapName2TmpName(setFileNameAll, mapPath2TmpPath);
+  		logger.debug("print mapName2TmpName");
 		logMapInfo(mapName2TmpName);
 		isGenerateTmpPath = true;
 	}
@@ -367,11 +367,11 @@ public class CmdPath {
 				setInput, setOutput, mapName2TmpName);
 	}
 	
-	public static CmdPath getInstance(boolean isLocal) {
+	public static CmdMoveFile getInstance(boolean isLocal) {
 		if (isLocal) {
-			return new CmdPath();
+			return new CmdMoveFile();
 		} else {
-			return new CmdPathAli();
+			return new CmdMoveFileAli();
 		}
 	}
 }

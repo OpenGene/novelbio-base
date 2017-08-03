@@ -147,7 +147,7 @@ public abstract class ConvertCmd {
 			} 
 			if(subCmd.startsWith("oss://")) {
 				// TODO 这里是有bug的.测试先这么写.
-				String convertCmd = CmdPathAli.convertAli2Loc(subCmd, isReadMap);
+				String convertCmd = CmdMoveFileAli.convertAli2Loc(subCmd, isReadMap);
 				logger.info("convert oss cmd unit from {} to {}", subCmd, convertCmd);
 				return convertCmd;
 			} else {

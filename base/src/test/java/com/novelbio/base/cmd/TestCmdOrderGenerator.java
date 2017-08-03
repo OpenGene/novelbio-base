@@ -41,18 +41,19 @@ public class TestCmdOrderGenerator {
 	}
 	
 	private void cmd1() {
-		CmdOrderGenerator cmdPath = new CmdOrderGenerator(true);
+		CmdOrderGenerator cmdPath = new CmdOrderGenerator();
+		CmdMoveFile cmdMoveFile = CmdMoveFile.getInstance(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile = "src/test/resources/testTrinity.fa";
 		lsCmd.add("bwa-index"); lsCmd.add(inFile);
 		cmdPath.setLsCmd(lsCmd);
-		cmdPath.setRedirectInToTmp(true);
-		cmdPath.setRedirectOutToTmp(true);
-		cmdPath.addCmdParamInput(inFile);
-		cmdPath.addCmdParamOutput("src/test/resources/cmd");
-		cmdPath.generateTmPath();
-		cmdPath.copyFileInAndRecordFiles();
-		String[] ss = cmdPath.getRunCmd();
+		cmdMoveFile.setRedirectInToTmp(true);
+		cmdMoveFile.setRedirectOutToTmp(true);
+		cmdMoveFile.addCmdParamInput(inFile);
+		cmdMoveFile.addCmdParamOutput("src/test/resources/cmd");
+		cmdMoveFile.generateTmPath();
+		cmdMoveFile.copyFileInAndRecordFiles();
+		String[] ss = cmdPath.getRunCmd(cmdMoveFile);
 		assertEquals("bwa-index", ss[0]);
 
 		assertEquals(PathDetail.getTmpPathRandom() +  "resources/testTrinity.fa", ss[1]);		
@@ -67,25 +68,26 @@ public class TestCmdOrderGenerator {
 		TxtReadandWrite txtWrite = new TxtReadandWrite(FileOperate.getPathName(ss[1]) + resultFileName, true);
 		txtWrite.writefileln("testCmdOrderGenerator");
 		txtWrite.close();
-		cmdPath.moveFileOut();
+		cmdMoveFile.moveFileOut();
 		
 		assertEquals(true, FileOperate.isFileExistAndBigThanSize(FileOperate.getPathName(inFile) + resultFileName, 0));
 	}
 	
 	private void cmd2() {
-		CmdOrderGenerator cmdPath = new CmdOrderGenerator(true);
+		CmdOrderGenerator cmdPath = new CmdOrderGenerator();
+		CmdMoveFile cmdMoveFile = CmdMoveFile.getInstance(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile = "src/test/resources/testTrinity.fa";
 		String outFile = "src/test/CmdOperateOut/testTrinity.fa";
 		lsCmd.add("bwa-index"); lsCmd.add(inFile); lsCmd.add(outFile);
 		cmdPath.setLsCmd(lsCmd);
-		cmdPath.setRedirectInToTmp(true);
-		cmdPath.setRedirectOutToTmp(true);
-		cmdPath.addCmdParamInput(inFile);
-		cmdPath.addCmdParamOutput(outFile);
-		cmdPath.generateTmPath();
-		cmdPath.copyFileInAndRecordFiles();
-		String[] ss = cmdPath.getRunCmd();
+		cmdMoveFile.setRedirectInToTmp(true);
+		cmdMoveFile.setRedirectOutToTmp(true);
+		cmdMoveFile.addCmdParamInput(inFile);
+		cmdMoveFile.addCmdParamOutput(outFile);
+		cmdMoveFile.generateTmPath();
+		cmdMoveFile.copyFileInAndRecordFiles();
+		String[] ss = cmdPath.getRunCmd(cmdMoveFile);
 		System.out.println(ArrayOperate.cmbString(ss, " "));
 		boolean isFileExist = FileOperate.isFileExistAndBigThanSize(ss[1], 0);
 		assertEquals(true, isFileExist);
@@ -96,26 +98,27 @@ public class TestCmdOrderGenerator {
 		TxtReadandWrite txtWrite = new TxtReadandWrite(FileOperate.getPathName(ss[2]) + resultFileName, true);
 		txtWrite.writefileln("testCmdOrderGenerator");
 		txtWrite.close();
-		cmdPath.moveFileOut();
+		cmdMoveFile.moveFileOut();
 		assertEquals(true, FileOperate.isFileExistAndBigThanSize(FileOperate.getPathName(outFile) + "/testTrinity.fa", 0));
 		FileOperate.deleteFileFolder(outFile);
 	}
 	
 	/** 假设test3文件夹 不 存在 */
 	private void cmd3() {
-		CmdOrderGenerator cmdPath = new CmdOrderGenerator(true);
+		CmdOrderGenerator cmdPath = new CmdOrderGenerator();
+		CmdMoveFile cmdMoveFile = CmdMoveFile.getInstance(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile = "src/test/resources/testTrinity.fa";
 		String outFile = "src/test/CmdOperateOut/testcc";
 		lsCmd.add("bwa-index"); lsCmd.add(inFile); lsCmd.add(outFile);
 		cmdPath.setLsCmd(lsCmd);
-		cmdPath.setRedirectInToTmp(true);
-		cmdPath.setRedirectOutToTmp(true);
-		cmdPath.addCmdParamInput(inFile);
-		cmdPath.addCmdParamOutput(outFile);
-		cmdPath.generateTmPath();
-		cmdPath.copyFileInAndRecordFiles();
-		String[] ss = cmdPath.getRunCmd();
+		cmdMoveFile.setRedirectInToTmp(true);
+		cmdMoveFile.setRedirectOutToTmp(true);
+		cmdMoveFile.addCmdParamInput(inFile);
+		cmdMoveFile.addCmdParamOutput(outFile);
+		cmdMoveFile.generateTmPath();
+		cmdMoveFile.copyFileInAndRecordFiles();
+		String[] ss = cmdPath.getRunCmd(cmdMoveFile);
 		System.out.println(ArrayOperate.cmbString(ss, " "));
 		boolean isFileExist = FileOperate.isFileExistAndBigThanSize(ss[1], 0);
 		assertEquals(true, isFileExist);
@@ -128,26 +131,27 @@ public class TestCmdOrderGenerator {
 		TxtReadandWrite txtWrite = new TxtReadandWrite(outPath, true);
 		txtWrite.writefileln("testCmdOrderGenerator");
 		txtWrite.close();
-		cmdPath.moveFileOut();
+		cmdMoveFile.moveFileOut();
 		assertEquals(true, FileOperate.isFileExistAndBigThanSize(FileOperate.getPathName(outFile) + resultFileName, 0));
 		FileOperate.deleteFileFolder(outFile);
 	}
 	
 	/** 假设test4文件夹存在 */
 	private void cmd4() {
-		CmdOrderGenerator cmdPath = new CmdOrderGenerator(true);
+		CmdOrderGenerator cmdPath = new CmdOrderGenerator();
+		CmdMoveFile cmdMoveFile = CmdMoveFile.getInstance(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile = "src/test/resources/testTrinity.fa";
 		String outFile = "src/test/CmdOperateOut/testTrinity3.fa";
 		lsCmd.add("bwa-index"); lsCmd.add(inFile); lsCmd.add(outFile);
 		cmdPath.setLsCmd(lsCmd);
-		cmdPath.setRedirectInToTmp(false);
-		cmdPath.setRedirectOutToTmp(true);
-		cmdPath.addCmdParamInput(inFile);
-		cmdPath.addCmdParamOutput(outFile);
-		cmdPath.generateTmPath();
-		cmdPath.copyFileInAndRecordFiles();
-		String[] ss = cmdPath.getRunCmd();
+		cmdMoveFile.setRedirectInToTmp(false);
+		cmdMoveFile.setRedirectOutToTmp(true);
+		cmdMoveFile.addCmdParamInput(inFile);
+		cmdMoveFile.addCmdParamOutput(outFile);
+		cmdMoveFile.generateTmPath();
+		cmdMoveFile.copyFileInAndRecordFiles();
+		String[] ss = cmdPath.getRunCmd(cmdMoveFile);
 		System.out.println(ArrayOperate.cmbString(ss, " "));
 		boolean isFileExist = FileOperate.isFileExistAndBigThanSize(ss[1], 0);
 		assertEquals(true, isFileExist);
@@ -160,26 +164,27 @@ public class TestCmdOrderGenerator {
 		TxtReadandWrite txtWrite = new TxtReadandWrite(outPath, true);
 		txtWrite.writefileln("testCmdOrderGenerator");
 		txtWrite.close();
-		cmdPath.moveFileOut();
+		cmdMoveFile.moveFileOut();
 		assertEquals(true, FileOperate.isFileExistAndBigThanSize(FileOperate.getPathName(outFile) + resultFileName, 0));
 		FileOperate.deleteFileFolder(outFile);
 	}
 	
 	/** 假设test5文件夹存在 */
 	private void cmd5() {
-		CmdOrderGenerator cmdPath = new CmdOrderGenerator(true);
+		CmdOrderGenerator cmdPath = new CmdOrderGenerator();
+		CmdMoveFile cmdMoveFile = CmdMoveFile.getInstance(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile = "src/test/resources/testTrinity.fa";
 		String outFile = "src/test/CmdOperateOut/testTrinity4.fa";
 		lsCmd.add("bwa-index"); lsCmd.add(inFile); lsCmd.add(outFile);
 		cmdPath.setLsCmd(lsCmd);
-		cmdPath.setRedirectInToTmp(true);
-		cmdPath.setRedirectOutToTmp(true);
-		cmdPath.addCmdParamInput(inFile);
-		cmdPath.addCmdParamOutput(outFile);
-		cmdPath.generateTmPath();
-		cmdPath.copyFileInAndRecordFiles();
-		String[] ss = cmdPath.getRunCmd();
+		cmdMoveFile.setRedirectInToTmp(true);
+		cmdMoveFile.setRedirectOutToTmp(true);
+		cmdMoveFile.addCmdParamInput(inFile);
+		cmdMoveFile.addCmdParamOutput(outFile);
+		cmdMoveFile.generateTmPath();
+		cmdMoveFile.copyFileInAndRecordFiles();
+		String[] ss = cmdPath.getRunCmd(cmdMoveFile);
 		System.out.println(ArrayOperate.cmbString(ss, " "));
 		boolean isFileExist = FileOperate.isFileExistAndBigThanSize(ss[1], 0);
 		assertEquals(true, isFileExist);
@@ -191,13 +196,14 @@ public class TestCmdOrderGenerator {
 		TxtReadandWrite txtWrite = new TxtReadandWrite(outPath, true);
 		txtWrite.writefileln("testCmdOrderGenerator");
 		txtWrite.close();
-		cmdPath.moveFileOut();
+		cmdMoveFile.moveFileOut();
 		assertEquals(true, FileOperate.isFileExistAndBigThanSize(FileOperate.getPathName(outFile) + resultFileName, 0));
 		FileOperate.deleteFileFolder(outFile);
 	}
 	
 	private void cmd6() {
-		CmdOrderGenerator cmdPath = new CmdOrderGenerator(true);
+		CmdOrderGenerator cmdPath = new CmdOrderGenerator();
+		CmdMoveFile cmdMoveFile = CmdMoveFile.getInstance(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile = "src/test/resources/testTrinity.fa";
 		String outFile = "src/test/CmdOperateOut2/test";
@@ -205,11 +211,11 @@ public class TestCmdOrderGenerator {
 		lsCmd.add("--inPath=" + inFile);
 		lsCmd.add("--outPath=" + outFile);
 		cmdPath.setLsCmd(lsCmd);
-		cmdPath.setRedirectOutToTmp(true);
-		cmdPath.addCmdParamOutput(outFile);
-		cmdPath.generateTmPath();
-		cmdPath.copyFileInAndRecordFiles();
-		String[] ss = cmdPath.getRunCmd();
+		cmdMoveFile.setRedirectOutToTmp(true);
+		cmdMoveFile.addCmdParamOutput(outFile);
+		cmdMoveFile.generateTmPath();
+		cmdMoveFile.copyFileInAndRecordFiles();
+		String[] ss = cmdPath.getRunCmd(cmdMoveFile);
 		System.out.println(ArrayOperate.cmbString(ss, " "));
 		String resultFileName = "test2.fatestResult.txt";
 		//往结果中写个文件 */
@@ -217,14 +223,15 @@ public class TestCmdOrderGenerator {
 		TxtReadandWrite txtWrite = new TxtReadandWrite(FileOperate.getPathName(outTmp) + resultFileName, true);
 		txtWrite.writefileln("testCmdOrderGenerator");
 		txtWrite.close();
-		cmdPath.moveFileOut();
+		cmdMoveFile.moveFileOut();
 		
 		assertEquals(true, FileOperate.isFileExistAndBigThanSize(FileOperate.getPathName(outFile) + resultFileName, 0));
 		FileOperate.deleteFileFolder(outFile);
 	}
 	
 	private void cmd7() {
-		CmdOrderGenerator cmdPath = new CmdOrderGenerator(true);
+		CmdOrderGenerator cmdPath = new CmdOrderGenerator();
+		CmdMoveFile cmdMoveFile = CmdMoveFile.getInstance(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile1 = "src/test/resources/testTrinity.fa";
 		String inFile2 = "src/test/resources/testTrinity2.fa";
@@ -233,15 +240,15 @@ public class TestCmdOrderGenerator {
 		lsCmd.add("--inPath=" + inFile1 + "," + inFile2);
 		lsCmd.add("--outPath=" + outFile);
 		cmdPath.setLsCmd(lsCmd);
-		cmdPath.setRedirectInToTmp(true);
-		cmdPath.setRedirectOutToTmp(true);
-		cmdPath.addCmdParamInput(inFile1);
-		cmdPath.addCmdParamInput(inFile2);
+		cmdMoveFile.setRedirectInToTmp(true);
+		cmdMoveFile.setRedirectOutToTmp(true);
+		cmdMoveFile.addCmdParamInput(inFile1);
+		cmdMoveFile.addCmdParamInput(inFile2);
 
-		cmdPath.addCmdParamOutput(outFile);
-		cmdPath.generateTmPath();
-		cmdPath.copyFileInAndRecordFiles();
-		String[] ss = cmdPath.getRunCmd();
+		cmdMoveFile.addCmdParamOutput(outFile);
+		cmdMoveFile.generateTmPath();
+		cmdMoveFile.copyFileInAndRecordFiles();
+		String[] ss = cmdPath.getRunCmd(cmdMoveFile);
 		
 		String inFileTmp1 = PathDetail.getTmpPathRandom() +  "resources/testTrinity.fa";
 		String inFileTmp2 = PathDetail.getTmpPathRandom() +  "resources/testTrinity2.fa";
@@ -254,14 +261,15 @@ public class TestCmdOrderGenerator {
 		TxtReadandWrite txtWrite = new TxtReadandWrite(FileOperate.getPathName(outTmp) + resultFileName, true);
 		txtWrite.writefileln("testCmdOrderGenerator");
 		txtWrite.close();
-		cmdPath.moveFileOut();
+		cmdMoveFile.moveFileOut();
 		
 		assertEquals(true, FileOperate.isFileExistAndBigThan0(FileOperate.getPathName(outFile) + resultFileName));
 		FileOperate.deleteFileFolder(outFile);
 	}
 	
 	private void cmd8() {
-		CmdOrderGenerator cmdPath = new CmdOrderGenerator(true);
+		CmdOrderGenerator cmdPath = new CmdOrderGenerator();
+		CmdMoveFile cmdMoveFile = CmdMoveFile.getInstance(true);
 		List<String> lsCmd = new ArrayList<>();
 		String inFile1 = "src/test/resources/testTrinity.fa";
 		String inFile2 = "src/test/resources/testTrinity2.fa";
@@ -271,14 +279,14 @@ public class TestCmdOrderGenerator {
 		lsCmd.add(">");
 		lsCmd.add(outFile);
 		cmdPath.setLsCmd(lsCmd);
-		cmdPath.setRedirectInToTmp(true);
-		cmdPath.setRedirectOutToTmp(true);
-		cmdPath.addCmdParamInput(inFile1);
-		cmdPath.addCmdParamInput(inFile2);
+		cmdMoveFile.setRedirectInToTmp(true);
+		cmdMoveFile.setRedirectOutToTmp(true);
+		cmdMoveFile.addCmdParamInput(inFile1);
+		cmdMoveFile.addCmdParamInput(inFile2);
 		
-		cmdPath.generateTmPath();
-		cmdPath.copyFileInAndRecordFiles();
-		String[] ss = cmdPath.getRunCmd();
+		cmdMoveFile.generateTmPath();
+		cmdMoveFile.copyFileInAndRecordFiles();
+		String[] ss = cmdPath.getRunCmd(cmdMoveFile);
 
 		String inFileTmp1 = PathDetail.getTmpPathRandom() +  "resources/testTrinity.fa";
 		String inFileTmp2 = PathDetail.getTmpPathRandom() +  "resources/testTrinity2.fa";
@@ -292,7 +300,7 @@ public class TestCmdOrderGenerator {
 		TxtReadandWrite txtWrite = new TxtReadandWrite(FileOperate.getPathName(outTmp) + resultFileName, true);
 		txtWrite.writefileln("testCmdOrderGenerator");
 		txtWrite.close();
-		cmdPath.moveFileOut();
+		cmdMoveFile.moveFileOut();
 		
 		assertEquals(true, FileOperate.isFileExistAndBigThan0(FileOperate.getPathName(outFile) + resultFileName));
 		FileOperate.deleteFileFolder(outFile);

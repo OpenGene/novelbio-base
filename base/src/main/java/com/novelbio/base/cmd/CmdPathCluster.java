@@ -70,7 +70,7 @@ public class CmdPathCluster {
 		String outReal = FileOperate.getParentPathNameWithSep(out);
 		mapOutPath2TmpOutPath.put(outReal, outTmp);
 		if (isAliyun) {
-			mapOutPath2TmpOutPath.put(CmdPathAli.convertAli2Loc(outReal, true), outTmp);
+			mapOutPath2TmpOutPath.put(CmdMoveFileAli.convertAli2Loc(outReal, true), outTmp);
 		}
 	}
 	
@@ -126,7 +126,7 @@ public class CmdPathCluster {
 	
 	/** 获得前面已经生成过的结果文件<br>
 	 * 譬如给定的文件路径是 /nbCloud/public/project1/task1/mypath/to/the/file.txt<br>
-	 * 然后 mapOutPath2TmpOutPath 中有路径 nbCloud/public/project1/task1/ : /home/novelbio/tmp/mypath/<br>
+	 * 然后 mapOutPath2TmpOutPath 中有路径 nbCloud/public/project1/task1/mypath/ : /home/novelbio/tmp/mypath/<br>
 	 * 则把/nbCloud/public/project1/task1/mypath/to/the/ 对应到 /home/novelbio/tmp/mypath/to/the
 	 * @param inputPath 输入的文件夹，以"/"结尾
 	 * @return
@@ -162,9 +162,10 @@ public class CmdPathCluster {
 		//输入的set中 /home/novelbio/oss/.inmap./test 和 /home/novelbio/oss/.outmap./test 是两个不同的文件夹
 		//如果直接跑会产生 一个 test文件夹， 一个test1文件夹
 		//而实际上这两个应该只产生一个test文件夹，所以在这里做一个合并的工作
+		//也就是key统一为  /home/novelbio/oss/.inmap./test 
 		ArrayListMultimap<String, String> mapPath2LsConvertPath = ArrayListMultimap.create();
 		for (String path : setPath) {
-			mapPath2LsConvertPath.put(CmdPathAli.convertAli2Loc(path, true), path);
+			mapPath2LsConvertPath.put(CmdMoveFileAli.convertAli2Loc(path, true), path);
 		}
 		//====================
 		Map<String, String> mapPath2TmpPath = new HashMap<>();
