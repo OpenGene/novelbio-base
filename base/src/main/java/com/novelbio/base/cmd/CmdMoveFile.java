@@ -126,6 +126,14 @@ public class CmdMoveFile {
 		setOutput.add(output);
 	}
 	
+	public void prepare() {
+		generateTmPath();
+		createFoldTmp();
+		
+		copyFileIn();
+		recordFilesWhileRedirectOutToTmp();
+	}
+	
 	//============================ 生成临时文件夹和配对路径 ============================
 	/** 生成实际文件和临时文件对照表 */
 	public synchronized void generateTmPath() {
@@ -191,24 +199,20 @@ public class CmdMoveFile {
 	/** 在cmd运行前，将输入文件拷贝到临时文件夹下
 	 * 同时记录临时文件夹下有多少文件，用于后面删除时跳过 */
 	public void copyFileInAndRecordFiles() {
-		createFoldTmp();
 		copyFileIn();
 		recordFilesWhileRedirectOutToTmp();
 	}
 	
-	/** 在cmd运行前，将输入文件拷贝到临时文件夹下 */
-	public void copyFileInTmp() {
-		createFoldTmp();
-		copyFileIn();
-	}
-
 	/** 将已有的输出文件夹在临时文件夹中创建好 */
 	protected void createFoldTmp() {
+		logger.debug("start create tmp folder");
 		for (String filePathName : mapName2TmpName.keySet()) {
 			String tmpPath = mapName2TmpName.get(filePathName);
 			if ( FileOperate.isFileDirectory(filePathName)) {
+				logger.debug("creat folder " + filePathName);
 				FileOperate.createFolders(tmpPath);
 			} else {
+				logger.debug("creat folder " + FileOperate.getParentPathNameWithSep(tmpPath));
 				FileOperate.createFolders(FileOperate.getParentPathNameWithSep(tmpPath));
 			}
 		}
@@ -233,7 +237,7 @@ public class CmdMoveFile {
 	 * 记录临时文件夹下有多少文件，主要用于 {@link #isRedirectOutToTmp}的情况
 	 * 就是如果需要把结果文件拷贝到临时文件夹下，那么拷贝完成后需要运行该命令
 	 */
-	public void recordFilesWhileRedirectOutToTmp() {
+	protected void recordFilesWhileRedirectOutToTmp() {
 		if (!isRedirectOutToTmp) return;
 		
 		mapFileName2LastModifyTimeAndLen.clear();

@@ -846,8 +846,7 @@ public class CmdOperate extends RunProcess {
 	 * 本步骤是解析cmd命令，主要目的是获取 > 之后所跟的路径<br>
 	 */
 	public void prepare() {
-		cmdMoveFile.generateTmPath();
-		cmdOrderGenerator.generateRunCmd(true, cmdMoveFile);
+		cmdMoveFile.prepare();
 	}
 	/**
 	 * 生成cmd命令，仅用于ScriptBuildFacade中的多线程部分
@@ -873,8 +872,7 @@ public class CmdOperate extends RunProcess {
 	private void running(boolean isCopyFileInAndRecordFiles, boolean isMoveFileOut) {
 		finishFlag = new FinishFlag();
 		if (isCopyFileInAndRecordFiles) {
-			cmdMoveFile.generateTmPath();
-			cmdMoveFile.copyFileInAndRecordFiles();
+			cmdMoveFile.prepare();
 		}
 		
 		String realCmd = getCmdExeStr();
