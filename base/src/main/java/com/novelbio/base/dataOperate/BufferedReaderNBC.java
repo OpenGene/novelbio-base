@@ -17,7 +17,7 @@ import java.util.stream.StreamSupport;
 public class BufferedReaderNBC extends BufferedReader {
 
 	/** 单行最多不能超过这么长，否则就报错 */
-	private int maxLineNum = 100000;
+	private int maxLineNum = 5000000;
 
 	private Reader in;
 

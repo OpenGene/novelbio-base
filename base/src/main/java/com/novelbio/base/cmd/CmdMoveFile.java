@@ -41,9 +41,17 @@ public class CmdMoveFile {
 	/** 输出的临时文件夹路径 */
 	private String tmpPath;
 	
-	/** 全体输入文件 */
+	/** 全体需要copyToTmp的输入文件 */
 	protected Set<String> setInput = new HashSet<>();
-	private Set<String> setOutput = new HashSet<>();
+	/** 全体需要copyToTmp的输出文件 */
+	protected Set<String> setOutput = new HashSet<>();
+	/**
+	 * 全体需要copyToTmp的InOutput文件的最近一层文件夹
+	 * 譬如fasta文件所建的索引，输入和输出都有该文件存在
+	 * 并且为 /home/novelbio/1.fasta 
+	 * 则set中保存 /home/novelbio
+	 */
+	protected Set<String> setInOutput = new HashSet<>();
 	
 	/**
 	 * key: 输入或输出的文件(夹)全名
@@ -127,11 +135,20 @@ public class CmdMoveFile {
 	}
 	
 	public void prepare() {
+		setInOutputPath();
 		generateTmPath();
 		createFoldTmp();
 		
 		copyFileIn();
 		recordFilesWhileRedirectOutToTmp();
+	}
+	
+	private void setInOutputPath() {
+		for (String infile : setInput) {
+			if (setOutput.contains(infile)) {
+				setInOutput.add(FileOperate.removeSep(FileOperate.getPathName(infile)));
+			}
+		}
 	}
 	
 	//============================ 生成临时文件夹和配对路径 ============================
@@ -258,7 +275,6 @@ public class CmdMoveFile {
 		if (!mapPath2TmpPathOut.isEmpty()) {
 			logger.info("start move files");
 		}
-		logger.debug("mapPath2TmpPathIn: " + mapPath2TmpPathIn.toString());
 		
 		for (String outPath : mapPath2TmpPathOut.keySet()) {
 			String outTmpPath = mapPath2TmpPathOut.get(outPath);

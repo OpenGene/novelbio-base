@@ -1,5 +1,10 @@
 package com.novelbio.base.cmd;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +48,7 @@ public class CmdMoveFileAli extends CmdMoveFile {
 			}
 		}
 	}
-		
+	
 	protected void moveSingleFileOut(String filePathTmp, String filePathOut) {
 		filePathOut = convertAli2Loc(filePathOut, false);
 		if (isRetainTmpFiles) {
@@ -55,6 +60,24 @@ public class CmdMoveFileAli extends CmdMoveFile {
 			//TODO 这里可能全改为move会更好些
 			FileOperate.moveFile(true, filePathTmp, filePathOut);
 		}
+		
+		/**
+		 * 因为aliyun的输入是inmap，输出是outmap
+		 * 因此存在情况：
+		 * xml1 对 /home/.inmap./a.fasta建索引为 /home/.outmap./a.fasta.fai
+		 * xml 输入参数为  /home/.inmap./a.fasta 并且isCopyToTmp = false
+		 * 这时候 我们就要求 /home/.inmap./a.fasta.fai 也必须存在
+		 * 所以就要在这里把所有潜在的 setInOutput 的输出文件链接到其对应的 inmap中去
+		 */
+		String filePathOutInmap = convertAli2Loc(filePathOut, true);
+		for (String parentPath : setInOutput) {
+			if (filePathOutInmap.startsWith(parentPath)) {
+				FileOperate.linkFile(filePathOut, filePathOutInmap, false);
+				break;
+				
+			}
+		}
+		
 	}
 	/**
 	 * 把oss://bucket/path/to/myfile 转成 /home/novelbio/.inmap./path/to/myfile
