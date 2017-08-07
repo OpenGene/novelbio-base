@@ -74,7 +74,6 @@ public class CmdMoveFileAli extends CmdMoveFile {
 			if (filePathOutInmap.startsWith(parentPath)) {
 				FileOperate.linkFile(filePathOut, filePathOutInmap, false);
 				break;
-				
 			}
 		}
 		
