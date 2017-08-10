@@ -50,7 +50,7 @@ class TxtRead implements Closeable {
 	long filesize = 0;
 	
 	/** 单行最多不能超过这么长，否则就报错 */
-	private int maxLineNum = 100000;
+	private int maxLineNum = 10000000;
 	
 	public TxtRead(Path file) {
 		txTtype = TXTtype.getTxtType(file.toString());
