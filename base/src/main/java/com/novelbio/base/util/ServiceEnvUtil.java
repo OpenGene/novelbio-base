@@ -13,6 +13,7 @@ public class ServiceEnvUtil {
 	
 	public static final String ENV_HADOOP = "hadoop";
 	public static final String ENV_ALIYUN = "aliyun";
+	public static final String DB_KEEPALIVE = "dbKeepAlive";
 	private static String env;
 	
 	static{
@@ -35,6 +36,14 @@ public class ServiceEnvUtil {
 	public static boolean isAliyunEnv() {
 		return ENV_ALIYUN.equals(env);
 	}
+	
+	/**
+	 * 批量计算时,数据库是否保持长连接
+	 * @return 是则返回true. 不是返回false
+	 */
+	public static boolean isDbKeepAlive() {
+		return isBatchCompute() && StringOperate.isEqual(System.getenv(DB_KEEPALIVE), "true");
+	}
 
 	/**
 	 * 是否阿里云批量计算环境. 批量计算中会有下面这个环境变量
@@ -45,7 +54,7 @@ public class ServiceEnvUtil {
 	}
 	
 	public static void main(String[] args) {
-		System.out.println(isBatchCompute());
+		System.out.println(isAliyunEnv());
 	}
 	
 }
