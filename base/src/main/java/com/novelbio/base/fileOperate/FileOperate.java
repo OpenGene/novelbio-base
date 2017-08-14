@@ -1639,21 +1639,28 @@ public class FileOperate {
 	 * @return
 	 */
 	public static void moveFile(boolean cover, String oldFileName, String newFileName) {
-		moveFile(cover, FileOperate.getPath(oldFileName), newFileName);
+		moveFile(cover, FileOperate.getPath(oldFileName), newFileName, true);
 	}
-
 	/**
-	 * @param cover
-	 *            是否覆盖
-	 * @param oldFileName
-	 *            老文件全路径
-	 * @param newFileName
-	 *            新文件全路径
+	 * 既可移动文件夹又可移动单个文件
+	 * @param cover 是否覆盖
+	 * @param oldFileName 老文件全路径
+	 * @param newFileName  新文件全路径
+	 * @param isDeleteFolder 如果是move的文件夹，move结束后是否删除已有的文件夹。
+	 * @return
+	 */
+	public static void moveFile(boolean cover, String oldFileName, String newFileName, boolean isDeleteFolder) {
+		moveFile(cover, FileOperate.getPath(oldFileName), newFileName, isDeleteFolder);
+	}
+	/**
+	 * @param cover  是否覆盖
+	 * @param oldFileName 老文件全路径
+	 * @param newFileName 新文件全路径
 	 * @return
 	 */
 	public static void moveFile(boolean cover, Path oldPath, Path newFileName) {
 		String newPath = getAbsolutePath(newFileName);
-		moveFile(cover, oldPath, newPath);
+		moveFile(cover, oldPath, newPath, true);
 	}
 
 	/**
@@ -1672,7 +1679,7 @@ public class FileOperate {
 		}
 		String newFileName = newPath + NewName;
 		Path oldFile = getPath(oldFileName);
-		moveFile(cover, oldFile, newFileName);
+		moveFile(cover, oldFile, newFileName, true);
 	}
 
 	/**
@@ -1683,11 +1690,11 @@ public class FileOperate {
 	 * @param cover
 	 * @return
 	 */
-	private static void moveFile(boolean cover, Path oldFile, String newPathName) {
+	private static void moveFile(boolean cover, Path oldFile, String newPathName, boolean isDeleteFolder) {
 		if (isFileExistAndNotDir(oldFile)) {
 			moveSingleFile(oldFile, newPathName, cover);
 		} else if (isFileDirectory(oldFile)) {
-			moveFoldFile(oldFile, newPathName, cover);
+			moveFoldFile(oldFile, newPathName, cover, isDeleteFolder);
 		}
 	}
 
@@ -1697,12 +1704,9 @@ public class FileOperate {
 	 * 如果没有文件则返回<br>
 	 * 注意：新文件夹后不要加\\<br>
 	 * 
-	 * @param oldPath
-	 *            文件路径
-	 * @param newPathStr
-	 *            新文件名
-	 * @param cover
-	 *            是否覆盖
+	 * @param oldPath 文件路径
+	 * @param newPathStr 新文件名
+	 * @param cover 是否覆盖
 	 * @return true 成功 false 失败
 	 */
 	// TODO 待测试
@@ -1758,11 +1762,11 @@ public class FileOperate {
 		oldfolderfile = addSep(oldfolderfile);
 
 		Path olddir = getPath(oldfolderfile);
-		moveFoldFile(olddir, newfolder, prix, cover);
+		moveFoldFile(olddir, newfolder, prix, cover, true);
 	}
 
-	private static void moveFoldFile(Path olddir, String newfolder, boolean cover) {
-		moveFoldFile(olddir, newfolder, "", cover);
+	private static void moveFoldFile(Path olddir, String newfolder, boolean cover, boolean isDeleteFolder) {
+		moveFoldFile(olddir, newfolder, "", cover, isDeleteFolder);
 	}
 
 	/**
@@ -1774,11 +1778,13 @@ public class FileOperate {
 	 *            目标文件目录
 	 * @param prix
 	 *            在文件前加上的前缀
-	 * @param cover
-	 *            是否覆盖
+	 * @param cover 是否覆盖
+	 * @param isDeleteFolder 如果是move的文件夹，move结束后是否删除已有的文件夹。
+	 * true: 删除olddir文件夹
+	 * false: 保留olddir中的全部文件夹
 	 * @throws Exception
 	 */
-	private static void moveFoldFile(Path olddir, String newfolder, String prix, boolean cover) {
+	private static void moveFoldFile(Path olddir, String newfolder, String prix, boolean cover, boolean isDeleteFolder) {
 		if (!FileOperate.isFileExist(olddir)) {
 			logger.error(olddir + " is not exist");
 		}
@@ -1808,26 +1814,28 @@ public class FileOperate {
 		String olddirPath = removeSplashTail(olddirPathTmp, false);
 		final boolean[] isMakeDirSameAsOld = new boolean[] { false };
 		
-		if (!FileOperate.isFileExist(pathNew)) {
-			try {
-				Files.move(olddir, pathNew);
-				return;
-			} catch (Exception e) {
-				// TODO: handle exception
+		//如果可以删除文件夹，那么就可以考虑使用Files.move直接全移动过去
+		if (isDeleteFolder) {
+			if (!FileOperate.isFileExist(pathNew)) {
+				try {
+					Files.move(olddir, pathNew);
+					return;
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
 			}
 		}
-		
-		
+
 		try {
 			createFolders(pathNew);
 			Files.list(olddir).forEach((pathOld) -> {
 				if (isFileDirectory(pathOld)) {
 					String newPath = removeSplashHead(newPathSep + pathOld.getFileName(), false);
 					newPath = removeSplashTail(newPath, false);
-					if (newPath.equals(olddirPath)) {
+					if (StringOperate.isEqual(newPath, olddirPath)) {
 						isMakeDirSameAsOld[0] = true;
 					}
-					moveFoldFile(pathOld, newPathSep + pathOld.getFileName(), prefix, cover);
+					moveFoldFile(pathOld, newPathSep + pathOld.getFileName(), prefix, cover, isDeleteFolder);
 				} else {
 					String newPathStr = newPathSep + prefix + pathOld.getFileName();
 					moveSingleFile(pathOld, newPathStr, cover);
@@ -1837,7 +1845,7 @@ public class FileOperate {
 			throw new ExceptionNbcFile("move fold error", e);
 		}
 
-		if (!isMakeDirSameAsOld[0]) {
+		if (isDeleteFolder && !isMakeDirSameAsOld[0]) {
 			FileOperate.deleteFileFolder(olddir);
 		}
 	}
