@@ -61,21 +61,22 @@ public class CmdMoveFileAli extends CmdMoveFile {
 			FileOperate.moveFile(true, filePathTmp, filePathOut);
 		}
 		
-		/**
-		 * 因为aliyun的输入是inmap，输出是outmap
-		 * 因此存在情况：
-		 * xml1 对 /home/.inmap./a.fasta建索引为 /home/.outmap./a.fasta.fai
-		 * xml 输入参数为  /home/.inmap./a.fasta 并且isCopyToTmp = false
-		 * 这时候 我们就要求 /home/.inmap./a.fasta.fai 也必须存在
-		 * 所以就要在这里把所有潜在的 setInOutput 的输出文件链接到其对应的 inmap中去
-		 */
-		String filePathOutInmap = convertAli2Loc(filePathOut, true);
-		for (String parentPath : setInOutput) {
-			if (filePathOutInmap.startsWith(parentPath)) {
-				FileOperate.linkFile(filePathOut, filePathOutInmap, false);
-				break;
-			}
-		}
+		//aliyun 无法向 .inmap./ 文件夹中写入文件或软链接，该文件夹为只读文件夹
+//		/**
+//		 * 因为aliyun的输入是inmap，输出是outmap
+//		 * 因此存在情况：
+//		 * xml1 对 /home/.inmap./a.fasta建索引为 /home/.outmap./a.fasta.fai
+//		 * xml 输入参数为  /home/.inmap./a.fasta 并且isCopyToTmp = false
+//		 * 这时候 我们就要求 /home/.inmap./a.fasta.fai 也必须存在
+//		 * 所以就要在这里把所有潜在的 setInOutput 的输出文件链接到其对应的 inmap中去
+//		 */
+//		String filePathOutInmap = convertAli2Loc(filePathOut, true);
+//		for (String parentPath : setInOutput) {
+//			if (filePathOutInmap.startsWith(parentPath)) {
+//				FileOperate.linkFile(filePathOut, filePathOutInmap, false);
+//				break;
+//			}
+//		}
 		
 	}
 	/**
