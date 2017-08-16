@@ -1,5 +1,8 @@
 package com.novelbio.base.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.novelbio.base.PathDetail;
 import com.novelbio.base.StringOperate;
 
@@ -10,6 +13,8 @@ import com.novelbio.base.StringOperate;
  *
  */
 public class ServiceEnvUtil {
+	
+	private static final Logger logger = LoggerFactory.getLogger(ServiceEnvUtil.class);
 	
 	public static final String ENV_HADOOP = "hadoop";
 	public static final String ENV_ALIYUN = "aliyun";
@@ -37,20 +42,38 @@ public class ServiceEnvUtil {
 		return ENV_ALIYUN.equals(env);
 	}
 	
+	private static Boolean isDbKeepAlive = null;
+	
 	/**
 	 * 批量计算时,数据库是否保持长连接
 	 * @return 是则返回true. 不是返回false
 	 */
 	public static boolean isDbKeepAlive() {
-		return isBatchCompute() && StringOperate.isEqual(System.getenv(DB_KEEPALIVE), "true");
+		if (isDbKeepAlive == null) {
+			if (isBatchCompute() && StringOperate.isEqual(System.getenv(DB_KEEPALIVE), "true")) {
+				isDbKeepAlive = true;
+			} else if (isBatchCompute()) {
+				isDbKeepAlive = false;
+			} else {
+				isDbKeepAlive = true;
+			}
+			logger.info("isDbKeepAlive=" + isDbKeepAlive);
+		}
+		return isDbKeepAlive;
 	}
+	
+	private static Boolean isBatchCompute = null;
 
 	/**
 	 * 是否阿里云批量计算环境. 批量计算中会有下面这个环境变量
 	 * @return 是则返回true. 不是返回false
 	 */
 	public static boolean isBatchCompute() {
-		return !StringOperate.isRealNull(System.getenv("BATCH_COMPUTE_OSS_HOST"));
+		if (isBatchCompute == null) {
+			isBatchCompute = !StringOperate.isRealNull(System.getenv("BATCH_COMPUTE_OSS_HOST"));
+			logger.info("isBatchCompute=" + isBatchCompute);
+		}
+		return isBatchCompute;
 	}
 	
 	public static void main(String[] args) {
