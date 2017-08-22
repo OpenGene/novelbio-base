@@ -1,5 +1,6 @@
 package com.novelbio.base.security;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -65,6 +66,35 @@ public class HashUtil {
 			e.printStackTrace();
 		}
 		return toHexString(md5.digest());
+	}
+	
+	/**
+	 * 计算File的Hash.
+	 * @param file
+	 * @return String
+	 */
+	public static String getHashOfMD5(File file) {
+		try (FileInputStream fStream = new FileInputStream(file); FileChannel fChannel = fStream.getChannel();) {
+			MessageDigest md5 = MessageDigest.getInstance("MD5");
+
+			ByteBuffer buffer = ByteBuffer.allocate(100 * 1024);
+			long s = System.currentTimeMillis();
+			for (int count = fChannel.read(buffer); count != -1; count = fChannel.read(buffer)) {
+				buffer.flip();
+				md5.update(buffer);
+				if (!buffer.hasRemaining()) {
+					buffer.clear();
+				}
+			}
+
+			String md5Str = toHexString(md5.digest());
+			s = System.currentTimeMillis() - s;
+
+			return md5Str;
+		} catch (NoSuchAlgorithmException | IOException e) {
+			logger.error("getHashOfMD5 error.", e);
+			return "";
+		}
 	}
 	
 	public static String getHashOfMD5(byte[] input) {
