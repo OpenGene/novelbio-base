@@ -278,5 +278,19 @@ public class Crypter {
 		params.put("key", keyEn);
 		params.put("sign", sign);
 		return params;
-	} 
+	}
+	
+	public static void main(String[] args) {
+		// 待加密的明文
+		String plaintext = "2016080600181066";
+		// 加密后的密文
+		String ciphertext = encryptAES(plaintext);
+		System.out.println("加密后的密文:");
+		System.out.println(ciphertext);
+		
+		// 解密后的明文
+		String plaintext2 = decryptAES(ciphertext);
+		System.out.println("解密后的明文:");
+		System.out.println(plaintext2);
+	}
 }
