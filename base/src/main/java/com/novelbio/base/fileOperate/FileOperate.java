@@ -78,26 +78,26 @@ public class FileOperate {
 	@Deprecated
 	public static File getFile(String filePathParent, String name) {
 		if (!StringOperate.isRealNull(filePathParent.trim())) {
-			filePathParent = FileOperate.addSep(filePathParent);
+			filePathParent = addSep(filePathParent);
 		}
 		String path = filePathParent + name;
 		return getFile(path);
 	}
 
-	/**
-	 * 根据不同的文件类型得到File
-	 * 
-	 * @param filePath
-	 * @return
-	 */
-	@Deprecated
-	public static File getFile(File fileParent, String name) {
-		if (fileParent instanceof FileHadoop) {
-			return new FileHadoop(FileOperate.addSep(fileParent.getAbsolutePath()) + name);
-		} else {
-			return new File(fileParent, name);
-		}
-	}
+//	/**
+//	 * 根据不同的文件类型得到File
+//	 * 
+//	 * @param filePath
+//	 * @return
+//	 */
+//	@Deprecated
+//	public static File getFile(File fileParent, String name) {
+//		if (fileParent instanceof FileHadoop) {
+//			return new FileHadoop(FileOperate.addSep(fileParent.getAbsolutePath()) + name);
+//		} else {
+//			return new File(fileParent, name);
+//		}
+//	}
 
 	/**
 	 * 根据不同的文件类型得到File.<br/>
@@ -372,7 +372,7 @@ public class FileOperate {
 	 */
 	public static String getLastPathName(String fileName) {
 		String ParentPath = getParentPathNameWithSep(fileName);
-		return FileOperate.getFileName(ParentPath);
+		return getFileName(ParentPath);
 	}
 
 	/**
@@ -409,7 +409,7 @@ public class FileOperate {
 	public static double getFileSizeEvaluateK(Collection<String> colFileName) {
 		double allFileSize = 0;
 		for (String fileName : colFileName) {
-			double size = (double) FileOperate.getFileSizeLong(fileName) / 1024;
+			double size = (double) getFileSizeLong(fileName) / 1024;
 			// 如果是压缩文件就假设源文件为6倍大 */
 			String suffix = getFileNameSep(fileName)[1].toLowerCase();
 			if (suffix.equals("gz") || suffix.equals("zip") || suffix.equals("rar"))
@@ -671,35 +671,35 @@ public class FileOperate {
 		}
 	}
 
-	/**
-	 * 获取文件夹下包含指定文件名与后缀的所有文件名,等待增加功能子文件夹下的文件。也就是循环获得文件<br>
-	 * 如果文件不存在则返回空的list<br>
-	 * 如果不是文件夹，则返回该文件名<br>
-	 * 
-	 * @param filePath
-	 *            目录路径
-	 * @param filename
-	 *            指定包含的文件名，是正则表达式 ，如 "*",正则表达式无视大小<br>
-	 *            null 表示不指定
-	 * @param suffix
-	 *            指定包含的后缀名，是正则表达式<br>
-	 *            文件 wfese.fse.fe认作 "wfese.fse"和"fe"<br>
-	 *            文件 wfese.fse.认作 "wfese.fse."和""<br>
-	 *            文件 wfese 认作 "wfese"和""<br>
-	 *            null 表示不指定
-	 * @return 返回包含目标文件全名的ArrayList
-	 * @throws IOException
-	 */
-	@Deprecated
-	public static List<File> getFoldFileLs(String filePath, String filename, String suffix) {
-		filePath = removeSep(filePath);
-		File file = getFile(filePath);
-		if (filePath.equals("")) {
-			filePath = file.getAbsolutePath();
-			file = getFile(filePath);
-		}
-		return getFoldFileLs(file, filename, suffix);
-	}
+//	/**
+//	 * 获取文件夹下包含指定文件名与后缀的所有文件名,等待增加功能子文件夹下的文件。也就是循环获得文件<br>
+//	 * 如果文件不存在则返回空的list<br>
+//	 * 如果不是文件夹，则返回该文件名<br>
+//	 * 
+//	 * @param filePath
+//	 *            目录路径
+//	 * @param filename
+//	 *            指定包含的文件名，是正则表达式 ，如 "*",正则表达式无视大小<br>
+//	 *            null 表示不指定
+//	 * @param suffix
+//	 *            指定包含的后缀名，是正则表达式<br>
+//	 *            文件 wfese.fse.fe认作 "wfese.fse"和"fe"<br>
+//	 *            文件 wfese.fse.认作 "wfese.fse."和""<br>
+//	 *            文件 wfese 认作 "wfese"和""<br>
+//	 *            null 表示不指定
+//	 * @return 返回包含目标文件全名的ArrayList
+//	 * @throws IOException
+//	 */
+//	@Deprecated
+//	public static List<File> getFoldFileLs(String filePath, String filename, String suffix) {
+//		filePath = removeSep(filePath);
+//		File file = getFile(filePath);
+//		if (filePath.equals("")) {
+//			filePath = file.getAbsolutePath();
+//			file = getFile(filePath);
+//		}
+//		return getFoldFileLs(file, filename, suffix);
+//	}
 
 	/**
 	 * 获取文件夹下包含指定文件名与后缀的所有文件名，仅找第一层，不递归<br>
@@ -724,77 +724,77 @@ public class FileOperate {
 		return getLsFoldPath(getPath(filePath), filename, suffix);
 	}
 
-	/**
-	 * 获取文件夹下全部文件名
-	 * 
-	 * @return 返回包含目标文件全名的List
-	 * @throws IOException
-	 */
-	@Deprecated
-	public static List<File> getFoldFileLs(File file) {
-		return getFoldFileLs(file, "*", "*");
-	}
+//	/**
+//	 * 获取文件夹下全部文件名
+//	 * 
+//	 * @return 返回包含目标文件全名的List
+//	 * @throws IOException
+//	 */
+//	@Deprecated
+//	public static List<File> getFoldFileLs(File file) {
+//		return getFoldFileLs(file, "*", "*");
+//	}
 
-	/**
-	 * 获取文件夹下全部文件名
-	 * 已过期,建议使用getLsFoldPath
-	 * 
-	 * @return 返回包含目标文件全名的List
-	 * @throws IOException
-	 */
-	@Deprecated
-	public static List<File> getFoldFileLs(String file) {
-		return getFoldFileLs(file, "*", "*");
-	}
+//	/**
+//	 * 获取文件夹下全部文件名
+//	 * 已过期,建议使用getLsFoldPath
+//	 * 
+//	 * @return 返回包含目标文件全名的List
+//	 * @throws IOException
+//	 */
+//	@Deprecated
+//	public static List<File> getFoldFileLs(String file) {
+//		return getFoldFileLs(file, "*", "*");
+//	}
 
-	/**
-	 * 获取文件夹下包含指定文件名与后缀的所有文件名,等待增加功能子文件夹下的文件。也就是循环获得文件<br>
-	 * 如果文件不存在则返回空的list<br>
-	 * 如果不是文件夹，则返回该文件名<br>
-	 * 
-	 * @param filePath
-	 *            目录路径
-	 * @param filename
-	 *            指定包含的文件名，是正则表达式 ，如 "*",正则表达式无视大小<br>
-	 *            null 表示不指定
-	 * @param suffix
-	 *            指定包含的后缀名，是正则表达式<br>
-	 *            文件 wfese.fse.fe认作 "wfese.fse"和"fe"<br>
-	 *            文件 wfese.fse.认作 "wfese.fse."和""<br>
-	 *            文件 wfese 认作 "wfese"和""<br>
-	 *            null 表示不指定
-	 * @return 返回包含目标文件全名的ArrayList
-	 * @throws IOException
-	 */
-	@Deprecated
-	public static List<File> getFoldFileLs(File file, String filename, String suffix) {
-		if (filename == null || filename.equals("*")) {
-			filename = ".*";
-		}
-		if (suffix == null || suffix.equals("*")) {
-			suffix = ".*";
-		}
-		FileFilterNBC fileFilterNBC = new FileFilterNBC(filename, suffix);
-		List<File> lsFilenames = new ArrayList<>();
-
-		if (!file.exists()) {// 没有文件，则返回空
-			return new ArrayList<>();
-		}
-		// 如果只是文件则返回文件名
-		if (!file.isDirectory()) { // 获取文件名与后缀名
-			if (fileFilterNBC.accept(file)) {
-				lsFilenames.add(file);
-				return lsFilenames;
-			}
-		}
-
-		File[] result = file.listFiles(fileFilterNBC);
-
-		for (File file2 : result) {
-			lsFilenames.add(file2);
-		}
-		return lsFilenames;
-	}
+//	/**
+//	 * 获取文件夹下包含指定文件名与后缀的所有文件名,等待增加功能子文件夹下的文件。也就是循环获得文件<br>
+//	 * 如果文件不存在则返回空的list<br>
+//	 * 如果不是文件夹，则返回该文件名<br>
+//	 * 
+//	 * @param filePath
+//	 *            目录路径
+//	 * @param filename
+//	 *            指定包含的文件名，是正则表达式 ，如 "*",正则表达式无视大小<br>
+//	 *            null 表示不指定
+//	 * @param suffix
+//	 *            指定包含的后缀名，是正则表达式<br>
+//	 *            文件 wfese.fse.fe认作 "wfese.fse"和"fe"<br>
+//	 *            文件 wfese.fse.认作 "wfese.fse."和""<br>
+//	 *            文件 wfese 认作 "wfese"和""<br>
+//	 *            null 表示不指定
+//	 * @return 返回包含目标文件全名的ArrayList
+//	 * @throws IOException
+//	 */
+//	@Deprecated
+//	public static List<File> getFoldFileLs(File file, String filename, String suffix) {
+//		if (filename == null || filename.equals("*")) {
+//			filename = ".*";
+//		}
+//		if (suffix == null || suffix.equals("*")) {
+//			suffix = ".*";
+//		}
+//		FileFilterNBC fileFilterNBC = new FileFilterNBC(filename, suffix);
+//		List<File> lsFilenames = new ArrayList<>();
+//
+//		if (!file.exists()) {// 没有文件，则返回空
+//			return new ArrayList<>();
+//		}
+//		// 如果只是文件则返回文件名
+//		if (!file.isDirectory()) { // 获取文件名与后缀名
+//			if (fileFilterNBC.accept(file)) {
+//				lsFilenames.add(file);
+//				return lsFilenames;
+//			}
+//		}
+//
+//		File[] result = file.listFiles(fileFilterNBC);
+//
+//		for (File file2 : result) {
+//			lsFilenames.add(file2);
+//		}
+//		return lsFilenames;
+//	}
 
 	public static class FileFilterNBC implements FileFilter {
 		PatternOperate patName;
@@ -858,7 +858,7 @@ public class FileOperate {
 	 * @throws IOException
 	 */
 	public static List<Path> getLsFoldPathRecur(String file, boolean isNeedFolder) {
-		return getLsFoldPathRecur(FileOperate.getPath(file), "*", "*", isNeedFolder);
+		return getLsFoldPathRecur(getPath(file), "*", "*", isNeedFolder);
 	}
 	/**
 	 * 获取文件夹下包含指定文件名与后缀的所有文件名<b>递归查找</b><br>
@@ -873,7 +873,7 @@ public class FileOperate {
 	 * @throws IOException
 	 */
 	public static List<String> getLsFoldPathRecurStr(String file, boolean isNeedFolder) {
-		List<Path> lsPaths = getLsFoldPathRecur(FileOperate.getPath(file), "*", "*", isNeedFolder);
+		List<Path> lsPaths = getLsFoldPathRecur(getPath(file), "*", "*", isNeedFolder);
 		List<String> lsResult = new ArrayList<>();
 		lsPaths.forEach((path) -> {
 			lsResult.add(getAbsolutePath(path));
@@ -941,7 +941,7 @@ public class FileOperate {
 		}
 
 		// 如果只是文件则返回文件名
-		if (!FileOperate.isFileDirectory(file)) { // 获取文件名与后缀名
+		if (!isFileDirectory(file)) { // 获取文件名与后缀名
 			if (predicateFileName == null) {
 				lsPath.add(file);
 			} else if (predicateFileName != null && predicateFileName.test(file)) {
@@ -1083,12 +1083,16 @@ public class FileOperate {
 	 * @return
 	 */
 	public static ArrayList<String> getLsFoldFileName(String filePath) {
+		/*
+		 * 
 		List<Path> lsPaths = getLsFoldPath(getPath(filePath), "*", "*");
 		ArrayList<String> lsResult = new ArrayList<>();
 		lsPaths.forEach((path) -> {
 			lsResult.add(getAbsolutePath(path));
 		});
 		return lsResult;
+		 */
+		return getLsFoldFileName(filePath, "*", "*");
 	}
 
 	/**
@@ -1102,12 +1106,39 @@ public class FileOperate {
 	 * @return
 	 */
 	public static ArrayList<String> getLsFoldFileName(String filePath, String filename, String suffix) {
+		/*
+		 * 
 		List<Path> lsPaths = getLsFoldPath(getPath(filePath), filename, suffix);
 		ArrayList<String> lsResult = new ArrayList<>();
 		lsPaths.forEach((path) -> {
 			lsResult.add(getAbsolutePath(path));
 		});
 		return lsResult;
+		 */
+		return getLsFoldFileName(getPath(filePath), filename, suffix);
+	}
+	
+	/**
+	 * 获取文件夹下包含指定文件名与后缀的所有文件名，仅找第一层，不递归<br>
+	 * 如果文件不存在则返回null<br>
+	 * 如果不是文件夹，则返回该文件名<br>
+	 * 
+	 * @param filePath
+	 * @param deepth
+	 *            指定深度
+	 * @return
+	 */
+	public static ArrayList<String> getLsFoldFileName(Path filePath) {
+		/*
+		 * 
+		List<Path> lsPaths = getLsFoldPath(filePath, "*", "*");
+		ArrayList<String> lsResult = new ArrayList<>();
+		lsPaths.forEach((path) -> {
+			lsResult.add(getAbsolutePath(path));
+		});
+		return lsResult;
+		 */
+		return getLsFoldFileName(filePath, "*", "*");
 	}
 
 	/**
@@ -1122,25 +1153,6 @@ public class FileOperate {
 	 */
 	public static ArrayList<String> getLsFoldFileName(Path filePath, String filename, String suffix) {
 		List<Path> lsPaths = getLsFoldPath(filePath, filename, suffix);
-		ArrayList<String> lsResult = new ArrayList<>();
-		lsPaths.forEach((path) -> {
-			lsResult.add(getAbsolutePath(path));
-		});
-		return lsResult;
-	}
-
-	/**
-	 * 获取文件夹下包含指定文件名与后缀的所有文件名，仅找第一层，不递归<br>
-	 * 如果文件不存在则返回null<br>
-	 * 如果不是文件夹，则返回该文件名<br>
-	 * 
-	 * @param filePath
-	 * @param deepth
-	 *            指定深度
-	 * @return
-	 */
-	public static ArrayList<String> getLsFoldFileName(Path filePath) {
-		List<Path> lsPaths = getLsFoldPath(filePath, "*", "*");
 		ArrayList<String> lsResult = new ArrayList<>();
 		lsPaths.forEach((path) -> {
 			lsResult.add(getAbsolutePath(path));
@@ -1232,7 +1244,7 @@ public class FileOperate {
 	/** 根据给定的后缀，产生相应的流，譬如如果后缀是gz，就包装为gz格式 */
 	public static OutputStream getOutputStreamWithSuffix(String filePath) throws IOException {
 		OutputStream os = getOutputStream(filePath, false);
-		return modifyOutputStream(TXTtype.getTxtType(filePath), os, FileOperate.getFileName(filePath));
+		return modifyOutputStream(TXTtype.getTxtType(filePath), os, getFileName(filePath));
 	}
 	
 	public static OutputStream modifyOutputStream(TXTtype txtTtype, OutputStream outputStreamRaw, String zipfileName) throws IOException {
@@ -1245,7 +1257,7 @@ public class FileOperate {
 			outputStream = new BufferedOutputStream(new BZip2CompressorOutputStream(outputStreamRaw), TxtReadandWrite.bufferLen);
 		} else if (txtTtype == TXTtype.Zip) {
 			ZipArchiveOutputStream zipOutputStream = new ZipArchiveOutputStream(outputStreamRaw);
-			ZipArchiveEntry entry = new ZipArchiveEntry(FileOperate.getFileNameSep(zipfileName)[0]);
+			ZipArchiveEntry entry = new ZipArchiveEntry(getFileNameSep(zipfileName)[0]);
 			zipOutputStream.putArchiveEntry(entry);
 			outputStream = new BufferedOutputStream(zipOutputStream, TxtReadandWrite.bufferLen);
 		} else if (txtTtype == TXTtype.Lzo) {
@@ -1275,14 +1287,14 @@ public class FileOperate {
 	
 	public static OutputStream getOutputStream(Path file, boolean append) throws IOException {
 		StandardOpenOption openOption = append ? StandardOpenOption.APPEND : StandardOpenOption.CREATE;
-		if (!FileOperate.isFileExist(file)) {
+		if (!isFileExist(file)) {
 			openOption = StandardOpenOption.CREATE;
 		}
-		if (append == false && FileOperate.isFileExistAndBigThan0(file)) {
-			if (FileOperate.isFileDirectory(file)) {
+		if (append == false && isFileExistAndBigThan0(file)) {
+			if (isFileDirectory(file)) {
 				throw new ExceptionNbcFile("cannot create outputstream on folder " + file.toString());
 			}
-			FileOperate.deleteFileFolder(file);
+			deleteFileFolder(file);
 		}
 		return Files.newOutputStream(file, openOption);
 	}
@@ -1301,7 +1313,7 @@ public class FileOperate {
 	 * @param cover
 	 */
 	public static void copyFileFolder(String oldPathFile, String newPathFile, boolean cover) {
-		boolean isFolder = FileOperate.isFileDirectory(oldPathFile);
+		boolean isFolder = isFileDirectory(oldPathFile);
 		Path oldfile = getPath(oldPathFile);
 		if (isFolder) {
 			copyFolder(oldfile, newPathFile, cover);
@@ -1311,7 +1323,7 @@ public class FileOperate {
 	}
 
 	public static void copyFileFolder(Path oldfile, String newPathFile, boolean cover) {
-		boolean isFolder = FileOperate.isFileDirectory(oldfile);
+		boolean isFolder = isFileDirectory(oldfile);
 		if (isFolder) {
 			copyFolder(oldfile, newPathFile, cover);
 		} else {
@@ -1330,10 +1342,10 @@ public class FileOperate {
 	 */
 	public static boolean copyFolder(Path oldFilePath, String newPath, boolean cover) {
 		final String newPathSep = addSep(newPath);
-		if (!FileOperate.isFileExist(oldFilePath)) {
+		if (!isFileExist(oldFilePath)) {
 			logger.error(oldFilePath + " is not exist");
 		}
-		if (!FileOperate.isFileDirectory(oldFilePath)) {
+		if (!isFileDirectory(oldFilePath)) {
 			logger.error(oldFilePath + " is not a folder");
 			return false;
 		}
@@ -1406,10 +1418,10 @@ public class FileOperate {
 		if (cover && isFileDirectory(pathNew)) {
 			throw new ExceptionFileError("cannot cover directory " + pathNew);
 		}
-		Path pathNewTmp = getPath(FileOperate.changeFileSuffix(getAbsolutePath(pathNew), "_tmp", null));
+		Path pathNewTmp = getPath(changeFileSuffix(getAbsolutePath(pathNew), "_tmp", null));
 		try {
 			Files.deleteIfExists(pathNewTmp);
-			createFolders(FileOperate.getPathName(pathNew));
+			createFolders(getPathName(pathNew));
 			logger.info("start copy from {} to {}", oldfile, pathNew);
 			Files.copy(oldfile, pathNewTmp, StandardCopyOption.REPLACE_EXISTING);
 			Files.deleteIfExists(pathNew);
@@ -1639,7 +1651,7 @@ public class FileOperate {
 	 * @return
 	 */
 	public static void moveFile(boolean cover, String oldFileName, String newFileName) {
-		moveFile(cover, FileOperate.getPath(oldFileName), newFileName, true);
+		moveFile(cover, getPath(oldFileName), newFileName, true);
 	}
 	/**
 	 * 既可移动文件夹又可移动单个文件
@@ -1650,7 +1662,7 @@ public class FileOperate {
 	 * @return
 	 */
 	public static void moveFile(boolean cover, String oldFileName, String newFileName, boolean isDeleteFolder) {
-		moveFile(cover, FileOperate.getPath(oldFileName), newFileName, isDeleteFolder);
+		moveFile(cover, getPath(oldFileName), newFileName, isDeleteFolder);
 	}
 	/**
 	 * @param cover  是否覆盖
@@ -1785,10 +1797,10 @@ public class FileOperate {
 	 * @throws Exception
 	 */
 	private static void moveFoldFile(Path olddir, String newfolder, String prix, boolean cover, boolean isDeleteFolder) {
-		if (!FileOperate.isFileExist(olddir)) {
+		if (!isFileExist(olddir)) {
 			logger.error(olddir + " is not exist");
 		}
-		if (!FileOperate.isFileDirectory(olddir)) {
+		if (!isFileDirectory(olddir)) {
 			logger.error(olddir + " is not a folder");
 			return;
 		}
@@ -1816,7 +1828,7 @@ public class FileOperate {
 		
 		//如果可以删除文件夹，那么就可以考虑使用Files.move直接全移动过去
 		if (isDeleteFolder) {
-			if (!FileOperate.isFileExist(pathNew)) {
+			if (!isFileExist(pathNew)) {
 				try {
 					Files.move(olddir, pathNew);
 					return;
@@ -1846,7 +1858,7 @@ public class FileOperate {
 		}
 
 		if (isDeleteFolder && !isMakeDirSameAsOld[0]) {
-			FileOperate.deleteFileFolder(olddir);
+			deleteFileFolder(olddir);
 		}
 	}
 
@@ -1887,15 +1899,15 @@ public class FileOperate {
 	 * @return 返回是否创建成功
 	 */
 	public static void linkFile(String rawFile, String linkTo, boolean cover) {
-		if (!cover && (FileOperate.isFileExist(linkTo) || FileOperate.isSymbolicLink(linkTo))) {
+		if (!cover && (isFileExist(linkTo) || isSymbolicLink(linkTo))) {
 			return;
 		}
-		if (!FileOperate.isFileExist(rawFile)) {
+		if (!isFileExist(rawFile)) {
 			return;
 		}
-		FileOperate.createFolders(FileOperate.getParentPathNameWithSep(linkTo));
-		if (FileOperate.isFileExist(linkTo) && cover) {
-			FileOperate.deleteFileFolder(linkTo);
+		createFolders(getParentPathNameWithSep(linkTo));
+		if (isFileExist(linkTo) && cover) {
+			deleteFileFolder(linkTo);
 		}
 
 		rawFile = FileHadoop.convertToHdfsPath(rawFile);
@@ -1910,7 +1922,7 @@ public class FileOperate {
 			throw new ExceptionNbcFile("could not creat symbolic link on hdfs from " + rawFile + " to " + linkTo);
 		}
 		try {
-			Files.createSymbolicLink(FileOperate.getPath(linkTo), FileOperate.getPath(rawFile));
+			Files.createSymbolicLink(getPath(linkTo), getPath(rawFile));
 		} catch (IOException e) {
 			throw new ExceptionNbcFile("could not creat symbolic link from " + rawFile + " to " + linkTo, e);
 		}
@@ -2020,7 +2032,7 @@ public class FileOperate {
 		return isFileExistAndNotDir(path);
 	}
 	public static boolean isSymbolicLink(String fileName) {
-		return Files.isSymbolicLink(FileOperate.getPath(fileName));
+		return Files.isSymbolicLink(getPath(fileName));
 	}
 	public static boolean isSymbolicLink(Path path) {
 		return Files.isSymbolicLink(path);
@@ -2040,7 +2052,7 @@ public class FileOperate {
 		}
 		if (size < 0)
 			size = -1;
-		return FileOperate.getFileSizeLong(path) > size;
+		return getFileSizeLong(path) > size;
 	}
 
 	/**
@@ -2059,7 +2071,7 @@ public class FileOperate {
 		if (size < 0)
 			size = -1;
 		Path path = getPath(fileName);
-		return FileOperate.getFileSizeLong(path) > size;
+		return getFileSizeLong(path) > size;
 	}
 
 	public static boolean isFileExistAndBigThan0(String fileName) {
@@ -2101,8 +2113,8 @@ public class FileOperate {
 	 */
 	@Deprecated
 	public static boolean isFileExistAndLossless(String filePath, long realSize) {
-		Path file = FileOperate.getPath(filePath);
-		if (FileOperate.isFileExist(file)) {
+		Path file = getPath(filePath);
+		if (isFileExist(file)) {
 			return false;
 		}
 		if (isFileExistAndNotDir(file)) {
@@ -2142,7 +2154,7 @@ public class FileOperate {
 		final Path path = getPath(file.getPath());
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
-				FileOperate.deleteFileFolder(path);
+				deleteFileFolder(path);
 			}
 		});
 	}
@@ -2150,7 +2162,7 @@ public class FileOperate {
 	public static void deleteOnExit(final Path path) {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
-				FileOperate.deleteFileFolder(path);
+				deleteFileFolder(path);
 			}
 		});
 	}
@@ -2159,7 +2171,7 @@ public class FileOperate {
 		final Path path = getPath(fileName);
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
-				FileOperate.deleteFileFolder(path);
+				deleteFileFolder(path);
 			}
 		});
 	}
@@ -2306,8 +2318,8 @@ public class FileOperate {
 		if (StringOperate.isRealNull(outPath)) {
 			return 0;
 		}
-		FileOperate.createFolders(FileOperate.getParentPathNameWithSep(outPath));
-		OutputStream os = FileOperate.getOutputStream(outPath);
+		createFolders(getParentPathNameWithSep(outPath));
+		OutputStream os = getOutputStream(outPath);
 		if (isOutputGzip) {
 			os = new GZIPOutputStream(os, TxtReadandWrite.bufferLen);
 		}
