@@ -171,6 +171,9 @@ public class PatternOperate {
      * @return 没有抓到的话，返回null
      */
     public String getPatFirst(String inputstr) {
+    	if (inputstr == null) {
+			return null;
+		}
     	return getPatFirst(inputstr, 0);
     }
     /**

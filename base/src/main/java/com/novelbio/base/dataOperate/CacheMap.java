@@ -17,9 +17,7 @@ import java.util.Set;
 public class CacheMap<K, V> extends AbstractMap<K, V> {
 
 	/** 过期时间8小时 */
-	private static final long DEFAULT_TIMEOUT = 8 * 3600_000L;
-	private static CacheMap<Object, Object> defaultInstance;
-	
+	private static final long DEFAULT_TIMEOUT = 8 * 3600_000L;	
 	
 	public static void main(String[] args) throws InterruptedException {
 		CacheMap<String, String> cache = new CacheMap<String, String>(10_000);
@@ -28,14 +26,17 @@ public class CacheMap<K, V> extends AbstractMap<K, V> {
 		Thread.sleep(10_000);
 		System.out.println("key=" + cache.containsKey("abc"));
 	}
-
-	public static synchronized final CacheMap<Object, Object> getDefault() {
-		if (defaultInstance == null) {
-			defaultInstance = new CacheMap<Object, Object>(DEFAULT_TIMEOUT);
-		}
-		return defaultInstance;
+	
+	public CacheMap(long timeout) {
+		this.cacheTimeout = timeout;
+		new ClearThread().start();
 	}
-
+	
+	/** 默认8小时过期 */
+	public CacheMap() {
+		this(DEFAULT_TIMEOUT);
+	}
+	
 	private class CacheEntry implements Entry<K, V> {
 		long time;
 		V value;
@@ -92,11 +93,6 @@ public class CacheMap<K, V> extends AbstractMap<K, V> {
 
 	private long cacheTimeout;
 	private Map<K, CacheEntry> map = new HashMap<K, CacheEntry>();
-
-	public CacheMap(long timeout) {
-		this.cacheTimeout = timeout;
-		new ClearThread().start();
-	}
 
 	@Override
 	public Set<Entry<K, V>> entrySet() {
