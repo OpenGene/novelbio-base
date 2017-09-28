@@ -1774,6 +1774,26 @@ public class FileOperate {
 	private static void moveFoldFile(Path olddir, String newfolder, boolean cover, boolean isDeleteFolder) {
 		moveFoldFile(olddir, newfolder, "", cover, isDeleteFolder);
 	}
+	
+	/**
+	 * 移动文件夹，将oldFolder文件夹下的全部文件以及目录移动到newFolder文件夹下面<br>
+	 * 注意：处理完成后，oldFolder文件夹下的全部文件均会被删除，文件夹是否保留由deleteOldFolder参数决定<br>
+	 * @param oldFolder 源文件夹
+	 * @param newFolder 目标文件夹
+	 * @param prix 文件名前缀，全部移动后的文件名称均添加该前缀，注意仅文件添加，文件夹不添加，例如prix="mv-"，移动前文件名：log.conf，移动后文件名：mv-log.conf
+	 * @param cover 是否覆盖，如果目标文件夹内已经存在同名文件或文件夹，true的时候则先删除后移动，false的时候则跳过不移动
+	 * @param deleteOldFolder 是否删除源文件夹，true的时候将删除oldFolder文件夹，fasle的时候则保留oldFolder文件夹及其内部全部的子文件夹
+	 * 
+	 * @author novelbio luwei
+	 * @date 20170928
+	 */
+	public static void moveFolder(String oldFolder, String newFolder, String prix, boolean cover, boolean deleteOldFolder) {
+		// 如果sPath不以文件分隔符结尾，自动添加文件分隔符
+		oldFolder = addSep(oldFolder);
+
+		Path olddir = getPath(oldFolder);
+		moveFoldFile(olddir, newFolder, prix, cover, deleteOldFolder);
+	}
 
 	/**
 	 * 移动指定文件夹内的全部文件，如果目标文件夹下有重名文件，则跳过，同时返回false<br/>
