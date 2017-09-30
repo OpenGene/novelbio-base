@@ -1813,6 +1813,7 @@ public class FileOperate {
 	private static void moveFoldFile(Path olddir, String newfolder, String prix, boolean cover, boolean isDeleteFolder) {
 		if (!isFileExist(olddir)) {
 			logger.error(olddir + " is not exist");
+			return;
 		}
 		if (!isFileDirectory(olddir)) {
 			logger.error(olddir + " is not a folder");
