@@ -284,7 +284,7 @@ public class DateUtil {
 	 */
 	public static Long getDateBetween(Date startDate, Date endDate) {
 		if (startDate == null || endDate == null) {
-			return null;
+			return 0L;
 		}
 		return (endDate.getTime() - startDate.getTime()) / 60_000; 
 	}

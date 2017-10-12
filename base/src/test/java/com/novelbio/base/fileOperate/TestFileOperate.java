@@ -366,6 +366,25 @@ public class TestFileOperate {
 		System.out.println(fileName);
 	}
 	
+	@Test
+	public void testMoveFolder() {
+		FileOperate.deleteFileFolder("/hdfs:/nbCloud/public/software/MoveFolder");
+		FileOperate.createFolders("/hdfs:/nbCloud/public/software/MoveFolder");
+		
+		FileOperate.moveFolder("/home/novelbio/git/snakerflow/snaker-nutz", "/hdfs:/nbCloud/public/software/MoveFolder", "", true, true);
+		
+		Assert.assertTrue(FileOperate.isFileExist("/hdfs:/nbCloud/public/software/MoveFolder/pom.xml"));
+		Assert.assertTrue(FileOperate.isFileExist("/hdfs:/nbCloud/public/software/MoveFolder/src/test/resources/log4j.properties"));
+		Assert.assertFalse(FileOperate.isFileExist("/home/novelbio/git/snakerflow/snaker-nutz"));
+		
+		FileOperate.createFolders("/home/novelbio/git/snakerflow/snaker-nutz");
+		FileOperate.moveFolder("/hdfs:/nbCloud/public/software/MoveFolder", "/home/novelbio/git/snakerflow/snaker-nutz", "", true, true);
+		
+		Assert.assertFalse(FileOperate.isFileExist("/hdfs:/nbCloud/public/software/MoveFolder"));
+		Assert.assertTrue(FileOperate.isFileExist("/home/novelbio/git/snakerflow/snaker-nutz/pom.xml"));
+		Assert.assertTrue(FileOperate.isFileExist("/home/novelbio/git/snakerflow/snaker-nutz/src/test/resources/log4j.properties"));
+	}
+	
 	public static void main(String[] args) {
 		
 		String pathStr1 = "nbCloud/public/AllProject/A__2016-12/project_58468c2c0cf23ee9307e8ea5/task_585798b444f45b7130562eb5/QualityControl_result/QCResults/";
@@ -405,5 +424,4 @@ public class TestFileOperate {
 		long time22 = System.currentTimeMillis();
 		System.out.println("base time=" + (time22 - time21));
 	}
-	
 }
