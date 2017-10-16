@@ -157,7 +157,12 @@ public class MD5generate {
 	 * @throws IOException
 	 */
 	public static String getMD5ofFileHead5MB(String fileName) throws IOException {
+		//TODO 这个方法对于oss的文件读取处理有问题.oss如果不是随机读.会把文件挨着读一遍的.这里需要使用随机读的方法.
+		/*
+		 * 
 		InputStream in = FileOperate.getInputStream(fileName);
+		 */
+		InputStream in = FileOperate.getSeekablePathInputStream(FileOperate.getPath(fileName));
 		long maxSize = 1024 * 1024 * 5;//100;
 		long fileLength = 0;
 		fileLength = FileOperate.getFileSizeLong(fileName);

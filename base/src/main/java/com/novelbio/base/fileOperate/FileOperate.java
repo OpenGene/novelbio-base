@@ -8,8 +8,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -135,6 +137,7 @@ public class FileOperate {
 		}
 		return null;
 	}
+	
 	public static Path getPath(String fileName) {
 		if (StringOperate.isRealNull(fileName))
 			return null;
@@ -1157,8 +1160,8 @@ public class FileOperate {
 	}
 
 	/**
-	 * 给定一个文件名，返回该文件名上有几个文件夹，不包括本文件夹 如 给定 /home/novelbio/test 和
-	 * /home/novelbio/test/ 都返回2<br>
+	 * 给定一个文件名，返回该文件名上有几个文件夹，不包括本文件夹 <br>
+	 * 如 给定 /home/novelbio/test 和 /home/novelbio/test/ 都返回2<br>
 	 * 此外 如 mypath/novelbio/test 和 mypath/novelbio/test/ 也都返回2
 	 * 
 	 * @param fileName
