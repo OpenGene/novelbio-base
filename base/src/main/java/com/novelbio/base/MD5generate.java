@@ -163,7 +163,7 @@ public class MD5generate {
 		InputStream in = FileOperate.getInputStream(fileName);
 		 */
 		InputStream in = FileOperate.getSeekablePathInputStream(FileOperate.getPath(fileName));
-		long maxSize = 1024 * 1024 * 5;//100;
+		long maxSize = 5L * 1024 * 1024;//100;
 		long fileLength = 0;
 		fileLength = FileOperate.getFileSizeLong(fileName);
 		maxSize = (maxSize > fileLength ? fileLength : maxSize);

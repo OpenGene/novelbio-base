@@ -2172,6 +2172,11 @@ public class FileOperate {
 //		});
 //	}
 
+	/**
+	 * 删除文件或文件夹.<br/>
+	 * <b>注意:该方法调用后不会立即删除文件后文件夹.是在jvm退出时,才会执行删除操作.正式代码务必谨慎使用.</b>
+	 * @param path
+	 */
 	public static void deleteOnExit(final Path path) {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
@@ -2180,6 +2185,11 @@ public class FileOperate {
 		});
 	}
 
+	/**
+	 * 删除文件或文件夹.<br/>
+	 * <b>注意:该方法调用后不会立即删除文件后文件夹.是在jvm退出时,才会执行删除操作.正式代码务必谨慎使用.</b>
+	 * @param path
+	 */
 	public static void deleteOnExit(String fileName) {
 		final Path path = getPath(fileName);
 		Runtime.getRuntime().addShutdownHook(new Thread() {
