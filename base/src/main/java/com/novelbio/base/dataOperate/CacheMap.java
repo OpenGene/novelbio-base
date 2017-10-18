@@ -27,6 +27,11 @@ public class CacheMap<K, V> extends AbstractMap<K, V> {
 		System.out.println("key=" + cache.containsKey("abc"));
 	}
 	
+	/**
+	 * 过期的毫秒数
+	 * 
+	 * @param timeout
+	 */
 	public CacheMap(long timeout) {
 		this.cacheTimeout = timeout;
 		new ClearThread().start();

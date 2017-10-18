@@ -546,7 +546,7 @@ class TxtRead implements Closeable {
 	BufferedReaderNBC readfile() {
 		try { initialReading(); 	}
 		catch (NoSuchFileException e) {
-			throw new ExceptionNbcFile("cannot file file: " + getFileName());
+			throw new ExceptionNbcFile("cannot find file: " + getFileName());
 		} catch (IOException e) {
 			String fileName = getFileName();
 			if (StringOperate.isRealNull(fileName) && inputStreamRaw != null) {

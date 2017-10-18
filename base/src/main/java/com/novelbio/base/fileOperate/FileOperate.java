@@ -2048,6 +2048,12 @@ public class FileOperate {
 		return Files.isSymbolicLink(path);
 	}
 	
+	/**
+	 * 判断文件是否存在，并且有一定的大小而不是空文件.可以是文件或文件夹,文件夹返回文件夹里所有文件的大小.
+	 * 
+	 * @param fileName
+	 * @return
+	 */
 	public static boolean isFileExistAndBigThan0(String fileName) {
 		return isFileExistAndBigThanSize(fileName, 0);
 	}
@@ -2063,7 +2069,7 @@ public class FileOperate {
 	}
 	
 	/**
-	 * 判断文件是否存在，并且有一定的大小而不是空文件
+	 * 判断文件是否存在，并且有一定的大小而不是空文件.可以是文件或文件夹,文件夹返回文件夹里所有文件的大小.
 	 * 
 	 * @param fileName
 	 *            如果为null, 直接返回false
