@@ -95,6 +95,7 @@ public class TestCmdOrderGenerator {
 		
 		String resultFileName = "testTrinity.fa";
 		//往结果中写个文件 */
+		FileOperate.createFolders(FileOperate.getPathName(ss[2]));
 		TxtReadandWrite txtWrite = new TxtReadandWrite(FileOperate.getPathName(ss[2]) + resultFileName, true);
 		txtWrite.writefileln("testCmdOrderGenerator");
 		txtWrite.close();
@@ -220,6 +221,7 @@ public class TestCmdOrderGenerator {
 		String resultFileName = "test2.fatestResult.txt";
 		//往结果中写个文件 */
 		String outTmp = ss[2].split("=")[1];
+		FileOperate.createFolders(FileOperate.getPathName(outTmp));
 		TxtReadandWrite txtWrite = new TxtReadandWrite(FileOperate.getPathName(outTmp) + resultFileName, true);
 		txtWrite.writefileln("testCmdOrderGenerator");
 		txtWrite.close();
