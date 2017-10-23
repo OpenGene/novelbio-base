@@ -5,10 +5,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 用来存储短暂对象的缓存类，实现Map接口，内部有一个定时器用来清除过期（DEFAULT_TIMEOUT）的对象。
- * 为避免创建过多线程，没有特殊要求请使用getDefault()方法来获取本类的实例。
+ * 为避免创建过多线程，没有特殊要求请使用getDefault()方法来获取本类的实例。<br/>
+ * 
+ * 参数代表过期的毫秒数.从数据存入开始计算.
+ * 
  * @author www.zuidaima.com
  * @param <K>
  * @param <V>
@@ -97,7 +101,7 @@ public class CacheMap<K, V> extends AbstractMap<K, V> {
 	}
 
 	private long cacheTimeout;
-	private Map<K, CacheEntry> map = new HashMap<K, CacheEntry>();
+	private Map<K, CacheEntry> map = new ConcurrentHashMap<K, CacheEntry>();
 
 	@Override
 	public Set<Entry<K, V>> entrySet() {
@@ -118,9 +122,7 @@ public class CacheMap<K, V> extends AbstractMap<K, V> {
 	@Override
 	public V put(K key, V value) {
 		CacheEntry entry = new CacheEntry(key, value);
-		synchronized (map) {
-			map.put(key, entry);
-		}
+		map.put(key, entry);
 		return value;
 	}
 
