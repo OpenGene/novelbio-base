@@ -16,7 +16,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -54,7 +53,7 @@ import com.novelbio.base.security.Crypter;
 public class HttpUtil {
 	private static PoolingHttpClientConnectionManager connMgr;
 	private static RequestConfig requestConfig;
-	private static final int MAX_TIMEOUT = 7000;
+	private static final int MAX_TIMEOUT = 120_000;
 	private static SSLConnectionSocketFactory sslsf = null;
 	static {
 		sslsf = SSLConnectionSocketFactory.getSystemSocketFactory();
@@ -207,7 +206,7 @@ public class HttpUtil {
 			e.printStackTrace();
 		}
 	}
-
+	
 	public static void main(String[] args) {
 		Map<String, Object> params = new HashMap<>();
 		params.put("taskId", "taskId");
