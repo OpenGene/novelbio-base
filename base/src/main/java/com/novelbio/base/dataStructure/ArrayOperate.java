@@ -655,6 +655,18 @@ public class ArrayOperate {
 			array[i] = tmpValue;
 		}
 	}
+	/**
+	 * 颠倒list，注意仅适用于arraylist
+	 * linkedlist不适合本方法
+	 * @param array
+	 */
+	public static <T>List<T> convertList(List<T> listInput) {
+		List<T> lsResult = new ArrayList<>();
+		for (int i = listInput.size()-1; i >= 0; i--) {
+			lsResult.add(listInput.get(i));
+		}
+		return lsResult;
+	}
 
 	/**
 	 * 颠倒数组，直接性将传入的数组倒置，不返回东西
