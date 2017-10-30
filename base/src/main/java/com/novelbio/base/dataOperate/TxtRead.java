@@ -191,7 +191,7 @@ class TxtRead implements Closeable {
 							throw new ExceptionNbcFile("file " + getFileName() + " have a very long line on line " + linNum, e);
 						}
 						if (line == null) {
-							close();
+//							close();
 						}
 						return line;
 					}
@@ -565,14 +565,14 @@ class TxtRead implements Closeable {
 	 * @throws Exception
 	 */
 	private void initialReading() throws IOException {
-			if (bufread != null) {
-				bufread.close();
-				bufread = null;
-			}
-			if (!isStream && inputStream != null) {
-				inputStream.close();
-				inputStream = null;
-			}
+		if (!isStream && bufread != null) {
+			bufread.close();
+			bufread = null;
+		}
+		if (!isStream && inputStream != null) {
+			inputStream.close();
+			inputStream = null;
+		}
 			
 		if (!isStream && inputStreamRaw != null) {
 			inputStreamRaw.close();
