@@ -8,10 +8,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -1421,6 +1419,7 @@ public class FileOperate {
 			Files.deleteIfExists(pathNewTmp);
 			createFolders(getPathName(pathNew));
 			logger.info("start copy from {} to {}", oldfile, pathNew);
+			//XXX 这里注意.StandardCopyOption的其他两个参数底层不支持.所以这里必须是REPLACE_EXISTING
 			Files.copy(oldfile, pathNewTmp, StandardCopyOption.REPLACE_EXISTING);
 			Files.deleteIfExists(pathNew);
 			Files.move(pathNewTmp, pathNew, StandardCopyOption.REPLACE_EXISTING);
