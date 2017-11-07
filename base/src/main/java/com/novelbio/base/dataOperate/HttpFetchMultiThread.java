@@ -77,9 +77,10 @@ import org.apache.http.protocol.HttpContext;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.HttpMethod;
+import com.gargoylesoftware.htmlunit.Page;
+import com.gargoylesoftware.htmlunit.ScriptException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.util.Cookie;
 import com.google.common.collect.Maps;
 import com.novelbio.base.ExceptionNbcParamError;
@@ -89,8 +90,7 @@ import com.novelbio.base.fileOperate.FileOperate;
 
 /**
  * 本类适合高并发的连接使用，如并发访问某个client<br>
- * 如果只是普通的爬虫，推荐使用
- * htmlUnit的{@link com.gargoylesoftware.htmlunit.WebClient}，那个更简单易用<br>
+ * 如果只是普通的爬虫，<b>推荐使用基于HtmlUnit工具的构造函数</b> new HttpFetchMultiThread() 更简单易用<br>
  * <b>单个HttpFetch用完后务必调用方法{@link #close()} 来释放连接</b><br>
  * 一次只能选择一项，要么post，要么get
  * 
@@ -133,7 +133,16 @@ public class HttpFetchMultiThread implements IHttpFetch, Closeable {
 
 	/**
 	 * 基于HtmlUnit工具的构造函数<br>
-	 * 由于HtmlUnit功能更加完善强大，因此建议优先使用该构造<br>
+	 * 由于HtmlUnit功能更加完善强大，因此<b>建议优先使用该构造</b><br>
+	 * 使用示例：<br>
+	 * HttpFetchMultiThread fetch = new HttpFetchMultiThread();<br>
+	 * String pageText1 = fetch.setDynamicPage(true)<br>
+	 *			.addCookies(domain, Map<String, String> c)<br>
+	 *			.addHeaders(Map<String, String> h)<br>
+	 *			.setParameters(Map<String, String> p)<br>
+	 *			.fetchPage(url, HttpFetchMultiThread.METHOD_GET);<br>
+	 * <br>
+	 * String pageText2 = fetch.fetchPage(url);<br>
 	 */
 	public HttpFetchMultiThread() {
 		initWebClient();
@@ -143,27 +152,27 @@ public class HttpFetchMultiThread implements IHttpFetch, Closeable {
 	 * 初始化默认的HtmlUnit的WebClient对象
 	 */
 	private void initWebClient() {
-		if(null == webClient) {
+		if (null == webClient) {
 			webClient = new WebClient(BrowserVersion.CHROME);
-			webClient.getOptions().setUseInsecureSSL(false); // 支持https
-	        // webClient.getOptions().setRedirectEnabled(true); // 启动客户端重定向
-	        webClient.getOptions().setTimeout(timeoutConnectionRequest); // 设置连接超时时间 ，这里是10S。如果为0，则无限期等待
-	        webClient.getOptions().setDoNotTrackEnabled(true); // 默认是false, 设置为true的话不让你的浏览行为被记录
+			webClient.getOptions().setUseInsecureSSL(true); // 支持https
+			// webClient.getOptions().setRedirectEnabled(true); // 启动客户端重定向
+			webClient.getOptions().setTimeout(timeoutConnectionRequest); // 设置连接超时时间 ，这里是10S。如果为0，则无限期等待
+			webClient.getOptions().setDoNotTrackEnabled(true); // 默认是false, 设置为true的话不让你的浏览行为被记录
 		}
-        
-        if(isDynamicPage) {
-        	webClient.getOptions().setThrowExceptionOnScriptError(false); // js运行错误时，是否抛出异常
-        	webClient.getOptions().setJavaScriptEnabled(true); // 启用JS解释器，默认为true
-        	webClient.getOptions().setCssEnabled(false); // 禁用css支持
-        	webClient.setJavaScriptTimeout(10000); // 设置js运行超时时间
-        	webClient.waitForBackgroundJavaScript(10000); // 设置页面等待js响应时间
-        } else {
-        	webClient.getOptions().setThrowExceptionOnScriptError(false); // js运行错误时，是否抛出异常
-        	webClient.getOptions().setJavaScriptEnabled(false); // 启用JS解释器，默认为true
-        	webClient.getOptions().setCssEnabled(false); // 禁用css支持
-        	webClient.setJavaScriptTimeout(1); // 设置js运行超时时间
-        	webClient.waitForBackgroundJavaScript(1); // 设置页面等待js响应时间
-        }
+
+		if (isDynamicPage) {
+			webClient.getOptions().setThrowExceptionOnScriptError(true); // js运行错误时，是否抛出异常
+			webClient.getOptions().setJavaScriptEnabled(true); // 启用JS解释器，默认为true
+			webClient.getOptions().setCssEnabled(false); // 禁用css支持
+			webClient.setJavaScriptTimeout(timeoutConnectionRequest); // 设置js运行超时时间
+			webClient.waitForBackgroundJavaScript(timeoutConnectionRequest); // 设置页面等待js响应时间
+		} else {
+			webClient.getOptions().setThrowExceptionOnScriptError(false); // js运行错误时，是否抛出异常
+			webClient.getOptions().setJavaScriptEnabled(false); // 启用JS解释器，默认为true
+			webClient.getOptions().setCssEnabled(false); // 禁用css支持
+			webClient.setJavaScriptTimeout(1); // 设置js运行超时时间
+			webClient.waitForBackgroundJavaScript(1); // 设置页面等待js响应时间
+		}
 	}
 	
 	/**
@@ -176,13 +185,18 @@ public class HttpFetchMultiThread implements IHttpFetch, Closeable {
 		initWebClient();
 		return this;
 	}
-	
+
+	/**
+	 * 设置请求参数
+	 * @param parameters
+	 * @return HttpFetchMultiThread
+	 */
 	public HttpFetchMultiThread setParameters(Map<String, String> parameters) {
-		if(null == request) {
+		if (null == request) {
 			request = new WebRequest(null);
 		}
 		List<com.gargoylesoftware.htmlunit.util.NameValuePair> requestParameters = new ArrayList<>();
-		if(null == parameters) {
+		if (null == parameters) {
 			request.setRequestParameters(requestParameters);
 			return this;
 		}
@@ -192,28 +206,46 @@ public class HttpFetchMultiThread implements IHttpFetch, Closeable {
 		request.setRequestParameters(requestParameters);
 		return this;
 	}
-	
+
+	/**
+	 * 添加一个请求header
+	 * @param name
+	 * @param value
+	 * @return HttpFetchMultiThread
+	 */
 	public HttpFetchMultiThread addHeader(String name, String value) {
-		if(null == request) {
+		if (null == request) {
 			request = new WebRequest(null);
 		}
 		request.setAdditionalHeader(name, value);
 		return this;
 	}
-	
+
+	/**
+	 * 添加多个请求header
+	 * @param headers
+	 * @return HttpFetchMultiThread
+	 */
 	public HttpFetchMultiThread addHeaders(Map<String, String> headers) {
-		if(null == headers) {
+		if (null == headers) {
 			return this;
 		}
-		if(null == request) {
+		if (null == request) {
 			request = new WebRequest(null);
 		}
 		request.setAdditionalHeaders(headers);
 		return this;
 	}
-	
+
+	/**
+	 * 添加一个请求cookie
+	 * @param domain 域名，例如：www.mingdao.com
+	 * @param name cookie名称
+	 * @param value cookie值
+	 * @return HttpFetchMultiThread
+	 */
 	public HttpFetchMultiThread addCookie(String domain, String name, String value) {
-		if(null == webClient) {
+		if (null == webClient) {
 			initWebClient();
 		}
 		webClient.getCookieManager().setCookiesEnabled(true); // 开启cookie管理
@@ -221,12 +253,18 @@ public class HttpFetchMultiThread implements IHttpFetch, Closeable {
 		webClient.getCookieManager().addCookie(cookie);
 		return this;
 	}
-	
+
+	/**
+	 * 添加多个请求cookies
+	 * @param domain 域名，例如：www.mingdao.com
+	 * @param cookies
+	 * @return HttpFetchMultiThread
+	 */
 	public HttpFetchMultiThread addCookies(String domain, Map<String, String> cookies) {
-		if(null == cookies) {
+		if (null == cookies) {
 			return this;
 		}
-		if(null == webClient) {
+		if (null == webClient) {
 			initWebClient();
 		}
 		webClient.getCookieManager().setCookiesEnabled(true); // 开启cookie管理
@@ -236,7 +274,7 @@ public class HttpFetchMultiThread implements IHttpFetch, Closeable {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * 获取指定URL的网页内容
 	 * @category 基于HtmlUnit工具
@@ -248,7 +286,7 @@ public class HttpFetchMultiThread implements IHttpFetch, Closeable {
 	public String fetchPage(String url) throws FailingHttpStatusCodeException, IOException {
 		return fetchPage(url, null);
 	}
-	
+
 	/**
 	 * 获取指定URL的网页内容
 	 * @category 基于HtmlUnit工具
@@ -258,24 +296,29 @@ public class HttpFetchMultiThread implements IHttpFetch, Closeable {
 	 * @throws FailingHttpStatusCodeException
 	 * @throws IOException
 	 */
-	public String fetchPage(String url, String httpMethod) throws FailingHttpStatusCodeException, IOException {
+	public String fetchPage(String url, String httpMethod) throws FailingHttpStatusCodeException, ScriptException, IOException {
 		if (null == request) {
-			if(StringOperate.isRealNull(httpMethod)) {
+			if (StringOperate.isRealNull(httpMethod)) {
 				request = new WebRequest(new URL(url));
 			} else {
 				request = new WebRequest(new URL(url), HttpMethod.valueOf(httpMethod));
 			}
 		} else {
 			request.setUrl(new URL(url));
-			if(!StringOperate.isRealNull(httpMethod)) {
+			if (!StringOperate.isRealNull(httpMethod)) {
 				request.setHttpMethod(HttpMethod.valueOf(httpMethod));
+			} else {
+				request.setHttpMethod(HttpMethod.GET);
 			}
 		}
-		HtmlPage htmlPage = webClient.getPage(request);
-		// 网页内容
-		return htmlPage.asText();
+
+		// HtmlPage page = webClient.getPage(request);
+		// return page.asXml();
+		Page page = webClient.getPage(request);
+		// 响应内容
+		return page.getWebResponse().getContentAsString();
 	}
-	
+
 	/**
 	 * 获取响应中添加的Cookies<br>
 	 * 在fetchPage()方法执行完成后，即可通过该方法获取<br>
@@ -581,9 +624,16 @@ public class HttpFetchMultiThread implements IHttpFetch, Closeable {
 	
 	public void close() {
 		try {
-			httpclient.close();
-			cm.shutdown();
-			cm.close();
+			if (null != httpclient) {
+				httpclient.close();
+			}
+			if (null != cm) {
+				cm.shutdown();
+				cm.close();
+			}
+			if (null != webClient) {
+				webClient.close();
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
