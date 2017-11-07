@@ -11,6 +11,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.NoRouteToHostException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.nio.charset.CodingErrorAction;
@@ -24,6 +25,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -71,10 +73,18 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
-import org.apache.log4j.Logger;
 
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.HttpMethod;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebRequest;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.util.Cookie;
+import com.google.common.collect.Maps;
 import com.novelbio.base.ExceptionNbcParamError;
 import com.novelbio.base.StringOperate;
+import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.fileOperate.FileOperate;
 
 /**
@@ -91,25 +101,200 @@ import com.novelbio.base.fileOperate.FileOperate;
  * @author zongjie
  */
 public class HttpFetchMultiThread implements IHttpFetch, Closeable {
-	private static Logger logger = Logger.getLogger(HttpFetchMultiThread.class);
-	
 	public static final int HTTPTYPE_POST = 2;
 	public static final int HTTPTYPE_GET = 4;
 	public static final int HTTPTYPE_HEAD = 12;
+	
+	public static final String METHOD_GET = "GET";
+	public static final String METHOD_POST = "POST";
 	
 	PoolingHttpClientConnectionManager cm;
 		
 	ArrayList<BasicHeader> lsHeaders = new ArrayList<BasicHeader>();
 	
 	CloseableHttpClient httpclient;
+	
+	/** HtmlUnit工具的客户端实例 */
+	private WebClient webClient;
+	/** HtmlUnit工具的请求实例 */
+	private WebRequest request;
+	/** 
+	 * HtmlUnit工具的请求实例是否是动态页面，默认为静态页面
+	 * 如果是动态页面，则启用JS引擎，设置JS运行超时等等，否则禁用JS
+	 */
+	private boolean isDynamicPage = false;
 
 	/** 好像httpclient会自动保存cookie */
 	CookieStore cookieStore;
 	
-	 int timeoutConnect = 10000;
-	 int timeoutSocket = 60000;
-	 int timeoutConnectionRequest = 10000;
-	 
+	int timeoutConnect = 10_000;
+	int timeoutSocket = 60_000;
+	int timeoutConnectionRequest = 10_000;
+
+	/**
+	 * 基于HtmlUnit工具的构造函数<br>
+	 * 由于HtmlUnit功能更加完善强大，因此建议优先使用该构造<br>
+	 */
+	public HttpFetchMultiThread() {
+		initWebClient();
+	}
+	
+	/**
+	 * 初始化默认的HtmlUnit的WebClient对象
+	 */
+	private void initWebClient() {
+		if(null == webClient) {
+			webClient = new WebClient(BrowserVersion.CHROME);
+			webClient.getOptions().setUseInsecureSSL(false); // 支持https
+	        // webClient.getOptions().setRedirectEnabled(true); // 启动客户端重定向
+	        webClient.getOptions().setTimeout(timeoutConnectionRequest); // 设置连接超时时间 ，这里是10S。如果为0，则无限期等待
+	        webClient.getOptions().setDoNotTrackEnabled(true); // 默认是false, 设置为true的话不让你的浏览行为被记录
+		}
+        
+        if(isDynamicPage) {
+        	webClient.getOptions().setThrowExceptionOnScriptError(false); // js运行错误时，是否抛出异常
+        	webClient.getOptions().setJavaScriptEnabled(true); // 启用JS解释器，默认为true
+        	webClient.getOptions().setCssEnabled(false); // 禁用css支持
+        	webClient.setJavaScriptTimeout(10000); // 设置js运行超时时间
+        	webClient.waitForBackgroundJavaScript(10000); // 设置页面等待js响应时间
+        } else {
+        	webClient.getOptions().setThrowExceptionOnScriptError(false); // js运行错误时，是否抛出异常
+        	webClient.getOptions().setJavaScriptEnabled(false); // 启用JS解释器，默认为true
+        	webClient.getOptions().setCssEnabled(false); // 禁用css支持
+        	webClient.setJavaScriptTimeout(1); // 设置js运行超时时间
+        	webClient.waitForBackgroundJavaScript(1); // 设置页面等待js响应时间
+        }
+	}
+	
+	/**
+	 * 设置是否是动态页面
+	 * @param isDynamicPage 是否是动态页面，true:是动态页面，则启用JS引擎，设置JS运行超时等等  false:静态页面，禁用JS
+	 * @return HttpFetchMultiThread
+	 */
+	public HttpFetchMultiThread setDynamicPage(boolean isDynamicPage) {
+		this.isDynamicPage = isDynamicPage;
+		initWebClient();
+		return this;
+	}
+	
+	public HttpFetchMultiThread setParameters(Map<String, String> parameters) {
+		if(null == request) {
+			request = new WebRequest(null);
+		}
+		List<com.gargoylesoftware.htmlunit.util.NameValuePair> requestParameters = new ArrayList<>();
+		if(null == parameters) {
+			request.setRequestParameters(requestParameters);
+			return this;
+		}
+		for (String name : parameters.keySet()) {
+			requestParameters.add(new com.gargoylesoftware.htmlunit.util.NameValuePair(name, parameters.get(name)));
+		}
+		request.setRequestParameters(requestParameters);
+		return this;
+	}
+	
+	public HttpFetchMultiThread addHeader(String name, String value) {
+		if(null == request) {
+			request = new WebRequest(null);
+		}
+		request.setAdditionalHeader(name, value);
+		return this;
+	}
+	
+	public HttpFetchMultiThread addHeaders(Map<String, String> headers) {
+		if(null == headers) {
+			return this;
+		}
+		if(null == request) {
+			request = new WebRequest(null);
+		}
+		request.setAdditionalHeaders(headers);
+		return this;
+	}
+	
+	public HttpFetchMultiThread addCookie(String domain, String name, String value) {
+		if(null == webClient) {
+			initWebClient();
+		}
+		webClient.getCookieManager().setCookiesEnabled(true); // 开启cookie管理
+		Cookie cookie = new Cookie(domain, name, value);
+		webClient.getCookieManager().addCookie(cookie);
+		return this;
+	}
+	
+	public HttpFetchMultiThread addCookies(String domain, Map<String, String> cookies) {
+		if(null == cookies) {
+			return this;
+		}
+		if(null == webClient) {
+			initWebClient();
+		}
+		webClient.getCookieManager().setCookiesEnabled(true); // 开启cookie管理
+		for (String name : cookies.keySet()) {
+			Cookie cookie = new Cookie(domain, name, cookies.get(name));
+			webClient.getCookieManager().addCookie(cookie);
+		}
+		return this;
+	}
+	
+	/**
+	 * 获取指定URL的网页内容
+	 * @category 基于HtmlUnit工具
+	 * @param url 指定URL 例如：https://www.mingdao.com
+	 * @return String 网页文本
+	 * @throws FailingHttpStatusCodeException
+	 * @throws IOException
+	 */
+	public String fetchPage(String url) throws FailingHttpStatusCodeException, IOException {
+		return fetchPage(url, null);
+	}
+	
+	/**
+	 * 获取指定URL的网页内容
+	 * @category 基于HtmlUnit工具
+	 * @param url 指定URL 例如：https://www.mingdao.com
+	 * @param httpMethod [null, METHOD_GET, METHOD_POST]
+	 * @return String 网页文本
+	 * @throws FailingHttpStatusCodeException
+	 * @throws IOException
+	 */
+	public String fetchPage(String url, String httpMethod) throws FailingHttpStatusCodeException, IOException {
+		if (null == request) {
+			if(StringOperate.isRealNull(httpMethod)) {
+				request = new WebRequest(new URL(url));
+			} else {
+				request = new WebRequest(new URL(url), HttpMethod.valueOf(httpMethod));
+			}
+		} else {
+			request.setUrl(new URL(url));
+			if(!StringOperate.isRealNull(httpMethod)) {
+				request.setHttpMethod(HttpMethod.valueOf(httpMethod));
+			}
+		}
+		HtmlPage htmlPage = webClient.getPage(request);
+		// 网页内容
+		return htmlPage.asText();
+	}
+	
+	/**
+	 * 获取响应中添加的Cookies<br>
+	 * 在fetchPage()方法执行完成后，即可通过该方法获取<br>
+	 * @category 基于HtmlUnit工具
+	 * @return Map<String, String>
+	 */
+	public Map<String, String> getResponseCookies() {
+		Map<String, String> responseCookies = Maps.newHashMap();
+		if (null == webClient || null == webClient.getCookieManager() || ArrayOperate.isEmpty(webClient.getCookieManager().getCookies())) {
+			return responseCookies;
+		}
+
+		Set<Cookie> cookies = webClient.getCookieManager().getCookies();
+		for (Cookie c : cookies) {
+			responseCookies.put(c.getName(), c.getValue());
+		}
+		return responseCookies;
+	}
+	
 	/** 不是单例，实际使用的时候get一次就可 */
 	public static HttpFetchMultiThread getInstance() {
 		return getInstance(200, 10, null);
