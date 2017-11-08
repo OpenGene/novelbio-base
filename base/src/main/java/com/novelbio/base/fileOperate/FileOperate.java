@@ -43,6 +43,7 @@ import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
 import com.novelbio.base.dataStructure.PatternOperate;
+import com.novelbio.base.util.IOUtil;
 import com.novelbio.jsr203.bos.OssFileSystemProvider;
 import com.novelbio.jsr203.bos.OssPath;
 
@@ -2363,12 +2364,7 @@ public class FileOperate {
 	 * @param stream
 	 */
 	public static void close(Closeable stream) {
-		try {
-			if (stream != null) {
-				stream.close();
-			}
-		} catch (Exception e) {
-		}
+		IOUtil.closeQuietly(stream);
 	}
 
 	/**
