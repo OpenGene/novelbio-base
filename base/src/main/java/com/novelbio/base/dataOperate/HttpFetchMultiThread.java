@@ -176,6 +176,20 @@ public class HttpFetchMultiThread implements IHttpFetch, Closeable {
 	}
 	
 	/**
+	 * 设置连接超时时间，默认10_000毫秒
+	 * @param timeoutConnectionRequest 毫秒值，例如：50_000
+	 * @return HttpFetchMultiThread
+	 */
+	public HttpFetchMultiThread setTimeout(int timeoutConnectionRequest) {
+		this.timeoutConnectionRequest = timeoutConnectionRequest;
+		if (null == webClient) {
+			initWebClient();
+		}
+		webClient.getOptions().setTimeout(timeoutConnectionRequest); // 设置连接超时时间，这里是10S。如果为0，则无限期等待
+		return this;
+	}
+	
+	/**
 	 * 设置是否是动态页面
 	 * @param isDynamicPage 是否是动态页面，true:是动态页面，则启用JS引擎，设置JS运行超时等等  false:静态页面，禁用JS
 	 * @return HttpFetchMultiThread
@@ -188,22 +202,19 @@ public class HttpFetchMultiThread implements IHttpFetch, Closeable {
 
 	/**
 	 * 设置请求参数
-	 * @param parameters
+	 * @param lsNameValuePairs List<com.gargoylesoftware.htmlunit.util.NameValuePair>
 	 * @return HttpFetchMultiThread
 	 */
-	public HttpFetchMultiThread setParameters(Map<String, String> parameters) {
+	public HttpFetchMultiThread setParameters(List<com.gargoylesoftware.htmlunit.util.NameValuePair> lsNameValuePairs) {
 		if (null == request) {
 			request = new WebRequest(null);
 		}
-		List<com.gargoylesoftware.htmlunit.util.NameValuePair> requestParameters = new ArrayList<>();
-		if (null == parameters) {
-			request.setRequestParameters(requestParameters);
-			return this;
+		if(null == lsNameValuePairs) {
+			request.setRequestParameters(new ArrayList<>());
+		} else {
+			
+			request.setRequestParameters(lsNameValuePairs);
 		}
-		for (String name : parameters.keySet()) {
-			requestParameters.add(new com.gargoylesoftware.htmlunit.util.NameValuePair(name, parameters.get(name)));
-		}
-		request.setRequestParameters(requestParameters);
 		return this;
 	}
 
