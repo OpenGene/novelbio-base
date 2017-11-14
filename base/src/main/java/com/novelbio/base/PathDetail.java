@@ -294,4 +294,13 @@ public class PathDetail {
 	public static String getEnvName() {
 		return properties.getProperty("env");
 	}
+
+	/**
+	 * redis服务器端的ip地址.端口走6379未配置
+	 * 
+	 * @return
+	 */
+	public static String getRedisServerIp() {
+		return properties.getProperty("redisServerIp");
+	}
 }
