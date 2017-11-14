@@ -379,34 +379,6 @@ public class ExcelOperate implements Closeable {
 	
 	/**
 	 * 指定sheet顺序号,读取该sheet全部内容.
-	 * <br/>
-	 * <b>注意:该方法是静态方法,不需要new excelOperate对象</b>
-	 * <br/>
-	 * 2016年3月31日
-	 * novelbio fans.fan
-	 * @param sheetNum			sheet页顺序号,从0开始.
-	 * @return
-	 */
-	public static List<List<String>> readLsExcel2007SheetFast(String filePathAndName, int sheetNum) {
-		InputStream is = null;
-		List<List<String>> exceldata = new ArrayList<>();
-		try {
-			is = FileOperate.getInputStream(filePathAndName);
-			
-			Excel2007Reader excel07 = new Excel2007Reader();
-			excel07.processOneSheet(is, sheetNum);
-			exceldata = excel07.getExcelData(); 
-		} catch (Exception e) {
-			logger.error("readExcel error.filePathAndName=" + filePathAndName + ",sheetNum=" + sheetNum, e);
-		} finally {
-			FileOperate.close(is);
-		}
-		
-		return exceldata;
-	}
-	
-	/**
-	 * 指定sheet顺序号,读取该sheet全部内容.
 	 * 
 	 * @param sheetNum			sheet页顺序号,从1开始,
 	 * @return
