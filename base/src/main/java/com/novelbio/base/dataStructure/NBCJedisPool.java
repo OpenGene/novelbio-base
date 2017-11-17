@@ -5,6 +5,8 @@
  */
 package com.novelbio.base.dataStructure;
 
+import java.util.Set;
+
 import com.novelbio.base.PathDetail;
 import com.novelbio.base.StringOperate;
 
@@ -13,13 +15,15 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 /**
- *
+ * 对JedisPool简单处理.这样可以让不同的业务使用不同的db.每次操作的都是自己的库
  * @author novelbio fans.fan
  */
 public class NBCJedisPool extends JedisPool {
 
-	/** session使用的redis库的下标号 */
+	/** session使用的redis库的下标号:0 */
 	public static final int DB_SESSION_INDEX = 0;
+	/** 阿里云上job结束时返回的topic,使用的redis库的下标号:1 */
+	public static final int DB_ALIYUN_TOPIC_INDEX = 1;
 	
 	private static String host = PathDetail.getRedisServerIp();
 	private static int port = 6379;
@@ -47,5 +51,15 @@ public class NBCJedisPool extends JedisPool {
 		Jedis jedis = super.getResource();
 		jedis.select(dbIndex);
 		return jedis;
+	}
+	
+	public static void main(String[] args) {
+		NBCJedisPool pool = new NBCJedisPool(1);
+		Jedis jedis = pool.getResource();
+		jedis.set("abc".getBytes(), "123".getBytes());
+		Set<String> setKeys = jedis.keys("*");
+		System.out.println(setKeys);
+		jedis.close();
+		pool.close();
 	}
 }
