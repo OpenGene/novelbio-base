@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 
 import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
+import com.novelbio.base.fileOperate.SeekablePathInputStream;
 
 /**
  * MD5的算法在RFC1321 中定义 在RFC 1321中，给出了Test suite用来检验你的实现是否正确： MD5 ("") =
@@ -112,7 +113,7 @@ public class MD5generate {
 	 * @throws IOException
 	 */
 	public static String getNBCFileMD5(String fileName) throws IOException {
-		InputStream in = FileOperate.getInputStream(fileName);
+		SeekablePathInputStream in = FileOperate.getSeekablePathInputStream(FileOperate.getPath(fileName));
 		long maxSize = 1024*1024*5;//100;
 		long fileLength = 0;
 		fileLength = FileOperate.getFileSizeLong(fileName);

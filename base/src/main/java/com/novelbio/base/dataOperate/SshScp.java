@@ -14,6 +14,7 @@ import ch.ethz.ssh2.SCPOutputStream;
 import ch.ethz.ssh2.Session;
 
 import com.novelbio.base.fileOperate.FileOperate;
+import com.novelbio.base.util.IOUtil;
 
 /** 基于ssh的scp，文件复制 */
 public class SshScp {
@@ -88,11 +89,16 @@ public class SshScp {
 		Path path = FileOperate.getPath(file);
 		long length = FileOperate.getFileSizeLong(path);
 		String fileName = FileOperate.getFileName(file);
-		SCPOutputStream os = scpClient.put(fileName, length, remoteDir, null);
-		InputStream is = FileOperate.getInputStream(path);
-		IOUtils.copy(is, os);
-		os.close();
-		is.close();
+		SCPOutputStream os = null;
+		InputStream is = null;
+		try {
+			os = scpClient.put(fileName, length, remoteDir, null);
+			is = FileOperate.getInputStream(path);
+			IOUtils.copy(is, os);
+		} catch (Exception e) {
+		} finally {
+			IOUtil.close(os, is);
+		}
 	}
 
 	/**

@@ -228,11 +228,12 @@ public class ExcelOperate implements Closeable {
 				wb = new XSSFWorkbook(is);
 			}
 			sheet = wb.getSheetAt(0);
-			FileOperate.close(is);
 		} catch (Exception e) {
 			logger.error("initialExcel error.", e);
 			// TODO 这里主要是不想显式的往外声明抛出异常,所以改为RuntimeException,是否合适,待考虑.
 			throw new ExceptionNbcExcel("initialExcel error " + filename, e);
+		} finally {
+			FileOperate.close(is);
 		}
 	}
 	
