@@ -37,6 +37,7 @@ import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.base.fileOperate.RandomFileInt;
 import com.novelbio.base.fileOperate.RandomFileInt.RandomFileFactory;
+import com.novelbio.base.util.IOUtil;
 
 import hdfs.jsr203.HdfsConfInitiator;
 
@@ -671,9 +672,10 @@ public class TxtReadandWrite implements Closeable {
 	public static String getCharset(File file) {
 		String charset = "GBK"; // 默认编码
 		byte[] first3Bytes = new byte[3];
+		BufferedInputStream bis = null;
 		try {
 			boolean checked = false;
-			BufferedInputStream bis = new BufferedInputStream(
+			bis = new BufferedInputStream(
 					FileOperate.getInputStream(file));
 			bis.mark(0);
 			int read = bis.read(first3Bytes, 0, 3);
@@ -727,9 +729,10 @@ public class TxtReadandWrite implements Closeable {
 				System.out.println();
 				System.out.println(loc + " " + Integer.toHexString(read));
 			}
-			bis.close();
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			FileOperate.close(bis);
 		}
 		return charset;
 	}
@@ -888,6 +891,19 @@ public class TxtReadandWrite implements Closeable {
 	 * @throws IOException
 	 */
 	public static String getFileContent(String filePathAndName) {
+		return getFileContent(FileOperate.getPath(filePathAndName));
+	}
+	
+	/**
+	 *  获取文件内容<br>
+	 * <b>只允许对小于5M的文件读取</b>
+	 * 
+	 * @author novelbio fans.fan
+	 * @date 2017年11月30日
+	 * @param filePathAndName
+	 * @return
+	 */
+	public static String getFileContent(Path filePathAndName) {
 		if (!FileOperate.isFileExistAndBigThan0(filePathAndName)) {
 			return null;
 		}
