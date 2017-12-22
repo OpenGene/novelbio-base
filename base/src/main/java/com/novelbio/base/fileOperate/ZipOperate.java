@@ -17,6 +17,8 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.novelbio.base.util.IOUtil;
+
 
 /**
  * 可以处理中文文件名
@@ -26,7 +28,7 @@ public class  ZipOperate {
 	private static final Logger logger = LoggerFactory.getLogger(ZipOperate.class);
 	public static void main(String[] args) {
 		try {
-			zip("/home/novelbio/Downloads/gnome-commander", "/home/novelbio/tmp/gnome-commander.zip");
+			zip("/home/novelbio/Downloads/QCResults", "/home/novelbio/tmp/gnome-commander2.zip");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -81,17 +83,23 @@ public class  ZipOperate {
                  }
                  ZipArchiveEntry zipArchiveEntry  = new ZipArchiveEntry(name);
                  zaos.putArchiveEntry(zipArchiveEntry);
-                 try (InputStream is = new BufferedInputStream(FileOperate.getInputStream(strfile));) {
+                 InputStream is = null;
+                 BufferedInputStream bis = null;
+                 try {
+                	 is = FileOperate.getInputStream(strfile);
+                	 bis = new BufferedInputStream(is);
                  	byte[] buffer = new byte[1024]; 
                  	int len = -1;
-                 	while((len = is.read(buffer)) != -1) {
+                 	while((len = bis.read(buffer)) != -1) {
                  		//把缓冲区的字节写入到ZipArchiveEntry
                  		zaos.write(buffer, 0, len);
                  	}
                  	zaos.closeArchiveEntry(); 
                  }catch(Exception e) {
                  	throw new RuntimeException(e);
-                 }
+                 } finally {
+					IOUtil.close(is, bis);
+				}
              }
              zaos.finish();
          }catch(Exception e){

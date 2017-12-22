@@ -3,13 +3,11 @@ package com.novelbio.base.fileOperate;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,9 +18,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.novelbio.base.dataOperate.TxtReadandWrite;
-import com.novelbio.jsr203.bos.OssFileSystem;
-import com.novelbio.jsr203.bos.OssFileSystemProvider;
-import com.novelbio.jsr203.bos.OssPath;
 
 //该脚本执行,需本地的hosts和hadoop环境
 public class TestFileOperate {
@@ -387,41 +382,9 @@ public class TestFileOperate {
 	
 	public static void main(String[] args) {
 		
-		String pathStr1 = "nbCloud/public/AllProject/A__2016-12/project_58468c2c0cf23ee9307e8ea5/task_585798b444f45b7130562eb5/QualityControl_result/QCResults/";
-		String pathStr2 = "oss://novelbrain/" + pathStr1;
-		Path path = FileOperate.getPath(pathStr2);
+		String pathStr1 = "hdfs:/nbCloud/public/AllProject/@2017-10/project_59f6e89760b2d5c2cb946291/task_59fad5d644140df6b1c7ec5d/GOAnalysis_result/Promoter_1-2kb>.NCM460.GO-Analysis_BP.xlsx";
 		
+		FileOperate.getPath(pathStr1);
 		
-//		List<Path> lsPaths = FileOperate.getLsFoldPathRecur(path, "*", "*", false);
-		
-		System.out.println("oss start...");
-		long time11 = System.currentTimeMillis();
-		try {
-			for (int i = 0; i < 10; i++) {
-				OssFileSystemProvider ossFileSystemProvider =	new OssFileSystemProvider();
-				URI uri = new URI(pathStr2);
-				Path ossPath = ossFileSystemProvider.getPath(uri);
-				OssFileSystem ossFileSystem = new OssFileSystem(ossFileSystemProvider, uri);
-				Iterator<Path>  paths = ossFileSystem.iteratorOf((OssPath) ossPath);
-				List<Path> lsPaths  = new ArrayList<>();
-				while (paths.hasNext()) {
-					Path path2 = (Path) paths.next();
-					lsPaths.add(path2);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		long time12 = System.currentTimeMillis();
-		System.out.println("oss time=" + (time12 - time11));
-		
-		System.out.println("base start...");
-		long time21 = System.currentTimeMillis();
-		for (int i = 0; i < 10; i++) {
-			System.out.println(i);
-			List<Path> lsPaths = FileOperate.getLsFoldPathRecur(path, "*", "*", false);
-		}
-		long time22 = System.currentTimeMillis();
-		System.out.println("base time=" + (time22 - time21));
 	}
 }
