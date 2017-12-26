@@ -44,10 +44,8 @@ import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
 import com.novelbio.base.dataStructure.PatternOperate;
 import com.novelbio.base.util.IOUtil;
-import com.novelbio.jsr203.cos.CosFileSystemProvider;
-import com.novelbio.jsr203.cos.CosPath;
-import com.novelbio.jsr203.oss.OssFileSystemProvider;
-import com.novelbio.jsr203.oss.OssPath;
+import com.novelbio.jsr203.objstorage.ObjPath;
+import com.novelbio.jsr203.objstorage.ObjStorageFileSystemProvider;
 
 import hdfs.jsr203.HadoopFileSystemProvider;
 import hdfs.jsr203.HadoopPath;
@@ -56,8 +54,8 @@ import hdfs.jsr203.HdfsConfInitiator;
 public class FileOperate {
 	private static final Logger logger = LoggerFactory.getLogger(FileOperate.class);
 	static HadoopFileSystemProvider hdfsProvider = new HadoopFileSystemProvider();
-	static OssFileSystemProvider ossProvider = new OssFileSystemProvider();
-	static CosFileSystemProvider cosProvider = new CosFileSystemProvider();
+	static ObjStorageFileSystemProvider objProvider = new ObjStorageFileSystemProvider();
+	
 	static PatternOperate patternOperate = new PatternOperate("^[/\\\\]{0,2}[^/]+\\:[/\\\\]{0,2}");
 	static boolean isWindowsOS = false;
 	static {
@@ -128,11 +126,9 @@ public class FileOperate {
 			}
 			if (first.startsWith(HadoopFileSystemProvider.SCHEME + ":/")) {
 				return hdfsProvider.getFileSystem(new URI(first)).getPath(new URI(first).getPath(), rest);
-			} else if (first.startsWith(ossProvider.getScheme() + ":/")) {
-				return ossProvider.getFileSystem(new URI(first)).getPath(new URI(first).getPath(), rest);
-			}  else if (first.startsWith(cosProvider.getScheme() + ":/")) {
-				return cosProvider.getFileSystem(new URI(first)).getPath(new URI(first).getPath(), rest);
-			} else {
+			} else if (first.startsWith(objProvider.getScheme() + ":/")) {
+				return objProvider.getFileSystem(new URI(first)).getPath(new URI(first).getPath(), rest);
+			}  else {
 				System.out.println("default Path");
 				return Paths.get(first, rest);
 			}
@@ -172,12 +168,9 @@ public class FileOperate {
 				// TODO 不是类没加载，而是META文件没有读取到
 				// Paths.get(uri);
 				return hdfsProvider.getPath(uri);
-			} else if (fileName.startsWith(OssFileSystemProvider.SCHEME)) {
+			} else if (fileName.startsWith(ObjStorageFileSystemProvider.SCHEME)) {
 				URI uri = new URI(fileName);
-				return ossProvider.getPath(uri);
-			}  else if (fileName.startsWith(CosFileSystemProvider.SCHEME)) {
-				URI uri = new URI(fileName);
-				return cosProvider.getPath(uri);
+				return objProvider.getPath(uri);
 			} else {
 				File file = new File(fileName);
 				return file.toPath();
@@ -257,7 +250,7 @@ public class FileOperate {
 		if (fileName.startsWith("oss://")) {
 			try {
 				URI uri = new URI(fileName);
-				String parentPath = ossProvider.getPath(uri).getParent().toString();
+				String parentPath = objProvider.getPath(uri).getParent().toString();
 				return parentPath.endsWith("/") ? parentPath : parentPath + "/";
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -267,7 +260,7 @@ public class FileOperate {
 		} else if (fileName.startsWith("cos://")) {
 			try {
 				URI uri = new URI(fileName);
-				String parentPath = cosProvider.getPath(uri).getParent().toString();
+				String parentPath = objProvider.getPath(uri).getParent().toString();
 				return parentPath.endsWith("/") ? parentPath : parentPath + "/";
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -637,9 +630,7 @@ public class FileOperate {
 			} else if (!name.startsWith(FileHadoop.hdfsSymbol)) {
 				name = FileHadoop.hdfsSymbol + name;
 			}
-		} else if (path instanceof OssPath) {
-			name = path.toString();
-		}  else if (path instanceof CosPath) {
+		} else if (path instanceof ObjPath) {
 			name = path.toString();
 		}
 		return name;
