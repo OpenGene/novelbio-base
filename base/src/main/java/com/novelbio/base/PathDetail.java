@@ -238,7 +238,7 @@ public class PathDetail {
 	}
 	/**
 	 * 取得nbcFile的开头形式
-	 * @return
+	 * @return  /nbcfile:/
 	 */
 	public static String getNBCFileHead() {
 		return properties.getProperty("nbcFileHead");

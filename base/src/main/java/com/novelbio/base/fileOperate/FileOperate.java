@@ -257,7 +257,17 @@ public class FileOperate {
 		if (fileName.startsWith("oss://")) {
 			try {
 				URI uri = new URI(fileName);
-				String parentPath = new OssFileSystemProvider().getPath(uri).getParent().toString();
+				String parentPath = ossProvider.getPath(uri).getParent().toString();
+				return parentPath.endsWith("/") ? parentPath : parentPath + "/";
+			} catch (Exception e) {
+				e.printStackTrace();
+				logger.error("getParentPathNameWithSep error.filename=" + fileName, e);
+				return fileName;
+			}
+		} else if (fileName.startsWith("cos://")) {
+			try {
+				URI uri = new URI(fileName);
+				String parentPath = cosProvider.getPath(uri).getParent().toString();
 				return parentPath.endsWith("/") ? parentPath : parentPath + "/";
 			} catch (Exception e) {
 				e.printStackTrace();
