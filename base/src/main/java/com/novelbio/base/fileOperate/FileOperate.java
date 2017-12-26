@@ -887,19 +887,19 @@ public class FileOperate {
 		
 		int noNeedReg = 0;
 		if (filename == null || filename.equals("*")) {
-			filename = ".*";
+			noNeedReg++;
 		}
 		if (suffix == null || suffix.equals("*")) {
-			suffix = ".*";
+			noNeedReg++;
 		}
 		if (file == null || !isFileExist(file)) {
 			return new ArrayList<>();
 		}
 		
-		PredicateFileName predicateFileName = null;
+		PredicateFileNameSuffix predicateFileName = null;
 		if (noNeedReg != 2) {
 			//等于2就是匹配所有，不需要正则了.
-			predicateFileName = new PredicateFileName(filename, suffix);
+			predicateFileName = new PredicateFileNameSuffix(filename, suffix);
 		}
 		// 如果只是文件则返回文件名
 		if (!isFileDirectory(file)) { // 获取文件名与后缀名
@@ -923,6 +923,63 @@ public class FileOperate {
 		}
 	}
 
+	/**
+	 * 获取文件夹下包含指定文件名与后缀的所有文件名，<b>仅找第一层，不递归</b><br>
+	 * 如果文件不存在则返回空的list<br>
+	 * 如果不是文件夹，则返回该文件名<br>
+	 * 
+	 * @param file
+	 *            目录路径
+	 * @param filename
+	 *            指定包含的文件名，是正则表达式 ，如 "*",正则表达式无视大小<br>
+	 *            null 表示不指定
+	 * @param suffix
+	 *            指定包含的后缀名，是正则表达式<br>
+	 *            文件 wfese.fse.fe认作 "wfese.fse"和"fe"<br>
+	 *            文件 wfese.fse.认作 "wfese.fse."和""<br>
+	 *            文件 wfese 认作 "wfese"和""<br>
+	 *            null 表示不指定
+	 * @return 返回包含目标文件全名的ArrayList
+	 * @throws IOException
+	 */
+	public static List<Path> getLsFoldPath(Path file, String filename) {
+		List<Path> lsFilenames = new ArrayList<>();
+		
+		boolean needReg = true;
+		if (filename == null || filename.equals("*")) {
+			needReg = false;
+		}
+		if (file == null || !isFileExist(file)) {
+			return new ArrayList<>();
+		}
+		
+		PredicateFileName predicateFileName = null;
+		if (needReg) {
+			//等于2就是匹配所有，不需要正则了.
+			predicateFileName = new PredicateFileName(filename);
+		}
+		// 如果只是文件则返回文件名
+		if (!isFileDirectory(file)) { // 获取文件名与后缀名
+			if (predicateFileName == null) {
+				lsFilenames.add(file);
+			} else if (predicateFileName != null && predicateFileName.test(file)) {
+				lsFilenames.add(file);
+			}
+			return lsFilenames;
+		}
+		try(Stream<Path> streamPath = Files.list(file)) {
+			if (predicateFileName != null) {
+				lsFilenames = streamPath.filter(predicateFileName).collect(Collectors.toList());
+			} else {
+				lsFilenames = streamPath.collect(Collectors.toList());
+			}
+			streamPath.close();
+			return lsFilenames;
+		} catch (IOException e) {
+			throw new ExceptionFileError("cannot get sub files of " + file.toString(), e);
+		}
+	}
+	
 	/**
 	 * 获取文件夹下包含指定文件名与后缀的所有文件名<b>递归查找</b><br>
 	 * 如果文件不存在则返回空的list<br>
@@ -1000,21 +1057,19 @@ public class FileOperate {
 
 		int noNeedReg = 0;
 		if (filename == null || filename.equals("*")) {
-			filename = ".*";
 			noNeedReg++;
 		}
 		if (suffix == null || suffix.equals("*")) {
-			suffix = ".*";
 			noNeedReg++;
 		}
 		if (file == null || !isFileExist(file)) {
 			return new ArrayList<>();
 		}
 		
-		PredicateFileName predicateFileName = null;
+		PredicateFileNameSuffix predicateFileName = null;
 		if (noNeedReg != 2) {
 			//等于2就是匹配所有，不需要正则了.
-			predicateFileName = new PredicateFileName(filename, suffix);
+			predicateFileName = new PredicateFileNameSuffix(filename, suffix);
 			predicateFileName.setFilterFolder(false);
 		}
 
@@ -1051,18 +1106,137 @@ public class FileOperate {
 			throw new ExceptionFileError("cannot get sub files of " + file.toString());
 		}
 	}
+	
+	/**
+	 * 获取文件夹下包含指定文件名与后缀的所有文件名，<b>递归查找</b><br>
+	 * 如果文件不存在则返回空的list<br>
+	 * 如果不是文件夹，则返回该文件名<br>
+	 * 
+	 * @param file
+	 *            目录路径
+	 * @param filename
+	 *            指定包含的文件名，是正则表达式 ，如 "*",正则表达式无视大小<br>
+	 *            null 表示不指定
+	 * @param isNeedFolder
+	 *            是否需要把文件夹也记录下来
+	 * @return 返回包含目标Path 的ArrayList
+	 * @throws IOException
+	 */
+	public static List<Path> getLsFoldPathRecur(Path file, String filename, boolean isNeedFolder) {
+		List<Path> lsPath = new ArrayList<>();
 
+		boolean needReg = true;
+		if (filename == null || filename.equals("*")) {
+			needReg = false;
+		}
+		if (file == null || !isFileExist(file)) {
+			return new ArrayList<>();
+		}
+		
+		PredicateFileName predicateFileName = null;
+		if (needReg) {
+			//等于2就是匹配所有，不需要正则了.
+			predicateFileName = new PredicateFileName(filename);
+			predicateFileName.setFilterFolder(false);
+		}
+
+		// 如果只是文件则返回文件名
+		if (!isFileDirectory(file)) { // 获取文件名与后缀名
+			if (predicateFileName == null) {
+				lsPath.add(file);
+			} else if (predicateFileName != null && predicateFileName.test(file)) {
+				lsPath.add(file);
+			}
+			return lsPath;
+		}
+		try(Stream<Path> streamPath = Files.list(file)) {
+			 List<Path> lsPathTmp = null;
+			 if (predicateFileName != null) {
+				 lsPathTmp = streamPath.filter(predicateFileName).collect(Collectors.toList());
+			} else {
+				lsPathTmp = streamPath.collect(Collectors.toList());
+			}
+			streamPath.close();
+			for (Path path : lsPathTmp) {
+				if (isFileDirectory(path)) {
+					//是ossPath，只要是以/结尾的.就是文件夹。不是osspath,则需查找判断一下
+					lsPath.addAll(getLsFoldPathRecur(path, filename, isNeedFolder));
+					if (isNeedFolder) {
+						lsPath.add(path);
+					}
+				} else {
+					lsPath.add(path);
+				}
+			}
+			return lsPath;
+		} catch (IOException e) {
+			throw new ExceptionFileError("cannot get sub files of " + file.toString());
+		}
+	}
+	
 	private static class PredicateFileName implements Predicate<Path> {
+		PatternOperate patName;
+
+		boolean isFilterFolder = true;
+
+		public PredicateFileName(String fileNameRegex) {
+			if (!StringOperate.isRealNull(fileNameRegex)) {
+				fileNameRegex = fileNameRegex.replace(".", "\\.");
+				fileNameRegex = fileNameRegex.replace("*", ".*");
+				if (!fileNameRegex.startsWith("^")) {
+					fileNameRegex = "^" + fileNameRegex;
+				}
+				if (!fileNameRegex.endsWith("$")) {
+					fileNameRegex = fileNameRegex + "$";
+				}
+			} else {
+				fileNameRegex = "*";
+			}
+			
+			if (!fileNameRegex.equalsIgnoreCase("*")) {
+				patName = new PatternOperate(fileNameRegex, false);
+			}
+		}
+
+		/** 是否用正则表达式过滤文件夹 */
+		public void setFilterFolder(boolean isFilterFolder) {
+			this.isFilterFolder = isFilterFolder;
+		}
+
+		@Override
+		public boolean test(Path t) {
+			if (!isFilterFolder && isFileDirectory(t)) {
+				return true;
+			}
+			String fileName = getFileName(t);
+			return patName == null || !patName.getPat(fileName).isEmpty();
+		}
+	}
+	
+	private static class PredicateFileNameSuffix implements Predicate<Path> {
 		PatternOperate patName;
 		PatternOperate patSuffix;
 
 		boolean isFilterFolder = true;
 
-		public PredicateFileName(String fileNameRegex, String suffixRegex) {
-			if (!StringOperate.isRealNull(fileNameRegex) && !fileNameRegex.equalsIgnoreCase("*")) {
+		public PredicateFileNameSuffix(String fileNameRegex, String suffixRegex) {
+			if (!StringOperate.isRealNull(fileNameRegex)) {
+				fileNameRegex = fileNameRegex.replace(".", "\\.");
+				fileNameRegex = fileNameRegex.replace("*", ".*");
+			} else {
+				fileNameRegex = "*";
+			}
+			if (!StringOperate.isRealNull(suffixRegex)) {
+				suffixRegex = suffixRegex.replace(".", "\\.");
+				suffixRegex = suffixRegex.replace("*", ".*");
+			} else {
+				suffixRegex = "*";
+			}
+			
+			if (!fileNameRegex.equalsIgnoreCase("*")) {
 				patName = new PatternOperate(fileNameRegex, false);
 			}
-			if (!StringOperate.isRealNull(suffixRegex) && !suffixRegex.equalsIgnoreCase("*")) {
+			if (!suffixRegex.equalsIgnoreCase("*")) {
 				if (!suffixRegex.endsWith("$")) {
 					suffixRegex += "$";
 				}
@@ -1082,7 +1256,7 @@ public class FileOperate {
 			}
 			String fileName = getFileName(t);
 			String[] fileNameSep = getFileNameSepWithoutPath(t.toString());
-			if (patSuffix == null && patName.getPat(fileName) != null) {
+			if (patSuffix == null && !patName.getPat(fileName).isEmpty()) {
 				return true;
 			}
 
@@ -1124,16 +1298,21 @@ public class FileOperate {
 	 * @return
 	 */
 	public static ArrayList<String> getLsFoldFileName(String filePath, String filename, String suffix) {
-		/*
-		 * 
-		List<Path> lsPaths = getLsFoldPath(getPath(filePath), filename, suffix);
-		ArrayList<String> lsResult = new ArrayList<>();
-		lsPaths.forEach((path) -> {
-			lsResult.add(getAbsolutePath(path));
-		});
-		return lsResult;
-		 */
 		return getLsFoldFileName(getPath(filePath), filename, suffix);
+	}
+	
+	/**
+	 * 获取文件夹下包含指定文件名与后缀的所有文件名，仅找第一层，不递归<br>
+	 * 如果文件不存在则返回null<br>
+	 * 如果不是文件夹，则返回该文件名<br>
+	 * 
+	 * @param filePath
+	 * @param deepth
+	 *            指定深度
+	 * @return
+	 */
+	public static ArrayList<String> getLsFoldFileName(String filePath, String filename) {
+		return getLsFoldFileName(getPath(filePath), filename);
 	}
 	
 	/**
@@ -1177,7 +1356,24 @@ public class FileOperate {
 		});
 		return lsResult;
 	}
-
+	/**
+	 * 获取文件夹下包含指定文件名与后缀的所有文件名，仅找第一层，不递归<br>
+	 * 如果文件不存在则返回null<br>
+	 * 如果不是文件夹，则返回该文件名<br>
+	 * 
+	 * @param filePath
+	 * @param deepth
+	 *            指定深度
+	 * @return
+	 */
+	public static ArrayList<String> getLsFoldFileName(Path filePath, String filename) {
+		List<Path> lsPaths = getLsFoldPath(filePath, filename);
+		ArrayList<String> lsResult = new ArrayList<>();
+		lsPaths.forEach((path) -> {
+			lsResult.add(getAbsolutePath(path));
+		});
+		return lsResult;
+	}
 	/**
 	 * 给定一个文件名，返回该文件名上有几个文件夹，不包括本文件夹 <br>
 	 * 如 给定 /home/novelbio/test 和 /home/novelbio/test/ 都返回2<br>
