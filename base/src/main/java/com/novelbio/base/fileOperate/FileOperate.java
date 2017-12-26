@@ -19,6 +19,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.nio.file.spi.FileSystemProvider;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -45,7 +46,8 @@ import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
 import com.novelbio.base.dataStructure.PatternOperate;
 import com.novelbio.base.util.IOUtil;
 import com.novelbio.jsr203.objstorage.ObjPath;
-import com.novelbio.jsr203.objstorage.ObjStorageFileSystemProvider;
+import com.novelbio.jsr203.objstorage.CosFileSystemProvider;
+import com.novelbio.jsr203.objstorage.PathDetailObjStorage;
 
 import hdfs.jsr203.HadoopFileSystemProvider;
 import hdfs.jsr203.HadoopPath;
@@ -54,7 +56,7 @@ import hdfs.jsr203.HdfsConfInitiator;
 public class FileOperate {
 	private static final Logger logger = LoggerFactory.getLogger(FileOperate.class);
 	static HadoopFileSystemProvider hdfsProvider = new HadoopFileSystemProvider();
-	static ObjStorageFileSystemProvider objProvider = new ObjStorageFileSystemProvider();
+	static FileSystemProvider objProvider = PathDetailObjStorage.generateObjStorageFileSystemProvider();
 	
 	static PatternOperate patternOperate = new PatternOperate("^[/\\\\]{0,2}[^/]+\\:[/\\\\]{0,2}");
 	static boolean isWindowsOS = false;
@@ -168,7 +170,7 @@ public class FileOperate {
 				// TODO 不是类没加载，而是META文件没有读取到
 				// Paths.get(uri);
 				return hdfsProvider.getPath(uri);
-			} else if (fileName.startsWith(ObjStorageFileSystemProvider.SCHEME)) {
+			} else if (fileName.startsWith(CosFileSystemProvider.SCHEME)) {
 				URI uri = new URI(fileName);
 				return objProvider.getPath(uri);
 			} else {

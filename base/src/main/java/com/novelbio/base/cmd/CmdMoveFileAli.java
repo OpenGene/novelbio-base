@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.cmd.ConvertCmd.ConvertCmdTmp;
 import com.novelbio.base.fileOperate.FileOperate;
-import com.novelbio.jsr203.objstorage.PathDetail;
+import com.novelbio.jsr203.objstorage.PathDetailObjStorage;
 
 
 /**
@@ -89,9 +89,9 @@ public class CmdMoveFileAli extends CmdMoveFile {
 	 */
 	public static String convertAli2Loc(String path, boolean isReadMap) {
 		
-		String pathLocal = PathDetail.changeOsToLocal(path);
-		if (pathLocal.startsWith(PathDetail.getOsMountPathWithSep())) {		//	/home/novelbio/oss
-			pathLocal = pathLocal.replaceFirst(PathDetail.getOsMountPathWithSep(), "");
+		String pathLocal = PathDetailObjStorage.changeOsToLocal(path);
+		if (pathLocal.startsWith(PathDetailObjStorage.getOsMountPathWithSep())) {		//	/home/novelbio/oss
+			pathLocal = pathLocal.replaceFirst(PathDetailObjStorage.getOsMountPathWithSep(), "");
 		} else {
 			return path;
 		}
@@ -101,7 +101,7 @@ public class CmdMoveFileAli extends CmdMoveFile {
 			pathLocal = FileOperate.removeSplashHead(pathLocal.replaceFirst(OUT_MAP, ""), false);
 		}
 		String head = isReadMap? IN_MAP : OUT_MAP;
-		pathLocal = PathDetail.getOsMountPathWithSep() + head + "/" + pathLocal;
+		pathLocal = PathDetailObjStorage.getOsMountPathWithSep() + head + "/" + pathLocal;
 		
 		return pathLocal;
 	}
