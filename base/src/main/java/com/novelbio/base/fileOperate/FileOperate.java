@@ -46,7 +46,6 @@ import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
 import com.novelbio.base.dataStructure.PatternOperate;
 import com.novelbio.base.util.IOUtil;
 import com.novelbio.jsr203.objstorage.ObjPath;
-import com.novelbio.jsr203.objstorage.CosFileSystemProvider;
 import com.novelbio.jsr203.objstorage.PathDetailObjStorage;
 
 import hdfs.jsr203.HadoopFileSystemProvider;
@@ -170,7 +169,7 @@ public class FileOperate {
 				// TODO 不是类没加载，而是META文件没有读取到
 				// Paths.get(uri);
 				return hdfsProvider.getPath(uri);
-			} else if (fileName.startsWith(CosFileSystemProvider.SCHEME)) {
+			} else if (fileName.startsWith(objProvider.getScheme())) {
 				URI uri = new URI(fileName);
 				return objProvider.getPath(uri);
 			} else {
