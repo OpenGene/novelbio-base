@@ -44,8 +44,10 @@ import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
 import com.novelbio.base.dataStructure.PatternOperate;
 import com.novelbio.base.util.IOUtil;
-import com.novelbio.jsr203.bos.OssFileSystemProvider;
-import com.novelbio.jsr203.bos.OssPath;
+import com.novelbio.jsr203.cos.CosFileSystemProvider;
+import com.novelbio.jsr203.cos.CosPath;
+import com.novelbio.jsr203.oss.OssFileSystemProvider;
+import com.novelbio.jsr203.oss.OssPath;
 
 import hdfs.jsr203.HadoopFileSystemProvider;
 import hdfs.jsr203.HadoopPath;
@@ -55,6 +57,7 @@ public class FileOperate {
 	private static final Logger logger = LoggerFactory.getLogger(FileOperate.class);
 	static HadoopFileSystemProvider hdfsProvider = new HadoopFileSystemProvider();
 	static OssFileSystemProvider ossProvider = new OssFileSystemProvider();
+	static CosFileSystemProvider cosProvider = new CosFileSystemProvider();
 	static PatternOperate patternOperate = new PatternOperate("^[/\\\\]{0,2}[^/]+\\:[/\\\\]{0,2}");
 	static boolean isWindowsOS = false;
 	static {
@@ -127,6 +130,8 @@ public class FileOperate {
 				return hdfsProvider.getFileSystem(new URI(first)).getPath(new URI(first).getPath(), rest);
 			} else if (first.startsWith(ossProvider.getScheme() + ":/")) {
 				return ossProvider.getFileSystem(new URI(first)).getPath(new URI(first).getPath(), rest);
+			}  else if (first.startsWith(cosProvider.getScheme() + ":/")) {
+				return cosProvider.getFileSystem(new URI(first)).getPath(new URI(first).getPath(), rest);
 			} else {
 				System.out.println("default Path");
 				return Paths.get(first, rest);
@@ -170,6 +175,9 @@ public class FileOperate {
 			} else if (fileName.startsWith(OssFileSystemProvider.SCHEME)) {
 				URI uri = new URI(fileName);
 				return ossProvider.getPath(uri);
+			}  else if (fileName.startsWith(CosFileSystemProvider.SCHEME)) {
+				URI uri = new URI(fileName);
+				return cosProvider.getPath(uri);
 			} else {
 				File file = new File(fileName);
 				return file.toPath();
@@ -620,6 +628,8 @@ public class FileOperate {
 				name = FileHadoop.hdfsSymbol + name;
 			}
 		} else if (path instanceof OssPath) {
+			name = path.toString();
+		}  else if (path instanceof CosPath) {
 			name = path.toString();
 		}
 		return name;
