@@ -18,6 +18,8 @@ public class ServiceEnvUtil {
 	
 	public static final String ENV_HADOOP = "hadoop";
 	public static final String ENV_ALIYUN = "aliyun";
+	public static final String ENV_TENCENT = "tencent";
+	
 	public static final String DB_KEEPALIVE = "dbKeepAlive";
 	private static String env;
 	
@@ -37,9 +39,16 @@ public class ServiceEnvUtil {
 		return ENV_HADOOP.equals(env);
 	}
 
+	public static boolean isCloudEnv() {
+		return isAliyunEnv() || isTencentEnv();
+	}
 
 	public static boolean isAliyunEnv() {
 		return ENV_ALIYUN.equals(env);
+	}
+	
+	public static boolean isTencentEnv() {
+		return ENV_TENCENT.equals(env);
 	}
 	
 	private static Boolean isDbKeepAlive = null;
