@@ -32,4 +32,13 @@ public class TestFileOperateOss {
 		Assert.assertEquals(true, FileOperate.isFileExist(path));
 	}
 	
+	@Test
+	public void testCreateFolders() {
+		Path path = FileOperate.getPath("oss://novelbrainsz/ccc/");
+		FileOperate.createFolders(path);
+		Assert.assertEquals(true, FileOperate.isFileDirectory(path));
+		FileOperate.deleteFileFolder(path);
+		Assert.assertEquals(false, FileOperate.isFileDirectory(path));
+	}
+	
 }

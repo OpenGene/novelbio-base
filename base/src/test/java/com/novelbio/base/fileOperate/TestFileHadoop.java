@@ -2,6 +2,7 @@ package com.novelbio.base.fileOperate;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.junit.Assert;
@@ -21,6 +22,13 @@ public class TestFileHadoop {
 		Assert.assertEquals("hdfs:/nbCloud/testHadoopStreaming/chrAll.fa", FileHadoop.convertToHdfsPath(file3));
 		Assert.assertEquals("/home/novelbio/nbCloud/testHadoopStreaming/chrAll.fa", FileHadoop.convertToHdfsPath(file4));
 
+	}
+	
+	@Test
+	public void testGetPath() {
+		String path = "hdfs:/nbCloud/public/order/appendix/55F8C7A1ABB4BD68A4D76BCD/廖婷-2015 取样方案及样品编号0925.doc";
+		Path path2 = FileOperate.getPath(path);
+		System.out.println(path2);
 	}
 	
 	@Test

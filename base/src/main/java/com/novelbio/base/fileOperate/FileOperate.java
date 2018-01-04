@@ -494,11 +494,11 @@ public class FileOperate {
 		}
 	}
 
-	public static BasicFileAttributes getFileAttribute(String filePath) {
-		return getFileAttribute(getPath(filePath));
-	}
+//	public static BasicFileAttributes getFileAttribute(String filePath) {
+//		return getFileAttribute(getPath(filePath));
+//	}
 
-	public static BasicFileAttributes getFileAttribute(Path filePath) {
+	private static BasicFileAttributes getFileAttribute(Path filePath) {
 		try {
 			return Files.readAttributes(filePath, BasicFileAttributes.class);
 		} catch (IOException e) {
