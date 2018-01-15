@@ -83,7 +83,7 @@ public class CmdOperate extends RunProcess {
 	
 	/** 用来传递参数，拷贝输入输出文件夹的类 */
 	protected CmdOrderGenerator cmdOrderGenerator = new CmdOrderGenerator();
-	protected CmdMoveFile cmdMoveFile =CmdMoveFile.getInstance(!ServiceEnvUtil.isAliyunEnv());
+	protected CmdMoveFile cmdMoveFile = CmdMoveFile.getInstance(!ServiceEnvUtil.isCloudEnv());
 
 	/** 输出本程序正在运行时的参数等信息，本功能也用docker替换了 */
 	@Deprecated

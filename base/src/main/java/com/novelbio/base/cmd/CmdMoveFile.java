@@ -13,10 +13,9 @@ import org.slf4j.LoggerFactory;
 
 import com.novelbio.base.PathDetail;
 import com.novelbio.base.StringOperate;
+import com.novelbio.base.cmd.ConvertCmd.ConvertCloud;
 import com.novelbio.base.cmd.ConvertCmd.ConvertCmdTmp;
 import com.novelbio.base.cmd.ConvertCmd.ConvertHdfs;
-import com.novelbio.base.cmd.ConvertCmd.ConvertOss;
-import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.base.util.ServiceEnvUtil;
 
@@ -266,7 +265,7 @@ public class CmdMoveFile {
 	}
 	
 	protected ConvertCmd getConvertOs2Local() {
-		return ServiceEnvUtil.isAliyunEnv() ? new ConvertOss() : new ConvertHdfs();
+		return ServiceEnvUtil.isCloudEnv() ? new ConvertCloud() : new ConvertHdfs();
 	}
 	
 	/**
