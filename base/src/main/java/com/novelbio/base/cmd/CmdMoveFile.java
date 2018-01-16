@@ -176,6 +176,12 @@ public class CmdMoveFile {
 		
 		if (isRedirectOutToTmp) {
 			mapPath2TmpPathOut = cmdPathCluster.getMapOutPath2TmpPath(setOutput, tmpPath);
+			//创建临时文件夹
+			for (String tmpPathOut : mapPath2TmpPathOut.values()) {
+				logger.info("create tmp file " + FileOperate.getPathName(tmpPathOut));
+				FileOperate.createFolders(FileOperate.getPathName(tmpPathOut));
+			}
+			
 			logger.debug("print mapPath2TmpPathOut");
 
 			logMapInfo(mapPath2TmpPathOut);
