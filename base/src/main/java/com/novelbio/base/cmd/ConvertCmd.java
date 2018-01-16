@@ -12,6 +12,7 @@ import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
+import com.novelbio.jsr203.objstorage.PathDetailObjStorage;
 
 /**
  * 文件夹切分并删除的工作
@@ -132,8 +133,8 @@ public abstract class ConvertCmd {
 	 * @author zong0jie
 	 * @data 2017年5月3日
 	 */
-	public static class ConvertOss extends ConvertCmd {
-		private static final Logger logger = LoggerFactory.getLogger(ConvertOss.class);
+	public static class ConvertCloud extends ConvertCmd {
+		private static final Logger logger = LoggerFactory.getLogger(ConvertCloud.class);
 		boolean isReadMap = true;
 		public void setIsReadMap(boolean isReadMap) {
 			this.isReadMap = isReadMap;
@@ -145,7 +146,7 @@ public abstract class ConvertCmd {
 					return FileHadoop.convertToLocalPath(subCmd);
 				}
 			} 
-			if(subCmd.startsWith("oss://")) {
+			if(subCmd.startsWith(PathDetailObjStorage.getSymbol() + "://")) {
 				// TODO 这里是有bug的.测试先这么写.
 				String convertCmd = CmdMoveFileAli.convertAli2Loc(subCmd, isReadMap);
 				logger.info("convert oss cmd unit from {} to {}", subCmd, convertCmd);
