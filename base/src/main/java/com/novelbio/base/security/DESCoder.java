@@ -181,4 +181,16 @@ public abstract class DESCoder extends Coder {
 
 		return encryptBASE64(secretKey.getEncoded());
 	}
+	
+	
+	public static void main(String[] args) {
+		try {
+//			byte[] mw =	decryptAES("fR0uPPSVZ7w=".getBytes(), "asdfd123");
+//			System.out.println(String.valueOf(mw));
+			byte[] m = encryptAES("test".getBytes(), "asdfd123asdfd123asdfd123");
+			System.out.println(String.valueOf(m));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }

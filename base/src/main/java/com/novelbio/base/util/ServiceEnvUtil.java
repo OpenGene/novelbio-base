@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import com.novelbio.base.PathDetail;
 import com.novelbio.base.StringOperate;
+import com.novelbio.jsr203.objstorage.CloudConstant;
 
 /**
  * 服务运行环境判定.是hadoop还是阿里云
@@ -79,7 +80,7 @@ public class ServiceEnvUtil {
 	 */
 	public static boolean isBatchCompute() {
 		if (isBatchCompute == null) {
-			isBatchCompute = !StringOperate.isRealNull(System.getenv("BATCH_COMPUTE_OSS_HOST"));
+			isBatchCompute = !StringOperate.isRealNull(System.getenv(CloudConstant.JobId));
 			logger.info("isBatchCompute=" + isBatchCompute);
 		}
 		return isBatchCompute;
