@@ -100,12 +100,12 @@ public abstract class ConvertCmd {
 				//java -jar /trimmomatic.jar PE -phred33 hdfs:/tmp/1.fq.gz hdfs:/tmp/2.fq.gz ... ILLUMINACLIP:hdfs:/tmp/PE.fa:2:30:10 LEADING:3
 				//其中 ILLUMINACLIP:hdfs:/tmp/PE.fa:2:30:10 这个文件夹在了两个参数之间。这样就很讨厌。所以这个业务主要就是把两个参数之间的文件拿出来转换文件名的
 				String tmpCmdSub = tmpCmd.replace("hdfs:", "hdfs@-@");
-				tmpCmdSub = tmpCmdSub.replace("oss:", "oss@-@");
+				tmpCmdSub = tmpCmdSub.replace(PathDetailObjStorage.getSymbol() + ":", "cloud@-@");
 				if (tmpCmdSub.contains(":")) {
 					String[] tmpCmd2Path = tmpCmdSub.split(":");
 					String[] tmpResult = new String[tmpCmd2Path.length];
 					for (int i = 0; i < tmpCmd2Path.length; i++) {
-						tmpResult[i] = convertSubCmd(tmpCmd2Path[i].replace("hdfs@-@", "hdfs:").replace("oss@-@", "oss:"));  
+						tmpResult[i] = convertSubCmd(tmpCmd2Path[i].replace("hdfs@-@", "hdfs:").replace("cloud@-@", PathDetailObjStorage.getSymbol() + ":"));  
 		            }
 					tmpCmd = ArrayOperate.cmbString(tmpResult, ":");
 					return tmpCmd;

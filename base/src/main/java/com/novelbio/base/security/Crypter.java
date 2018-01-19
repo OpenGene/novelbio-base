@@ -267,7 +267,6 @@ public class Crypter {
 	public static Map<String, Object> encryptHttpParams(String url, String paramJson) {
 		long st = Long.parseLong(("" + System.currentTimeMillis()).substring(7));
 		String key = DateUtil.getDateMSAndRandom().substring(0, 16);
-		System.out.println(key.length());
 		String paramEn = encryptAESonCBC(paramJson, key);
 		String keyEn = encryptByPublicKey(key);
 		String sign = signByMD5(url + st + paramEn);
@@ -282,7 +281,7 @@ public class Crypter {
 	
 	public static void main(String[] args) {
 		// 待加密的明文
-		String plaintext = "2016080600181066";
+		String plaintext = "https://openapi.alipay.com/gateway.do";
 		// 加密后的密文
 		String ciphertext = encryptAES(plaintext);
 		System.out.println("加密后的密文:");

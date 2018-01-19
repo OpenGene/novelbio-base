@@ -248,17 +248,7 @@ public class FileOperate {
 			return fileName;
 		}
 
-		if (fileName.startsWith("oss://")) {
-			try {
-				URI uri = new URI(fileName);
-				String parentPath = objProvider.getPath(uri).getParent().toString();
-				return parentPath.endsWith("/") ? parentPath : parentPath + "/";
-			} catch (Exception e) {
-				e.printStackTrace();
-				logger.error("getParentPathNameWithSep error.filename=" + fileName, e);
-				return fileName;
-			}
-		} else if (fileName.startsWith("cos://")) {
+		if (fileName.startsWith(objProvider.getScheme() + "://")) {
 			try {
 				URI uri = new URI(fileName);
 				String parentPath = objProvider.getPath(uri).getParent().toString();
