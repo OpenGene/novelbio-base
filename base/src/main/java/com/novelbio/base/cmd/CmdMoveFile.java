@@ -175,12 +175,6 @@ public class CmdMoveFile {
 		
 		if (isRedirectOutToTmp) {
 			mapPath2TmpPathOut = cmdPathCluster.getMapOutPath2TmpPath(setOutput, tmpPath);
-			//创建临时文件夹
-			for (String tmpPathOut : mapPath2TmpPathOut.values()) {
-				logger.info("create tmp file " + FileOperate.getPathName(tmpPathOut));
-				FileOperate.createFolders(FileOperate.getPathName(tmpPathOut));
-			}
-			
 			logger.debug("print mapPath2TmpPathOut");
 
 			logMapInfo(mapPath2TmpPathOut);
@@ -230,11 +224,11 @@ public class CmdMoveFile {
 		logger.debug("start create tmp folder");
 		for (String filePathName : mapName2TmpName.keySet()) {
 			String tmpPath = mapName2TmpName.get(filePathName);
-			if ( FileOperate.isFileDirectory(filePathName)) {
-				logger.debug("creat folder " + filePathName);
+			if (filePathName.endsWith("/") || filePathName.endsWith("\\") || tmpPath.endsWith("/") || tmpPath.endsWith("\\")) {
+				logger.info("creat folder " + filePathName);
 				FileOperate.createFolders(tmpPath);
 			} else {
-				logger.debug("creat folder " + FileOperate.getParentPathNameWithSep(tmpPath));
+				logger.info("creat folder " + FileOperate.getParentPathNameWithSep(tmpPath));
 				FileOperate.createFolders(FileOperate.getParentPathNameWithSep(tmpPath));
 			}
 		}
@@ -334,6 +328,10 @@ public class CmdMoveFile {
 		}
 		
 		List<Path> lsSubPaths = FileOperate.getLsFoldPath(pathInTmp);
+		if (lsSubPaths.isEmpty()) {
+			lsFileNeedMove.add(FileOperate.getAbsolutePath(pathInTmp));
+		}
+		//TODO 为什么不移动着个
 		for (Path path : lsSubPaths) {
 			lsFileNeedMove.addAll(getLsFileInTmpNeedMove(path));
 		}
