@@ -230,6 +230,22 @@ public class FileOperate {
 
 		return null;// TODO: handle exception
 	}
+	
+	/**
+	 * 给定路径名，返回其上一层路径，带"/" 如给定 /wer/fw4e/sr/frw/s3er.txt 返回 /wer/fw4e/sr/frw
+	 * <br>
+	 * 如果为相对路径的最上层，譬如给定的是soap 则返回“” 可以给定不存在的路径
+	 * 
+	 * @param fileName
+	 * @return
+	 * @throws IOException
+	 */
+	public static String getParentPathNameWithSep(Path path) {
+		if (path == null)
+			return null;
+
+		return getParentPathNameWithSep(path.toString());
+	}
 
 	/**
 	 * 给定路径名，返回其上一层路径，带"/" 如给定 /wer/fw4e/sr/frw/s3er.txt 返回 /wer/fw4e/sr/frw/
@@ -254,7 +270,6 @@ public class FileOperate {
 				String parentPath = objProvider.getPath(uri).getParent().toString();
 				return parentPath.endsWith("/") ? parentPath : parentPath + "/";
 			} catch (Exception e) {
-				e.printStackTrace();
 				logger.error("getParentPathNameWithSep error.filename=" + fileName, e);
 				return fileName;
 			}
@@ -274,48 +289,7 @@ public class FileOperate {
 			}
 		}
 	}
-	/**
-	 * 给定路径名，返回其上一层路径，带"/" 如给定 /wer/fw4e/sr/frw/s3er.txt 返回 /wer/fw4e/sr/frw
-	 * <br>
-	 * 如果为相对路径的最上层，譬如给定的是soap 则返回“” 可以给定不存在的路径
-	 * 
-	 * @param fileName
-	 * @return
-	 * @throws IOException
-	 */
-	public static String getParentPathNameWithSep(Path path) {
-		if (path == null)
-			return null;
-
-		if (path.toString().equals("/") || path.toString().equals("\\")) {
-			return path.toString();
-		}
-		String fileName = path.toString();
-		if (fileName.startsWith(objProvider.getScheme() + "://")) {
-			try {
-				Path parentPath = path.getParent();
-				return FileOperate.addSep(parentPath.toString());
-			} catch (Exception e) {
-				e.printStackTrace();
-				logger.error("getParentPathNameWithSep error.filename=" + fileName, e);
-				return fileName;
-			}
-		} else {
-			File file = new File(fileName);
-			String fileParent = file.getParent();
-			String head = patternOperate.getPatFirst(fileName);
-			if (head == null)
-				head = "";
-			if (fileParent == null)
-				fileParent = "";
-
-			if (fileParent.length() < head.length()) {
-				return head;
-			} else {
-				return addSep(fileParent);
-			}
-		}
-	}
+	
 	/**
 	 * 给定路径名，返回其最近一层路径，带"/" 如给定 /wer/fw4e/sr/frw/s3er.txt 返回 /wer/fw4e/sr/frw/
 	 * <br>
@@ -1521,6 +1495,16 @@ public class FileOperate {
 		return getOutputStream(file, false);
 	}
 	
+	/**
+	 * 获取文件的写入流对象.<br/>
+	 *  1.当文件所在的文件夹不存在时,会自动创建父级文件夹.<br/>
+	 *  2.append为false.并文件大小大于0时,会删除现有文件.<br/>
+	 * 
+	 * @param file
+	 * @param append
+	 * @return
+	 * @throws IOException
+	 */
 	public static OutputStream getOutputStream(Path file, boolean append) throws IOException {
 		StandardOpenOption openOption = append ? StandardOpenOption.APPEND : StandardOpenOption.CREATE;
 		if (!isFileExist(file)) {
@@ -1532,6 +1516,7 @@ public class FileOperate {
 			}
 			deleteFileFolder(file);
 		}
+		createFolders(getParentPathNameWithSep(file));
 		return Files.newOutputStream(file, openOption);
 	}
 	
