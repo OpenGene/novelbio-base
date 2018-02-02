@@ -598,7 +598,7 @@ class TxtRead implements Closeable {
 				}
 			}
 			inputStream = new BufferedInputStream(zipArchiveInputStream, TxtReadandWrite.bufferLen);
-		} else if (txtType == TXTtype.Gzip) {
+		} else if (txtType == TXTtype.Gzip || txtType == txtType.BGzip) {
 			inputStream = new BufferedInputStream(new GZIPInputStream(inputStreamRaw, TxtReadandWrite.bufferLen), TxtReadandWrite.bufferLen);
 		} else if (txtType == TXTtype.Bzip2) {
 			inputStream = new BufferedInputStream(new BZip2CompressorInputStream(inputStreamRaw), TxtReadandWrite.bufferLen);

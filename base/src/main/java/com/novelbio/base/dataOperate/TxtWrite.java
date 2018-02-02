@@ -96,6 +96,8 @@ class TxtWrite implements Closeable {
 			lzo.setConf(HdfsConfInitiator.getConf());
 			CompressionOutputStream outputStreamCmp =lzo.createOutputStream(outputStreamRaw);
 			outputStream = new BufferedOutputStream(outputStreamCmp);
+		} else if (txtTtype == TXTtype.BGzip) {
+			throw new ExceptionNbcFile("doesnot support bgzip format");
 		}
 	}
 

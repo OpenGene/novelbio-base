@@ -58,7 +58,7 @@ public class TxtReadandWrite implements Closeable {
 	}
 	
 	public static enum TXTtype{
-		Gzip, Bzip2, Zip, Txt, Lzo;
+		BGzip, Gzip, Bzip2, Zip, Txt, Lzo;
 		/**
 		 * 根据文件后缀判断文件的类型，是gz还是txt等
 		 * @return
@@ -74,6 +74,8 @@ public class TxtReadandWrite implements Closeable {
 				txtTtype = TXTtype.Zip;
 			} else if (fileName.endsWith("lzo")) {
 				txtTtype = TXTtype.Lzo;
+			} else if (fileName.endsWith("bgz")) {
+				txtTtype = TXTtype.BGzip;
 			} else {
 				txtTtype = TXTtype.Txt;
 			}
