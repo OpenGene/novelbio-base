@@ -74,7 +74,7 @@ public class TxtReadandWrite implements Closeable {
 				txtTtype = TXTtype.Zip;
 			} else if (fileName.endsWith("lzo")) {
 				txtTtype = TXTtype.Lzo;
-			} else if (fileName.endsWith("bgz")) {
+			} else if (fileName.endsWith("bgz")) {//TODO 这种后缀名igv不认，igv只认gz后缀
 				txtTtype = TXTtype.BGzip;
 			} else {
 				txtTtype = TXTtype.Txt;
