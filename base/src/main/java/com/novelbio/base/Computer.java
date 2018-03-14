@@ -79,7 +79,13 @@ public class Computer implements Serializable {
 		if (FileOperate.isWindows()) {
 			ip = getIpWindows();
 		} else {
-			ip = getIpLinux();
+			try {
+				ip = getIpUbuntu();
+			} catch (Exception e) {
+			}
+			if (StringOperate.isRealNull(ip) || ip.equals("0.0.0.0")) {
+				ip = getIpCentOs();
+			}
 		}
 	}
 	
@@ -102,9 +108,15 @@ public class Computer implements Serializable {
 		return ip;
 	}
 	
-	private String getIpLinux() {
+	private String getIpUbuntu() {
+		return getIpLinux("/sbin/ifconfig");
+	}
+	private String getIpCentOs() {
+		return getIpLinux("/sbin/ifconfig");
+	}
+	private String getIpLinux(String cmd) {
 		String ip = "";
-		List<String> lsIp = new ArrayList<String>();
+		List<String> lsIp = new ArrayList<>();
 		List<String> lsCmd = new ArrayList<>();
 		lsCmd.add("/sbin/ifconfig");
 		CmdOperate cmdOperate = new CmdOperate(lsCmd);

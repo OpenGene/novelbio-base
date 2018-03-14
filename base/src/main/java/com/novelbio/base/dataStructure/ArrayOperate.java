@@ -100,9 +100,11 @@ public class ArrayOperate {
 		int i = 1;
 		for (T info : ss) {
 			if (i == 1) {
-				result.append(info.toString());
+				String value = info == null ? null : info.toString();
+				result.append(value);
 			} else {
-				result.append(sep).append(info.toString());
+				String value = info == null ? null : info.toString();
+				result.append(sep).append(value);
 			}
 			i++;
 		}
