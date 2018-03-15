@@ -57,4 +57,6 @@ public class SepSign {
 	/** subTask的样本名/组名的后缀 */
 	public static final String SEP_SUBTASK_SUFFIX = ".";
 	
+	/** task导出时的结果文件夹顺序分隔符 */
+	public static final String SEP_TASK_INDEX = ".";
 }
