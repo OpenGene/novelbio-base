@@ -326,7 +326,7 @@ public class CmdOrderGenerator {
 		return realCmd;
 	}
 	
-	protected ConvertCmd getConvertOs2Local() {
+	public static ConvertCmd getConvertOs2Local() {
 		return ServiceEnvUtil.isCloudEnv() ? new ConvertCloud() : new ConvertHdfs();
 	}
 	

@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -206,6 +207,12 @@ public class CmdOperate extends RunProcess {
 		cmdOrderGenerator.setLsCmd(lsCmd);
 	}
 	
+	public void setMapEnv(Map<String, String> mapEnv) {
+		((ProcessCmd)process).setMapEnv(mapEnv);
+	}
+	public void addEnv(String key, String value) {
+		((ProcessCmd)process).addEnv(key, value);
+	}
 	/**
 	 * 如果要外部移动数据，可以把这个配置进来，
 	 * 但是必须在{@link CmdOperate}创建完毕后第一时间设置

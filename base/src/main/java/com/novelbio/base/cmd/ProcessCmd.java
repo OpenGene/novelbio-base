@@ -5,17 +5,22 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
 import com.novelbio.base.StringOperate;
+import com.novelbio.base.dataStructure.ArrayOperate;
 
 /** 本地版的cmd进程 */
 public class ProcessCmd implements IntProcess {
 	private static final Logger logger = Logger.getLogger(ProcessCmd.class);
 	File runPath;
 	Process process;
+	
+	Map<String, String> mapEnv = new HashMap<>();
 	
 	public ProcessCmd() {	}
 	
@@ -29,10 +34,21 @@ public class ProcessCmd implements IntProcess {
 		this.runPath = runPath;
 	}
 	
+	public void setMapEnv(Map<String, String> mapEnv) {
+		this.mapEnv = mapEnv;
+	}
+	public void addEnv(String key, String value) {
+		mapEnv.put(key, value);
+	}
+	
 	/** 第一个执行 */
 	public void exec(String[] cmd) throws Exception {
-		Runtime runtime = Runtime.getRuntime();
-		process = runtime.exec(cmd, null, runPath);
+//		Runtime runtime = Runtime.getRuntime();
+		ProcessBuilder processBuilder = new ProcessBuilder(cmd);
+		if (!ArrayOperate.isEmpty(mapEnv)) {
+			processBuilder.environment().putAll(mapEnv);
+		}
+		process = processBuilder.start();
 	}
 	
 	public int waitFor() throws InterruptedException {

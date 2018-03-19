@@ -121,7 +121,15 @@ public class CmdMoveFile {
 		}
 		setInput.add(input);
 	}
-	
+	/**
+	 * 添加输入文件路径的参数，配合{@link #setRedirectInToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
+	 * @param input 输入文件的哪个参数
+	 */
+	public void addCmdParamInput(List<String> input) {
+		for (String path : input) {
+			addCmdParamInput(path);
+		}
+	}
 	/**
 	 * 添加输出文件路径的参数，配合{@link #setRedirectOutToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
 	 * @param output 输出文件的哪个参数，如果输入参数类似 "--outPath=/hdfs:/test.fa"，这里填写 "/hdfs:/test.fa"
@@ -132,7 +140,15 @@ public class CmdMoveFile {
 		}
 		setOutput.add(output);
 	}
-	
+	/**
+	 * 添加输出文件路径的参数，配合{@link #setRedirectOutToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
+	 * @param output 输出文件的哪个参数，如果输入参数类似 "--outPath=/hdfs:/test.fa"，这里填写 "/hdfs:/test.fa"
+	 */
+	public void addCmdParamOutput(List<String> output) {
+		for (String path : output) {
+			addCmdParamOutput(path);
+		}
+	}
 	public void prepare() {
 		setInOutputPath();
 		generateTmPath();
