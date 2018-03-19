@@ -1642,7 +1642,7 @@ public class FileOperate {
 		try {
 			Files.deleteIfExists(pathNewTmp);
 			createFolders(getPathName(pathNew));
-			logger.info("start copy from {} to {}", oldfile, pathNew);
+			logger.debug("start copy from {} to {}", oldfile, pathNew);
 			//XXX 这里注意.StandardCopyOption的其他两个参数底层不支持.所以这里必须是REPLACE_EXISTING
 			Files.copy(oldfile, pathNewTmp, StandardCopyOption.REPLACE_EXISTING);
 			Files.deleteIfExists(pathNew);
