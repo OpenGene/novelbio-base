@@ -145,8 +145,7 @@ public class PatternOperate {
      * <b>简单处理，相对快速</b>
      * 获得序列中指定的所有正则表达式的值
      * @param inputstr
-     * @param regex
-     * @param CASE
+     * @param groupID
      * @return 没有抓到的话，返回size=0的list
      */
     public ArrayList<String> getPat(String inputstr, int... groupID) {

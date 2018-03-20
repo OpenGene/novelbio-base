@@ -84,6 +84,10 @@ public class FileOperate {
 		String path = filePathParent + name;
 		return getFile(path);
 	}
+	
+	public static String getSchema() {
+		return objProvider.getScheme();
+	}
 
 //	/**
 //	 * 根据不同的文件类型得到File

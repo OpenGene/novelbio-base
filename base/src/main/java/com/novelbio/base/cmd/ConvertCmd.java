@@ -136,6 +136,10 @@ public abstract class ConvertCmd {
 	public static class ConvertCloud extends ConvertCmd {
 		private static final Logger logger = LoggerFactory.getLogger(ConvertCloud.class);
 		boolean isReadMap = true;
+		/**
+		 * 默认是true
+		 * @param isReadMap
+		 */
 		public void setIsReadMap(boolean isReadMap) {
 			this.isReadMap = isReadMap;
 		}
