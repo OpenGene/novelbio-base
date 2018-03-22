@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.cmd.ConvertCmd.ConvertCmdTmp;
 import com.novelbio.base.fileOperate.FileOperate;
+import com.novelbio.base.util.ServiceEnvUtil;
 import com.novelbio.jsr203.objstorage.PathDetailObjStorage;
 
 
@@ -40,6 +41,9 @@ public class CmdMoveFileAli extends CmdMoveFile {
 	protected void copyFileIn() {
 		for (String inFile : setInput) {
 			String inTmpName = mapName2TmpName.get(inFile);
+			if (StringOperate.isRealNull(inTmpName)) {
+				continue;
+			}
 			try {
 				logger.info("link file from {} to {}", inFile, inTmpName);
 				FileOperate.linkFile(inFile, inTmpName, false);
@@ -88,7 +92,9 @@ public class CmdMoveFileAli extends CmdMoveFile {
 	 * @return
 	 */
 	public static String convertAli2Loc(String path, boolean isReadMap) {
-		
+		if (!ServiceEnvUtil.isCloudEnv()) {
+			return path;
+		}
 		String pathLocal = PathDetailObjStorage.changeOsToLocal(path);
 		if (pathLocal.startsWith(PathDetailObjStorage.getOsMountPathWithSep())) {		//	/home/novelbio/oss
 			pathLocal = pathLocal.replaceFirst(PathDetailObjStorage.getOsMountPathWithSep(), "");

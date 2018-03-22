@@ -280,10 +280,6 @@ public class CmdMoveFile {
 		}); 
 	}
 	
-	protected ConvertCmd getConvertOs2Local() {
-		return ServiceEnvUtil.isCloudEnv() ? new ConvertCloud() : new ConvertHdfs();
-	}
-	
 	/**
 	 * 将tmpPath文件夹中的内容全部移动到resultPath中 */
 	public void moveFileOut() {

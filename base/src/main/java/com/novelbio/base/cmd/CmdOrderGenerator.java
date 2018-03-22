@@ -280,8 +280,9 @@ public class CmdOrderGenerator {
 		saveErrPath = null;
 		
 		ConvertCmdTmp convertCmdTmp = cmdMoveFile.generateConvertCmdTmp();
-		ConvertCmd convertOs2Local = getConvertOs2Local();
-		
+		//这个感觉用不到，或者说仅用于hdfs的转化，因为oss的转化已经在Script.getLsValue()那块完成
+		ConvertCmd convertOs2Local = getConvertOs2Local(true);
+		//TODO
 		for (String tmpCmd : lsCmd) {
 			if (redirectStdAndErr) {
 				if (tmpCmd.equals(">")  || tmpCmd.equals("1>")) {
@@ -326,8 +327,8 @@ public class CmdOrderGenerator {
 		return realCmd;
 	}
 	
-	public static ConvertCmd getConvertOs2Local() {
-		return ServiceEnvUtil.isCloudEnv() ? new ConvertCloud() : new ConvertHdfs();
+	public static ConvertCmd getConvertOs2Local(boolean isReadMap) {
+		return ServiceEnvUtil.isCloudEnv() ? new ConvertCloud(isReadMap) : new ConvertHdfs();
 	}
 	
 //	/**
