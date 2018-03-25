@@ -121,7 +121,7 @@ class TxtWrite implements Closeable {
 	 * @throws Exception
 	 */
 	public void writefile(String content) {
-		writefile(content, true);
+		writefile(content, false);
 	}
 	
 	/**
@@ -174,7 +174,17 @@ class TxtWrite implements Closeable {
 			throw new RuntimeException(e);
 		}
 	}
-	
+	/**
+	 * @param content
+	 * @throws Exception
+	 */
+	public void writefile(byte[] bytes) {
+		try {
+			outputStream.write(bytes);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 	/**
 	 * 写入并换行，没有flush
 	 * @param content

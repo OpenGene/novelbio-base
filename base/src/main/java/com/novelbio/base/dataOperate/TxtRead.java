@@ -86,6 +86,7 @@ class TxtRead implements Closeable {
 	
 	/**
 	 * 返回该文本的回车方式
+	 * 只能读取文本
 	 * @return
 	 */
 	public String getEnterType() {
@@ -100,23 +101,48 @@ class TxtRead implements Closeable {
 	}
 	
 	private String getEnterTypeExp() throws Exception {
-		int firstLineNum = readFirstLine().getBytes().length;
-		//获得第一行的btye长度
-		byte[] mybyte = new byte[firstLineNum + 2];
-		initialReading();
-		inputStream.read(mybyte);
-		Charset cs = Charset.forName("UTF-8");
-		ByteBuffer bb = ByteBuffer.allocate (mybyte.length);
-		bb.put(mybyte);
-		bb.flip();
-		CharBuffer cb = cs.decode (bb);
-		close();
-		char[] mychar = cb.array();
-		if (mychar[mychar.length - 2] == 13 && mychar[mychar.length - 1] == 10) {
-			return TxtReadandWrite.ENTER_WINDOWS;
-		} else {
-			return TxtReadandWrite.ENTER_LINUX;
+		bufread = readfile();
+		int last = -1;
+		String type = null;
+		while (true) {
+			int num = bufread.read();
+			if (num == -1) {
+				break;
+			}
+			if (num == 10) {
+				if (last == 13) {
+					type = TxtReadandWrite.ENTER_WINDOWS; 
+				} else {
+					type = TxtReadandWrite.ENTER_LINUX; 
+				}
+				break;
+			}
+			last = num;
 		}
+		return type;
+//		while (bufread.read()) {
+//			
+//		}
+//		for (int chr : bufread.read()) {
+//			
+//		}
+//		int firstLineNum = readFirstLine().getBytes().length;
+//		//获得第一行的btye长度
+//		byte[] mybyte = new byte[firstLineNum + 2];
+//		initialReading();
+//		inputStream.read(mybyte);
+//		Charset cs = Charset.forName("UTF-8");
+//		ByteBuffer bb = ByteBuffer.allocate (mybyte.length);
+//		bb.put(mybyte);
+//		bb.flip();
+//		CharBuffer cb = cs.decode (bb);
+//		close();
+//		char[] mychar = cb.array();
+//		if (mychar[mychar.length - 2] == 13 && mychar[mychar.length - 1] == 10) {
+//			return TxtReadandWrite.ENTER_WINDOWS;
+//		} else {
+//			return TxtReadandWrite.ENTER_LINUX;
+//		}
 	}
 	
 	public Iterable<String> readlines() {
