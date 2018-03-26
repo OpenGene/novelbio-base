@@ -45,6 +45,7 @@ import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
 import com.novelbio.base.dataStructure.PatternOperate;
 import com.novelbio.base.util.IOUtil;
+import com.novelbio.base.util.ServiceEnvUtil;
 import com.novelbio.jsr203.objstorage.ObjPath;
 import com.novelbio.jsr203.objstorage.PathDetailObjStorage;
 
@@ -688,7 +689,12 @@ public class FileOperate {
 			throw new ExceptionFileError("cannot getCanonicalPath " + fileName, e);
 		}
 	}
-
+	public static String convertToHdfs(String file) {
+		if (!ServiceEnvUtil.isHadoopEnvRun()) {
+			return file;
+		}
+		return FileHadoop.convertToHdfsPath(file);
+	}
 //	/**
 //	 * 获取文件夹下包含指定文件名与后缀的所有文件名,等待增加功能子文件夹下的文件。也就是循环获得文件<br>
 //	 * 如果文件不存在则返回空的list<br>
