@@ -17,7 +17,6 @@ import org.apache.log4j.Logger;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.novelbio.base.StringOperate;
-import com.novelbio.base.cmd.StreamOut.EnumCmdStreamStat;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.dataStructure.ArrayOperate;
@@ -1105,62 +1104,149 @@ public class CmdOperate extends RunProcess {
 	}
 }
 
-/** 用docker去查看container的  */
-@Deprecated
-class CmdRunInfo {
-	private static final Logger logger = Logger.getLogger(CmdRunInfo.class);
-	/** 每分钟写一个信息到文本中，意思该程序还在运行中，主要是针对RNAmapping这种等待时间很长的程序 */
-	private static final int timeTxtWiteTips = 120000;
-	/** 运行进程的pid */
-	IntProcess process;
-	String outFile;
-	Timer timerWriteTips;
-	TxtReadandWrite txtWrite;
-			
-	public void setOutFile(String outFile) {
-		this.outFile = outFile;
+class CmdMvCp extends CmdOperate {
+	public CmdMvCp(List<String> lsCmd) {
+		super(lsCmd);
 	}
-	public void setProcess(IntProcess process) {
-		this.process = process;
-	}
-	public void setFinish() {
-		if (timerWriteTips != null) {
-			logger.info("stop RunInfo timer");
-			timerWriteTips.cancel();
+	@Override
+	protected void doInBackgroundB() throws Exception {
+		String[] cmdRun = cmdOrderGenerator.getCmdExeStr(cmdMoveFile);
+		if (cmdRun == null || cmdRun.length < 2
+				|| (!cmdRun[0].equals("mv") && !cmdRun[0].equals("cp") && !cmdRun[0].equals("mkdir"))) {
+			super.doInBackgroundB();
+			return;
 		}
 		
-		if (StringOperate.isRealNull(outFile)) {
-			return;
+		finishFlag.start();
+		cmdRun = cmdOrderGenerator.getRunCmd(cmdMoveFile);
+		List<String> lsCmd = ArrayOperate.converArray2List(cmdRun);
+		try {
+			runMvAndCp(lsCmd);
+			runMkdir(lsCmd);
+			finishFlag.setFlag(0);
+		} catch (Exception e) {
+			finishFlag.setFlag(1);
+			throw e;
 		}
-		txtWrite.writefileln("stop get running info");
-		txtWrite.close();
 	}
-	
-	public void startWriteRunInfo() {
-		if (StringOperate.isRealNull(outFile)) {
-			return;
+	/**
+	 * 如果是hadoop环境且如果命令是mv或cp，则调用FileOperate进行，因为直接操作hdfs很可能会导致io问题
+	 * @param lsCmdStr
+	 * @return
+	 */
+	@VisibleForTesting
+	protected static boolean runMvAndCp(List<String> lsCmdStr) {
+//		if (!ServiceEnvUtil.isHadoopEnvRun()) return false;
+		if (!lsCmdStr.get(0).equals("mv") && !lsCmdStr.get(0).equals("cp"))  return false;
+		
+		String cmd = ArrayOperate.cmbString(lsCmdStr, " ");
+		boolean isCover = true;
+
+		for (String string : lsCmdStr) {
+			if (string.equalsIgnoreCase("-n") || string.equalsIgnoreCase("--no-clobber")) {
+				isCover = false;
+				break;
+			}
 		}
-		timerWriteTips = new Timer();
-		txtWrite = new TxtReadandWrite(outFile, true);
-		timerWriteTips.schedule(new TimerTask() {
-			public void run() {
-				synchronized (this) {
-					try {
-						txtWrite.writefileln(DateUtil.getNowTimeStr() + " Program Is Still Running, This Tip Display " + timeTxtWiteTips/1000 + " seconds per time");
-						List<ProcessInfo> lsProcInfo = process.getLsProcInfo();
-						if (lsProcInfo.isEmpty()) return;
-						
-						txtWrite.writefileln(ProcessInfo.getTitle());
-						for (ProcessInfo processInfo : lsProcInfo) {
-							txtWrite.writefileln(processInfo.toString());
-						}
-						txtWrite.flush();
-					} catch (Exception e) {e.printStackTrace(); }
-					txtWrite.flush();
+		
+		//获取多个需要移动的文件。
+		//譬如 mv a.txt b.txt c.txt /home/novelbio/d/
+		//则获取 a.txt b.txt c.txt
+		List<String> lsFileNeedMvOrCp = new ArrayList<>();
+		boolean isFile = false;
+		for (int i = 1; i < lsCmdStr.size() - 1; i++) {
+			String fileName = lsCmdStr.get(i);
+			if (fileName.startsWith("-")) {
+				if (isFile) {
+					throw new ExceptionCmd("cmd error: " + cmd);
+				}
+				continue;
+			}
+			isFile = true;
+			lsFileNeedMvOrCp.add(fileName);
+		}
+		
+		//创建输出文件夹
+		String outFile = lsCmdStr.get(lsCmdStr.size() - 1);
+		
+		/** 仅需考虑hdfs，如果是cos则不需要考虑这个问题 */
+		outFile = FileOperate.convertToHdfs(outFile);
+		if (StringOperate.isRealNull(outFile)) {
+			throw new ExceptionCmd("cannot move or copy file to null: " + cmd);
+		}
+		
+		//是否拷贝到输入文件同一级的文件夹下
+		//true cp /home/novelbio/  /mytest/aaa/
+		//aaa 存在则为true，结果为/mytest/aaa/novelbio
+		//aaa 不存在则为false，结果为 /mytest/aaa/* 其中*为novelbio文件夹中的内容
+		//TODO 以上规则有待检查是否与linux命令一致
+		boolean isOutFolder = FileOperate.isFileDirectory(outFile);
+		if (isOutFolder) outFile = FileOperate.addSep(outFile);
+		
+		if (lsCmdStr.get(0).equals("mv")) {
+			for (String file : lsFileNeedMvOrCp) {
+				file = FileOperate.convertToHdfs(file);
+				if (!FileOperate.isFileExistAndBigThan0(file)) {
+					continue;
+				}
+				if (isOutFolder) {
+					FileOperate.moveFile(isCover, file, outFile + FileOperate.getFileName(file));
+				} else {
+					FileOperate.moveFile(isCover, file, outFile);
 				}
 			}
-		}, 1000, timeTxtWiteTips);		
+		}
+		
+		if (lsCmdStr.get(0).equals("cp")) {
+			for (String file : lsFileNeedMvOrCp) {
+				file = FileOperate.convertToHdfs(file);
+				if (!FileOperate.isFileExistAndBigThan0(file)) {
+					continue;
+				}
+				if (isOutFolder) {
+					FileOperate.copyFileFolder(file, outFile + FileOperate.getFileName(file), isCover);
+				} else {
+					FileOperate.copyFileFolder(file, outFile, isCover);
+				}
+			}
+		}
+
+		return true;
 	}
 	
+	/**
+	 * 如果是hadoop环境且如果命令是mv或cp，则调用FileOperate进行，因为直接操作hdfs很可能会导致io问题
+	 * @param lsCmdStr
+	 * @return
+	 */
+	@VisibleForTesting
+	protected static boolean runMkdir(List<String> lsCmdStr) {
+//		if (!ServiceEnvUtil.isHadoopEnvRun()) return false;
+		if (!lsCmdStr.get(0).equals("mkdir"))  return false;
+		
+		String cmd = ArrayOperate.cmbString(lsCmdStr, " ");
+		
+		//获取多个需要移动的文件。
+		//譬如 mv a.txt b.txt c.txt /home/novelbio/d/
+		//则获取 a.txt b.txt c.txt
+		List<String> lsFolderNeedCreate = new ArrayList<>();
+		boolean isFile = false;
+		for (int i = 1; i <= lsCmdStr.size() - 1; i++) {
+			String folderName = lsCmdStr.get(i);
+			if (folderName.startsWith("-")) {
+				if (isFile) {
+					throw new ExceptionCmd("cmd error: " + cmd);
+				}
+				continue;
+			}
+			isFile = true;
+			lsFolderNeedCreate.add(folderName);
+		}
+		for (String folder : lsFolderNeedCreate) {
+			folder = FileOperate.convertToHdfs(folder);
+			FileOperate.createFolders(folder);
+		}
+		return true;
+	}
 }
 
