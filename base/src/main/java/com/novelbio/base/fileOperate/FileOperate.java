@@ -86,10 +86,36 @@ public class FileOperate {
 		return getFile(path);
 	}
 	
+	/**
+	 * 返回当前系统的schema，譬如oss，hdfs等
+	 * 注意不带最后的冒号
+	 * @return
+	 */
 	public static String getSchema() {
-		return objProvider.getScheme();
+		if (ServiceEnvUtil.isHadoopEnvRun()) {
+			return hdfsProvider.getScheme();
+		} else {
+			return objProvider.getScheme();
+		}
 	}
-
+	/**
+	 * 是否为绝对路径，也就是以
+	 * "/"  "hdfs:"  "cos:" "oss:"
+	 * 等开头 
+	 * @return
+	 */
+	public static boolean isAbsolutPath(String path) {
+		String head = "/";
+		if (ServiceEnvUtil.isHadoopEnvRun()) {
+			head = hdfsProvider.getScheme() + ":/";
+		} else if (ServiceEnvUtil.isCloudEnv()) {
+			head = objProvider.getScheme() + ":/";
+		}
+		if (StringOperate.isRealNull(path)) {
+			return false;
+		}
+		return path.startsWith(head);
+	}
 //	/**
 //	 * 根据不同的文件类型得到File
 //	 * 
