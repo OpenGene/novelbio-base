@@ -36,7 +36,7 @@ public class TestCmdOperateAli {
 		lsCmd.add("oss://nbcloud/nbcloud22/test.log");
 		CmdOperate cmdOperate = new CmdOperate(lsCmd);
 		
-		cmdOperate.prepare();
+		cmdOperate.prepareAndMoveFileIn();
 		assertEquals("oss://nbcloud/nbcloud22/test.bam", cmdOperate.getSaveStdOutFile());
 		
 		String cmd = cmdOperate.getCmdExeStrReal();

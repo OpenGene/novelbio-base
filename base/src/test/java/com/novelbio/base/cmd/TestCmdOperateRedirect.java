@@ -47,7 +47,7 @@ public class TestCmdOperateRedirect {
 		cmdOperate.addCmdParamOutput("/hdfs:/nbcloud22/test.bam");
 		cmdOperate.addCmdParamOutput("/hdfs:/nbcloud22/test.log");
 		
-		cmdOperate.prepare();
+		cmdOperate.prepareAndMoveFileIn();
 		assertEquals("/home/novelbio/tmp/nbcloud22/test.bam", cmdOperate.getSaveStdOutFile());
 		String cmd = cmdOperate.getCmdExeStrReal();
 		
@@ -142,7 +142,7 @@ public class TestCmdOperateRedirect {
 		cmdOperate.setRedirectInToTmp(true);
 		cmdOperate.addCmdParamInput(resultPath1 + "test1.txt");
 		cmdOperate.addCmdParamInput(resultPath2 + "test2.txt");
-		cmdOperate.prepare();
+		cmdOperate.prepareAndMoveFileIn();
 		String cmd = cmdOperate.getCmdExeStrReal();
 		assertEquals("cat " + tmpRealPath1 +  "test1.txt " + tmpRealPath2 +  "test2.txt", cmd);
 	}

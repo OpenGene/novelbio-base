@@ -721,6 +721,22 @@ public class FileOperate {
 		}
 		return FileHadoop.convertToHdfsPath(file);
 	}
+	
+	public static String convertHdfsOssToLocal(String path) {
+		if (FileHadoop.isHdfs(path)) {
+			path = FileHadoop.convertToLocalPath(path);
+		}
+		if (path.startsWith("oss://")) {
+			try {
+				URI uri = new URI(path);
+				path = "/media/nbfs" + uri.getPath();
+			} catch (URISyntaxException e) {
+				throw new RuntimeException("cannot resolve url " + path);
+			}
+		}
+		return path;
+	}
+	
 //	/**
 //	 * 获取文件夹下包含指定文件名与后缀的所有文件名,等待增加功能子文件夹下的文件。也就是循环获得文件<br>
 //	 * 如果文件不存在则返回空的list<br>

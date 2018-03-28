@@ -176,8 +176,7 @@ public class StringOperate {
 			e.printStackTrace();
 			logger.error("解码出错：" + inputUrl);
 		}
-		result = result.replace("&amp;", "&");
-		result = result.replace("&nbsp;", " ");
+		result = StringEscapeUtils.unescapeHtml(result);
 		return result;
 	}
 	

@@ -93,13 +93,6 @@ public class CmdOperate extends RunProcess {
 	String cmd1SH;
 
 	/**
-	 * 是本地使用的cmd还是阿里云的
-	 * @param isLocal
-	 */
-	public CmdOperate() {
-		process = new ProcessCmd();
-	}
-	/**
 	 * 初始化后直接开新线程即可 先写入Shell脚本，再运行。
 	 * 一般用不到，只有当直接运行cmd会失败时才考虑使用该方法。
 	 * 目前遇到的情况是直接跑hadoop streaming程序会出错，采用该方法跑
@@ -113,9 +106,25 @@ public class CmdOperate extends RunProcess {
 	public CmdOperate(String cmd, String cmdWriteInFileName) {
 		process = new ProcessCmd();
 		FileOperate.validateFileName(cmdWriteInFileName);
-		setCmdFile(cmd, cmdWriteInFileName);
+		setCmdFile(cmd, null, cmdWriteInFileName);
 	}
 
+	/**
+	 * 初始化后直接开新线程即可 先写入Shell脚本，再运行。
+	 * 一般用不到，只有当直接运行cmd会失败时才考虑使用该方法。
+	 * 目前遇到的情况是直接跑hadoop streaming程序会出错，采用该方法跑
+	 * 就不会出错了
+	 * 
+	 * @param cmd 输入命令
+	 * @param param 可以添加类似 -euxo pipefail 这种参数。注意不能包含 \t \n 这种特殊字符
+	 * @param cmdWriteInFileName
+	 *            将命令写入的文本
+	 */
+	public CmdOperate(String cmd, String param, String cmdWriteInFileName) {
+		process = new ProcessCmd();
+		FileOperate.validateFileName(cmdWriteInFileName);
+		setCmdFile(cmd, param, cmdWriteInFileName);
+	}
 	public CmdOperate(List<String> lsCmd) {
 		process = new ProcessCmd();
 		cmdOrderGenerator.setLsCmd(lsCmd);
@@ -132,11 +141,11 @@ public class CmdOperate extends RunProcess {
 	
 	public CmdOperate(String ip, String user, List<String> lsCmd, String idrsa) {
 		process = new ProcessRemote(ip, user);
-		((ProcessRemote)process).setKeyFile(idrsa);
+		((ProcessRemote)process).setKeyFile(FileOperate.getPath(idrsa));
 		cmdOrderGenerator.setLsCmd(lsCmd);
 	}
 	
-	public CmdOperate(String ip, String user, String idrsa) {
+	public CmdOperate(String ip, String user, Path idrsa) {
 		process = new ProcessRemote(ip, user);
 		((ProcessRemote)process).setKeyFile(idrsa);
 	}
@@ -200,7 +209,7 @@ public class CmdOperate extends RunProcess {
 	 * @param lsCmd
 	 * @param keyFile 私钥文件
 	 */
-	public CmdOperate(String ip, String usr, String pwd, List<String> lsCmd, String keyFile) {
+	public CmdOperate(String ip, String usr, String pwd, List<String> lsCmd, Path keyFile) {
 		process = new ProcessRemote(ip, usr, pwd);
 		((ProcessRemote)process).setKeyFile(keyFile);
 		cmdOrderGenerator.setLsCmd(lsCmd);
@@ -237,11 +246,13 @@ public class CmdOperate extends RunProcess {
 	}
 	
 	/**
-	 * 将cmd写入哪个文本，然后执行，如果初始化输入了cmdWriteInFileName, 就不需要这个了
 	 * 
+	 * 将cmd写入哪个文本，然后执行，如果初始化输入了cmdWriteInFileName, 就不需要这个了
 	 * @param cmd
+	 * @param param 可以添加类似 -euxo pipefail 这种参数。注意不能包含 \t \n 这种特殊字符
+	 * @param cmdWriteInFileName
 	 */
-	private void setCmdFile(String cmd, String cmdWriteInFileName) {
+	private void setCmdFile(String cmd, String param, String cmdWriteInFileName) {
 		while (true) {
 			cmd1SH = cmdMoveFile.getTmpPath() + cmdWriteInFileName.replace("\\", "/") + DateUtil.getDateAndRandom() + ".sh";
 			if (!FileOperate.isFileExist(cmd1SH)) {
@@ -253,6 +264,12 @@ public class CmdOperate extends RunProcess {
 		txtCmd1.close();
 		cmdMoveFile.clearLsCmd();
 		cmdOrderGenerator.addCmdParam("sh");
+		if (!StringOperate.isRealNull(param)) {
+			String[] ss = param.trim().split(" ");
+			for (String paramUnit : ss) {
+				cmdOrderGenerator.addCmdParam(paramUnit);
+			}
+		}
 		cmdOrderGenerator.addCmdParam(cmd1SH);
 	}
 	
@@ -317,13 +334,6 @@ public class CmdOperate extends RunProcess {
 	 */
 	public void setIsStdoutTxt(boolean isStdoutTxt) {
 		cmdOrderGenerator.setJustDisplayStd(isStdoutTxt);
-	}
-	
-	/** 如果为null就不加入 */
-	public void addCmdParam(String param) {
-		if (!StringOperate.isRealNull(param)) {
-			cmdOrderGenerator.addCmdParam(param);
-		}
 	}
 	
 	/**
@@ -774,7 +784,7 @@ public class CmdOperate extends RunProcess {
 	 * bam文件还没处理完。这时候就需要在外部等bam文件线程结束后再移动文件。
 	 * 因此这里就选择不把输出文件移出去。
 	 * 
-	 * @param isCopyFileInAndRecordFiles false 则需要手动调用 {@link #prepare()},  {@link #copyFileIn()} 和 {@link #recordFilesWhileRedirectOutToTmp()}
+	 * @param isCopyFileInAndRecordFiles false 则需要手动调用 {@link #prepareAndMoveFileIn()},  {@link #copyFileIn()} 和 {@link #recordFilesWhileRedirectOutToTmp()}
 	 * 或者调用方法 {@link #setCmdMoveFile(CmdMoveFile)} 从外部传入 {@link CmdMoveFile} 对象
 	 * @param isMoveFileOut false 则需要手动调用 {@link #moveFileOut()}
 	 */
@@ -847,12 +857,12 @@ public class CmdOperate extends RunProcess {
 	
 	/**
 	 * 把{@link CmdOperate#runWithExp()} 拆成两个方法<br>
-	 * 分别是 {@link CmdOperate#prepare()} 和 {@link CmdOperate#runWithExpNoPrepare()}<br>
+	 * 分别是 {@link CmdOperate#prepareAndMoveFileIn()} 和 {@link CmdOperate#runWithExpNoPrepare()}<br>
 	 * <br>
 	 * 本步骤是解析cmd命令，主要目的是获取 > 之后所跟的路径<br>
 	 */
-	public void prepare() {
-		cmdMoveFile.prepare();
+	public void prepareAndMoveFileIn() {
+		cmdMoveFile.prepareAndMoveFileIn();
 	}
 	/**
 	 * 生成cmd命令，仅用于ScriptBuildFacade中的多线程部分
@@ -863,7 +873,7 @@ public class CmdOperate extends RunProcess {
 	/**
 	 * 复制文件到临时文件夹<br>
 	 * 当{@link #runWithExp(boolean, boolean)} 第一个参数为false时调用
-	 * 包含{@link #prepare()}的功能
+	 * 包含{@link #prepareAndMoveFileIn()}的功能
 	 */
 	public void copyFileIn() {
 		cmdMoveFile.copyFileIn();
@@ -878,7 +888,7 @@ public class CmdOperate extends RunProcess {
 	private void running(boolean isCopyFileInAndRecordFiles, boolean isMoveFileOut) {
 		finishFlag = new FinishFlag();
 		if (isCopyFileInAndRecordFiles) {
-			cmdMoveFile.prepare();
+			cmdMoveFile.prepareAndMoveFileIn();
 		}
 		
 		String realCmd = getCmdExeStr();
@@ -932,7 +942,7 @@ public class CmdOperate extends RunProcess {
 	}
 	
 	/** 记录临时文件夹下有多少文件，用于后面删除时跳过 
-	 * 当{@link #runWithExp(boolean, boolean)} 第二个参数为false时调用<br>
+	 * 当{@link #runWithExp(boolean, boolean)} 第二个参数为false时主动调用<br>
 	 * 在 {@link #runWithExp(boolean, boolean)} 之后调用
 	 */
 	public void moveFileOut() {

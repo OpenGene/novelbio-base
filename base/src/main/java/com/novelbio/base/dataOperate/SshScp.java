@@ -46,7 +46,7 @@ public class SshScp {
 	public void setKey(String keyInfo) {
 		this.key = keyInfo.toCharArray();
 	}
-	public void setKeyFile(String keyFile) {
+	public void setKeyFile(Path keyFile) {
 		StringBuilder stringBuilder = new StringBuilder();
 		TxtReadandWrite txtRead = new TxtReadandWrite(keyFile);
 		for (String content : txtRead.readlines()) {

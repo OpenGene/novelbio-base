@@ -33,7 +33,7 @@ public class TestCmdOperate {
 		lsCmd.add("/hdfs:/nbcloud22/test.log");
 		CmdOperate cmdOperate = new CmdOperate(lsCmd);
 		
-		cmdOperate.prepare();
+		cmdOperate.prepareAndMoveFileIn();
 		assertEquals("/hdfs:/nbcloud22/test.bam", cmdOperate.getSaveStdOutFile());
 		
 		String cmd = cmdOperate.getCmdExeStrReal();

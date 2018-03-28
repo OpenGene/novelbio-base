@@ -149,7 +149,7 @@ public class CmdMoveFile {
 			addCmdParamOutput(path);
 		}
 	}
-	public void prepare() {
+	public void prepareAndMoveFileIn() {
 		setInOutputPath();
 		generateTmPath();
 		createFoldTmp();

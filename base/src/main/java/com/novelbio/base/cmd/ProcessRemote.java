@@ -3,6 +3,7 @@ package com.novelbio.base.cmd;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.util.List;
 
 import ch.ethz.ssh2.ChannelCondition;
@@ -44,7 +45,7 @@ public class ProcessRemote implements IntProcess {
 	public void setKey(String keyInfo) {
 		this.key = keyInfo.toCharArray();
 	}
-	public void setKeyFile(String keyFile) {
+	public void setKeyFile(Path keyFile) {
 		StringBuilder stringBuilder = new StringBuilder();
 		TxtReadandWrite txtRead = new TxtReadandWrite(keyFile);
 		for (String content : txtRead.readlines()) {
