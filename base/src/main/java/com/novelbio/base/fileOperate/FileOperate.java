@@ -115,7 +115,7 @@ public class FileOperate {
 		if (StringOperate.isRealNull(path)) {
 			return false;
 		}
-		return path.startsWith(head);
+		return path.startsWith(head) || path.startsWith("/");
 	}
 //	/**
 //	 * 根据不同的文件类型得到File
