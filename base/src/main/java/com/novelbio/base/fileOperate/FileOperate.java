@@ -40,6 +40,7 @@ import com.hadoop.compression.lzo.LzopCodec;
 import com.novelbio.base.PathDetail;
 import com.novelbio.base.SerializeKryo;
 import com.novelbio.base.StringOperate;
+import com.novelbio.base.cmd.CmdMoveFileAli;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
@@ -727,12 +728,13 @@ public class FileOperate {
 			path = FileHadoop.convertToLocalPath(path);
 		}
 		if (path.startsWith("oss://")) {
-			try {
-				URI uri = new URI(path);
-				path = "/media/nbfs" + uri.getPath();
-			} catch (URISyntaxException e) {
-				throw new RuntimeException("cannot resolve url " + path);
-			}
+			path = CmdMoveFileAli.convertAli2Loc(path, true);
+//			try {
+//				URI uri = new URI(path);
+//				path = "/media/nbfs" + uri.getPath();
+//			} catch (URISyntaxException e) {
+//				throw new RuntimeException("cannot resolve url " + path);
+//			}
 		}
 		return path;
 	}
