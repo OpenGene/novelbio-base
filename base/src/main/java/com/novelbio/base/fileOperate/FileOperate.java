@@ -1325,15 +1325,6 @@ public class FileOperate {
 	 * @return
 	 */
 	public static ArrayList<String> getLsFoldFileName(String filePath) {
-		/*
-		 * 
-		List<Path> lsPaths = getLsFoldPath(getPath(filePath), "*", "*");
-		ArrayList<String> lsResult = new ArrayList<>();
-		lsPaths.forEach((path) -> {
-			lsResult.add(getAbsolutePath(path));
-		});
-		return lsResult;
-		 */
 		return getLsFoldFileName(filePath, "*", "*");
 	}
 
@@ -1376,15 +1367,6 @@ public class FileOperate {
 	 * @return
 	 */
 	public static ArrayList<String> getLsFoldFileName(Path filePath) {
-		/*
-		 * 
-		List<Path> lsPaths = getLsFoldPath(filePath, "*", "*");
-		ArrayList<String> lsResult = new ArrayList<>();
-		lsPaths.forEach((path) -> {
-			lsResult.add(getAbsolutePath(path));
-		});
-		return lsResult;
-		 */
 		return getLsFoldFileName(filePath, "*", "*");
 	}
 
@@ -1627,13 +1609,13 @@ public class FileOperate {
 		}
 		try {
 			createFolders(newPathSep);
-			Files.list(oldFilePath).forEach((pathOld) -> {
+			for (Path pathOld : getLsFoldPath(oldFilePath)) {
 				if (isFileDirectory(pathOld)) {
 					copyFolder(pathOld, newPathSep + pathOld.getFileName(), cover);
 				} else {
 					copyFile(pathOld, newPathSep + pathOld.getFileName(), cover);
 				}
-			});
+			}
 		} catch (Exception e) {
 			throw new ExceptionNbcFile("copy fold error", e);
 		}
