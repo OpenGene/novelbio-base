@@ -1612,8 +1612,11 @@ public class FileOperate {
 			for (Path pathOld : getLsFoldPath(oldFilePath)) {
 				if (isFileDirectory(pathOld)) {
 					copyFolder(pathOld, newPathSep + pathOld.getFileName(), cover);
+				} else if (isFileExistAndNotDir(pathOld)) {
+					copyFile(pathOld, getPath(newPathSep + pathOld.getFileName()), cover);
 				} else {
-					copyFile(pathOld, newPathSep + pathOld.getFileName(), cover);
+					String isSymbolLink = isSymbolicLink(pathOld) ? " is symbol link" : " is not symbol link";
+					logger.error("file not exist: " + pathOld + " and " + isSymbolLink);
 				}
 			}
 		} catch (Exception e) {
@@ -1649,6 +1652,9 @@ public class FileOperate {
 	 * @return
 	 */
 	public static void copyFile(Path oldfile, String newfile, boolean cover) {
+		if (!isFileExistAndNotDir(oldfile)) {
+			throw new ExceptionNbcFile("no file exist: " + oldfile);
+		}
 		copyFile(oldfile, getPath(newfile), cover);
 	}
 
@@ -1663,10 +1669,7 @@ public class FileOperate {
 	 *            是否覆盖
 	 * @return
 	 */
-	public static void copyFile(Path oldfile, Path pathNew, boolean cover) {
-		if (!isFileExistAndNotDir(oldfile)) {
-			throw new ExceptionNbcFile("no file exist: " + oldfile);
-		}
+	protected static void copyFile(Path oldfile, Path pathNew, boolean cover) {
 		if (oldfile != null && isFilePathSame(getAbsolutePath(oldfile), getAbsolutePath(pathNew)))
 			return;
 		if (!cover && isFileExist(pathNew))
@@ -1680,7 +1683,7 @@ public class FileOperate {
 			createFolders(getPathName(pathNew));
 			logger.debug("start copy from {} to {}", oldfile, pathNew);
 			//XXX 这里注意.StandardCopyOption的其他两个参数底层不支持.所以这里必须是REPLACE_EXISTING
-			Files.copy(oldfile, pathNewTmp, StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(oldfile, pathNewTmp, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
 			Files.deleteIfExists(pathNew);
 			Files.move(pathNewTmp, pathNew, StandardCopyOption.REPLACE_EXISTING);
 		} catch (Exception e) {

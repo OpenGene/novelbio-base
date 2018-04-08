@@ -84,17 +84,17 @@ public class TestFileOperate {
 		FileOperate.createFolders(folder1);
 		FileOperate.createFolders(folder2);
 		
-		FileOperate.copyFile(file, FileOperate.getAbsolutePath(file1), true);
-		FileOperate.copyFile(file, file2, true);
-		FileOperate.copyFile(file, file3, true);
+		FileOperate.copyFileFolder(file, FileOperate.getAbsolutePath(file1), true);
+		FileOperate.copyFileFolder(file, FileOperate.getAbsolutePath(file2), true);
+		FileOperate.copyFileFolder(file, FileOperate.getAbsolutePath(file3), true);
 		
-		FileOperate.copyFile(file, file11, true);
-		FileOperate.copyFile(file, file12, true);
-		FileOperate.copyFile(file, file13, true);
+		FileOperate.copyFileFolder(file, FileOperate.getAbsolutePath(file11), true);
+		FileOperate.copyFileFolder(file, FileOperate.getAbsolutePath(file12), true);
+		FileOperate.copyFileFolder(file, FileOperate.getAbsolutePath(file13), true);
 
-		FileOperate.copyFile(file, file21, true);
-		FileOperate.copyFile(file, file22, true);
-		FileOperate.copyFile(file, file23, true);
+		FileOperate.copyFileFolder(file, FileOperate.getAbsolutePath(file21), true);
+		FileOperate.copyFileFolder(file, FileOperate.getAbsolutePath(file22), true);
+		FileOperate.copyFileFolder(file, FileOperate.getAbsolutePath(file23), true);
 	}
 	
 	@Test
