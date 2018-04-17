@@ -2,6 +2,7 @@ package com.novelbio.base.cmd;
 
 public class ExceptionCmd extends RuntimeException{
 	private static final long serialVersionUID = 6016303614042631477L;
+	int errorCode = 1;
 	
 	public ExceptionCmd(Throwable t) {
 		super(t);
@@ -27,5 +28,14 @@ public class ExceptionCmd extends RuntimeException{
 	}
 	public ExceptionCmd(String info, Exception e) {
 		super(info, e);
+	}
+	public void setErrorCode(Integer errorCode) {
+		if (errorCode == null) {
+			return;
+		}
+		this.errorCode = errorCode;
+	}
+	public int getErrorCode() {
+		return errorCode;
 	}
 }

@@ -254,7 +254,8 @@ public class CmdOperate extends RunProcess {
 	 */
 	private void setCmdFile(String cmd, String param, String cmdWriteInFileName) {
 		while (true) {
-			cmd1SH = cmdMoveFile.getTmpPath() + cmdWriteInFileName.replace("\\", "/") + DateUtil.getDateAndRandom() + ".sh";
+			cmd1SH = cmdMoveFile.getTmpPath() + cmdWriteInFileName.replace("\\", "/");
+			cmd1SH = FileOperate.changeFileSuffix(cmd1SH, "."+DateUtil.getDateAndRandom(), "sh");
 			if (!FileOperate.isFileExist(cmd1SH)) {
 				break;
             }
@@ -507,7 +508,10 @@ public class CmdOperate extends RunProcess {
 		}
 		return errInfo.toString();
 	}
-	
+	/** null表示没有运行 */
+	public Integer getErrorCode() {
+		return finishFlag.getFlag();
+	}
 	/** 程序执行完后可以看标准输出<br>
 	 * 仅返回最多{@link #lineNum}行的信息<br>
 	 * 内部实现为linkedlist<br>
@@ -836,19 +840,24 @@ public class CmdOperate extends RunProcess {
 		if (!StringOperate.isRealNull(info) && !info.endsWith("\n")) {
 			info = info + "\n";
 		}
+		ExceptionCmd e = null;
 		if (runThreadStat == RunThreadStat.finishAbnormal) {
 			if (!StringOperate.isRealNull(info)) {
-				throw new ExceptionCmd(info, this, exception);
+				e = new ExceptionCmd(info, this, exception);
 			} else {
-				throw new ExceptionCmd(this, exception);
+				e = new ExceptionCmd(this, exception);
 			}
 		}
 		if (!isFinishedNormal()) {
 			if (!StringOperate.isRealNull(info)) {
-				throw new ExceptionCmd(info, this);
+				e = new ExceptionCmd(info, this);
 			} else {
-				throw new ExceptionCmd(this);
+				e = new ExceptionCmd(this);
 			}
+			e.setErrorCode(finishFlag.getFlag());
+		}
+		if (e != null) {
+			throw e;
 		}
 		if (FileOperate.isFileExistAndNotDir(cmd1SH)) {
 			FileOperate.deleteFileFolder(cmd1SH);
@@ -1061,6 +1070,9 @@ public class CmdOperate extends RunProcess {
 		}
 		public void setFlag(Integer flag) {
 			this.flag = flag;
+		}
+		public Integer getFlag() {
+			return flag;
 		}
 	}
 	

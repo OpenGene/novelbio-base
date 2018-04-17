@@ -2120,7 +2120,7 @@ public class FileOperate {
 
 		try {
 			createFolders(pathNew);
-			Files.list(olddir).forEach((pathOld) -> {
+			for (Path pathOld : getLsFoldPath(olddir)) {
 				if (isFileDirectory(pathOld)) {
 					String newPath = removeSplashHead(newPathSep + pathOld.getFileName(), false);
 					newPath = removeSplashTail(newPath, false);
@@ -2132,7 +2132,7 @@ public class FileOperate {
 					String newPathStr = newPathSep + prefix + pathOld.getFileName();
 					moveSingleFile(pathOld, newPathStr, cover);
 				}
-			});
+			}
 		} catch (Exception e) {
 			throw new ExceptionNbcFile("move fold error", e);
 		}
@@ -2483,16 +2483,12 @@ public class FileOperate {
 			throw new ExceptionFileError("path is not directory " + path);
 		}
 
-		try {
-			Files.list(path).forEach((insidePath) -> {
-				if (isFileDirectory(insidePath)) {
-					deleteFolder(insidePath);
-				} else {
-					delFile(insidePath);
-				}
-			});
-		} catch (IOException e) {
-			throw new ExceptionFileError("cannot delete path " + path, e);
+		for (Path insidePath : getLsFoldPath(path)) {
+			if (isFileDirectory(insidePath)) {
+				deleteFolder(insidePath);
+			} else {
+				delFile(insidePath);
+			}
 		}
 	}
 
@@ -2506,13 +2502,13 @@ public class FileOperate {
 		}
 		
 		try {
-			Files.list(dirFile).forEach((file) -> {
+			for (Path file : getLsFoldPath(dirFile)) {
 				if (isFileDirectory(file)) {
 					deleteFolder(file);
 				} else {
 					delFile(file);
 				}
-			});
+			}
 			Files.deleteIfExists(dirFile);
 		} catch (Exception e) {
 
