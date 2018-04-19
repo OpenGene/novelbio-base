@@ -283,12 +283,25 @@ public class CmdMoveFile {
 	/**
 	 * 将tmpPath文件夹中的内容全部移动到resultPath中 */
 	public void moveFileOut() {
+		moveFileOut(true);
+	}
+	/**
+	 * 将tmpPath文件夹中的内容全部移动到resultPath中 */
+	public void moveFileOutError() {
+		moveFileOut(false);
+	}
+	/**
+	 * 将tmpPath文件夹中的内容全部移动到resultPath中
+	 * @param isNormal 是否正常结束
+	 */
+	private void moveFileOut(boolean isNormal) {
 		if (!mapPath2TmpPathOut.isEmpty()) {
 			logger.info("start move files");
 		}
 		
 		for (String outPath : mapPath2TmpPathOut.keySet()) {
 			String outTmpPath = mapPath2TmpPathOut.get(outPath);
+			outPath = isNormal? outPath : outPath+"error/";
 			//遍历某个输出临时文件夹下的全体文件，看是否是cmd运行之前就保存的文件
 			//如果是新生成的文件，就可以拷贝出去
 			List<String> lsFilesFinish = FileOperate.getLsFoldFileName(outTmpPath);
@@ -309,7 +322,6 @@ public class CmdMoveFile {
 			}
 		}
 	}
-	
 	/**
 	 * 给定某个临时文件或文件夹，看里面哪些文件需要移动
 	 * @param pathInTmp
