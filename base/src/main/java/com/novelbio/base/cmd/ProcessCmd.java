@@ -33,8 +33,11 @@ public class ProcessCmd implements IntProcess {
 	public void setRunPath(File runPath) {
 		this.runPath = runPath;
 	}
-	
+	/** 支持输入空值 */
 	public void setMapEnv(Map<String, String> mapEnv) {
+		if (ArrayOperate.isEmpty(mapEnv)) {
+			return;
+		}
 		this.mapEnv = mapEnv;
 	}
 	public void addEnv(String key, String value) {

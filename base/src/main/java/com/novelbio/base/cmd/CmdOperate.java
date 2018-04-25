@@ -215,6 +215,7 @@ public class CmdOperate extends RunProcess {
 		cmdOrderGenerator.setLsCmd(lsCmd);
 	}
 	
+	/** 支持输入空值 */
 	public void setMapEnv(Map<String, String> mapEnv) {
 		((ProcessCmd)process).setMapEnv(mapEnv);
 	}

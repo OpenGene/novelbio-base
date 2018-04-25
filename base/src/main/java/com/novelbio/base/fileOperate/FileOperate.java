@@ -723,51 +723,21 @@ public class FileOperate {
 		return FileHadoop.convertToHdfsPath(file);
 	}
 	
-	public static String convertHdfsOssToLocal(String path) {
+	/**
+	 * 把hdfs、oss路径转换成本地路径
+	 * @param path
+	 * @param isRead 仅公有云用到，只读挂载还是只写挂载
+	 * @return
+	 */
+	public static String convertHdfsOssToLocal(String path, boolean isRead) {
 		if (FileHadoop.isHdfs(path)) {
 			path = FileHadoop.convertToLocalPath(path);
 		}
 		if (path.startsWith("oss://")) {
-			path = CmdMoveFileAli.convertAli2Loc(path, true);
-//			try {
-//				URI uri = new URI(path);
-//				path = "/media/nbfs" + uri.getPath();
-//			} catch (URISyntaxException e) {
-//				throw new RuntimeException("cannot resolve url " + path);
-//			}
+			path = CmdMoveFileAli.convertAli2Loc(path, isRead);
 		}
 		return path;
 	}
-	
-//	/**
-//	 * 获取文件夹下包含指定文件名与后缀的所有文件名,等待增加功能子文件夹下的文件。也就是循环获得文件<br>
-//	 * 如果文件不存在则返回空的list<br>
-//	 * 如果不是文件夹，则返回该文件名<br>
-//	 * 
-//	 * @param filePath
-//	 *            目录路径
-//	 * @param filename
-//	 *            指定包含的文件名，是正则表达式 ，如 "*",正则表达式无视大小<br>
-//	 *            null 表示不指定
-//	 * @param suffix
-//	 *            指定包含的后缀名，是正则表达式<br>
-//	 *            文件 wfese.fse.fe认作 "wfese.fse"和"fe"<br>
-//	 *            文件 wfese.fse.认作 "wfese.fse."和""<br>
-//	 *            文件 wfese 认作 "wfese"和""<br>
-//	 *            null 表示不指定
-//	 * @return 返回包含目标文件全名的ArrayList
-//	 * @throws IOException
-//	 */
-//	@Deprecated
-//	public static List<File> getFoldFileLs(String filePath, String filename, String suffix) {
-//		filePath = removeSep(filePath);
-//		File file = getFile(filePath);
-//		if (filePath.equals("")) {
-//			filePath = file.getAbsolutePath();
-//			file = getFile(filePath);
-//		}
-//		return getFoldFileLs(file, filename, suffix);
-//	}
 
 	/**
 	 * 获取文件夹下包含指定文件名与后缀的所有文件名，仅找第一层，不递归<br>
@@ -791,78 +761,6 @@ public class FileOperate {
 	public static List<Path> getLsFoldPath(String filePath, String filename, String suffix) {
 		return getLsFoldPath(getPath(filePath), filename, suffix);
 	}
-
-//	/**
-//	 * 获取文件夹下全部文件名
-//	 * 
-//	 * @return 返回包含目标文件全名的List
-//	 * @throws IOException
-//	 */
-//	@Deprecated
-//	public static List<File> getFoldFileLs(File file) {
-//		return getFoldFileLs(file, "*", "*");
-//	}
-
-//	/**
-//	 * 获取文件夹下全部文件名
-//	 * 已过期,建议使用getLsFoldPath
-//	 * 
-//	 * @return 返回包含目标文件全名的List
-//	 * @throws IOException
-//	 */
-//	@Deprecated
-//	public static List<File> getFoldFileLs(String file) {
-//		return getFoldFileLs(file, "*", "*");
-//	}
-
-//	/**
-//	 * 获取文件夹下包含指定文件名与后缀的所有文件名,等待增加功能子文件夹下的文件。也就是循环获得文件<br>
-//	 * 如果文件不存在则返回空的list<br>
-//	 * 如果不是文件夹，则返回该文件名<br>
-//	 * 
-//	 * @param filePath
-//	 *            目录路径
-//	 * @param filename
-//	 *            指定包含的文件名，是正则表达式 ，如 "*",正则表达式无视大小<br>
-//	 *            null 表示不指定
-//	 * @param suffix
-//	 *            指定包含的后缀名，是正则表达式<br>
-//	 *            文件 wfese.fse.fe认作 "wfese.fse"和"fe"<br>
-//	 *            文件 wfese.fse.认作 "wfese.fse."和""<br>
-//	 *            文件 wfese 认作 "wfese"和""<br>
-//	 *            null 表示不指定
-//	 * @return 返回包含目标文件全名的ArrayList
-//	 * @throws IOException
-//	 */
-//	@Deprecated
-//	public static List<File> getFoldFileLs(File file, String filename, String suffix) {
-//		if (filename == null || filename.equals("*")) {
-//			filename = ".*";
-//		}
-//		if (suffix == null || suffix.equals("*")) {
-//			suffix = ".*";
-//		}
-//		FileFilterNBC fileFilterNBC = new FileFilterNBC(filename, suffix);
-//		List<File> lsFilenames = new ArrayList<>();
-//
-//		if (!file.exists()) {// 没有文件，则返回空
-//			return new ArrayList<>();
-//		}
-//		// 如果只是文件则返回文件名
-//		if (!file.isDirectory()) { // 获取文件名与后缀名
-//			if (fileFilterNBC.accept(file)) {
-//				lsFilenames.add(file);
-//				return lsFilenames;
-//			}
-//		}
-//
-//		File[] result = file.listFiles(fileFilterNBC);
-//
-//		for (File file2 : result) {
-//			lsFilenames.add(file2);
-//		}
-//		return lsFilenames;
-//	}
 
 	public static class FileFilterNBC implements FileFilter {
 		PatternOperate patName;
