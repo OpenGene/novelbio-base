@@ -59,4 +59,7 @@ public class SepSign {
 	
 	/** task导出时的结果文件夹顺序分隔符 */
 	public static final String SEP_TASK_INDEX = ".";
+	
+	/** 样本组名如果是多组名时的分割符 */
+	public static final String GROUPNAME_SEP = ",";
 }
