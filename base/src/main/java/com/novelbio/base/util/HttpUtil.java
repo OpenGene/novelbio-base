@@ -21,6 +21,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -57,8 +58,8 @@ public class HttpUtil {
 	private static SSLConnectionSocketFactory sslsf = null;
 	static {
 		sslsf = SSLConnectionSocketFactory.getSystemSocketFactory();
-		Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory> create().register("http", PlainConnectionSocketFactory.INSTANCE).register("https", sslsf)
-				.build();
+		Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
+				.register("http", PlainConnectionSocketFactory.INSTANCE).register("https", sslsf).build();
 		// 设置连接池
 		connMgr = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
 		// 设置连接池大小
@@ -206,12 +207,13 @@ public class HttpUtil {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static void main(String[] args) {
 		Map<String, Object> params = new HashMap<>();
 		params.put("taskId", "taskId");
 		String requestUrl = "http://pay.test.com/api/freezing_Frozen";
-		Map<String, Object> paramsEn = Crypter.encryptHttpParams(requestUrl.substring(requestUrl.lastIndexOf("/") + 1), JSON.toJSONString(params));
+		Map<String, Object> paramsEn = Crypter.encryptHttpParams(requestUrl.substring(requestUrl.lastIndexOf("/") + 1),
+				JSON.toJSONString(params));
 		String resultStr = HttpUtil.doPost(requestUrl, paramsEn, null);
 		System.out.println("res=" + resultStr);
 	}
@@ -240,7 +242,23 @@ class SeeSSLCloseableHttpClient {
 		}
 	};
 
+	/**
+	 * liqi-修改---方法重构增加参数
+	 * 
+	 * @return
+	 */
 	public static CloseableHttpClient getCloseableHttpClient() {
+		return getCloseableHttpClient(null);
+	}
+
+	/**
+	 * liqi--新增--getCloseableHttpClient()方法增加参数CookieStore。<br>
+	 * 增加对cookieStore的支持
+	 * 
+	 * @param cookieStore
+	 * @return
+	 */
+	public static CloseableHttpClient getCloseableHttpClient(CookieStore cookieStore) {
 		SSLContext ctx = null;
 		try {
 			ctx = SSLContext.getInstance("TLS");
@@ -251,13 +269,18 @@ class SeeSSLCloseableHttpClient {
 			e.printStackTrace();
 		}
 		HttpClientBuilder builder = HttpClientBuilder.create();
-		SSLConnectionSocketFactory sslConnectionFactory = new SSLConnectionSocketFactory(ctx, NoopHostnameVerifier.INSTANCE);
+		SSLConnectionSocketFactory sslConnectionFactory = new SSLConnectionSocketFactory(ctx,
+				NoopHostnameVerifier.INSTANCE);
 		builder.setSSLSocketFactory(sslConnectionFactory);
-		Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory> create().register("https", sslConnectionFactory).build();
+		Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
+				.register("https", sslConnectionFactory).build();
 		HttpClientConnectionManager ccm1 = new BasicHttpClientConnectionManager(registry);
 		builder.setConnectionManager(ccm1);
 
+		// 添加cookieStore
+		if (cookieStore != null) {
+			builder.setDefaultCookieStore(cookieStore);
+		}
 		return builder.build();
 	}
-
 }
