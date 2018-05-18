@@ -89,6 +89,8 @@ public class FileOperate {
 	
 	/**
 	 * 返回当前系统的schema，譬如oss，hdfs等
+	 * 注意要么返回hdfs，要么返回oss/cos
+	 * 不会返回
 	 * 注意不带最后的冒号
 	 * @return
 	 */
@@ -733,7 +735,7 @@ public class FileOperate {
 		if (FileHadoop.isHdfs(path)) {
 			path = FileHadoop.convertToLocalPath(path);
 		}
-		if (path.startsWith("oss://")) {
+		if (ServiceEnvUtil.isCloudEnv() && path.startsWith(FileOperate.getSchema() +":")) {
 			path = CmdMoveFileAli.convertAli2Loc(path, isRead);
 		}
 		return path;

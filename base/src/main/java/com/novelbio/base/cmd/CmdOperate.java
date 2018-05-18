@@ -913,9 +913,11 @@ public class CmdOperate extends RunProcess {
 		try {
 			doInBackgroundB();
 		} catch (RuntimeException e) {
+			finishFlag.flag = 1;
 			runtimeException = e;
 			try { if (streamIn != null) streamIn.threadStop(); } catch (Exception e2) { }
 		} catch (Exception e) {
+			finishFlag.flag = 1;
 			runtimeException = new ExceptionCmd(e);
 			try { if (streamIn != null) streamIn.threadStop(); } catch (Exception e2) { }
 		}
