@@ -1,5 +1,7 @@
 package com.novelbio.base.fileOperate;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -8,7 +10,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -380,11 +384,18 @@ public class TestFileOperate {
 		Assert.assertTrue(FileOperate.isFileExist("/home/novelbio/git/snakerflow/snaker-nutz/src/test/resources/log4j.properties"));
 	}
 	
+	@Test
+	public void testConvertHdfsOssToLocal() {
+		String path = "cos://novelbrainbj-1255651097//nbCloud/public/task/scriptmodule/fastp/";
+		String convertPath = FileOperate.convertHdfsOssToLocal(path, true);
+		assertEquals("/home/novelbio/cos/.inmap./nbCloud/public/task/scriptmodule/fastp/", convertPath);
+	}
+	
 	public static void main(String[] args) {
 		
-		String pathStr1 = "hdfs:/nbCloud/public/AllProject/@2017-10/project_59f6e89760b2d5c2cb946291/task_59fad5d644140df6b1c7ec5d/GOAnalysis_result/Promoter_1-2kb>.NCM460.GO-Analysis_BP.xlsx";
-		
-		FileOperate.getPath(pathStr1);
+		Map<Integer, String> mapTest = new HashMap<>();
+		mapTest.put(new Integer("1"), "111");
+		System.out.println(mapTest.containsKey(1));
 		
 	}
 }
