@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpUtils;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -26,9 +24,10 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.novelbio.base.fileOperate.FileOperate;
-import com.novelbio.base.security.Crypter;
 
 /**
  * 使用httpClient登陆，获取authCode等操作时使用<br>
@@ -43,6 +42,8 @@ public class HttpWithCookieUtil {
 	CookieStore cookieStore = null;
 
 	private static final int MAX_TIMEOUT = 120_000;
+	private static final Logger logger = LoggerFactory.getLogger(HttpWithCookieUtil.class);
+
 	private static RequestConfig requestConfig;
 	static {
 		RequestConfig.Builder configBuilder = RequestConfig.custom();
@@ -56,7 +57,7 @@ public class HttpWithCookieUtil {
 	}
 
 	/**
-	 * 实例化的对象一定要关闭
+	 * 每个实例持有一个cookieStore。要使用cookie信息，需要在一个实例上处理
 	 */
 	public HttpWithCookieUtil() {
 		cookieStore = new BasicCookieStore();
@@ -124,7 +125,7 @@ public class HttpWithCookieUtil {
 	}
 
 	/**
-	 * 发送 GET 请求（HTTP），K-V形式 
+	 * 发送 GET 请求（HTTP），K-V形式
 	 * 
 	 * @param url
 	 * @param params
@@ -137,7 +138,7 @@ public class HttpWithCookieUtil {
 		if (params == null) {
 			params = new HashMap<>();
 		}
-		
+
 		for (String key : params.keySet()) {
 			if (i == 0)
 				param.append("?");
@@ -164,7 +165,7 @@ public class HttpWithCookieUtil {
 				result = IOUtils.toString(instream, "UTF-8");
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("doGet error and url=" + apiUrl, e);
 		} finally {
 			FileOperate.close(httpClient);
 			HttpUtil.closeResponse(response);
