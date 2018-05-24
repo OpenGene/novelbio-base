@@ -191,6 +191,22 @@ public class PatternOperate {
     	return null;
     }
 
+    /**
+     * <b>简单处理，相对快速</b>
+     * 获得序列中指定的第一个正则表达式的值，如果有括弧，获取最后一个括弧所对应的值
+     * @param inputstr
+     * @param regex
+     * @param CASE
+     * @return 没有抓到的话，返回null
+     */
+    public String getPatFirst_lastGroup(String inputstr)  {
+    	Matcher matInput=patInput.matcher(inputstr);
+    	 while (matInput.find()) {
+    		 return matInput.group(matInput.groupCount());
+		}
+    	return null;
+    }
+    
     public Matcher getMatcher(String inputstr)  {
     	Matcher matInput=patInput.matcher(inputstr);
     	return matInput;
