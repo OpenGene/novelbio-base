@@ -15,9 +15,9 @@ public class TestFileOperateLinkAndMove {
 	@Before
 	public void Before() {
 		FileOperate.linkFile(tmpDir, tmpDirLink, true);
-		FileOperate.deleteOnExit(tmpDir);
-		FileOperate.deleteOnExit(tmpDir2);
-		FileOperate.deleteOnExit(tmpDirLink);
+		FileOperate.deleteFileFolder(tmpDir);
+		FileOperate.deleteFileFolder(tmpDir2);
+		FileOperate.deleteFileFolder(tmpDirLink);
 
 	}
 	/**

@@ -36,9 +36,9 @@ public class TestFileHadoop {
 		String fileName = "/hdfs:/nbCloud/test/junittest/nbcplatform/testFileHadoop";
 		FileHadoop file = new FileHadoop(fileName);
 		file.mkdirs();
-		Assert.assertTrue(FileOperate.isFileDirectory(file));
+		Assert.assertTrue(FileOperate.isFileDirectory(file.toPath()));
 		FileHadoop fileTxt = new FileHadoop(file.getAbsolutePath() + "/fileTxt.txt");
-		OutputStream is = FileOperate.getOutputStream(fileTxt);
+		OutputStream is = FileOperate.getOutputStream(fileTxt.toPath());
 		TxtReadandWrite txtWrite = new TxtReadandWrite(is);
 		txtWrite.writefileln("some thing");
 		txtWrite.writefileln("intresting");
@@ -49,9 +49,9 @@ public class TestFileHadoop {
 		Assert.assertEquals("intresting", lsInfo.get(1));
 		
 //		fileTxt.deleteOnExit();
-		Assert.assertTrue(FileOperate.isFileExistAndNotDir(fileTxt));
+		Assert.assertTrue(FileOperate.isFileExistAndNotDir(fileTxt.toPath()));
 		
 		System.out.println(fileTxt.delete());
-		Assert.assertFalse(FileOperate.isFileExistAndNotDir(fileTxt));
+		Assert.assertFalse(FileOperate.isFileExistAndNotDir(fileTxt.toPath()));
 	}
 }

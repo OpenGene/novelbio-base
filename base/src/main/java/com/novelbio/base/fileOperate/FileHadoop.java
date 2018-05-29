@@ -164,7 +164,7 @@ public class FileHadoop extends File {
 	}
 
 	public void deleteOnExit() {
-		FileOperate.deleteOnExit(path);
+		FileOperate.deleteFileFolder(path);
 	}
 	
 	@Override

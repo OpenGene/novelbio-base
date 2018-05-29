@@ -684,7 +684,7 @@ public class TxtReadandWrite implements Closeable {
 		try {
 			boolean checked = false;
 			bis = new BufferedInputStream(
-					FileOperate.getInputStream(file));
+					FileOperate.getInputStream(file.toPath()));
 			bis.mark(0);
 			int read = bis.read(first3Bytes, 0, 3);
 			if (read == -1)
@@ -916,7 +916,7 @@ public class TxtReadandWrite implements Closeable {
 			return null;
 		}
 		if (FileOperate.getFileSizeLong(filePathAndName) > 5242880) {
-			throw new RuntimeException("file size more than 5M");
+			throw new RuntimeException("file size more than 5M.path=" + filePathAndName);
 		}
 		StringBuffer stringBuffer = new StringBuffer();
 		TxtReadandWrite.readfileLs(filePathAndName).forEach(str -> stringBuffer.append(str).append("\n"));
