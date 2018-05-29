@@ -511,6 +511,9 @@ public class CmdOperate extends RunProcess {
 	}
 	/** null表示没有运行 */
 	public Integer getErrorCode() {
+		if (finishFlag == null) {
+			return 1;
+		}
 		return finishFlag.getFlag();
 	}
 	/** 程序执行完后可以看标准输出<br>
