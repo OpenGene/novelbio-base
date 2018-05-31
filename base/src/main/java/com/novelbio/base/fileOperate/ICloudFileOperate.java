@@ -16,6 +16,14 @@ import java.util.List;
 public interface ICloudFileOperate {
 
 	public boolean isDbSavedPath(Path path);
+	
+	public boolean isFileExist(Path path);
+	
+	public boolean isFileDirectory(Path path);
+	
+	public long getFileSizeLong(Path path);
+	
+	public long getTimeLastModify(Path path);
 
 	public List<Path> getLsFoldPath(Path file, String filename, String suffix);
 

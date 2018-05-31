@@ -363,6 +363,10 @@ public class FileOperate {
 		if (path == null) {
 			throw new ExceptionFileError("cannot get file " + path);
 		}
+		
+		if (cloudFileOperate != null && cloudFileOperate.isDbSavedPath(path)) {
+			return cloudFileOperate.getTimeLastModify(path);
+		}
 		try {
 			FileTime time = Files.getLastModifiedTime(path);
 			return time.toMillis();
@@ -457,6 +461,10 @@ public class FileOperate {
 	 */
 	// TODO 测试
 	public static long getFileSizeLong(Path path) {
+		if (cloudFileOperate != null && cloudFileOperate.isDbSavedPath(path)) {
+			return cloudFileOperate.getFileSizeLong(path);
+		}
+		
 		if (path == null || !isFileExist(path)) {
 			return -1;
 		}
@@ -1848,6 +1856,9 @@ public class FileOperate {
 
 	/** 判断文件是否为文件夹,null直接返回false */
 	public static boolean isFileDirectory(Path file) {
+		if (cloudFileOperate != null && cloudFileOperate.isDbSavedPath(file)) {
+			return cloudFileOperate.isFileDirectory(file);
+		}
 		return file != null && Files.isDirectory(file);
 	}
 
@@ -1865,6 +1876,9 @@ public class FileOperate {
 	 * @return 文件存在,返回true.否则,返回false
 	 */
 	public static boolean isFileExist(Path path) {
+		if (cloudFileOperate != null && cloudFileOperate.isDbSavedPath(path)) {
+			return cloudFileOperate.isFileExist(path);
+		}
 		return path != null && Files.exists(path);
 	}
 
