@@ -58,6 +58,8 @@ public class FileOperate {
 	static HadoopFileSystemProvider hdfsProvider = new HadoopFileSystemProvider();
 	static FileSystemProvider objProvider = PathDetailObjStorage.generateObjStorageFileSystemProvider();
 	
+	static ICloudFileOperate cloudFileOperate = null;
+	
 	static PatternOperate patternOperate = new PatternOperate("^[/\\\\]{0,2}[^/]+\\:[/\\\\]{0,2}");
 	static boolean isWindowsOS = false;
 	static {
@@ -65,6 +67,7 @@ public class FileOperate {
 		if (osName.toLowerCase().indexOf("windows") > -1) {
 			isWindowsOS = true;
 		}
+		cloudFileOperate = CloudFileOperateFactory.getInstance().getCloudFileOperate();
 	}
 	/** 是否是windows操作系统 */
 	public static boolean isWindows() {
@@ -730,8 +733,35 @@ public class FileOperate {
 	 * @return 返回包含目标文件全名的ArrayList
 	 * @throws IOException
 	 */
+	public static List<Path> getLsFoldPath(Path file, String filename) {
+		return getLsFoldPath(file, filename, "*");
+	}
+
+	/**
+	 * 获取文件夹下包含指定文件名与后缀的所有文件名，<b>仅找第一层，不递归</b><br>
+	 * 如果文件不存在则返回空的list<br>
+	 * 如果不是文件夹，则返回该文件名<br>
+	 * 
+	 * @param file
+	 *            目录路径
+	 * @param filename
+	 *            指定包含的文件名，是正则表达式 ，如 "*",正则表达式无视大小<br>
+	 *            null 表示不指定
+	 * @param suffix
+	 *            指定包含的后缀名，是正则表达式<br>
+	 *            文件 wfese.fse.fe认作 "wfese.fse"和"fe"<br>
+	 *            文件 wfese.fse.认作 "wfese.fse."和""<br>
+	 *            文件 wfese 认作 "wfese"和""<br>
+	 *            null 表示不指定
+	 * @return 返回包含目标文件全名的ArrayList
+	 * @throws IOException
+	 */
 	public static List<Path> getLsFoldPath(Path file, String filename, String suffix) {
 		List<Path> lsFilenames = new ArrayList<>();
+		
+		if (file == null || !isFileExist(file)) {
+			return lsFilenames;
+		}
 		
 		int noNeedReg = 0;
 		if (filename == null || filename.equals("*")) {
@@ -740,10 +770,6 @@ public class FileOperate {
 		if (suffix == null || suffix.equals("*")) {
 			noNeedReg++;
 		}
-		if (file == null || !isFileExist(file)) {
-			return new ArrayList<>();
-		}
-		
 		PredicateFileNameSuffix predicateFileName = null;
 		if (noNeedReg != 2) {
 			//等于2就是匹配所有，不需要正则了.
@@ -771,63 +797,6 @@ public class FileOperate {
 		}
 	}
 
-	/**
-	 * 获取文件夹下包含指定文件名与后缀的所有文件名，<b>仅找第一层，不递归</b><br>
-	 * 如果文件不存在则返回空的list<br>
-	 * 如果不是文件夹，则返回该文件名<br>
-	 * 
-	 * @param file
-	 *            目录路径
-	 * @param filename
-	 *            指定包含的文件名，是正则表达式 ，如 "*",正则表达式无视大小<br>
-	 *            null 表示不指定
-	 * @param suffix
-	 *            指定包含的后缀名，是正则表达式<br>
-	 *            文件 wfese.fse.fe认作 "wfese.fse"和"fe"<br>
-	 *            文件 wfese.fse.认作 "wfese.fse."和""<br>
-	 *            文件 wfese 认作 "wfese"和""<br>
-	 *            null 表示不指定
-	 * @return 返回包含目标文件全名的ArrayList
-	 * @throws IOException
-	 */
-	public static List<Path> getLsFoldPath(Path file, String filename) {
-		List<Path> lsFilenames = new ArrayList<>();
-		
-		boolean needReg = true;
-		if (filename == null || filename.equals("*")) {
-			needReg = false;
-		}
-		if (file == null || !isFileExist(file)) {
-			return new ArrayList<>();
-		}
-		
-		PredicateFileName predicateFileName = null;
-		if (needReg) {
-			//等于2就是匹配所有，不需要正则了.
-			predicateFileName = new PredicateFileName(filename);
-		}
-		// 如果只是文件则返回文件名
-		if (!isFileDirectory(file)) { // 获取文件名与后缀名
-			if (predicateFileName == null) {
-				lsFilenames.add(file);
-			} else if (predicateFileName != null && predicateFileName.test(file)) {
-				lsFilenames.add(file);
-			}
-			return lsFilenames;
-		}
-		try(Stream<Path> streamPath = Files.list(file)) {
-			if (predicateFileName != null) {
-				lsFilenames = streamPath.filter(predicateFileName).collect(Collectors.toList());
-			} else {
-				lsFilenames = streamPath.collect(Collectors.toList());
-			}
-			streamPath.close();
-			return lsFilenames;
-		} catch (IOException e) {
-			throw new ExceptionFileError("cannot get sub files of " + file.toString(), e);
-		}
-	}
-	
 	/**
 	 * 获取文件夹下包含指定文件名与后缀的所有文件名<b>递归查找</b><br>
 	 * 如果文件不存在则返回空的list<br>
@@ -1093,6 +1062,10 @@ public class FileOperate {
 	 * @return
 	 */
 	public static ArrayList<String> getLsFoldFileName(Path filePath, String filename, String suffix) {
+//		if (iCloudFileOperate.isInDB(Path filePath, String filename, String suffix))) {
+//			return iCloudFileOperate.getLsFoldFileName(filePath, filename);
+//		}
+		
 		List<Path> lsPaths = getLsFoldPath(filePath, filename, suffix);
 		ArrayList<String> lsResult = new ArrayList<>();
 		lsPaths.forEach((path) -> {
@@ -1953,6 +1926,10 @@ public class FileOperate {
 		return isSymbolicLink(getPath(fileName));
 	}
 	public static boolean isSymbolicLink(Path path) {
+		if (path instanceof ObjPath) {
+			// 对象存储只支持软链接.
+			return false;
+		}
 		return Files.isSymbolicLink(path);
 	}
 	
