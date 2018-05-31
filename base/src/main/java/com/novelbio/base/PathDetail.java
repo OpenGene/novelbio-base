@@ -9,6 +9,7 @@ import java.util.Properties;
 
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.fileOperate.FileOperate;
+import com.novelbio.base.util.IOUtil;
 
 public class PathDetail {
 	/** 临时文件夹中的文件保留若干天 */
@@ -34,7 +35,7 @@ public class PathDetail {
 			e1.printStackTrace();
 			throw new RuntimeException(e1);
 		} finally{
-			FileOperate.close(in);
+			IOUtil.closeQuietly(in);
 		}
 		tmpHdfsPath = properties.getProperty("tmpHdfsPath");
 		

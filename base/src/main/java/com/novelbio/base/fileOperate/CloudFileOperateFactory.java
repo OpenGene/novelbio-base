@@ -5,10 +5,9 @@
  */
 package com.novelbio.base.fileOperate;
 
-import java.lang.reflect.Modifier;
-import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.novelbio.base.reflect.ClassFinder;
 import com.novelbio.base.util.ServiceEnvUtil;
 
 /**
@@ -16,6 +15,7 @@ import com.novelbio.base.util.ServiceEnvUtil;
  * @author novelbio fans.fan
  */
 public class CloudFileOperateFactory {
+	private static final Logger logger = LoggerFactory.getLogger(CloudFileOperateFactory.class);
 	private static CloudFileOperateFactory cloudFileOperateFactory = new CloudFileOperateFactory();
 
 	ICloudFileOperate cloudFileOperate;
@@ -27,21 +27,13 @@ public class CloudFileOperateFactory {
 	 */
 	private CloudFileOperateFactory() {
 		if (!ServiceEnvUtil.isCloudEnv()) {
+			logger.info("is not cloud env. return ");
 			return;
 		}
-		//TODO 这里的包路径因为接口和实现类的不相同.先这么写.后边改成动态的
-		Set<Class<?>> setAllClazz = ClassFinder.getClasses("com.novelbio.erp.biz.project.domain");
-		for (Class<?> clazz : setAllClazz) {
-			if (!ICloudFileOperate.class.isAssignableFrom(clazz) || Modifier.isAbstract(clazz.getModifiers())
-					|| clazz.isInterface()) {
-				// 不是ICloudFileOperate的子类或是抽象类,就不要
-				continue;
-			}
-			try {
-				cloudFileOperate = (ICloudFileOperate) clazz.newInstance();
-			} catch (InstantiationException | IllegalAccessException e) {
-				throw new RuntimeException(e);
-			}
+		try {
+			cloudFileOperate = (ICloudFileOperate) Class.forName("com.novelbio.erp.biz.project.domain.CloudFileOperate").newInstance();
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+			throw new RuntimeException(e);
 		}
 	}
 

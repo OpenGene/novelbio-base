@@ -6,7 +6,6 @@
 package com.novelbio.base.fileOperate;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,7 +20,5 @@ public interface ICloudFileOperate {
 	public List<Path> getLsFoldPath(Path file, String filename, String suffix);
 
 	public List<Path> getLsFoldPathRecur(Path file, String filename, String suffix, boolean isNeedFolder);
-
-	public ArrayList<String> getLsFoldFileName(Path filePath, String filename);
 
 }
