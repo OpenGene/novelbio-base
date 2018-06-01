@@ -35,7 +35,7 @@ public class PathDetail {
 			e1.printStackTrace();
 			throw new RuntimeException(e1);
 		} finally{
-			IOUtil.closeQuietly(in);
+			IOUtil.close(in);
 		}
 		tmpHdfsPath = properties.getProperty("tmpHdfsPath");
 		

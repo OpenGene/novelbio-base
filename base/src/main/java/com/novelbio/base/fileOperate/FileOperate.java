@@ -2185,13 +2185,13 @@ public class FileOperate {
 
 	/**
 	 * 关闭流<br/>
-	 * 建议直接用IOUtil.closeQuietly(stream);
+	 * 建议直接用IOUtil.close(stream);
 	 * @date 2015年11月24日
 	 * @param stream
 	 */
 	@Deprecated
 	public static void close(Closeable... stream) {
-		IOUtil.closeQuietly(stream);
+		IOUtil.close(stream);
 	}
 
 	/**
