@@ -25,6 +25,10 @@ public class ServiceEnvUtil {
 	private static String env;
 	
 	static{
+		init();
+	}
+	
+	private static void init() {
 		env = PathDetail.getEnvName();
 	}
 	

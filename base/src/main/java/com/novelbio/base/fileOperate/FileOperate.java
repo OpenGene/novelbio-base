@@ -364,9 +364,13 @@ public class FileOperate {
 			throw new ExceptionFileError("cannot get file " + path);
 		}
 		
-		if (cloudFileOperate != null && cloudFileOperate.isDbSavedPath(path)) {
-			return cloudFileOperate.getTimeLastModify(path);
+		if (path instanceof CloudPath) {
+			return ((CloudPath)path).getCreateTime();
 		}
+		
+//		if (cloudFileOperate != null && cloudFileOperate.isDbSavedPath(path)) {
+//			return cloudFileOperate.getTimeLastModify(path);
+//		}
 		try {
 			FileTime time = Files.getLastModifiedTime(path);
 			return time.toMillis();
@@ -461,8 +465,11 @@ public class FileOperate {
 	 */
 	// TODO 测试
 	public static long getFileSizeLong(Path path) {
-		if (cloudFileOperate != null && cloudFileOperate.isDbSavedPath(path)) {
-			return cloudFileOperate.getFileSizeLong(path);
+//		if (cloudFileOperate != null && cloudFileOperate.isDbSavedPath(path)) {
+//			return cloudFileOperate.getFileSizeLong(path);
+//		}
+		if (path != null && path instanceof CloudPath) {
+			return ((CloudPath)path).getFileSize();
 		}
 		
 		if (path == null || !isFileExist(path)) {
@@ -1856,8 +1863,11 @@ public class FileOperate {
 
 	/** 判断文件是否为文件夹,null直接返回false */
 	public static boolean isFileDirectory(Path file) {
-		if (cloudFileOperate != null && cloudFileOperate.isDbSavedPath(file)) {
-			return cloudFileOperate.isFileDirectory(file);
+//		if (cloudFileOperate != null && cloudFileOperate.isDbSavedPath(file)) {
+//			return cloudFileOperate.isFileDirectory(file);
+//		}
+		if (file != null && file instanceof CloudPath) {
+			return ((CloudPath)file).isDirectory();
 		}
 		return file != null && Files.isDirectory(file);
 	}
@@ -1876,9 +1886,9 @@ public class FileOperate {
 	 * @return 文件存在,返回true.否则,返回false
 	 */
 	public static boolean isFileExist(Path path) {
-		if (cloudFileOperate != null && cloudFileOperate.isDbSavedPath(path)) {
-			return cloudFileOperate.isFileExist(path);
-		}
+//		if (cloudFileOperate != null && cloudFileOperate.isDbSavedPath(path)) {
+//			return cloudFileOperate.isFileExist(path);
+//		}
 		return path != null && Files.exists(path);
 	}
 
@@ -2171,11 +2181,12 @@ public class FileOperate {
 	}
 
 	/**
-	 * 关闭流
-	 * 
+	 * 关闭流<br/>
+	 * 建议直接用IOUtil.closeQuietly(stream);
 	 * @date 2015年11月24日
 	 * @param stream
 	 */
+	@Deprecated
 	public static void close(Closeable... stream) {
 		IOUtil.closeQuietly(stream);
 	}
