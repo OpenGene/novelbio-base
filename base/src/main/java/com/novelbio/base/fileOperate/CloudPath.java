@@ -15,7 +15,7 @@ import com.novelbio.jsr203.objstorage.ObjPath;
  */
 public class CloudPath extends ObjPath {
 	
-	private boolean isDirectory;
+	private boolean directory;
 	private long fileSize;
 	private long createTime;
 
@@ -28,11 +28,11 @@ public class CloudPath extends ObjPath {
 	}
 
 	public boolean isDirectory() {
-		return isDirectory;
+		return directory;
 	}
 
 	public void setDirectory(boolean isDirectory) {
-		this.isDirectory = isDirectory;
+		this.directory = isDirectory;
 	}
 
 	public long getFileSize() {

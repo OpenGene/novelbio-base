@@ -1889,6 +1889,9 @@ public class FileOperate {
 //		if (cloudFileOperate != null && cloudFileOperate.isDbSavedPath(path)) {
 //			return cloudFileOperate.isFileExist(path);
 //		}
+		if (path != null && path instanceof CloudPath) {
+			return true;
+		}
 		return path != null && Files.exists(path);
 	}
 
