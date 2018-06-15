@@ -47,6 +47,7 @@ import com.novelbio.base.dataStructure.PatternOperate;
 import com.novelbio.base.util.IOUtil;
 import com.novelbio.base.util.ServiceEnvUtil;
 import com.novelbio.jsr203.objstorage.ObjPath;
+import com.novelbio.jsr203.objstorage.ObjStorageUtil;
 import com.novelbio.jsr203.objstorage.PathDetailObjStorage;
 
 import hdfs.jsr203.HadoopFileSystemProvider;
@@ -130,55 +131,52 @@ public class FileOperate {
 		return file;
 	}
 	
+	public static void main(String[] args) {
+//		String pathStr = "hdfs:/publicFile/Special_Information_for_test/Nelumbo_nucifera_genome/unplaced.scaf_sep/gi|478766296|gb|AQOG01057743.fa";
+		String pathStr = "cos://novelbiosha-1255651097/publicFile/Special_Information_for_test/Nelumbo_nucifera_genome/unplaced.scaf_sep/gi|478766296|gb|AQOG01057743.fa";
+		Path path = getPath(pathStr);
+		System.out.println(path);
+		System.out.println(ObjStorageUtil.getInnerPath(path));
+	}
+	
 	public static Path getPath(String first, String... rest) {
 		try {
 			if (first == null || rest == null || rest.length == 0) {
 				throw new IllegalArgumentException("params can not be null");
 			}
 			if (first.startsWith(HadoopFileSystemProvider.SCHEME + ":/")) {
-				return hdfsProvider.getFileSystem(new URI(first)).getPath(new URI(first).getPath(), rest);
+				String[] params = getURIParams(FileHadoop.hdfsSymbol, first);
+				URI uri = new URI("hdfs", params[0], params[1], null);
+				return hdfsProvider.getFileSystem(uri).getPath(uri.getPath(), rest);
 			} else if (first.startsWith(objProvider.getScheme() + ":/")) {
-				return objProvider.getFileSystem(new URI(first)).getPath(new URI(first).getPath(), rest);
+				String[] params = getURIParams(objProvider.getScheme(), first);
+				URI uri = new URI(objProvider.getScheme(), params[0], params[1], null);
+				return objProvider.getFileSystem(uri).getPath(uri.getPath(), rest);
 			}  else {
 				return Paths.get(first, rest);
 			}
 		} catch (URISyntaxException e) {
-			e.printStackTrace();
+			throw new ExceptionFileError("getPath error.path=" + first, e);
 		}
-		return null;
 	}
 	
 	public static Path getPath(String fileName) {
 		if (StringOperate.isRealNull(fileName))
 			return null;
 		if (fileName.startsWith(PathDetail.getHdpHdfsHeadSymbol())) {
+			//这个是为了兼容老的数据
 			fileName = fileName.replaceFirst(PathDetail.getHdpHdfsHeadSymbol(), FileHadoop.hdfsSymbol);
 		}
 		try {
 			if (fileName.startsWith(FileHadoop.hdfsSymbol)) {
-				URI uri = null;
-				if (!fileName.contains(" ")) {
-					uri = new URI(fileName);
-				} else {
-					fileName = fileName.replace(FileHadoop.hdfsSymbol, "");
-					if (fileName.startsWith(":"))
-						fileName.replaceFirst(":", "");
-					String host = null, path = "";
-					if (fileName.startsWith("//")) {
-						String[] ss = fileName.replaceFirst("//", "").split("/", 2);
-						host = ss[0];
-						path = "/" + ss[1];
-					} else {
-						path = fileName;
-					}
-					uri = new URI("hdfs", host, path, null);
-				}
-
+				String[] params = getURIParams(FileHadoop.hdfsSymbol, fileName);
+				URI uri = new URI("hdfs", params[0], params[1], null);
 				// TODO 不是类没加载，而是META文件没有读取到
 				// Paths.get(uri);
 				return hdfsProvider.getPath(uri);
 			} else if (fileName.startsWith(objProvider.getScheme())) {
-				URI uri = new URI(fileName);
+				String[] params = getURIParams(objProvider.getScheme(), fileName);
+				URI uri = new URI(objProvider.getScheme(), params[0], params[1], null);
 				return objProvider.getPath(uri);
 			} else {
 				File file = new File(fileName);
@@ -187,6 +185,23 @@ public class FileOperate {
 		} catch (Exception e) {
 			throw new ExceptionFileError("cannot get path from " + fileName, e);
 		}
+	}
+	
+	private static String[] getURIParams(String scheme, String fileName) {
+		fileName = fileName.replace(scheme, "");
+		if (fileName.startsWith(":")) {
+			fileName = fileName.replaceFirst(":", "");
+		}
+		String host = null, path = "";
+		if (fileName.startsWith("//")) {
+			String[] ss = fileName.replaceFirst("//", "").split("/", 2);
+			host = ss[0];
+			path = "/" + ss[1];
+		} else {
+			path = fileName;
+		}
+		
+		return new String[] {host, path};
 	}
 
 	public static Path getPath(File file) {

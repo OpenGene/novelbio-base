@@ -33,7 +33,7 @@ public class CloudFileOperateFactory {
 		try {
 			cloudFileOperate = (ICloudFileOperate) Class.forName("com.novelbio.erp.biz.project.domain.CloudFileOperate").newInstance();
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-			throw new RuntimeException(e);
+			logger.error(e.getMessage());
 		}
 	}
 
