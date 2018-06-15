@@ -1,6 +1,6 @@
 package com.novelbio.base.util;
 
-import java.util.Random;
+import java.util.UUID;
 
 import org.apache.commons.lang3.RandomUtils;
 
@@ -41,5 +41,26 @@ public class NBRandomUtil {
 			strInt = String.format("%0" + length + "d", ranInt);
 		}
 		return strInt;
+	}
+
+	/**
+	 * 获取指定长度的uuid字符串，去掉符号"-"<br>
+	 * 参数超过32返回一个uuid，参数在0-32之间，截取uuid头部对于长度字符。小于等于0抛出非法参数异常<br>
+	 * UUID version为随即UUID
+	 * 
+	 * @param length
+	 *            大于0
+	 * @return
+	 */
+	public static String getUUIDString(int length) {
+		if (length < 1) {
+			throw new IllegalArgumentException("the length must biger than 0. length = " + length);
+		}
+		String uuid = UUID.randomUUID().toString().replace("-", "");
+		if (length > uuid.length()) {
+			return uuid;
+		} else {
+			return uuid.substring(0, length);
+		}
 	}
 }
