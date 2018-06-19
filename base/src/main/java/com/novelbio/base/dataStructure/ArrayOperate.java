@@ -52,6 +52,24 @@ public class ArrayOperate {
 		return result.toString();
 	}
 
+	/**
+	 * 合并字符串数组
+	 * @param ss 待合并的字符串数组
+	 * @param sep 分隔符
+	 * @return
+	 */
+	public static String cmbString(int[] ss, String sep) {
+		StringBuffer result = new StringBuffer();
+		if (ss.length < 1) {
+			return "";
+		}
+		result.append(ss[0]);
+		for (int i = 1; i < ss.length; i++) {
+			result.append(sep).append(ss[i]);
+		}
+		return result.toString();
+	}
+	
 	public static String cmbString(double[] values, String sep) {
 		StringBuffer result = new StringBuffer();
 		if (values.length < 1) {

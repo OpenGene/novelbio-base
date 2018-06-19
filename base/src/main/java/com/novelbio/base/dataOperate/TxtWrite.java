@@ -123,7 +123,14 @@ class TxtWrite implements Closeable {
 	public void writefile(String content) {
 		writefile(content, false);
 	}
-	
+	/**
+	 * 写完自动flush
+	 * @param content 要写入文件内容
+	 * @throws Exception
+	 */
+	public void writefile(char content) {
+		writefile((byte) content, false);
+	}
 	/**
 	 * 将流写入文件
 	 * 
@@ -143,7 +150,21 @@ class TxtWrite implements Closeable {
 			throw new RuntimeException(e);
 		}
 	}
-	
+	/**
+	 * 写完自动flush
+	 * @param content 要写入文件内容
+	 * @throws Exception
+	 */
+	public void writefile(byte content, boolean flush) {
+		try {
+			outputStream.write(content);
+			if (flush) {
+				 flush();
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 	/**
 	 * 写完自动flush
 	 * @param content 要写入文件内容

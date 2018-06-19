@@ -485,7 +485,14 @@ public class TxtReadandWrite implements Closeable {
 	public void writefile(String content) {
 		txtWrite.writefile(content);
 	}
-	
+	/**
+	 * 写完自动flush
+	 * @param content 要写入文件内容
+	 * @throws Exception
+	 */
+	public void writefile(char content) {
+		txtWrite.writefile(content);
+	}
 	/**
 	 * 将流写入文件
 	 * 
