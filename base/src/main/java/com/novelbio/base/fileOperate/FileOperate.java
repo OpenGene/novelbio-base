@@ -68,7 +68,11 @@ public class FileOperate {
 		if (osName.toLowerCase().indexOf("windows") > -1) {
 			isWindowsOS = true;
 		}
-		cloudFileOperate = CloudFileOperateFactory.getInstance().getCloudFileOperate();
+		try {
+			cloudFileOperate = CloudFileOperateFactory.getInstance().getCloudFileOperate();
+		} catch (Exception e) {
+			logger.warn("cloudFileOperate init error. " + e.getMessage());
+		}
 		logger.info("cloudFileOperate=" + cloudFileOperate);
 	}
 	/** 是否是windows操作系统 */
