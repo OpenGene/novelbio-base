@@ -39,6 +39,7 @@ public class CmdMoveFileAli extends CmdMoveFile {
 	 * 阿里云因为支持软连接，所以就不需要拷贝了，直接作软连接即可
 	 */
 	protected void copyFileIn() {
+		logger.info("start link file from storage to local");
 		for (String inFile : setInput) {
 			String inTmpName = mapName2TmpName.get(inFile);
 			if (StringOperate.isRealNull(inTmpName)) {
@@ -58,8 +59,17 @@ public class CmdMoveFileAli extends CmdMoveFile {
 		if (isRetainTmpFiles) {
 			logger.info("move file from {} to {} ",  filePathTmp, filePathOut);
 			FileOperate.moveFile(true, filePathTmp, filePathOut);
-			logger.info("link file from  " + filePathOut + "  to  " + filePathTmp);
-			FileOperate.linkFile(filePathOut, filePathTmp, false);
+			/**
+			 * 这里就直接move到storage即可，虽然说是move，实际上还是copy，只不过move的话会将
+			 * 临时文件夹中的文件清空。
+			 * 然后move结束后不将结果link回来，因为现在move出去的路径还是 task_result/.tmp./
+			 * 如果cmd是正常结束的，会将结果从 task_result/.tmp./ move 至 task_result/ 下
+			 * 那么这里将 task_result/.tmp./file 链接到 local/file 这个链接就会失效
+			 * 
+			 * 反正后面将storage数据移动到临时文件夹时，也是link进来，并不消耗内存
+			 */
+//			logger.info("link file from  " + filePathOut + "  to  " + filePathTmp);
+//			FileOperate.linkFile(filePathOut, filePathTmp, false);
 		} else {
 			//TODO 这里可能全改为move会更好些
 			FileOperate.moveFile(true, filePathTmp, filePathOut);

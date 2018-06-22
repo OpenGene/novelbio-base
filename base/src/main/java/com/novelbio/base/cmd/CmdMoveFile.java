@@ -253,7 +253,7 @@ public class CmdMoveFile {
 	/** 把要输入的文件拷贝到临时文件夹中 */
 	protected void copyFileIn() {
 		if (!isRedirectInToTmp) return;
-		
+		logger.info("start copy file from storage to local");
 		for (String inFile : setInput) {
 			String inTmpName = mapName2TmpName.get(inFile);
 			try {
