@@ -123,6 +123,30 @@ public class CmdMoveFileAli extends CmdMoveFile {
 	}
 	
 	/**
+	 * 把/home/novelbio/.inmap./path/to/myfile 转成 oss://bucket/path/to/myfile
+	 * 
+	 * 
+	 * @param path 注意path必须以挂载oss的路径开头
+	 * @return
+	 */
+	public static String convertLoc2Obj(String pathLocal) {
+		if (!ServiceEnvUtil.isCloudEnv()) {
+			return pathLocal;
+		}
+		if (!pathLocal.startsWith(PathDetailObjStorage.getOsMountPathWithSep())) {
+			return pathLocal;
+		}
+		
+		pathLocal = pathLocal.substring(PathDetailObjStorage.getOsMountPathWithSep().length());
+		if (pathLocal.startsWith(IN_MAP)) {
+			pathLocal = pathLocal.substring(IN_MAP.length());
+		} else if (pathLocal.startsWith(OUT_MAP)) {
+			pathLocal = pathLocal.substring(OUT_MAP.length());
+		}
+		return PathDetailObjStorage.getSymbol() + "://" + PathDetailObjStorage.getBucket() + "/" + pathLocal;
+	}
+	
+	/**
 	 * 主要应付aliyun oss的变态特性。<br>
 	 * <br>
 	 * 一般来说输入文件都要从只读挂载中获取，但是也不排除特殊情况<br>
