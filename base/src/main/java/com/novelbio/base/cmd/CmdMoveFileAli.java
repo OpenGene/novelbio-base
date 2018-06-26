@@ -143,7 +143,8 @@ public class CmdMoveFileAli extends CmdMoveFile {
 		} else if (pathLocal.startsWith(OUT_MAP)) {
 			pathLocal = pathLocal.substring(OUT_MAP.length());
 		}
-		return PathDetailObjStorage.getSymbol() + "://" + PathDetailObjStorage.getBucket() + "/" + pathLocal;
+		//注意此时pathLocal应该保留了头部的 "/"
+		return PathDetailObjStorage.getSymbol() + "://" + PathDetailObjStorage.getBucket() + pathLocal;
 	}
 	
 	/**
