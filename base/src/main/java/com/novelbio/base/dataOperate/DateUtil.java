@@ -101,7 +101,10 @@ public class DateUtil {
 	 * @param pattern
 	 * @return
 	 */
-	public static String date2String(long dateLong, String pattern) {
+	public static String date2String(Long dateLong, String pattern) {
+		if (dateLong == null) {
+			dateLong = System.currentTimeMillis();
+		}
 		Date date = new Date(dateLong);
 		return date2String(date, pattern);
 	}
@@ -147,7 +150,10 @@ public class DateUtil {
 	 * @param date
 	 * @return
 	 */
-	public static Date Long2Date(long date) {
+	public static Date Long2Date(Long date) {
+		if (date == null) {
+			date = System.currentTimeMillis();
+		}
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(date);
 		return calendar.getTime();
