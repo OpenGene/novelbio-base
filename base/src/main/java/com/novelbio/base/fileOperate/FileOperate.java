@@ -1166,7 +1166,7 @@ public class FileOperate {
 		}
 	}
 
-	public static SeekablePathInputStream getInputStreamSeekable(String filePath) {
+	public static SeekablePathInputStream getSeekablePathInputStream(String filePath) {
 		return new SeekablePathInputStream(getPath(filePath));
 	}
 
