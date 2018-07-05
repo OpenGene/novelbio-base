@@ -69,6 +69,7 @@ public class FileOperate {
 			isWindowsOS = true;
 		}
 		try {
+			//TODO 这里放NBCWebApp启动时候初始化
 			cloudFileOperate = CloudFileOperateFactory.getInstance().getCloudFileOperate();
 		} catch (Exception e) {
 			logger.warn("cloudFileOperate init error. " + e.getMessage());
