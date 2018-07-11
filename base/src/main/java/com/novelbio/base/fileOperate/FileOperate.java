@@ -1782,7 +1782,9 @@ public class FileOperate {
 					Files.move(srcPath, pathNew);
 					return;
 				} catch (Exception e) {
-					throw new ExceptionNbcFile("move fold error" + srcPath, e);
+					//这里报错，说明跨盘符剪切，因此调用后面的方法进行复制+剪切
+					//所以不能抛出异常
+					logger.error("move fold error" + srcPath + " using cp mode instead");
 				}
 			}
 		}
