@@ -52,7 +52,7 @@ public class SepSign {
 	public static final String SEP_INFO_WELLS = "#";
 
 	/** 创建物种索引任务ID的分隔符 */
-	public static final String TASK_INDEX_ID_SEP = "-";
+	public static final String TASK_INDEX_ID_SEP = "--";
 	
 	/** subTask的样本名/组名的后缀 */
 	public static final String SEP_SUBTASK_SUFFIX = ".";
