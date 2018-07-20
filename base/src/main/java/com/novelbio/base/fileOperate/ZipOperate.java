@@ -85,24 +85,19 @@ public class  ZipOperate {
                  zaos.putArchiveEntry(zipArchiveEntry);
                  InputStream is = null;
                  BufferedInputStream bis = null;
-                 try {
-                	 is = FileOperate.getInputStream(strfile);
-                	 bis = new BufferedInputStream(is);
-                 	byte[] buffer = new byte[1024]; 
-                 	int len = -1;
-                 	while((len = bis.read(buffer)) != -1) {
-                 		//把缓冲区的字节写入到ZipArchiveEntry
-                 		zaos.write(buffer, 0, len);
-                 	}
-                 	zaos.closeArchiveEntry(); 
-                 }catch(Exception e) {
-                 	throw new RuntimeException(e);
-                 } finally {
-					IOUtil.close(is, bis);
-				}
+            	 is = FileOperate.getInputStream(strfile);
+            	 bis = new BufferedInputStream(is);
+             	byte[] buffer = new byte[1024]; 
+             	int len = -1;
+             	while((len = bis.read(buffer)) != -1) {
+             		//把缓冲区的字节写入到ZipArchiveEntry
+             		zaos.write(buffer, 0, len);
+             	}
+             	zaos.closeArchiveEntry(); 
              }
              zaos.finish();
          }catch(Exception e){
+        	 logger.error("zip file error.", e);
              throw new RuntimeException(e);
          }
     }
