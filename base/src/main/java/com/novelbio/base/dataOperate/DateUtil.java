@@ -276,8 +276,11 @@ public class DateUtil {
 		long time1 = cal.getTimeInMillis();
 		cal.setTime(bdate);
 		long time2 = cal.getTimeInMillis();
+		return daysBetween(time1, time2);
+	}
+	
+	public static int daysBetween(long time1, long time2) {
 		long between_days = (time2 - time1) / (1000 * 3600 * 24);
-
 		return Integer.parseInt(String.valueOf(between_days));
 	}
 	
