@@ -243,6 +243,7 @@ public class CmdOperate extends RunProcess {
 	 * @param isOutToTerminate 默认是true
 	 */
 	public void setTerminateWriteTo(boolean needLog) {
+		cmdMoveFile.setNeedLog(needLog);
 		this.needLog = needLog;
 	}
 	

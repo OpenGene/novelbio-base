@@ -39,7 +39,8 @@ public class CmdMoveFileAli extends CmdMoveFile {
 	 * 阿里云因为支持软连接，所以就不需要拷贝了，直接作软连接即可
 	 */
 	protected void copyFileIn() {
-		logger.info("start link file from storage to local");
+		if (isNeedLog) logger.info("start link file from storage to local");
+		
 		for (String inFile : setInput) {
 			String inTmpName = mapName2TmpName.get(inFile);
 			if (StringOperate.isRealNull(inTmpName)) {

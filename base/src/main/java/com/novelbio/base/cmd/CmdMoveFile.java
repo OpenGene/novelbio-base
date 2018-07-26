@@ -13,11 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import com.novelbio.base.PathDetail;
 import com.novelbio.base.StringOperate;
-import com.novelbio.base.cmd.ConvertCmd.ConvertCloud;
 import com.novelbio.base.cmd.ConvertCmd.ConvertCmdTmp;
-import com.novelbio.base.cmd.ConvertCmd.ConvertHdfs;
 import com.novelbio.base.fileOperate.FileOperate;
-import com.novelbio.base.util.ServiceEnvUtil;
 
 /**
  * 移动输入文件到临时文件夹<br>
@@ -72,8 +69,15 @@ public class CmdMoveFile {
 	
 	private boolean isNeedDeleteTmpPath = false;
 	
+	boolean isNeedLog = true;
+	
 	public void setCmdPathCluster(CmdPathCluster cmdPathCluster) {
 		this.cmdPathCluster = cmdPathCluster;
+	}
+	
+	/** 是否输出日志，默认为true */
+	public void setNeedLog(boolean isNeedLog) {
+		this.isNeedLog = isNeedLog;
 	}
 	
 	/** 设定复制输入输出文件所到的临时文件夹 */
@@ -178,7 +182,10 @@ public class CmdMoveFile {
 		
 		Map<String, String> mapPath2TmpPath = new HashMap<>();
 		String tmpPath = getTmpPath();
-		logger.debug("tmp path is " + tmpPath);
+		
+		if (isNeedLog) {
+			logger.debug("tmp path is " + tmpPath);
+		}
 		
 		if (isRedirectInToTmp) {
 			mapPath2TmpPathIn = cmdPathCluster.getMapInPath2TmpPath(setInput, tmpPath);
@@ -199,12 +206,19 @@ public class CmdMoveFile {
 		}
 		
   		mapName2TmpName = getMapName2TmpName(setFileNameAll, mapPath2TmpPath);
-  		logger.debug("print mapName2TmpName");
+  		
+  		if (isNeedLog) {
+  			logger.debug("print mapName2TmpName");
+		}
+  	
 		logMapInfo(mapName2TmpName);
 		isGenerateTmpPath = true;
 	}
 	
 	private void logMapInfo(Map<String, String> mapName2TmpName) {
+		if (!isNeedLog) {
+			return;
+		}
 		for (String name : mapName2TmpName.keySet()) {
 			logger.debug(name + "=" + mapName2TmpName.get(name));
 		}
@@ -237,7 +251,9 @@ public class CmdMoveFile {
 	
 	/** 将已有的输出文件夹在临时文件夹中创建好 */
 	protected void createFoldTmp() {
-		logger.debug("start create tmp folder");
+  		if (isNeedLog) {
+  			logger.debug("start create tmp folder");
+		}
 		for (String filePathName : mapName2TmpName.keySet()) {
 			String tmpPath = mapName2TmpName.get(filePathName);
 			if (filePathName.endsWith("/") || filePathName.endsWith("\\") || tmpPath.endsWith("/") || tmpPath.endsWith("\\")) {
@@ -253,7 +269,8 @@ public class CmdMoveFile {
 	/** 把要输入的文件拷贝到临时文件夹中 */
 	protected void copyFileIn() {
 		if (!isRedirectInToTmp) return;
-		logger.info("start copy file from storage to local");
+		if (isNeedLog) logger.info("start copy file from storage to local");
+		
 		for (String inFile : setInput) {
 			String inTmpName = mapName2TmpName.get(inFile);
 			try {
