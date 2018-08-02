@@ -34,9 +34,10 @@ public class TestCmdOperate {
 		CmdOperate cmdOperate = new CmdOperate(lsCmd);
 		
 		cmdOperate.prepareAndMoveFileIn();
+		cmdOperate.getRunCmd();
 		assertEquals("/hdfs:/nbcloud22/test.bam", cmdOperate.getSaveStdOutFile());
-		
 		String cmd = cmdOperate.getCmdExeStrReal();
+
 		assertEquals("samtools index " + PathDetail.getHdfsLocalPath() + "/nbcloud/test.bam > " + PathDetail.getHdfsLocalPath() + "/nbcloud22/test.bam 2> " + PathDetail.getHdfsLocalPath()
 				+ "/nbcloud22/test.log", cmd);
 	}

@@ -1,5 +1,8 @@
 package com.novelbio.base.cmd;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -81,8 +84,8 @@ public class CmdPathCluster {
 	 * @return
 	 */
 	protected Map<String, String> getMapOutPath2TmpPath(Set<String> setFiles, String pathTmp) {
-		Set<String> setPath = mergeParentPath(setFiles);
-		return getMapPath2TmpPath(setPath, pathTmp);
+//		List<String> setPath = mergeParentPath(setFiles);
+		return getMapPath2TmpPath(setFiles, pathTmp);
 	}
 	
 	/**
@@ -115,13 +118,36 @@ public class CmdPathCluster {
 	 * @param setFiles
 	 * @return
 	 */
-	private Set<String> mergeParentPath(Set<String> setFiles) {
-		Set<String> setPath = new HashSet<>();
-		for (String inFileName : setFiles) {
-			String inPath = FileOperate.getParentPathNameWithSep(inFileName);
-			setPath.add(inPath);
+	@VisibleForTesting
+	protected static Set<String> mergeParentPath(Collection<String> setFiles) {
+ 		Set<String> setPaths = new HashSet<>();
+		for (String fileName : setFiles) {
+			String path = FileOperate.getParentPathNameWithSep(fileName);
+			setPaths.add(path);
 		}
-		return setPath;
+		
+		List<String> lsPaths = new ArrayList<>(setPaths);
+		Collections.sort(lsPaths, (p1, p2) -> {
+			Integer length1 = p1.length();
+			Integer length2 = p2.length();
+			return length1.compareTo(length2);
+		});
+		
+		Set<String> lsResult = new HashSet<>();
+		for (String path : lsPaths) {
+			boolean isPathExist = false;
+			for (String pathNew : lsResult) {
+				if (path.startsWith(pathNew)) {
+					isPathExist = true;
+					break;
+				}
+			}
+			if (!isPathExist) {
+				lsResult.add(path);
+			}
+		}
+		
+		return lsResult;
 	}
 	
 	/** 获得前面已经生成过的结果文件<br>
@@ -158,13 +184,13 @@ public class CmdPathCluster {
 		return resultPath;
 	}
 	
-	private Map<String, String> getMapPath2TmpPath(Set<String> setPath, String pathTmp) {
+	private Map<String, String> getMapPath2TmpPath(Collection<String> lsPath, String pathTmp) {
 		//输入的set中 /home/novelbio/oss/.inmap./test 和 /home/novelbio/oss/.outmap./test 是两个不同的文件夹
 		//如果直接跑会产生 一个 test文件夹， 一个test1文件夹
 		//而实际上这两个应该只产生一个test文件夹，所以在这里做一个合并的工作
 		//也就是key统一为  /home/novelbio/oss/.inmap./test 
 		ArrayListMultimap<String, String> mapPath2LsConvertPath = ArrayListMultimap.create();
-		for (String path : setPath) {
+		for (String path : lsPath) {
 			mapPath2LsConvertPath.put(CmdMoveFileAli.convertAli2Loc(path, true), path);
 		}
 		//====================

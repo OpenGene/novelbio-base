@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataStructure.ArrayOperate;
+import com.novelbio.base.dataStructure.doubleArrayTrie.TrieSetLongFindShort;
 import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.jsr203.objstorage.PathDetailObjStorage;
@@ -116,7 +117,6 @@ public abstract class ConvertCmd {
 		return tmpCmd;
 	}
 
-
 	public static class ConvertHdfs extends ConvertCmd {
 		@Override
 		String convert(String subCmd) {
@@ -168,23 +168,25 @@ public abstract class ConvertCmd {
 		boolean isRedirectOutToTmp;
 		boolean isRedirectInToTmp;
 		Set<String> setInput;
-		Set<String> setOutput;
+		TrieSetLongFindShort trieSetLongFindShort;
 		Map<String, String> mapName2TmpName;
 		
 		public ConvertCmdTmp(boolean isRedirectInToTmp, boolean isRedirectOutToTmp, Set<String> setInput, Set<String> setOutput, Map<String, String> mapName2TmpName) {
 			this.isRedirectInToTmp = isRedirectInToTmp;
 			this.isRedirectOutToTmp = isRedirectOutToTmp;
 			this.setInput = setInput;
-			this.setOutput = setOutput;
+			trieSetLongFindShort = new TrieSetLongFindShort(setOutput);
 			this.mapName2TmpName = mapName2TmpName;
 		}
 		
 		@Override
 		String convert(String subCmd) {
-			if ((isRedirectInToTmp && setInput.contains(subCmd))
-					|| 
-					(isRedirectOutToTmp && setOutput.contains(subCmd))) {
+			if (isRedirectInToTmp && setInput.contains(subCmd)) {
 				subCmd = mapName2TmpName.get(subCmd);
+			} else if (isRedirectOutToTmp && trieSetLongFindShort.contains(subCmd)) {
+				String path = trieSetLongFindShort.getKeyFirst(subCmd);
+				String tmpPath = mapName2TmpName.get(path);
+				subCmd = subCmd.replaceFirst(path, tmpPath);
 			}
 			return subCmd;
 		}

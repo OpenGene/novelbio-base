@@ -33,9 +33,9 @@ public class TestCmdOperateRedirect {
 		lsCmd.add("/hdfs:/nbcloud/result/test.bam");
 		lsCmd.add("/hdfs:/nbcloud/test.bam");
 		lsCmd.add(">");
-		lsCmd.add("/hdfs:/nbcloud22/test.bam");
+		lsCmd.add("/hdfs:/nbcloud22/abc/test.bam");
 		lsCmd.add("2>");
-		lsCmd.add("/hdfs:/nbcloud22/test.log");
+		lsCmd.add("/hdfs:/nbcloud22/abc/def/test.log");
 		CmdOperate cmdOperate = new CmdOperate(lsCmd);
 		cmdOperate.setCmdPathCluster(cmdPathCluster);
 		cmdOperate.setCmdTmpPath(tmpPath);
@@ -44,15 +44,17 @@ public class TestCmdOperateRedirect {
 		cmdOperate.addCmdParamInput("/hdfs:/nbcloud/result/test.bam");
 		cmdOperate.addCmdParamInput("/hdfs:/nbcloud/test.bam");
 
-		cmdOperate.addCmdParamOutput("/hdfs:/nbcloud22/test.bam");
-		cmdOperate.addCmdParamOutput("/hdfs:/nbcloud22/test.log");
-		
+		cmdOperate.addCmdParamOutput("/hdfs:/nbcloud22/abc/test.bam");
+		cmdOperate.addCmdParamOutput("/hdfs:/nbcloud22/abc/def/test.log");
+		cmdOperate.addCmdParamOutput("/hdfs:/nbcloud22/abc/");
+
 		cmdOperate.prepareAndMoveFileIn();
-		assertEquals("/home/novelbio/tmp/nbcloud22/test.bam", cmdOperate.getSaveStdOutFile());
 		String cmd = cmdOperate.getCmdExeStrReal();
+		cmdOperate.getRunCmd();
+		assertEquals("/home/novelbio/tmp/nbcloud22/abc/test.bam", cmdOperate.getSaveStdOutFile());
 		
-		assertEquals("samtools index /home/novelbio/mytest/result/test.bam /home/novelbio/tmp/nbcloud/test.bam "
-				+ "> /home/novelbio/tmp/nbcloud22/test.bam 2> /home/novelbio/tmp/nbcloud22/test.log", cmd);
+		assertEquals("samtools index /home/novelbio/tmp/nbcloud/result/test.bam /home/novelbio/tmp/nbcloud/test.bam "
+				+ "> /home/novelbio/tmp/nbcloud22/abc/test.bam 2> /home/novelbio/tmp/nbcloud22/abc/def/test.log", cmd);
 	}
 	
 	

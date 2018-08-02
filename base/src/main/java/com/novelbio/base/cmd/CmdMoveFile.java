@@ -11,9 +11,13 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.novelbio.base.ExceptionNbcParamError;
 import com.novelbio.base.PathDetail;
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.cmd.ConvertCmd.ConvertCmdTmp;
+import com.novelbio.base.dataStructure.doubleArrayTrie.DoubleArrayTrie;
+import com.novelbio.base.dataStructure.doubleArrayTrie.DoubleArrayTrieDart;
+import com.novelbio.base.dataStructure.doubleArrayTrie.TrieMapLongFindShort;
 import com.novelbio.base.fileOperate.FileOperate;
 
 /**
@@ -41,13 +45,6 @@ public class CmdMoveFile {
 	protected Set<String> setInput = new HashSet<>();
 	/** 全体需要copyToTmp的输出文件 */
 	protected Set<String> setOutput = new HashSet<>();
-	/**
-	 * 全体需要copyToTmp的InOutput文件的最近一层文件夹
-	 * 譬如fasta文件所建的索引，输入和输出都有该文件存在
-	 * 并且为 /home/novelbio/1.fasta 
-	 * 则set中保存 /home/novelbio
-	 */
-	protected Set<String> setInOutput = new HashSet<>();
 	
 	/**
 	 * key: 输入或输出的文件(夹)全名
@@ -154,20 +151,11 @@ public class CmdMoveFile {
 		}
 	}
 	public void prepareAndMoveFileIn() {
-		setInOutputPath();
 		generateTmPath();
 		createFoldTmp();
 		
 		copyFileIn();
 		recordFilesWhileRedirectOutToTmp();
-	}
-	
-	private void setInOutputPath() {
-		for (String infile : setInput) {
-			if (setOutput.contains(infile)) {
-				setInOutput.add(FileOperate.removeSep(FileOperate.getPathName(infile)));
-			}
-		}
 	}
 	
 	//============================ 生成临时文件夹和配对路径 ============================
@@ -197,6 +185,7 @@ public class CmdMoveFile {
 		}
 		
 		if (isRedirectOutToTmp) {
+			setOutput = CmdPathCluster.mergeParentPath(setOutput);
 			mapPath2TmpPathOut = cmdPathCluster.getMapOutPath2TmpPath(setOutput, tmpPath);
 			logger.debug("print mapPath2TmpPathOut");
 
@@ -204,7 +193,6 @@ public class CmdMoveFile {
 			setFileNameAll.addAll(setOutput);
 			mapPath2TmpPath.putAll(mapPath2TmpPathOut);
 		}
-		
   		mapName2TmpName = getMapName2TmpName(setFileNameAll, mapPath2TmpPath);
   		
   		if (isNeedLog) {
@@ -225,20 +213,15 @@ public class CmdMoveFile {
 	}
 	
 	private Map<String, String> getMapName2TmpName(Set<String> setFileNameAll, Map<String, String> mapPath2TmpPath) {
-		Map<String, String> mapName2TmpName = new HashMap<>();
-
+		TrieMapLongFindShort<String> trieMapLongFindShort = new TrieMapLongFindShort<>(mapPath2TmpPath);
 		for (String filePathName : setFileNameAll) {
-			String tmpPath = mapPath2TmpPath.get(FileOperate.getParentPathNameWithSep(filePathName));
-			String fileName = FileOperate.getFileName(filePathName);
-			tmpPath = tmpPath + fileName;
-			/** 将已有的输出文件夹在临时文件夹中创建好 */
-			if (filePathName.endsWith("/") || filePathName.endsWith("\\")) {
-				tmpPath = FileOperate.addSep(tmpPath);
-			}
-			mapName2TmpName.put(filePathName, tmpPath);
+			String path = trieMapLongFindShort.getKeyFirst(filePathName);
+			String tmpPath = mapPath2TmpPath.get(path);
+			String tmpPathFile = filePathName.replaceFirst(path, tmpPath);
+			mapName2TmpName.put(filePathName, tmpPathFile);
 		}
 		return mapName2TmpName;
-	}
+	}	
 	
 	//===========================================================================
 
