@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.novelbio.base.dataStructure.ArrayOperate;
 
@@ -18,7 +19,6 @@ import com.novelbio.base.dataStructure.ArrayOperate;
  */
 public class TrieSetLongFindShort {
 	List<String> lsKeys = new ArrayList<>();
-	DoubleArrayTrieDart doubleArrayTrieDart = new DoubleArrayTrieDart();
 	Set<String> setKkey;
 	
 	public TrieSetLongFindShort(Set<String> setKkey) {
@@ -32,7 +32,27 @@ public class TrieSetLongFindShort {
 			Integer l2 = info2.length();
 			return -l1.compareTo(l2);
 		});
-		doubleArrayTrieDart.build(lsKeys);
+	}
+	
+	/** 输入 /home/novelbio/mytest/
+	 * 可以把 /home/novelbio/ 所对应的值找出来
+	 * 注意如果找出多个value，则从长到短排序
+	 */
+	public String getKeyFirst(String searchInfo) {
+		List<String> lsResult = getLsKeys(searchInfo);
+		if (!lsResult.isEmpty()) {
+			return lsResult.get(0);
+		}
+		
+		return null;
+	}
+
+	/** 输入 /home/novelbio/mytest/
+	 * 可以把 /home/novelbio/ 所对应的值找出来
+	 * 注意如果找出多个value，则从长到短排序
+	 */
+	public boolean contains(String searchInfo) {
+		return !getLsKeys(searchInfo).isEmpty();
 	}
 	
 	/** 输入 /home/novelbio/mytest/
@@ -44,43 +64,9 @@ public class TrieSetLongFindShort {
 			return new ArrayList<>();
 		}
 		
-		List<Integer> lsIndex = doubleArrayTrieDart.commonPrefixSearch(searchInfo);
-		List<String> lsResult = new ArrayList<>();
-		for (Integer index : lsIndex) {
-			lsResult.add(lsKeys.get(index));
-		}
-		return lsResult;
+		return lsKeys.stream().filter(key -> searchInfo.startsWith(key)).collect(Collectors.toList());
 	}
-	/** 输入 /home/novelbio/mytest/
-	 * 可以把 /home/novelbio/ 所对应的值找出来
-	 * 注意如果找出多个value，则从长到短排序
-	 */
-	public String getKeyFirst(String searchInfo) {
-		List<String> lsResult = getLsKeys(searchInfo);
-		if (!lsResult.isEmpty()) {
-			return lsResult.get(0);
-		}
-		return null;
-	}
-	/** 输入 /home/novelbio/mytest/
-	 * 可以把 /home/novelbio/ 所对应的值找出来
-	 * 注意如果找出多个value，则从长到短排序
-	 */
-	public boolean contains(String searchInfo) {
-		try {
-			if (ArrayOperate.isEmpty(setKkey)) {
-				return false;
-			}
-			List<Integer> lsIndex = doubleArrayTrieDart.commonPrefixSearch(searchInfo);
-			return !lsIndex.isEmpty();
-		} catch (Exception e) {
-			if (ArrayOperate.isEmpty(setKkey)) {
-				return false;
-			}
-			List<Integer> lsIndex = doubleArrayTrieDart.commonPrefixSearch(searchInfo);
-			return !lsIndex.isEmpty();
-		}
-
-	}
+	
+	
 	
 }

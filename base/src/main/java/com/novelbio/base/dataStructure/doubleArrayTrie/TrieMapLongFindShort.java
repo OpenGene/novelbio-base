@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.novelbio.base.dataStructure.ArrayOperate;
 
@@ -18,7 +19,7 @@ import com.novelbio.base.dataStructure.ArrayOperate;
  */
 public class TrieMapLongFindShort<T> {
 	List<String> lsKeys = new ArrayList<>();
-	DoubleArrayTrieDart doubleArrayTrieDart = new DoubleArrayTrieDart();
+//	DoubleArrayTrieDart doubleArrayTrieDart = new DoubleArrayTrieDart();
 	Map<String, T> mapKey2Value;
 	
 	public TrieMapLongFindShort(Map<String, T> mapKey2Value) {
@@ -33,25 +34,8 @@ public class TrieMapLongFindShort<T> {
 			Integer l2 = info2.length();
 			return -l1.compareTo(l2);
 		});
-		doubleArrayTrieDart.build(lsKeys);
 	}
-	
-	/** 输入 /home/novelbio/mytest/
-	 * 可以把 /home/novelbio/ 所对应的值找出来
-	 * 注意如果找出多个value，则从长到短排序
-	 */
-	public List<String> getLsKeys(String searchInfo) {
-		if (ArrayOperate.isEmpty(mapKey2Value)) {
-			return new ArrayList<>();
-		}
-		
-		List<Integer> lsIndex = doubleArrayTrieDart.commonPrefixSearch(searchInfo);
-		List<String> lsResult = new ArrayList<>();
-		for (Integer index : lsIndex) {
-			lsResult.add(lsKeys.get(index));
-		}
-		return lsResult;
-	}
+
 	
 	/** 输入 /home/novelbio/mytest/
 	 * 可以把 /home/novelbio/ 所对应的值找出来
@@ -103,12 +87,20 @@ public class TrieMapLongFindShort<T> {
 	 * 注意如果找出多个value，则从长到短排序
 	 */
 	public boolean contains(String searchInfo) {
+		return !getLsKeys(searchInfo).isEmpty();
+	}
+	
+	
+	/** 输入 /home/novelbio/mytest/
+	 * 可以把 /home/novelbio/ 所对应的值找出来
+	 * 注意如果找出多个value，则从长到短排序
+	 */
+	public List<String> getLsKeys(String searchInfo) {
 		if (ArrayOperate.isEmpty(mapKey2Value)) {
-			return false;
+			return new ArrayList<>();
 		}
 		
-		List<Integer> lsIndex = doubleArrayTrieDart.commonPrefixSearch(searchInfo);
-		return !lsIndex.isEmpty();
+		return lsKeys.stream().filter(key -> searchInfo.startsWith(key)).collect(Collectors.toList());
 	}
 	
 }
