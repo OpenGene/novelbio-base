@@ -43,9 +43,10 @@ public class CmdMoveFile {
 	
 	/** 全体需要copyToTmp的输入文件 */
 	protected Set<String> setInput = new HashSet<>();
+	/** 全体需要copyToTmp的输出文件，将文件头部进行合并 */
+	protected Set<String> setOutputMerge = new HashSet<>();
 	/** 全体需要copyToTmp的输出文件 */
 	protected Set<String> setOutput = new HashSet<>();
-	
 	/**
 	 * key: 输入或输出的文件(夹)全名
 	 * value: 临时文件(夹)全名
@@ -185,12 +186,12 @@ public class CmdMoveFile {
 		}
 		
 		if (isRedirectOutToTmp) {
-			setOutput = CmdPathCluster.mergeParentPath(setOutput);
-			mapPath2TmpPathOut = cmdPathCluster.getMapOutPath2TmpPath(setOutput, tmpPath);
+			setOutputMerge = CmdPathCluster.mergeParentPath(setOutput);
+			mapPath2TmpPathOut = cmdPathCluster.getMapOutPath2TmpPath(setOutputMerge, tmpPath);
 			logger.debug("print mapPath2TmpPathOut");
 
 			logMapInfo(mapPath2TmpPathOut);
-			setFileNameAll.addAll(setOutput);
+			setFileNameAll.addAll(setOutputMerge);
 			mapPath2TmpPath.putAll(mapPath2TmpPathOut);
 		}
   		mapName2TmpName = getMapName2TmpName(setFileNameAll, mapPath2TmpPath);
@@ -237,10 +238,11 @@ public class CmdMoveFile {
   		if (isNeedLog) {
   			logger.debug("start create tmp folder");
 		}
-		for (String filePathName : mapName2TmpName.keySet()) {
-			String tmpPath = mapName2TmpName.get(filePathName);
-			if (filePathName.endsWith("/") || filePathName.endsWith("\\") || tmpPath.endsWith("/") || tmpPath.endsWith("\\")) {
-				logger.info("creat folder " + filePathName);
+		ConvertCmdTmp cmdTmp = generateConvertCmdTmp();
+		for (String path : setOutput) {
+			String tmpPath = cmdTmp.convert(path);
+			if (tmpPath.endsWith("/") || tmpPath.endsWith("\\")) {
+				logger.info("creat folder " + tmpPath);
 				FileOperate.createFolders(tmpPath);
 			} else {
 				logger.info("creat folder " + FileOperate.getParentPathNameWithSep(tmpPath));
@@ -411,7 +413,7 @@ public class CmdMoveFile {
 	/** 用于做路径转换 */
 	public ConvertCmdTmp generateConvertCmdTmp() {
 		return new ConvertCmdTmp(isRedirectInToTmp, isRedirectOutToTmp,
-				setInput, setOutput, mapName2TmpName);
+				setInput, setOutputMerge, mapName2TmpName);
 	}
 	
 	public static CmdMoveFile getInstance(boolean isLocal) {
