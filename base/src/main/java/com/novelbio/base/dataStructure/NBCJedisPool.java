@@ -22,8 +22,8 @@ public class NBCJedisPool extends JedisPool {
 
 	/** session使用的redis库的下标号:0 */
 	public static final int DB_SESSION_INDEX = 0;
-	/** 阿里云上job结束时返回的topic,使用的redis库的下标号:1 */
-	public static final int DB_ALIYUN_TOPIC_INDEX = 1;
+	/** 微信小程序session使用的redis库的下标号:1 */
+	public static final int WECHAT_INDEX = 1;
 	/** 使用redis作为一个简单的消息队列:2 */
 	public static final int DB_REDIS_QUEUE_INDEX = 2;
 	
