@@ -41,7 +41,7 @@ public interface Alignment {
 		return align1.getStartAbs() <= align2.getEndAbs() && align1.getEndAbs() >= align2.getStartAbs();
 	}
 	
-	/** 判断两个align是否overlap 不考虑头尾相连的情况，意思不是 >= 和 <= */
+	/** 判断两个align是否overlap */
 	public static boolean isSiteInAlign(Alignment align, int site) {
 		return site >= align.getStartAbs() && site <= align.getEndAbs();
 	}
