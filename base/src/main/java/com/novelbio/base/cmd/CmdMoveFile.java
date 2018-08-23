@@ -47,6 +47,10 @@ public class CmdMoveFile {
 	protected Set<String> setOutputMerge = new HashSet<>();
 	/** 全体需要copyToTmp的输出文件 */
 	protected Set<String> setOutput = new HashSet<>();
+	
+	/** 全体不需要copyToTmp的输入文件 */
+	protected Set<String> setInputNotCopy = new HashSet<>();
+	
 	/**
 	 * key: 输入或输出的文件(夹)全名
 	 * value: 临时文件(夹)全名
@@ -132,6 +136,16 @@ public class CmdMoveFile {
 			addCmdParamInput(path);
 		}
 	}
+	/** 如果部分文件需要拷贝，则要设置不需要拷贝的文件夹 */
+	public void addCmdParamInputNotCopy(List<String> input) {
+		for (String path : input) {
+			if (StringOperate.isRealNull(path)) {
+				throw new ExceptionCmd("input is null");
+			}
+			setInputNotCopy.add(path);
+		}
+	}
+	
 	/**
 	 * 添加输出文件路径的参数，配合{@link #setRedirectOutToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
 	 * @param output 输出文件的哪个参数，如果输入参数类似 "--outPath=/hdfs:/test.fa"，这里填写 "/hdfs:/test.fa"
@@ -413,7 +427,7 @@ public class CmdMoveFile {
 	/** 用于做路径转换 */
 	public ConvertCmdTmp generateConvertCmdTmp() {
 		return new ConvertCmdTmp(isRedirectInToTmp, isRedirectOutToTmp,
-				setInput, setOutputMerge, mapName2TmpName);
+				setInput, setInputNotCopy, setOutputMerge, mapName2TmpName);
 	}
 	
 	public static CmdMoveFile getInstance(boolean isLocal) {

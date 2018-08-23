@@ -168,19 +168,25 @@ public abstract class ConvertCmd {
 		boolean isRedirectOutToTmp;
 		boolean isRedirectInToTmp;
 		Set<String> setInput;
+		Set<String> setInputNotCopy;
+
 		TrieSetLongFindShort trieSetLongFindShort;
 		Map<String, String> mapName2TmpName;
 		
-		public ConvertCmdTmp(boolean isRedirectInToTmp, boolean isRedirectOutToTmp, Set<String> setInput, Set<String> setOutput, Map<String, String> mapName2TmpName) {
+		public ConvertCmdTmp(boolean isRedirectInToTmp, boolean isRedirectOutToTmp, Set<String> setInput, Set<String> setInNotCopy, Set<String> setOutput, Map<String, String> mapName2TmpName) {
 			this.isRedirectInToTmp = isRedirectInToTmp;
 			this.isRedirectOutToTmp = isRedirectOutToTmp;
 			this.setInput = setInput;
+			this.setInputNotCopy = setInNotCopy;
 			trieSetLongFindShort = new TrieSetLongFindShort(setOutput);
 			this.mapName2TmpName = mapName2TmpName;
 		}
 		
 		@Override
 		String convert(String subCmd) {
+			if (setInputNotCopy.contains(subCmd)) {
+				return subCmd;
+			}
 			if (isRedirectInToTmp && setInput.contains(subCmd)) {
 				subCmd = mapName2TmpName.get(subCmd);
 			} else if (isRedirectOutToTmp && trieSetLongFindShort.contains(subCmd)) {

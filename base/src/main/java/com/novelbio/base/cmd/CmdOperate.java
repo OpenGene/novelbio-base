@@ -358,6 +358,14 @@ public class CmdOperate extends RunProcess {
 		}
 	}
 	/**
+	 * 如果存在部分文件需要拷贝，部分文件不需要拷贝
+	 * 最好把不需要拷贝的记录下来做过滤用
+	 * @param lsInput
+	 */
+	public void addCmdParamInputNotCopy(List<String> lsInput) {
+		cmdMoveFile.addCmdParamInputNotCopy(lsInput);
+	}
+	/**
 	 * <b>本参数只用来标记需要重定位的文件输出参数，不加入cmd的参数列表</b><br>
 	 * 添加输出文件路径的参数，配合{@link #setRedirectOutToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
 	 * @param output 输出文件的哪个参数，默认不加入参数list，仅仅标记一下
