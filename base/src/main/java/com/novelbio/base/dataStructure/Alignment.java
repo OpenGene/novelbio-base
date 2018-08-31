@@ -2,6 +2,7 @@ package com.novelbio.base.dataStructure;
 
 import java.util.Comparator;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.novelbio.base.StringOperate;
 
 public interface Alignment {
@@ -28,7 +29,14 @@ public interface Alignment {
 				return o1start.compareTo(o2start);
 			}
 		}
-		
+	}
+	
+	public static int getDistance(Alignment align1, Alignment align2) {
+		if (align1.getStartAbs() > align2.getStartAbs()) {
+			return align1.getStartAbs() - align2.getEndAbs();
+		} else {
+			return align2.getStartAbs() - align1.getEndAbs();
+		}
 	}
 	
 	/** 判断Align1是否cover Align2 */
