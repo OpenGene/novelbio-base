@@ -1,6 +1,8 @@
 package com.novelbio.base.fileOperate;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
@@ -12,7 +14,7 @@ import java.nio.file.StandardOpenOption;
  * @author zong0jie
  *
  */
-public class SeekablePathOutputStream {
+public class SeekablePathOutputStream extends OutputStream {
 	
 	private Path path;
 	private SeekableByteChannel seekableByteChannel;
@@ -29,7 +31,9 @@ public class SeekablePathOutputStream {
 			throw new ExceptionSeekablePathStream("cannot get file ", e);
         }
 	}
-	
+	public void seekToEnd() throws IOException {
+		seekableByteChannel.position(fileLength);
+	}
 	public long length() {
 		return fileLength;
 	}
@@ -42,9 +46,17 @@ public class SeekablePathOutputStream {
 		seekableByteChannel.position(position);
 	}
 	
-	public int write(byte[] buffer, int offset, int length) throws IOException {
+	/**
+	 * TODO 尚未测试
+	 */
+	//TODO 尚未测试
+	@Override
+	public void write(int b) throws IOException {
+		seekableByteChannel.write(ByteBuffer.wrap(new byte[]{(byte)b}));		
+	}
+	public void write(byte[] buffer, int offset, int length) throws IOException {
 		ByteBuffer byteBuffer = ByteBuffer.wrap(buffer, offset, length);
-		return seekableByteChannel.write(byteBuffer);
+		seekableByteChannel.write(byteBuffer);
 	}
 	
 	public void close() throws IOException {
@@ -79,6 +91,7 @@ public class SeekablePathOutputStream {
 			super(info, t);
 		}
 	}
+
 
 	
 }

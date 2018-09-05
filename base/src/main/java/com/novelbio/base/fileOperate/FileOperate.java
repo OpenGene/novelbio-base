@@ -1175,6 +1175,14 @@ public class FileOperate {
 		return new SeekablePathInputStream(path);
 	}
 
+	public static SeekablePathOutputStream getSeekablePathOutStream(String filePath) {
+		return new SeekablePathOutputStream(getPath(filePath));
+	}
+
+	public static SeekablePathOutputStream getSeekablePathOutStream(Path path) {
+		return new SeekablePathOutputStream(path);
+	}
+	
 	/** 根据给定的后缀，产生相应的流，譬如如果后缀是gz，就包装为gz格式 */
 	public static OutputStream getOutputStreamWithSuffix(String filePath) throws IOException {
 		OutputStream os = getOutputStream(filePath, false);
@@ -1207,7 +1215,7 @@ public class FileOperate {
 		return getOutputStream(filePath, false);
 	}
 	
-	private static OutputStream getOutputStream(String filePath, boolean append) throws IOException {
+	public static OutputStream getOutputStream(String filePath, boolean append) throws IOException {
 		return getOutputStream(getPath(filePath), append);
 	}
 
@@ -1230,14 +1238,17 @@ public class FileOperate {
 		if (!isFileExist(file)) {
 			openOption = StandardOpenOption.CREATE;
 		}
-		if (append == false && isFileExistAndBigThan0(file)) {
+		if (!append && isFileExistAndBigThan0(file)) {
 			if (isFileDirectory(file)) {
 				throw new ExceptionNbcFile("cannot create outputstream on folder " + file.toString());
 			}
 			deleteFileFolder(file);
 		}
 		createFolders(getParentPathNameWithSep(file));
-		return Files.newOutputStream(file, openOption);
+		if (!append || !file.toUri().toString().startsWith(FileHadoop.hdfsSymbol)) {
+			return Files.newOutputStream(file, openOption);
+		}
+		return HdfsInitial.getFileSystem().append(new org.apache.hadoop.fs.Path(file.toUri()));
 	}
 	
 	/**

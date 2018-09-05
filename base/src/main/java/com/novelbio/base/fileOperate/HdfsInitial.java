@@ -28,6 +28,8 @@ public class HdfsInitial {
 		conf.set("dfs.permissions.enabled", "false");
 		conf.set("dfs.client.block.write.replace-datanode-on-failure.policy", "NEVER"); 
 		conf.set("dfs.client.block.write.replace-datanode-on-failure.enable", "true"); 
+		conf.setBoolean( "dfs.support.append", true );
+
 		try {
 			fsHDFS = FileSystem.get(conf);
 		} catch (IOException e) {
