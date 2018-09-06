@@ -1236,7 +1236,7 @@ public class FileOperate {
 	public static OutputStream getOutputStream(Path file, boolean append) throws IOException {
 		boolean isFileDirExist = isFileExist(file);
 		boolean isFileDir = isFileDirExist && isFileDirectory(file);
-		boolean isFileExist = isFileDirExist && ! isFileDirExist;
+		boolean isFileExist = isFileDirExist && !isFileDirExist;
 		if (isFileDir) {
 			throw new ExceptionNbcFile("cannot create outputstream on folder " + file.toString());
 		}
