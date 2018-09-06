@@ -30,6 +30,7 @@ import com.novelbio.base.dataStructure.PatternOperate;
 import com.novelbio.base.fileOperate.ExceptionNbcFile;
 import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.base.fileOperate.PositionInputStream;
+import com.novelbio.base.util.IOUtil;
 
 class TxtRead implements Closeable {
 	private static final Logger logger = Logger.getLogger(TxtRead.class);
@@ -657,9 +658,9 @@ class TxtRead implements Closeable {
 	 * 关闭流文件
 	 */
 	public void close() {
-		FileOperate.close(bufread);
-		FileOperate.close(inputStream);
-		FileOperate.close(inputStreamRaw);
+		IOUtil.close(bufread);
+		IOUtil.close(inputStream);
+		IOUtil.close(inputStreamRaw);
 	}
 
 }

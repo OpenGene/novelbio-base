@@ -1,7 +1,5 @@
 package com.novelbio.base.dataOperate;
 
-import hdfs.jsr203.HdfsConfInitiator;
-
 import java.io.BufferedOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
@@ -16,6 +14,8 @@ import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.hdfs.DFSOutputStream;
 import org.apache.hadoop.io.compress.CompressionOutputStream;
 import org.apache.log4j.Logger;
 
@@ -24,13 +24,16 @@ import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
 import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.fileOperate.ExceptionNbcFile;
 import com.novelbio.base.fileOperate.FileOperate;
+import com.novelbio.base.util.IOUtil;
+
+import hdfs.jsr203.HdfsConfInitiator;
 
 class TxtWrite implements Closeable {
 	private static Logger logger = Logger.getLogger(TxtReadandWrite.class);
 	
 	TXTtype txtTtype;
 	Path file;
-	BufferedOutputStream outputStream;
+	OutputStream outputStream;
 	boolean append = true;
 	
 	/**
@@ -46,7 +49,7 @@ class TxtWrite implements Closeable {
 		if (outputStream instanceof BufferedOutputStream) {
 			this.outputStream = (BufferedOutputStream)outputStream;
 		} else {
-			this.outputStream = new BufferedOutputStream(outputStream);
+			this.outputStream = outputStream;//new BufferedOutputStream(outputStream);
 		}
 	}
 	
@@ -54,7 +57,7 @@ class TxtWrite implements Closeable {
 		this.append = append;
 	}
 	
-	public BufferedOutputStream getOutputStream() {
+	public OutputStream getOutputStream() {
 		if (outputStream == null) {
 			try {
 				createFile();
@@ -106,10 +109,14 @@ class TxtWrite implements Closeable {
 	 * @param content
 	 *            ，要写入文件内容
 	 * @throws Exception
-	 */
+	 */	
 	public void flush() {
 		try {
-			outputStream.flush();
+			if (outputStream instanceof FSDataOutputStream) {
+				((FSDataOutputStream) outputStream).hflush();
+			} else {
+				outputStream.flush();
+			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -531,16 +538,20 @@ class TxtWrite implements Closeable {
 	 */
 	public void close() {
 		 flush();
-		 try { outputStream.close(); } catch (Exception e) {}
-		try { zipOutputStream.closeArchiveEntry(); } catch (Exception e) { }
-		if (txtTtype == TXTtype.Lzo) {
-			try {
-				TxtReadandWrite.indexLzo(getFileName());
-			} catch (Exception e) {
-				throw new ExceptionNbcFile("cannot make lzo index for file " + getFileName(), e);
+		 IOUtil.close(outputStream, zipOutputStream);
+		 if (zipOutputStream != null) {
+			 try {
+				zipOutputStream.closeArchiveEntry();
+			} catch (IOException e) {
 			}
-			
 		}
+//		if (txtTtype == TXTtype.Lzo) {
+//			try {
+//				TxtReadandWrite.indexLzo(getFileName());
+//			} catch (Exception e) {
+//				throw new ExceptionNbcFile("cannot make lzo index for file " + getFileName(), e);
+//			}
+//		}
 	}
 	
 }

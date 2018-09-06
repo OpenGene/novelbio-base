@@ -1234,18 +1234,22 @@ public class FileOperate {
 	 * @throws IOException
 	 */
 	public static OutputStream getOutputStream(Path file, boolean append) throws IOException {
+		boolean isFileDirExist = isFileExist(file);
+		boolean isFileDir = isFileDirExist && isFileDirectory(file);
+		boolean isFileExist = isFileDirExist && ! isFileDirExist;
+		if (isFileDir) {
+			throw new ExceptionNbcFile("cannot create outputstream on folder " + file.toString());
+		}
+		
 		StandardOpenOption openOption = append ? StandardOpenOption.APPEND : StandardOpenOption.CREATE;
-		if (!isFileExist(file)) {
+		if (!isFileDirExist) {
 			openOption = StandardOpenOption.CREATE;
 		}
-		if (!append && isFileExistAndBigThan0(file)) {
-			if (isFileDirectory(file)) {
-				throw new ExceptionNbcFile("cannot create outputstream on folder " + file.toString());
-			}
+		if (!append && isFileExist) {
 			deleteFileFolder(file);
 		}
 		createFolders(getParentPathNameWithSep(file));
-		if (!append || !file.toUri().toString().startsWith(FileHadoop.hdfsSymbol)) {
+		if (!append || !isFileExist || !file.toUri().toString().startsWith(FileHadoop.hdfsSymbol)) {
 			return Files.newOutputStream(file, openOption);
 		}
 		return HdfsInitial.getFileSystem().append(new org.apache.hadoop.fs.Path(file.toUri()));

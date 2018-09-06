@@ -58,7 +58,9 @@ public class TxtReadandWrite implements Closeable {
 	}
 	
 	public static enum TXTtype{
-		BGzip, Gzip, Bzip2, Zip, Txt, Lzo;
+		BGzip, Gzip, Bzip2, Zip, Txt,
+		@Deprecated
+		Lzo;
 		/**
 		 * 根据文件后缀判断文件的类型，是gz还是txt等
 		 * @return
@@ -670,8 +672,13 @@ public class TxtReadandWrite implements Closeable {
 	 * 关闭，关闭后依然可以读文件
 	 */
 	public void close() {
-		try { if (txtRead != null) txtRead.close(); } catch (Exception e) { }
-		try { if (txtWrite != null) txtWrite.close(); } catch (Exception e) { }
+		if (txtRead != null) {
+			txtRead.close();
+		}
+		if (txtWrite != null) {
+			txtWrite.close();
+		}
+		
 		if (!read) {
 			try {
 				txtRead = new TxtRead(FileOperate.getPath(txtWrite.getFileName()));
