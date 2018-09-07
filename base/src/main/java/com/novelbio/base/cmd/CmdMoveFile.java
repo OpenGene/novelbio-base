@@ -46,8 +46,9 @@ public class CmdMoveFile {
 	protected Set<String> setOutput = new HashSet<>();
 	
 	/** 全体不需要copyToTmp的输入文件 */
-	protected Set<String> setInputNotCopy = new HashSet<>();
-	
+	protected Set<String> setInNotCopy = new HashSet<>();
+	/** 全体不需要copyToTmp的输入文件 */
+	protected Set<String> setOutNotCopy = new HashSet<>();
 	/**
 	 * key: 输入或输出的文件(夹)全名
 	 * value: 临时文件(夹)全名
@@ -139,10 +140,18 @@ public class CmdMoveFile {
 			if (StringOperate.isRealNull(path)) {
 				throw new ExceptionCmd("input is null");
 			}
-			setInputNotCopy.add(path);
+			setInNotCopy.add(path);
 		}
 	}
-	
+	/** 如果部分文件需要拷贝，则要设置不需要拷贝的文件夹 */
+	public void addCmdParamOutputNotCopy(List<String> output) {
+		for (String path : output) {
+			if (StringOperate.isRealNull(path)) {
+				throw new ExceptionCmd("input is null");
+			}
+			setOutNotCopy.add(path);
+		}
+	}
 	/**
 	 * 添加输出文件路径的参数，配合{@link #setRedirectOutToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
 	 * @param output 输出文件的哪个参数，如果输入参数类似 "--outPath=/hdfs:/test.fa"，这里填写 "/hdfs:/test.fa"
@@ -247,16 +256,16 @@ public class CmdMoveFile {
 	/** 将已有的输出文件夹在临时文件夹中创建好 */
 	protected void createFoldTmp() {
   		if (isNeedLog) {
-  			logger.debug("start create tmp folder");
+  			logger.info("start create tmp folder");
 		}
 		ConvertCmdTmp cmdTmp = generateConvertCmdTmp();
 		for (String path : setOutput) {
 			String tmpPath = cmdTmp.convert(path);
 			if (tmpPath.endsWith("/") || tmpPath.endsWith("\\")) {
-				logger.info("creat folder " + tmpPath);
+				logger.info("create folder " + tmpPath);
 				FileOperate.createFolders(tmpPath);
 			} else {
-				logger.info("creat folder " + FileOperate.getParentPathNameWithSep(tmpPath));
+				logger.info("create folder " + FileOperate.getParentPathNameWithSep(tmpPath));
 				FileOperate.createFolders(FileOperate.getParentPathNameWithSep(tmpPath));
 			}
 		}
@@ -424,7 +433,7 @@ public class CmdMoveFile {
 	/** 用于做路径转换 */
 	public ConvertCmdTmp generateConvertCmdTmp() {
 		return new ConvertCmdTmp(isRedirectInToTmp, isRedirectOutToTmp,
-				setInput, setInputNotCopy, setOutputMerge, mapName2TmpName);
+				setInput, setInNotCopy, setOutputMerge, setOutNotCopy, mapName2TmpName);
 	}
 	
 	public static CmdMoveFile getInstance(boolean isLocal) {
