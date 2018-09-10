@@ -473,8 +473,6 @@ class TxtWrite implements Closeable {
 		} catch (Exception e) {
 			logger.error("write list data error:"+getFileName());
 			throw new RuntimeException(e);
-		} finally {
-			close();
 		}
 	}
 
@@ -538,7 +536,7 @@ class TxtWrite implements Closeable {
 	 */
 	public void close() {
 		 flush();
-		 IOUtil.close(outputStream, zipOutputStream);
+		 IOUtil.close(outputStream);
 		 if (zipOutputStream != null) {
 			 try {
 				zipOutputStream.closeArchiveEntry();
