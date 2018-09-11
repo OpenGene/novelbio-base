@@ -634,6 +634,18 @@ public class FileOperate {
 		return path.toString();
 	}
 
+	/** 给定类似 ./my/path/../to/my/name/
+	 * 返回 my/to/my/name/
+	 * 
+	 * 注意如果 ../my/path 这种，会报错
+	 * @param filePath
+	 * @return
+	 */
+	public static String getPathRemoveDot(String filePath) {
+		PathDecoder pathDecoder = new PathDecoder(filePath);
+		return pathDecoder.getResult();
+	}
+	
 	public static String getAbsolutePath(String fileName) {
 		return getAbsolutePath(getPath(fileName));
 	}
