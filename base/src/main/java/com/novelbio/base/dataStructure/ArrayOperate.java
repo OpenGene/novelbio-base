@@ -51,7 +51,56 @@ public class ArrayOperate {
 		}
 		return result.toString();
 	}
-
+	
+	/**
+	 * 给定list 和 element<br>
+	 * 把list中含有element的index全取出来，从0开始计数<br>
+	 * <br>
+	 * 注意比较list元素和element时，是<b>调用的对象的equals方法</b><br>
+	 * @param lsIds
+	 * @param id
+	 * @return
+	 */
+	public static<T> List<Integer> getLsIndexContainsEle(List<T> lsEle, T element) {
+		List<Integer> lsIndex = new ArrayList<>();
+		for (int i = 0; i < lsEle.size(); i++) {
+			T idTmp = lsEle.get(i);
+			if (isEquals(element, idTmp)) {
+				lsIndex.add(i);
+			}
+		}
+		return lsIndex;
+	}
+	
+	/**
+	 * 仅用于string
+	 * 给定list 和 element<br>
+	 * 把list中含有element的index全取出来，从0开始计数<br>
+	 * @param lsIds
+	 * @param id
+	 * @return
+	 */
+	public static List<Integer> getLsIndexContainsEleIgnoreCase(List<String> lsIds, String id) {
+		List<Integer> lsIndex = new ArrayList<>();
+		for (int i = 0; i < lsIds.size(); i++) {
+			String idTmp = lsIds.get(i);
+			if (StringOperate.isEqualIgnoreCase(idTmp, id)) {
+				lsIndex.add(i);
+			}
+		}
+		return lsIndex;
+	}
+	
+	private static<T> boolean isEquals(T a, T b) {
+		if (a == null && b == null) {
+			return true;
+		} else if (a == null || b == null) {
+			return false;
+		} else {
+			return a.equals(b);
+		}
+	}
+	
 	/**
 	 * 合并字符串数组
 	 * @param ss 待合并的字符串数组
@@ -787,7 +836,25 @@ public class ArrayOperate {
 		}
 		return result;
 	}
-
+	/**
+	 * using {@link #indelElement(Object[], int[])} replace<br>
+	 * 复制数组
+	 * @param <T>
+	 * @param array
+	 * @param Length 将array的Length位复制给结果array，如果length > array.length，则延长结果array
+	 * @return
+	 * 最后生成Length长度的array
+	 */
+	public static int[] copyArray(int[] array, int Length) {
+		int[] result = new int[Length];
+		for (int i = 0; i < array.length; i++) {
+			if (i >= Length) {
+				continue;
+			}
+			result[i] = array[i];
+		}
+		return result;
+	}
 	/**
 	 * 复制数组
 	 * @param <T>

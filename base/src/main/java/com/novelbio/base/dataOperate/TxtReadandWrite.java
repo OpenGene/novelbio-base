@@ -503,12 +503,11 @@ public class TxtReadandWrite implements Closeable {
 	public void writefile(InputStream is) {
 		txtWrite.writefile(is);
 	}
-	/**
-	 * @param content
-	 * @throws Exception
-	 */
 	public void writefile(byte[] bytes) {
 		txtWrite.writefile(bytes);
+	}
+	public void writefile(byte b) {
+		txtWrite.writefile(b);
 	}
 	/**
 	 * @param content

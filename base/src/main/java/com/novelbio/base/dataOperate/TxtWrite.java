@@ -202,13 +202,18 @@ class TxtWrite implements Closeable {
 			throw new RuntimeException(e);
 		}
 	}
-	/**
-	 * @param content
-	 * @throws Exception
-	 */
+
 	public void writefile(byte[] bytes) {
 		try {
 			outputStream.write(bytes);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	public void writefile(byte b) {
+		try {
+			outputStream.write(b);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
