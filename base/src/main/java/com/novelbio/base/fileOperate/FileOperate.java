@@ -287,35 +287,9 @@ public class FileOperate {
 	public static String getParentPathNameWithSep(String fileName) {
 		if (fileName == null)
 			return null;
-
-		if (fileName.equals("/") || fileName.equals("\\")) {
-			return fileName;
-		}
-
-		if (fileName.startsWith(objProvider.getScheme() + "://")) {
-			try {
-				URI uri = new URI(fileName);
-				String parentPath = objProvider.getPath(uri).getParent().toString();
-				return parentPath.endsWith("/") ? parentPath : parentPath + "/";
-			} catch (Exception e) {
-				logger.error("getParentPathNameWithSep error.filename=" + fileName, e);
-				return fileName;
-			}
-		} else {
-			File file = new File(fileName);
-			String fileParent = file.getParent();
-			String head = patternOperate.getPatFirst(fileName);
-			if (head == null)
-				head = "";
-			if (fileParent == null)
-				fileParent = "";
-
-			if (fileParent.length() < head.length()) {
-				return head;
-			} else {
-				return addSep(fileParent);
-			}
-		}
+		
+		PathDecoder pathDecoder = new PathDecoder(fileName);
+		return pathDecoder.getParentPathNameWithSep();
 	}
 	
 	/**
@@ -347,10 +321,8 @@ public class FileOperate {
 	public static String getPathName(String fileName) {
 		if (fileName == null)
 			return null;
-		if (fileName.endsWith("/") || fileName.endsWith("\\")) {
-			return fileName;
-		}
-		return getParentPathNameWithSep(fileName);
+		PathDecoder pathDecoder = new PathDecoder(fileName);
+		return pathDecoder.getPathWithSep();
 	}
 
 	/**
@@ -413,7 +385,7 @@ public class FileOperate {
 	}
 
 	/**
-	 * 给定路径名，返回其名字 如给定/home/zong0jie/和/home/zong0jie 都返回zong0jie 可以给定不存在的路径
+	 * 给定路径名，返回其名字 如给定/home/zong0jie/ 和 /home/zong0jie 都返回zong0jie 可以给定不存在的路径
 	 * 
 	 * @param fileName
 	 * @return
@@ -422,8 +394,8 @@ public class FileOperate {
 		if (StringOperate.isRealNull(fileName)) {
 			return "";
 		}
-		File file = new File(fileName);
-		return file.getName();
+		PathDecoder pathDecoder = new PathDecoder(fileName);
+		return pathDecoder.getName();
 	}
 
 	/**
@@ -535,9 +507,7 @@ public class FileOperate {
 		if (fileName.endsWith("/") || fileName.endsWith("\\")) {
 			return new String[] { "", "" };
 		}
-		File file = new File(fileName);
-		String filename = file.getName();
-		return getFileNameSepWithoutPath(filename);
+		return getFileNameSepWithoutPath(getFileName(fileName));
 	}
 
 	/**
@@ -643,14 +613,25 @@ public class FileOperate {
 	 */
 	public static String getPathRemoveDot(String filePath) {
 		PathDecoder pathDecoder = new PathDecoder(filePath);
-		return pathDecoder.getResult();
+		return pathDecoder.getAbsPathWithSep();
 	}
 	
 	public static String getAbsolutePath(String fileName) {
+		if (PathDecoder.isAbsPath(fileName)) {
+			PathDecoder pathDecoder = new PathDecoder(fileName);
+			return pathDecoder.getAbsPathWithSep();
+		}
+		
 		return getAbsolutePath(getPath(fileName));
 	}
-
+	
 	public static String getAbsolutePath(Path path) {
+		String pathStr = path.toString();
+		if (PathDecoder.isAbsPath(pathStr)) {
+			PathDecoder pathDecoder = new PathDecoder(pathStr);
+			return pathDecoder.getAbsPathWithSep();
+		}
+		
 		String name = path.toAbsolutePath().normalize().toString();
 		if (path instanceof HadoopPath) {
 			if (name.startsWith(PathDetail.getHdpHdfsHeadSymbol())) {
@@ -665,6 +646,15 @@ public class FileOperate {
 	}
 	
 	public static String getCanonicalPath(String fileName) {
+		if (PathDecoder.isAbsPath(fileName)) {
+			PathDecoder pathDecoder = new PathDecoder(fileName);
+			String filePath = pathDecoder.getAbsPathWithSep();
+			 if (filePath.startsWith("file://")) {
+				 filePath = fileName.replaceFirst("file://", "");
+			 }
+			 return filePath;
+		}
+		
 		boolean isAddSplashHead = false;
 		if (fileName.startsWith(PathDetail.getHdpHdfsHeadSymbol())) {
 			fileName = FileHadoop.convertToHdfsPath(fileName);
