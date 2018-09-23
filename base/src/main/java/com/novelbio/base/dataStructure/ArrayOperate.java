@@ -443,6 +443,49 @@ public class ArrayOperate {
 			}
 		}
 	}
+	
+	/**
+	 * 将 lsNeedAdd 和 lsSummary按顺序每个元素累加起来
+	 * 累加结果放到lsSummary中
+	 * @param lsSummary
+	 * @param lsNeedAdd
+	 */
+	public static void addListToFirst(List<Integer> lsSummary, List<Integer> lsNeedAdd) {
+		for (int j = 0; j < lsSummary.size(); j++) {
+			int num = lsSummary.get(j);
+			if (j < lsNeedAdd.size()) {
+				int numAdd = lsNeedAdd.get(j);
+				lsSummary.set(j, num+numAdd);
+			}
+		}
+		if (lsSummary.size() < lsNeedAdd.size()) {
+			for (int i = lsSummary.size(); i < lsNeedAdd.size(); i++) {
+				lsSummary.add(lsNeedAdd.get(i));
+			}
+		}
+	}
+	
+	/**
+	 * 将 lsNeedAdd 和 lsSummary按顺序每个元素累加起来
+	 * 累加结果放到lsSummary中
+	 * @param lsSummary
+	 * @param lsNeedAdd
+	 */
+	public static List<Integer> addList(List<Integer> ls1, List<Integer> ls2) {
+		List<Integer> lsSummary = new ArrayList<>();
+		
+		for (int j = 0; j < ls1.size(); j++) {
+			int num1 = ls1.get(j);
+			int num2 = j < ls2.size() ? ls2.get(j) : 0;
+			lsSummary.add(num1 + num2);
+		}
+		if (ls1.size() < ls2.size()) {
+			for (int i = lsSummary.size(); i < ls2.size(); i++) {
+				lsSummary.add(ls2.get(i));
+			}
+		}
+		return lsSummary;
+	}
 
 	/**
 	 * <b>没有添加范围检测功能</b>
@@ -451,7 +494,7 @@ public class ArrayOperate {
 	 * @param <T>
 	 * @param Aarray 数组
 	 * @param lsIndelInfo 不要出现小于0项。需要删除哪几项，从0开始计算，<br>
-	 * 	<b>0：</b> 添加或删除哪一项<br>
+	 * 	<b>0：</b> 添加或删除哪一项,从0开始计数<br>
 	 * 正数：添加，<b>添加在指定位置的前面</b>，<br>
 	 * 负数：删除，如果超出数组项，则忽略<br>
 	 * <b>1：</b>添加几个元素，或删除该元素<br>
@@ -459,6 +502,7 @@ public class ArrayOperate {
 	 * @param filling 默认填充的元素
 	 * @return
 	 */
+	@Deprecated
 	public static <T> T[] indelElement(T[] Aarray, ArrayList<int[]> lsIndelInfo, T filling) {
 		// 0：修正第几位，1.负数删除，正数在前面添加一位
 		HashMap<Integer, TreeSet<Integer>> hashIndelInfo = new HashMap<Integer, TreeSet<Integer>>();
@@ -540,7 +584,7 @@ public class ArrayOperate {
 		}
 		return lsResult;
 	}
-
+	
 	/**
 	 * 用之前要看清楚指定的column是否在ls内 <br>
 	 * 给定List，获得其中指定的某几列,获得的某几列按照指定的列进行排列,<b>从0开始计数</b><br>
