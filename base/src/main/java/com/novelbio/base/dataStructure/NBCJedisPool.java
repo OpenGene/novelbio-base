@@ -26,6 +26,8 @@ public class NBCJedisPool extends JedisPool {
 	public static final int WECHAT_INDEX = 1;
 	/** 使用redis作为一个简单的消息队列:2 */
 	public static final int DB_REDIS_QUEUE_INDEX = 2;
+	/** 使用redis作为Set的简单操作:3 */
+	public static final int DB_REDIS_SET_INDEX = 3;
 	
 	private static String host = PathDetail.getRedisServerIp();
 	private static int port = 6379;
@@ -54,7 +56,7 @@ public class NBCJedisPool extends JedisPool {
 		jedis.select(dbIndex);
 		return jedis;
 	}
-	
+
 	public static void main(String[] args) {
 		NBCJedisPool pool = new NBCJedisPool(1);
 		Jedis jedis = pool.getResource();
