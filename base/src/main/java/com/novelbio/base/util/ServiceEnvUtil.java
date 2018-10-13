@@ -80,10 +80,14 @@ public class ServiceEnvUtil {
 	 */
 	public static boolean isBatchCompute() {
 		if (isBatchCompute == null) {
-			isBatchCompute = !StringOperate.isRealNull(System.getenv(CloudConstant.JobId));
+			isBatchCompute = !StringOperate.isRealNull(getJobId());
 			logger.info("isBatchCompute=" + isBatchCompute);
 		}
 		return isBatchCompute;
+	}
+	
+	public static String getJobId() {
+		return System.getenv(CloudConstant.JobId);
 	}
 	
 	public static void main(String[] args) {

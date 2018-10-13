@@ -112,6 +112,18 @@ public class HttpJsonUtil {
 		}
 		return lsResult;
 	}
+	
+	public static ResultJson postEncryp(String requestUrl, Map<String, Object> params, String authCode) {
+		Map<String, Object> paramsEn = Crypter.encryptHttpParams(requestUrl.substring(requestUrl.lastIndexOf("/") + 1),
+				JSON.toJSONString(params));
+		try {
+			// paramsEn已经加密，HttpJsonUtil不需要二次处理
+			paramsEn.put("authCode", authCode); // 添加authCode
+			return HttpJsonUtil.post4JsonOne(requestUrl, paramsEn, HttpJsonUtil.ENCRYTION_TYPE_NONE, ResultJson.class);
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage());
+		}
+	}
 
 	/**
 	 * 返回值为普通Json格式时(非列表)调用<br>
