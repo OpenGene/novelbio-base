@@ -1,22 +1,16 @@
 package com.novelbio.base.cmd;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.novelbio.base.PathDetail;
 import com.novelbio.base.StringOperate;
+import com.novelbio.base.cmd.ConvertCmd.ConvertCloud;
 import com.novelbio.base.cmd.ConvertCmd.ConvertCmdGetFileName;
 import com.novelbio.base.cmd.ConvertCmd.ConvertCmdTmp;
 import com.novelbio.base.cmd.ConvertCmd.ConvertHdfs;
-import com.novelbio.base.cmd.ConvertCmd.ConvertCloud;
 import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.base.util.ServiceEnvUtil;
 
@@ -66,9 +60,9 @@ public class CmdOrderGenerator {
 	 * 正常情况输出到标准输出流 > out.gz  会自动压缩成gz格式
 	 * 但是部分情况cat 1.gz 2.gz > out.gz 这时候不能压缩成gz格式
 	 */
-	private boolean isOutStdWithSuffix = true;
+	private boolean isOutStdWithSuffix = false;
 	/** 同 {@link #isOutStdWithSuffix} */
-	private boolean isOutErrWithSuffix = true;
+	private boolean isOutErrWithSuffix = false;
 	
 	/** 如果为null就不加入 */
 	public void addCmdParam(String param) {
@@ -249,13 +243,13 @@ public class CmdOrderGenerator {
 				if (tmpCmd.equals(">")  || tmpCmd.equals("1>") || tmpCmd.equals("(>)") || tmpCmd.equals("(1>)")) {
 					//(>) 和(1>) 表示输出的gz不进行压缩
 					if (tmpCmd.startsWith("(")) {
-						isOutStdWithSuffix = false;
+						isOutStdWithSuffix = true;
 					}
 					stdOut = true;
 					continue;
 				} else if (tmpCmd.equals("2>") || tmpCmd.equals("(2>)")) {
 					if (tmpCmd.startsWith("(")) {
-						isOutErrWithSuffix = false;
+						isOutErrWithSuffix = true;
 					}
 					errOut = true;
 					continue;
