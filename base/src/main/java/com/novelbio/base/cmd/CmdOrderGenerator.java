@@ -61,26 +61,15 @@ public class CmdOrderGenerator {
 	 * 也有把oss或者bos路径修改为本地路径
 	 */
 	boolean isConvertHdfs2Loc = true;	
+	/**
+	 * 标准输出是否按照后缀名进行自动压缩
+	 * 正常情况输出到标准输出流 > out.gz  会自动压缩成gz格式
+	 * 但是部分情况cat 1.gz 2.gz > out.gz 这时候不能压缩成gz格式
+	 */
+	private boolean isOutStdWithSuffix = true;
+	/** 同 {@link #isOutStdWithSuffix} */
+	private boolean isOutErrWithSuffix = true;
 	
-//	/** 设定复制输入输出文件所到的临时文件夹 */
-//	public void setTmpPath(String tmpPath) {
-//		cmdPath.setTmpPath(tmpPath);
-//	}
-//	public String getTmpPath() {
-//		return cmdPath.getTmpPath();
-//	}
-//	/** 结束后删除临时文件夹，仅当tmp文件夹为随机生成的时候才会删除 */
-//	public void deleletTmpPath() {
-//		cmdPath.deleteTmpPath();
-//	}
-//	
-//	/** 临时文件夹中的文件是否删除 */
-//	public void setRetainTmpFiles(boolean isRetainTmpFiles) {
-//		cmdPath.setRetainTmpFiles(isRetainTmpFiles);
-//	}
-//	public void setCmdPathCluster(CmdPathCluster cmdPathCluster) {
-//		cmdPath.setCmdPathCluster(cmdPathCluster);
-//	}
 	/** 如果为null就不加入 */
 	public void addCmdParam(String param) {
 		if (!StringOperate.isRealNull(param)) {
@@ -108,6 +97,20 @@ public class CmdOrderGenerator {
 	public boolean isJustDisplayStd() {
 		return isJustDisplayStd;
 	}
+
+	/**
+	 * 标准输出是否按照后缀名进行自动压缩
+	 * 正常情况输出到标准输出流 > out.gz  会自动压缩成gz格式
+	 * 但是部分情况cat 1.gz 2.gz > out.gz 这时候不能压缩成gz格式
+	 * 
+	 * 默认为true, 仅当 > 写成 (>) 时, 本值为false
+	 */
+	public boolean isOutStdWithSuffix() {
+		return isOutStdWithSuffix;
+	}
+	public boolean isOutErrWithSuffix() {
+		return isOutErrWithSuffix;
+	}
 	
 	public void setLsCmd(List<String> lsCmd) {
 		this.lsCmd = lsCmd;
@@ -120,30 +123,6 @@ public class CmdOrderGenerator {
 	public void setConvertHdfs2Loc(boolean isConvertHdfs2Loc) {
 		this.isConvertHdfs2Loc = isConvertHdfs2Loc;
 	}
-	
-//	/** 是否将输入文件拷贝到临时文件夹，默认为false */
-//	public void setRedirectInToTmp(boolean isRedirectInToTmp) {
-//		cmdPath.setRedirectInToTmp(isRedirectInToTmp);
-//	}
-//	/** 是否将输出先重定位到临时文件夹，再拷贝回实际文件夹，默认为false */
-//	public void setRedirectOutToTmp(boolean isRedirectOutToTmp) {
-//		cmdPath.setRedirectOutToTmp(isRedirectOutToTmp);
-//	}
-//
-//	/**
-//	 * 添加输入文件路径的参数，配合{@link #setRedirectInToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
-//	 * @param input 输入文件的哪个参数
-//	 */
-//	public void addCmdParamInput(String input) {
-//		cmdPath.addCmdParamInput(input);
-//	}
-//	/**
-//	 * 添加输出文件路径的参数，配合{@link #setRedirectOutToTmp(boolean)}，可设定为将输出先重定位到临时文件夹，再拷贝回实际文件夹
-//	 * @param output 输出文件的哪个参数，如果输入参数类似 "--outPath=/hdfs:/test.fa"，这里填写 "/hdfs:/test.fa"
-//	 */
-//	public void addCmdParamOutput(String output) {
-//		cmdPath.addCmdParamOutput(output);
-//	}
 	
 	/** 如果param为null则返回 */
 	public void addCmdParam(List<String> lsCmd) {
@@ -234,29 +213,11 @@ public class CmdOrderGenerator {
 		return convertGetFileName.convertCmd(generateRunCmd(false, cmdMoveFile));
 	}
 	
-//	public void generateTmPath() {
-//		cmdPath.generateTmPath();
-//	}
-	
 	/** 返回执行的具体cmd命令，实际cmd命令 */
 	public String[] getCmdExeStrReal(CmdMoveFile cmdMoveFile) {
 		cmdMoveFile.generateTmPath();
 		return generateRunCmd(false, cmdMoveFile);
 	}
-
-//	/** 在cmd运行前，将输入文件拷贝到临时文件夹下
-//	 * 同时记录临时文件夹下有多少文件，用于后面删除时跳过 */
-//	public void copyFileInAndRecordFiles() {
-//		cmdPath.copyFileInAndRecordFiles();
-//	}
-//	/** 在cmd运行前，将输入文件拷贝到临时文件夹下 */
-//	public void copyFileIn() {
-//		cmdPath.copyFileInTmp();
-//	}
-//	/** 记录临时文件夹下有多少文件，用于后面删除时跳过 */
-//	public void recordFilesWhileRedirectOutToTmp() {
-//		cmdPath.recordFilesWhileRedirectOutToTmp();
-//	}
 	
 	/** 必须先调用{@link #copyFileInAndRecordFiles()}，
 	 * 等运行cmd结束后还需要调用{@link #moveFileOut()} 来完成运行 */
@@ -285,16 +246,27 @@ public class CmdOrderGenerator {
 		//TODO
 		for (String tmpCmd : lsCmd) {
 			if (redirectStdAndErr) {
-				if (tmpCmd.equals(">")  || tmpCmd.equals("1>")) {
+				if (tmpCmd.equals(">")  || tmpCmd.equals("1>") || tmpCmd.equals("(>)") || tmpCmd.equals("(1>)")) {
+					//(>) 和(1>) 表示输出的gz不进行压缩
+					if (tmpCmd.startsWith("(")) {
+						isOutStdWithSuffix = false;
+					}
 					stdOut = true;
 					continue;
-				} else if (tmpCmd.equals("2>")) {
+				} else if (tmpCmd.equals("2>") || tmpCmd.equals("(2>)")) {
+					if (tmpCmd.startsWith("(")) {
+						isOutErrWithSuffix = false;
+					}
 					errOut = true;
 					continue;
 				} else if (tmpCmd.equals("<")) {
 					stdIn = true;
 					continue;
 				}
+			}
+			
+			if (tmpCmd.equals("(>)") || tmpCmd.equals("(1>)") || tmpCmd.equals("(2>)")) {
+				tmpCmd = tmpCmd.substring(1, tmpCmd.length()-1);
 			}
 			
 			tmpCmd = convertCmdTmp.convertSubCmd(tmpCmd);

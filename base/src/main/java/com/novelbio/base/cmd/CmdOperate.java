@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import org.apache.log4j.Logger;
 
@@ -697,7 +695,8 @@ public class CmdOperate extends RunProcess {
 		if (!getCmdInStdStream) {
 			if (outPath != null) {
 				FileOperate.createFolders(FileOperate.getPathName(outPath));
-				outputGobbler.setOutputStream(FileOperate.getOutputStreamWithSuffix(outPath), cmdOrderGenerator.isJustDisplayStd());
+				OutputStream os = cmdOrderGenerator.isOutStdWithSuffix() ? FileOperate.getOutputStreamWithSuffix(outPath) : FileOperate.getOutputStream(outPath);
+				outputGobbler.setOutputStream(os, cmdOrderGenerator.isJustDisplayStd());
 				if (cmdOrderGenerator.isJustDisplayStd() && lsOutInfo != null) {
 					outputGobbler.setLsInfo(lsOutInfo, lineNumStd);
 				}
@@ -725,7 +724,8 @@ public class CmdOperate extends RunProcess {
 		if (!getCmdInErrStream) {
 			if (errPath != null) {
 				FileOperate.createFolders(FileOperate.getPathName(errPath));
-				errorGobbler.setOutputStream(FileOperate.getOutputStreamWithSuffix(errPath), cmdOrderGenerator.isJustDisplayErr());
+				OutputStream os = cmdOrderGenerator.isOutErrWithSuffix() ? FileOperate.getOutputStreamWithSuffix(errPath) : FileOperate.getOutputStream(errPath);
+				errorGobbler.setOutputStream(os, cmdOrderGenerator.isJustDisplayErr());
 				if (cmdOrderGenerator.isJustDisplayErr() && lsErrorInfo != null) {
 					errorGobbler.setLsInfo(lsErrorInfo, lineNumErr);
 				}
