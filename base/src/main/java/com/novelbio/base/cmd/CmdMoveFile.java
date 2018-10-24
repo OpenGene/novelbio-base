@@ -330,8 +330,11 @@ public class CmdMoveFile {
 			logger.debug("outpath: " + outPath + " outTmpPath: " + outTmpPath + " lsFilesFinish: " + lsFilesFinish.toString());
 			for (String fileInTmp : lsFilesFinish) {
 				String  filePathResult = fileInTmp.replaceFirst(outTmpPath, outPath);
-				if (setInput.contains(filePathResult) && FileOperate.isFileExistAndBigThanSize(filePathResult, 0)) {
-					continue;
+				if (setInput.contains(filePathResult) ) {
+					Path path = FileOperate.getPath(filePathResult);
+					if (!FileOperate.isFileDirectory(path) && FileOperate.isFileExistAndBigThanSize(path, 0)) {
+						continue;
+					}
 				}
 				
 				List<String> lsFilesInTmpNeedMove = getLsFileInTmpNeedMove(FileOperate.getPath(fileInTmp));
