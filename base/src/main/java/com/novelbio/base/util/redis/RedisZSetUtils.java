@@ -23,7 +23,7 @@ public class RedisZSetUtils {
 
 	private RedisZSetUtils() {
 	}
-	
+
 	/**
 	 * 往set中写入元素
 	 * 
@@ -32,11 +32,11 @@ public class RedisZSetUtils {
 	 */
 	public static void zadd(String key, String values) {
 		Jedis jedis = jedisPool.getResource();
-		double score = (double)System.currentTimeMillis();
+		double score = (double) System.currentTimeMillis();
 		jedis.zadd(key, score, values);
 		jedis.close();
 	}
-	
+
 	/**
 	 * 移除set中的元素
 	 * 
@@ -48,7 +48,7 @@ public class RedisZSetUtils {
 		jedis.zrem(key, members);
 		jedis.close();
 	}
-	
+
 	/**
 	 * 获取列表的数量
 	 * 
@@ -61,7 +61,7 @@ public class RedisZSetUtils {
 		jedis.close();
 		return slong;
 	}
-	
+
 	/**
 	 * 分页获取集合中的数据，默认排序
 	 * 
@@ -74,7 +74,7 @@ public class RedisZSetUtils {
 	 * @return
 	 */
 	public static List<String> lrang(String key, long begIndex, Integer count) {
-		long endIndex = begIndex + count;
+		long endIndex = begIndex + count - 1;
 		Jedis jedis = jedisPool.getResource();
 		long slong = jedis.zcard(key);
 		if (begIndex == slong) {
