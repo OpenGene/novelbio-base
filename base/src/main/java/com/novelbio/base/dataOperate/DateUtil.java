@@ -1,5 +1,6 @@
 package com.novelbio.base.dataOperate;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -354,6 +355,30 @@ public class DateUtil {
 		calendar.set(Calendar.MINUTE, 59);
 		calendar.set(Calendar.SECOND, 59);
 		return calendar.getTimeInMillis();
+	}
+	
+	/**
+	 *  将2018-02-07T09:29:09Z格式的转为date
+	 *  
+	 * @author novelbio fans.fan
+	 * @date 2018年9月20日
+	 * @param dateUTC
+	 * @return
+	 * @throws ParseException
+	 */
+	public static Date getUTCDate(String dateUTC) throws ParseException {
+		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+		return sdf1.parse(dateUTC);//拿到Date对象
+	}
+	
+	public static void main(String[] args) {
+		String d = "2018-02-07T09:29:09Z";
+		try {
+			Date date = getUTCDate(d);
+			System.out.println(date);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
 	}
 	
 }
