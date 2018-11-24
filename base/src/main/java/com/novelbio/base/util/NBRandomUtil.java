@@ -18,11 +18,7 @@ public class NBRandomUtil {
 	 * @return
 	 */
 	public static int getInt(int maxInt) {
-		if (maxInt == 0) {
-			maxInt = 1;
-		}
-		int ret = RandomUtils.nextInt(0, maxInt);
-		return ret;
+		return RandomUtils.nextInt(0, maxInt);
 	}
 
 	/**
@@ -33,13 +29,13 @@ public class NBRandomUtil {
 	 * @return
 	 */
 	public static String getString(int length) {
-		int ranInt = RandomUtils.nextInt(0, Integer.MAX_VALUE);
-		String strInt = ranInt + "";
-		if (strInt.length() > length) {
-			strInt = strInt.substring(strInt.length() - length);
-		} else {
-			strInt = String.format("%0" + length + "d", ranInt);
+		if (length == 0) {
+			return "";
 		}
+		int maxValue = (int) Math.pow(10, length) - 1;
+		int ranInt = RandomUtils.nextInt(0, maxValue);
+		String strInt = ranInt + "";
+		strInt = String.format("%0" + length + "d", ranInt);
 		return strInt;
 	}
 
