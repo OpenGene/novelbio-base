@@ -41,7 +41,7 @@ public class LayoutForce {
 		lsNodes = layoutForce.springLayout(10000);
 	}
 	
-	public void setLsNodesAndEdges(List<Node> lsNodes, List<Edge> lsEdges) {
+	public void setLsNodesAndEdges(List<? extends Node> lsNodes, List<? extends Edge> lsEdges) {
 		for (Node node : lsNodes) {
 			if (node.getId().contains(Edge.nodeSep)) {
 				throw new RuntimeException("node id cannot contain " + Edge.nodeSep);

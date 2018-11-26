@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.math3.stat.StatUtils;
@@ -1094,4 +1095,45 @@ public class MathComput {
 		return hashResult;
 	}
 	
+	public static int roman2Int(String roman) {
+		Roman2Int roman2Int = new Roman2Int();
+		return roman2Int.romanToInt(roman);
+	}
+	
+}
+class Roman2Int {
+	Map<Character, Integer> mapChr2Int = new HashMap<>();
+	
+	public Roman2Int() {
+		mapChr2Int.put('I', 1);
+		mapChr2Int.put('V', 5);
+		mapChr2Int.put('X', 10);
+		mapChr2Int.put('L', 50);
+		mapChr2Int.put('C', 100);
+		mapChr2Int.put('D', 500);
+		mapChr2Int.put('M', 1000);
+	}
+	public int romanToInt(String s) {  
+		if (s.length() < 1) return 0;  
+		int result = 0;  
+		int current = 0;  
+		int pre = mapChr2Int.get(s.charAt(0));  
+		int temp = pre;   
+		for (int i = 1; i < s.length(); i++) {  
+			current = mapChr2Int.get(s.charAt(i));  
+			if (current == pre)  
+				temp += current;  
+			else if (current > pre){  
+				temp = current - temp;  
+			}  
+			else if (current < pre){  
+				result += temp;  
+				temp = current;  
+			}  
+			pre = current;  
+		}  
+		result += temp;  
+		return result;  
+	}
+
 }

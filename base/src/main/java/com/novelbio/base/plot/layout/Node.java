@@ -10,6 +10,7 @@ public class Node {
 	double x;
 	double y;
 	double r;
+	String info;
 	
 	public Node(String id) {
 		this.id = id;
@@ -42,7 +43,12 @@ public class Node {
 	public double getR() {
 		return r;
 	}
-	
+	public void setInfo(String info) {
+		this.info = info;
+	}
+	public String getInfo() {
+		return info;
+	}
 	/** 
 	 * 计算node1在node2的作用下的位移情况<br>
 	 * 返回 node1 所需要的位移<br>

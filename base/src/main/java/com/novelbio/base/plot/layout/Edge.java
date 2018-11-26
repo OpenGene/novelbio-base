@@ -26,6 +26,9 @@ public class Edge {
 	public String getId2() {
 		return id2;
 	}
+	public void setLength(double length) {
+		this.length = length;
+	}
 	/** 0 表示默认长度，按照电磁力弹出去 */
 	public double getLength() {
 		return length;
