@@ -10,10 +10,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,7 @@ import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.fileOperate.ExceptionNbcFile;
 import com.novelbio.base.fileOperate.FileOperate;
+import com.novelbio.base.util.IOUtil;
 
 /**
  * <b>本类需要实例化才能使用</b><br> 
@@ -117,9 +120,7 @@ public class ExcelOperate implements Closeable {
 			}
 		} catch (Exception e) {
 		} finally {
-			FileOperate.close(is);
-			FileOperate.close(inputStreamReader);
-			FileOperate.close(bufferedReader);
+			IOUtil.close(is, inputStreamReader, bufferedReader);
 		}
 		return false;
 	}
@@ -142,10 +143,10 @@ public class ExcelOperate implements Closeable {
 		String suffix = FileOperate.getFileSuffix(filename);
 		InputStream is =  FileOperate.getInputStream(filename);
 		if (EXCEL03_SUFFIX.equals(suffix) && isExcel2003(is)) {
-			FileOperate.close(is);
+			IOUtil.close(is);
 			return EXCEL2003;
 		} else if (EXCEL07_SUFFIX.equals(suffix) && isExcel2007(is)) {
-			FileOperate.close(is);
+			IOUtil.close(is);
 			return EXCEL2007;
 		}
 		
@@ -157,17 +158,21 @@ public class ExcelOperate implements Closeable {
 			new HSSFWorkbook(is);
 			return true;
 		} catch (Exception e) {
-			FileOperate.close(is);
+			IOUtil.close(is);
 		}
 		return false;
 	}
 
 	public static boolean isExcel2007(InputStream is) {
 		try {
-			new XSSFWorkbook(is);
+			// TODO 这种判断方法会非常占内存.对于大excel文件.oom概率非常高.所以使用下面的方式.
+			// new XSSFWorkbook(is);
+			
+			OPCPackage pkg = OPCPackage.open(is);
+			new XSSFReader(pkg);
 			return true;
 		} catch (Exception e) {
-			FileOperate.close(is);
+			IOUtil.close(is);
 		}
 		return false;
 	}
