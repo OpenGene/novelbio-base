@@ -43,9 +43,8 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
-import com.alibaba.fastjson.JSON;
+import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.fileOperate.FileOperate;
-import com.novelbio.base.security.Crypter;
 
 /**
  * HTTP 请求工具类
@@ -157,7 +156,7 @@ public class HttpUtil {
 			if (params != null) {
 				List<NameValuePair> pairList = new ArrayList<>(params.size());
 				for (Map.Entry<String, Object> entry : params.entrySet()) {
-					NameValuePair pair = new BasicNameValuePair(entry.getKey(), entry.getValue().toString());
+					NameValuePair pair = new BasicNameValuePair(entry.getKey(), entry.getValue() == null ? null : entry.getValue().toString());
 					pairList.add(pair);
 				}
 				httpPost.setEntity(new UrlEncodedFormEntity(pairList, Charset.forName("UTF-8")));
@@ -210,12 +209,24 @@ public class HttpUtil {
 
 	public static void main(String[] args) {
 		Map<String, Object> params = new HashMap<>();
-		params.put("taskId", "taskId");
-		String requestUrl = "http://pay.test.com/api/freezing_Frozen";
-		Map<String, Object> paramsEn = Crypter.encryptHttpParams(requestUrl.substring(requestUrl.lastIndexOf("/") + 1),
-				JSON.toJSONString(params));
-		String resultStr = HttpUtil.doPost(requestUrl, paramsEn, null);
-		System.out.println("res=" + resultStr);
+		params.put("csrfmiddlewaretoken", "B5qnoqYpWjqV0gCSno0ihs7OpPzM35o1f8klNLfUXf7GQjTkKHy08JdLIdcQcvgH");
+		params.put("chr", "chr01");
+		params.put("pos_start", 1);
+		params.put("pos_end", 10000);
+		params.put("type", "All");
+		params.put("pop1", "All");
+		params.put("b1", "AND");
+		params.put("pop2", "All");
+		params.put("b2", "AND");
+		params.put("pop3", "All");
+		params.put("dispop", "All");
+		Map<String, String> headers = new HashMap<>();
+		headers.put("Cookie", "csrftoken=bUR4X5pjlrPEp9MElrEJ0MByN0aKCbYMPXL2mqGOmnwpfc36IKcrR3Hv6oNOLBQs; _ga=GA1.2.919839038.1530868797; _gid=GA1.2.1209465166.1530868797; _gat=1");
+		String requestUrl = "http://ricevarmap.ncpgr.cn/v2/vars_in_region/";
+		String resultStr = HttpUtil.doPost(requestUrl, params, headers);
+		TxtReadandWrite txtWrite = new TxtReadandWrite("/home/novelbio/tmp/test.html", true);
+		txtWrite.writefile(resultStr, true);
+		txtWrite.close();
 	}
 }
 
