@@ -17,9 +17,9 @@ public class TestMyBeanUtilModel {
 
 	private String a;
 	private Date b;
-	private List<String> lsStr = new ArrayList<>();
-	private Set<Date> setDate = new HashSet<>();
-	private Map<String, Object> mapKey2Obj = new HashMap<>();
+	private List<String> lsStr;
+	private Set<Date> setDate;
+	private Map<String, Object> mapKey2Obj;
 	private TestMyBeanUtilModel innerModel;
 	
 	public String getA() {

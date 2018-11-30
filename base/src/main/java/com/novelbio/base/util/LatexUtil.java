@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.cglib.beans.BeanMap;
+import net.sf.cglib.beans.BeanMap;
 
 /**
  * 处理latex的保留字符转义。<br>
