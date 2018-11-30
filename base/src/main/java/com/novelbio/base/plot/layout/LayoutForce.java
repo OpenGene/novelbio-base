@@ -26,11 +26,11 @@ public class LayoutForce {
 	 * key: Id
 	 * value: node
 	 */
-	Map<String, Node> mapId2Nodes;
+	Map<String, Node> mapId2Nodes = new HashMap<>();
 	/** key: Id1+ Edge.nodeSep + Id2
 	 * value: edge
 	 */
-	Map<String, Edge> mapIds2Edge;
+	Map<String, Edge> mapIds2Edge = new HashMap<>();
 	
 	public static void main(String[] args) {
 		List<Node> lsNodes = new ArrayList<>();
