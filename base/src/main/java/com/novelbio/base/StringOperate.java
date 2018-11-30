@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -176,7 +176,7 @@ public class StringOperate {
 			e.printStackTrace();
 			logger.error("解码出错：" + inputUrl);
 		}
-		result = StringEscapeUtils.unescapeHtml(result);
+		result = StringEscapeUtils.unescapeHtml4(result);
 		return result;
 	}
 	
@@ -216,7 +216,7 @@ public class StringOperate {
     	if (isRealNull(content)) {
 			return content;
 		} else {
-			return StringEscapeUtils.escapeHtml(content).replace("\n", "<br>").replace("\r\n", "<br>");
+			return StringEscapeUtils.unescapeHtml4(content).replace("\n", "<br>").replace("\r\n", "<br>");
 		}
     }
     
