@@ -31,11 +31,9 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
 import org.apache.commons.io.IOUtils;
-import org.apache.hadoop.io.compress.CompressionOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hadoop.compression.lzo.LzopCodec;
 import com.novelbio.base.PathDetail;
 import com.novelbio.base.SerializeKryo;
 import com.novelbio.base.StringOperate;
@@ -52,7 +50,6 @@ import com.novelbio.jsr203.objstorage.PathDetailObjStorage;
 
 import hdfs.jsr203.HadoopFileSystemProvider;
 import hdfs.jsr203.HadoopPath;
-import hdfs.jsr203.HdfsConfInitiator;
 
 public class FileOperate {
 	private static final Logger logger = LoggerFactory.getLogger(FileOperate.class);
@@ -1204,11 +1201,6 @@ public class FileOperate {
 			ZipArchiveEntry entry = new ZipArchiveEntry(getFileNameSep(zipfileName)[0]);
 			zipOutputStream.putArchiveEntry(entry);
 			outputStream = new BufferedOutputStream(zipOutputStream, TxtReadandWrite.bufferLen);
-		} else if (txtTtype == TXTtype.Lzo) {
-			LzopCodec lzo = new LzopCodec();
-			lzo.setConf(HdfsConfInitiator.getConf());
-			CompressionOutputStream outputStreamCmp =lzo.createOutputStream(outputStreamRaw);
-			outputStream = new BufferedOutputStream(outputStreamCmp);
 		}
 		return outputStream;
 	}

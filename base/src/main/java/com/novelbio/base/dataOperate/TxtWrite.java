@@ -94,11 +94,6 @@ class TxtWrite implements Closeable {
 			ZipArchiveEntry entry = new ZipArchiveEntry(FileOperate.getFileNameSep(file.toString())[0]);
 			zipOutputStream.putArchiveEntry(entry);
 			outputStream = new BufferedOutputStream(zipOutputStream, TxtReadandWrite.bufferLen);
-		} else if (txtTtype == TXTtype.Lzo) {
-			LzopCodec lzo = new LzopCodec();
-			lzo.setConf(HdfsConfInitiator.getConf());
-			CompressionOutputStream outputStreamCmp =lzo.createOutputStream(outputStreamRaw);
-			outputStream = new BufferedOutputStream(outputStreamCmp);
 		} else if (txtTtype == TXTtype.BGzip) {
 			throw new ExceptionNbcFile("doesnot support bgzip format");
 		}

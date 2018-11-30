@@ -217,17 +217,7 @@
 			<artifactId>ganymed-ssh2</artifactId>
 			<version>261</version>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.curator</groupId>
-			<artifactId>curator-recipes</artifactId>
-			<version>2.1.0-incubating</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>guava</artifactId>
-					<groupId>com.google.guava</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+
 		<!-- <dependency> <groupId>org.apache.curator</groupId> <artifactId>curator-examples</artifactId> 
 			<version>2.1.0-incubating</version> <exclusions> <exclusion> <artifactId>guava</artifactId> 
 			<groupId>com.google.guava</groupId> </exclusion> </exclusions> </dependency> -->

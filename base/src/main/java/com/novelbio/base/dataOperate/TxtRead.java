@@ -629,10 +629,6 @@ class TxtRead implements Closeable {
 			inputStream = new BufferedInputStream(new GZIPInputStream(inputStreamRaw, TxtReadandWrite.bufferLen), TxtReadandWrite.bufferLen);
 		} else if (txtType == TXTtype.Bzip2) {
 			inputStream = new BufferedInputStream(new BZip2CompressorInputStream(inputStreamRaw), TxtReadandWrite.bufferLen);
-		} else if (txtType == TXTtype.Lzo) {
-			LzopCodec lzo = new LzopCodec();
-			lzo.setConf(HdfsConfInitiator.getConf());   
-			inputStream = lzo.createInputStream(inputStreamRaw);   
 		}
 	}
 	
