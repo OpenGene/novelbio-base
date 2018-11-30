@@ -107,11 +107,7 @@ class TxtWrite implements Closeable {
 	 */	
 	public void flush() {
 		try {
-			if (outputStream instanceof FSDataOutputStream) {
-				((FSDataOutputStream) outputStream).hflush();
-			} else {
-				outputStream.flush();
-			}
+			outputStream.flush();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
