@@ -27,10 +27,8 @@ import java.util.Map.Entry;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 
-import com.hadoop.compression.lzo.DistributedLzoIndexer;
 import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.fileOperate.ExceptionNbcFile;
 import com.novelbio.base.fileOperate.FileHadoop;
@@ -38,8 +36,6 @@ import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.base.fileOperate.RandomFileInt;
 import com.novelbio.base.fileOperate.RandomFileInt.RandomFileFactory;
 import com.novelbio.base.util.IOUtil;
-
-import hdfs.jsr203.HdfsConfInitiator;
 
 /**
  * 新建read没关系
@@ -834,26 +830,6 @@ public class TxtReadandWrite implements Closeable {
         return lsResult;
     }
 
-
-	
-	
-	public static void indexLzo(String inputFile) throws Exception {
-		if(!FileHadoop.isHdfs(inputFile)) {
-			return;
-		}
-		String inputFileHdfs = FileHadoop.convertToHdfsPath(inputFile);
-		FileOperate.deleteFileFolder(inputFileHdfs + ".index");
-
-		inputFile = FileHadoop.convertToHdfsPath(inputFile);
-		DistributedLzoIndexer lzoIndexer = new DistributedLzoIndexer();
-		Configuration indexConf = HdfsConfInitiator.getConf();
-		indexConf.set("io.compression.codecs",
-				"com.hadoop.compression.lzo.LzopCodec");
-		lzoIndexer.setConf(indexConf);
-		
-		lzoIndexer.run(new String[]{inputFile});
-	}
-	
 	public static String readFirstLine(String txtFile) {
 		return readFirstLine(FileOperate.getPath(txtFile));
 	}

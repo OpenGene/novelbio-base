@@ -1,7 +1,5 @@
 package com.novelbio.base.dataOperate;
 
-import hdfs.jsr203.HdfsConfInitiator;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.Closeable;
@@ -23,7 +21,6 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.log4j.Logger;
 
-import com.hadoop.compression.lzo.LzopCodec;
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
 import com.novelbio.base.dataStructure.PatternOperate;
