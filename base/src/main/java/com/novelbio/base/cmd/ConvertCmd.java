@@ -11,9 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.dataStructure.doubleArrayTrie.TrieSetLongFindShort;
-import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
-import com.novelbio.jsr203.objstorage.PathDetailObjStorage;
 
 /**
  * 文件夹切分并删除的工作
@@ -101,12 +99,11 @@ public abstract class ConvertCmd {
 				//java -jar /trimmomatic.jar PE -phred33 hdfs:/tmp/1.fq.gz hdfs:/tmp/2.fq.gz ... ILLUMINACLIP:hdfs:/tmp/PE.fa:2:30:10 LEADING:3
 				//其中 ILLUMINACLIP:hdfs:/tmp/PE.fa:2:30:10 这个文件夹在了两个参数之间。这样就很讨厌。所以这个业务主要就是把两个参数之间的文件拿出来转换文件名的
 				String tmpCmdSub = tmpCmd.replace("hdfs:", "hdfs@-@");
-				tmpCmdSub = tmpCmdSub.replace(PathDetailObjStorage.getSymbol() + ":", "cloud@-@");
 				if (tmpCmdSub.contains(":")) {
 					String[] tmpCmd2Path = tmpCmdSub.split(":");
 					String[] tmpResult = new String[tmpCmd2Path.length];
 					for (int i = 0; i < tmpCmd2Path.length; i++) {
-						tmpResult[i] = convertSubCmd(tmpCmd2Path[i].replace("hdfs@-@", "hdfs:").replace("cloud@-@", PathDetailObjStorage.getSymbol() + ":"));  
+						tmpResult[i] = convertSubCmd(tmpCmd2Path[i].replace("hdfs@-@", "hdfs:"));  
 		            }
 					tmpCmd = ArrayOperate.cmbString(tmpResult, ":");
 					return tmpCmd;
@@ -120,11 +117,6 @@ public abstract class ConvertCmd {
 	public static class ConvertHdfs extends ConvertCmd {
 		@Override
 		String convert(String subCmd) {
-			if (subCmd.length() > 6) {
-				if (FileHadoop.isHdfs(subCmd) || FileHadoop.isHdfs(subCmd.substring(1, subCmd.length() - 2))) {
-					return FileHadoop.convertToLocalPath(subCmd);
-				}
-			}
 			return subCmd;
 		}
 	}
@@ -149,19 +141,7 @@ public abstract class ConvertCmd {
 		}
 		@Override
 		String convert(String subCmd) {
-			if (subCmd.length() > 6) {
-				if (FileHadoop.isHdfs(subCmd) || FileHadoop.isHdfs(subCmd.substring(1, subCmd.length() - 2))) {
-					return FileHadoop.convertToLocalPath(subCmd);
-				}
-			} 
-			if(subCmd.startsWith(PathDetailObjStorage.getSymbol() + "://")) {
-				// TODO 这里是有bug的.测试先这么写.
-				String convertCmd = CmdMoveFileAli.convertAli2Loc(subCmd, isReadMap);
-				logger.info("convert oss cmd unit from {} to {}", subCmd, convertCmd);
-				return convertCmd;
-			} else {
-				return subCmd;
-			}
+			return subCmd;
 		}
 	}
 	public static class ConvertCmdTmp extends ConvertCmd {

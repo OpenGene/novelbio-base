@@ -384,13 +384,6 @@ public class TestFileOperate {
 		Assert.assertTrue(FileOperate.isFileExist("/home/novelbio/git/snakerflow/snaker-nutz/src/test/resources/log4j.properties"));
 	}
 	
-	@Test
-	public void testConvertHdfsOssToLocal() {
-		String path = "cos://novelbrainbj-1255651097//nbCloud/public/task/scriptmodule/fastp/";
-		String convertPath = FileOperate.convertHdfsOssToLocal(path, true);
-		assertEquals("/home/novelbio/cos/.inmap./nbCloud/public/task/scriptmodule/fastp/", convertPath);
-	}
-	
 	public static void main(String[] args) {
 		
 		Map<Integer, String> mapTest = new HashMap<>();

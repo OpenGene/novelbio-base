@@ -38,17 +38,10 @@ import com.novelbio.base.fileOperate.FileOperate;
 public class CmdPathCluster {
 	private static final Logger logger = LoggerFactory.getLogger(CmdPathCluster.class);
 	
-	/** 是否为阿里云 */
-	boolean isAliyun;
-	
 	/** key 实际输出文件夹
 	 * value 该实际输出文件夹当时的临时文件夹，以 "/" 结尾
 	 */
 	Map<String, String> mapOutPath2TmpOutPath = new ConcurrentHashMap<>();
-	
-	public CmdPathCluster(boolean isAliyun) {
-		this.isAliyun = isAliyun;
-	}
 	
 	/** 目前仅用于打印日志 */
 	public void printLogMapOutPath2TmpOutPath(boolean isDebug) {
@@ -72,9 +65,6 @@ public class CmdPathCluster {
 		String outTmp = FileOperate.getParentPathNameWithSep(tmpOut);
 		String outReal = FileOperate.getParentPathNameWithSep(out);
 		mapOutPath2TmpOutPath.put(outReal, outTmp);
-		if (isAliyun) {
-			mapOutPath2TmpOutPath.put(CmdMoveFileAli.convertAli2Loc(outReal, true), outTmp);
-		}
 	}
 	
 	/**
@@ -191,7 +181,7 @@ public class CmdPathCluster {
 		//也就是key统一为  /home/novelbio/oss/.inmap./test 
 		ArrayListMultimap<String, String> mapPath2LsConvertPath = ArrayListMultimap.create();
 		for (String path : lsPath) {
-			mapPath2LsConvertPath.put(CmdMoveFileAli.convertAli2Loc(path, true), path);
+			mapPath2LsConvertPath.put(path, path);
 		}
 		//====================
 		Map<String, String> mapPath2TmpPath = new HashMap<>();

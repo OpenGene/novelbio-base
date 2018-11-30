@@ -1,8 +1,5 @@
 package com.novelbio.base.plot;
 
-import com.novelbio.base.fileOperate.FileHadoop;
-
-
 /**
  * 韦恩图对象
  * @author novelbio
@@ -45,7 +42,7 @@ public class VennImage {
 	 * @param height 图片高度
 	 */
 	public VennImage(String savePath,int width,int height) {
-		this.savePath = FileHadoop.convertToLocalPath(savePath.replace("\\", "/"));
+		this.savePath = savePath.replace("\\", "/");
 		this.width = width;
 		this.height = height;
 	}

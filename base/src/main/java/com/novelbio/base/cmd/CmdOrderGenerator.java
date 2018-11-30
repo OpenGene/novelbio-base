@@ -7,12 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.novelbio.base.StringOperate;
-import com.novelbio.base.cmd.ConvertCmd.ConvertCloud;
 import com.novelbio.base.cmd.ConvertCmd.ConvertCmdGetFileName;
 import com.novelbio.base.cmd.ConvertCmd.ConvertCmdTmp;
-import com.novelbio.base.cmd.ConvertCmd.ConvertHdfs;
 import com.novelbio.base.fileOperate.FileOperate;
-import com.novelbio.base.util.ServiceEnvUtil;
 
 /**
  * 输入cmdlist，将其整理为相应的cmd string array<br>
@@ -47,14 +44,6 @@ public class CmdOrderGenerator {
 	
 	/** 是否已经生成了临时文件夹，生成一次就够了 */
 	boolean isGenerateTmpPath = false;
-	
-	/** 是否将hdfs的路径，改为本地路径
-	 * 如将 /hdfs:/fseresr 改为 /media/hdfs/fseresr
-	 * 只有类似varscan这种我们修改了代码，让其兼容hdfs的程序才不需要修改
-	 * 
-	 * 也有把oss或者bos路径修改为本地路径
-	 */
-	boolean isConvertHdfs2Loc = true;	
 	/**
 	 * 标准输出是否按照后缀名进行自动压缩
 	 * 正常情况输出到标准输出流 > out.gz  会自动压缩成gz格式
@@ -108,14 +97,6 @@ public class CmdOrderGenerator {
 	
 	public void setLsCmd(List<String> lsCmd) {
 		this.lsCmd = lsCmd;
-	}
-	
-	/** 是否将hdfs的路径，改为本地路径，<b>默认为true</b><br>
-	 * 如将 /hdfs:/fseresr 改为 /media/hdfs/fseresr<br>
-	 * 只有类似varscan这种我们修改了代码，让其兼容hdfs的程序才不需要修改
-	 */
-	public void setConvertHdfs2Loc(boolean isConvertHdfs2Loc) {
-		this.isConvertHdfs2Loc = isConvertHdfs2Loc;
 	}
 	
 	/** 如果param为null则返回 */
@@ -236,7 +217,6 @@ public class CmdOrderGenerator {
 		
 		ConvertCmdTmp convertCmdTmp = cmdMoveFile.generateConvertCmdTmp();
 		//这个感觉用不到，或者说仅用于hdfs的转化，因为oss的转化已经在Script.getLsValue()那块完成
-		ConvertCmd convertOs2Local = getConvertOs2Local(true);
 		//TODO
 		for (String tmpCmd : lsCmd) {
 			if (redirectStdAndErr) {
@@ -284,17 +264,10 @@ public class CmdOrderGenerator {
 				stdIn = false;
 				continue;
 			}
-			if (isConvertHdfs2Loc) {
-				tmpCmd = convertOs2Local.convertSubCmd(tmpCmd);
-			}
 			lsReal.add(tmpCmd);
 		}
 		String[] realCmd = lsReal.toArray(new String[0]);
 		return realCmd;
-	}
-	
-	public static ConvertCmd getConvertOs2Local(boolean isReadMap) {
-		return ServiceEnvUtil.isCloudEnv() ? new ConvertCloud(isReadMap) : new ConvertHdfs();
 	}
 	
 //	/**

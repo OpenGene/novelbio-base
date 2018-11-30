@@ -185,7 +185,7 @@ public class CmdMoveFile {
   		if (isGenerateTmpPath) {
 			return;
 		}
-		if (cmdPathCluster == null) cmdPathCluster = new CmdPathCluster(false);
+		if (cmdPathCluster == null) cmdPathCluster = new CmdPathCluster();
 		
 		Set<String> setFileNameAll = new HashSet<>();
 		
@@ -439,11 +439,4 @@ public class CmdMoveFile {
 				setInput, setInNotCopy, setOutputMerge, setOutNotCopy, mapName2TmpName);
 	}
 	
-	public static CmdMoveFile getInstance(boolean isLocal) {
-		if (isLocal) {
-			return new CmdMoveFile();
-		} else {
-			return new CmdMoveFileAli();
-		}
-	}
 }

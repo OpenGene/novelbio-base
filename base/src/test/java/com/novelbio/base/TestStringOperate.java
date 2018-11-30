@@ -2,7 +2,6 @@ package com.novelbio.base;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mortbay.servlet.RestFilter;
 
 public class TestStringOperate {
 	@Test
@@ -21,13 +20,13 @@ public class TestStringOperate {
 	
 	@Test
 	public void testIsContainerSpecialCode() {
-		String fileName = "欧意生物-2016.docx";
+		String fileName = "欧易生物-2016.docx";
 		boolean is = StringOperate.isContainerSpecialCode(fileName);
 		Assert.assertFalse(is);
-		fileName = "欧意生物_2016.docx";
+		fileName = "欧易生物_2016.docx";
 		is = StringOperate.isContainerSpecialCode(fileName);
 		Assert.assertFalse(is);
-		fileName = "欧意生物(2016).docx";
+		fileName = "欧易生物(2016).docx";
 		is = StringOperate.isContainerSpecialCode(fileName);
 		Assert.assertTrue(is);
 	}

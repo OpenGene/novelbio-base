@@ -14,19 +14,13 @@ import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.hdfs.DFSOutputStream;
-import org.apache.hadoop.io.compress.CompressionOutputStream;
 import org.apache.log4j.Logger;
 
-import com.hadoop.compression.lzo.LzopCodec;
 import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
 import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.fileOperate.ExceptionNbcFile;
 import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.base.util.IOUtil;
-
-import hdfs.jsr203.HdfsConfInitiator;
 
 class TxtWrite implements Closeable {
 	private static Logger logger = Logger.getLogger(TxtReadandWrite.class);

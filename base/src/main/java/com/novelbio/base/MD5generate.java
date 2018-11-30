@@ -13,7 +13,6 @@ import java.security.NoSuchAlgorithmException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 
-import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.base.fileOperate.SeekablePathInputStream;
 
@@ -45,8 +44,6 @@ public class MD5generate {
 	
 	public static void main(String[] args) throws Exception {
 		String filePath = "/hdfs:/nbCloud/public/publicFile/deflate.js";
-		if(FileHadoop.isHdfs(filePath))
-			System.out.println(FileHadoop.convertToLocalPath(filePath));
 	}
 	/**
 	 * 返回""表示出错
@@ -71,8 +68,6 @@ public class MD5generate {
 	 */
 	//TODO 效果一般待修正
 	public static String getNBCFileRealMd5(String fileName) throws IOException {
-		if(FileHadoop.isHdfs(fileName))
-			fileName = FileHadoop.convertToLocalPath(fileName);
 		File file = new File(fileName);
 		FileInputStream in = new FileInputStream(file);  
 		FileChannel ch = in.getChannel();  
@@ -138,8 +133,6 @@ public class MD5generate {
 		fileLength = FileOperate.getFileSizeLong(fileName);
 		maxSize = (maxSize > fileLength ? fileLength : maxSize);
 		
-		if(FileHadoop.isHdfs(fileName))
-			fileName = FileHadoop.convertToLocalPath(fileName);
 		File file = new File(fileName);
 		FileInputStream in = new FileInputStream(file);  
 		FileChannel ch = in.getChannel();  

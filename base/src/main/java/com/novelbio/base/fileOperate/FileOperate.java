@@ -7,8 +7,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -18,7 +16,6 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
-import java.nio.file.spi.FileSystemProvider;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -37,26 +34,15 @@ import org.slf4j.LoggerFactory;
 import com.novelbio.base.PathDetail;
 import com.novelbio.base.SerializeKryo;
 import com.novelbio.base.StringOperate;
-import com.novelbio.base.cmd.CmdMoveFileAli;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.dataOperate.TxtReadandWrite.TXTtype;
 import com.novelbio.base.dataStructure.PatternOperate;
 import com.novelbio.base.util.IOUtil;
-import com.novelbio.base.util.ServiceEnvUtil;
-import com.novelbio.jsr203.objstorage.ObjPath;
-import com.novelbio.jsr203.objstorage.ObjStorageUtil;
-import com.novelbio.jsr203.objstorage.PathDetailObjStorage;
-
-import hdfs.jsr203.HadoopFileSystemProvider;
-import hdfs.jsr203.HadoopPath;
 
 public class FileOperate {
 	private static final Logger logger = LoggerFactory.getLogger(FileOperate.class);
-	static HadoopFileSystemProvider hdfsProvider = new HadoopFileSystemProvider();
-	static FileSystemProvider objProvider = PathDetailObjStorage.generateObjStorageFileSystemProvider();
-	
-	static ICloudFileOperate cloudFileOperate = null;
+
 	
 	static PatternOperate patternOperate = new PatternOperate("^[/\\\\]{0,2}[^/]+\\:[/\\\\]{0,2}");
 	static boolean isWindowsOS = false;
@@ -65,33 +51,12 @@ public class FileOperate {
 		if (osName.toLowerCase().indexOf("windows") > -1) {
 			isWindowsOS = true;
 		}
-		try {
-			//TODO 这里放NBCWebApp启动时候初始化
-			cloudFileOperate = CloudFileOperateFactory.getInstance().getCloudFileOperate();
-		} catch (Exception e) {
-			logger.warn("cloudFileOperate init error. " + e.getMessage());
-		}
-		logger.info("cloudFileOperate=" + cloudFileOperate);
 	}
 	/** 是否是windows操作系统 */
 	public static boolean isWindows() {
 		return isWindowsOS;
 	}
 
-	/**
-	 * 返回当前系统的schema，譬如oss，hdfs等
-	 * 注意要么返回hdfs，要么返回oss/cos
-	 * 不会返回
-	 * 注意不带最后的冒号
-	 * @return
-	 */
-	public static String getSchema() {
-		if (ServiceEnvUtil.isHadoopEnvRun()) {
-			return hdfsProvider.getScheme();
-		} else {
-			return objProvider.getScheme();
-		}
-	}
 	/**
 	 * 是否为绝对路径，也就是以
 	 * "/"  "hdfs:"  "cos:" "oss:"
@@ -100,11 +65,6 @@ public class FileOperate {
 	 */
 	public static boolean isAbsolutPath(String path) {
 		String head = "/";
-		if (ServiceEnvUtil.isHadoopEnvRun()) {
-			head = hdfsProvider.getScheme() + ":/";
-		} else if (ServiceEnvUtil.isCloudEnv()) {
-			head = objProvider.getScheme() + ":/";
-		}
 		if (StringOperate.isRealNull(path)) {
 			return false;
 		}
@@ -121,15 +81,7 @@ public class FileOperate {
 	 */
 	@Deprecated
 	public static File getFile(String filePath) {
-		File file = null;
-		boolean isHdfs = FileHadoop.isHdfs(filePath);
-		if (isHdfs) {
-			file = new FileHadoop(filePath);
-		} else if (filePath.startsWith("oss:/")) {
-			file = new File(getPath(filePath).toString());
-		} else {
-			file = new File(filePath);
-		}
+		File file = new File(filePath);
 		return file;
 	}
 	
@@ -138,74 +90,26 @@ public class FileOperate {
 		String pathStr = "cos://novelbiosha-1255651097/publicFile/Special_Information_for_test/Nelumbo_nucifera_genome/unplaced.scaf_sep/gi|478766296|gb|AQOG01057743.fa";
 		Path path = getPath(pathStr);
 		System.out.println(path);
-		System.out.println(ObjStorageUtil.getInnerPath(path));
 	}
 	
 	public static Path getPath(String first, String... rest) {
-		try {
-			if (first == null || rest == null || rest.length == 0) {
-				throw new IllegalArgumentException("params can not be null");
-			}
-			if (first.startsWith(HadoopFileSystemProvider.SCHEME + ":/")) {
-				String[] params = getURIParams(FileHadoop.hdfsSymbol, first);
-				URI uri = new URI("hdfs", params[0], params[1], null);
-				return hdfsProvider.getFileSystem(uri).getPath(uri.getPath(), rest);
-			} else if (first.startsWith(objProvider.getScheme() + ":/")) {
-				String[] params = getURIParams(objProvider.getScheme(), first);
-				URI uri = new URI(objProvider.getScheme(), params[0], params[1], null);
-				return objProvider.getFileSystem(uri).getPath(uri.getPath(), rest);
-			}  else {
-				return Paths.get(first, rest);
-			}
-		} catch (URISyntaxException e) {
-			throw new ExceptionFileError("getPath error.path=" + first, e);
+		if (first == null || rest == null || rest.length == 0) {
+			throw new IllegalArgumentException("params can not be null");
 		}
+		return Paths.get(first, rest);
 	}
 	
 	public static Path getPath(String fileName) {
 		if (StringOperate.isRealNull(fileName))
 			return null;
-		if (fileName.startsWith(PathDetail.getHdpHdfsHeadSymbol())) {
-			//这个是为了兼容老的数据
-			fileName = fileName.replaceFirst(PathDetail.getHdpHdfsHeadSymbol(), FileHadoop.hdfsSymbol);
-		}
 		try {
-			if (fileName.startsWith(FileHadoop.hdfsSymbol)) {
-				String[] params = getURIParams(FileHadoop.hdfsSymbol, fileName);
-				URI uri = new URI("hdfs", params[0], params[1], null);
-				// TODO 不是类没加载，而是META文件没有读取到
-				// Paths.get(uri);
-				return hdfsProvider.getPath(uri);
-			} else if (fileName.startsWith(objProvider.getScheme())) {
-				String[] params = getURIParams(objProvider.getScheme(), fileName);
-				URI uri = new URI(objProvider.getScheme(), params[0], params[1], null);
-				return objProvider.getPath(uri);
-			} else {
-				File file = new File(fileName);
-				return file.toPath();
-			}
+			File file = new File(fileName);
+			return file.toPath();
 		} catch (Exception e) {
 			throw new ExceptionFileError("cannot get path from " + fileName, e);
 		}
 	}
 	
-	private static String[] getURIParams(String scheme, String fileName) {
-		fileName = fileName.replace(scheme, "");
-		if (fileName.startsWith(":")) {
-			fileName = fileName.replaceFirst(":", "");
-		}
-		String host = null, path = "";
-		if (fileName.startsWith("//")) {
-			String[] ss = fileName.replaceFirst("//", "").split("/", 2);
-			host = ss[0];
-			path = "/" + ss[1];
-		} else {
-			path = fileName;
-		}
-		
-		return new String[] {host, path};
-	}
-
 	public static Path getPath(File file) {
 		if (file == null)
 			return null;
@@ -353,10 +257,6 @@ public class FileOperate {
 			throw new ExceptionFileError("cannot get file " + path);
 		}
 		
-		if (path instanceof CloudPath) {
-			return ((CloudPath)path).getCreateTime();
-		}
-		
 //		if (cloudFileOperate != null && cloudFileOperate.isDbSavedPath(path)) {
 //			return cloudFileOperate.getTimeLastModify(path);
 //		}
@@ -452,15 +352,7 @@ public class FileOperate {
 	 * @return 没有文件返回-1
 	 * @throws IOException
 	 */
-	// TODO 测试
 	public static long getFileSizeLong(Path path) {
-//		if (cloudFileOperate != null && cloudFileOperate.isDbSavedPath(path)) {
-//			return cloudFileOperate.getFileSizeLong(path);
-//		}
-		if (path != null && path instanceof CloudPath) {
-			return ((CloudPath)path).getFileSize();
-		}
-		
 		if (path == null || !isFileExist(path)) {
 			return -1;
 		}
@@ -630,15 +522,6 @@ public class FileOperate {
 		}
 		
 		String name = path.toAbsolutePath().normalize().toString();
-		if (path instanceof HadoopPath) {
-			if (name.startsWith(PathDetail.getHdpHdfsHeadSymbol())) {
-				name = name.replaceFirst(PathDetail.getHdpHdfsHeadSymbol(), FileHadoop.hdfsSymbol);
-			} else if (!name.startsWith(FileHadoop.hdfsSymbol)) {
-				name = FileHadoop.hdfsSymbol + name;
-			}
-		} else if (path instanceof ObjPath) {
-			name = path.toString();
-		}
 		return name;
 	}
 	
@@ -653,15 +536,7 @@ public class FileOperate {
 		}
 		
 		boolean isAddSplashHead = false;
-		if (fileName.startsWith(PathDetail.getHdpHdfsHeadSymbol())) {
-			fileName = FileHadoop.convertToHdfsPath(fileName);
-		}
-		if (fileName.startsWith(FileHadoop.hdfsSymbol)) {
-			if (!fileName.startsWith("/")) {
-				fileName = "/" + fileName;
-				isAddSplashHead = true;
-			}
-		} else if (fileName.startsWith("file://")) {
+		if (fileName.startsWith("file://")) {
 			fileName = fileName.replaceFirst("file://", "");
 		}
 		File file = new File(fileName);
@@ -675,30 +550,7 @@ public class FileOperate {
 			throw new ExceptionFileError("cannot getCanonicalPath " + fileName, e);
 		}
 	}
-	public static String convertToHdfs(String file) {
-		if (!ServiceEnvUtil.isHadoopEnvRun()) {
-			return file;
-		}
-		return FileHadoop.convertToHdfsPath(file);
-	}
 	
-	/**
-	 * 把hdfs、oss路径转换成本地挂载的路径
-	 * @param path
-	 * @param isRead 仅公有云用到，只读挂载还是只写挂载
-	 * @return
-	 */
-	public static String convertHdfsOssToLocal(String path, boolean isRead) {
-		if (FileHadoop.isHdfs(path)) {
-			path = FileHadoop.convertToLocalPath(path);
-		}
-		if (ServiceEnvUtil.isCloudEnv() && path.startsWith(FileOperate.getSchema() +":")) {
-			path = CmdMoveFileAli.convertAli2Loc(path, isRead);
-		}
-		return path;
-	}
-	
-
 	/**
 	 * 获取文件夹下包含指定文件名与后缀的所有文件名，仅找第一层，不递归<br>
 	 * 如果文件不存在则返回null<br>
@@ -890,10 +742,6 @@ public class FileOperate {
 			return lsFilenames;
 		}
 		
-		if (cloudFileOperate != null && cloudFileOperate.isDbSavedPath(path)) {
-			return cloudFileOperate.getLsFoldPath(path, filename, suffix);
-		}
-		
 		int noNeedReg = 0;
 		if (filename == null || filename.equals("*")) {
 			noNeedReg++;
@@ -988,10 +836,6 @@ public class FileOperate {
 			return lsPath;
 		}
 		
-		if (cloudFileOperate != null && cloudFileOperate.isDbSavedPath(path)) {
-			return cloudFileOperate.getLsFoldPathRecur(path, filename, suffix, isNeedFolder);
-		}
-
 		int noNeedReg = 0;
 		if (filename == null || filename.equals("*")) {
 			noNeedReg++;
@@ -1243,10 +1087,7 @@ public class FileOperate {
 			deleteFileFolder(file);
 		}
 		createFolders(getParentPathNameWithSep(file));
-		if (!append || !isFileExist || !file.toUri().toString().startsWith(FileHadoop.hdfsSymbol)) {
-			return Files.newOutputStream(file, openOption);
-		}
-		return HdfsInitial.getFileSystem().append(new org.apache.hadoop.fs.Path(file.toUri()));
+		return Files.newOutputStream(file, openOption);
 	}
 	
 	/**
@@ -1365,18 +1206,13 @@ public class FileOperate {
 		}
 		Path pathNewTmp = getPath(changeFileSuffix(getAbsolutePath(pathNew), "_tmp", null));
 		try {
-			if (pathNew instanceof ObjPath) {
-				//拷贝到云平台的对象存储中.没有拷贝好是不会有文件显示的.如果改用_tmp会操作更复杂
-				Files.copy(oldfile, pathNew, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
-			} else {
-				Files.deleteIfExists(pathNewTmp);
-				createFolders(getPathName(pathNew));
-				logger.debug("start copy from {} to {}", oldfile, pathNew);
-				//XXX 这里注意.StandardCopyOption的其他两个参数底层不支持.所以这里必须是REPLACE_EXISTING
-				Files.copy(oldfile, pathNewTmp, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
-				Files.deleteIfExists(pathNew);
-				Files.move(pathNewTmp, pathNew, StandardCopyOption.REPLACE_EXISTING);
-			}
+			Files.deleteIfExists(pathNewTmp);
+			createFolders(getPathName(pathNew));
+			logger.debug("start copy from {} to {}", oldfile, pathNew);
+			//XXX 这里注意.StandardCopyOption的其他两个参数底层不支持.所以这里必须是REPLACE_EXISTING
+			Files.copy(oldfile, pathNewTmp, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+			Files.deleteIfExists(pathNew);
+			Files.move(pathNewTmp, pathNew, StandardCopyOption.REPLACE_EXISTING);
 		} catch (Exception e) {
 			throw new ExceptionNbcFile("copy file from " + oldfile + " to " + pathNew + " error", e);
 		}
@@ -1672,16 +1508,11 @@ public class FileOperate {
 			if (isFileExist(destPath)) {
 				if (!isCover)
 					return;
-				if (destPath instanceof ObjPath) {
-					//云平台对象存储移动.后台执行copy和delete两个操作.copy时,如果文件存在会自动覆盖的
-					Files.move(srcPath, destPath);
-				} else {
-					Path destPathTmp = getPath(destPathStr + ".tmp" + DateUtil.getDateAndRandom());
-					Files.deleteIfExists(destPathTmp);
-					Files.move(srcPath, destPathTmp);
-					Files.deleteIfExists(destPath);
-					Files.move(destPathTmp, destPath);
-				}
+				Path destPathTmp = getPath(destPathStr + ".tmp" + DateUtil.getDateAndRandom());
+				Files.deleteIfExists(destPathTmp);
+				Files.move(srcPath, destPathTmp);
+				Files.deleteIfExists(destPath);
+				Files.move(destPathTmp, destPath);
 			} else {
 				Files.move(srcPath, destPath);
 			}
@@ -1868,18 +1699,6 @@ public class FileOperate {
 		if (isFileExist(linkTo) && cover) {
 			deleteFileFolder(linkTo);
 		}
-
-		rawFile = FileHadoop.convertToHdfsPath(rawFile);
-		linkTo = FileHadoop.convertToHdfsPath(linkTo);
-		boolean isRawHdfs = FileHadoop.isHdfs(rawFile);
-		boolean isLinkHdfs = FileHadoop.isHdfs(linkTo);
-		if (isRawHdfs ^ isLinkHdfs) {
-			throw new ExceptionFileNotExist("RawFile And LinkTo File Are Not In Same FileSystem\n, raw File: " + rawFile
-					+ "\nLinkTo: " + linkTo);
-		}
-		if (isRawHdfs) {
-			throw new ExceptionNbcFile("could not creat symbolic link on hdfs from " + rawFile + " to " + linkTo);
-		}
 		try {
 			Files.createSymbolicLink(getPath(linkTo), getPath(rawFile));
 		} catch (IOException e) {
@@ -1894,12 +1713,6 @@ public class FileOperate {
 
 	/** 判断文件是否为文件夹,null直接返回false */
 	public static boolean isFileDirectory(Path file) {
-//		if (cloudFileOperate != null && cloudFileOperate.isDbSavedPath(file)) {
-//			return cloudFileOperate.isFileDirectory(file);
-//		}
-		if (file != null && file instanceof CloudPath) {
-			return ((CloudPath)file).isDirectory();
-		}
 		return file != null && Files.isDirectory(file);
 	}
 
@@ -1917,12 +1730,6 @@ public class FileOperate {
 	 * @return 文件存在,返回true.否则,返回false
 	 */
 	public static boolean isFileExist(Path path) {
-//		if (cloudFileOperate != null && cloudFileOperate.isDbSavedPath(path)) {
-//			return cloudFileOperate.isFileExist(path);
-//		}
-		if (path != null && path instanceof CloudPath) {
-			return true;
-		}
 		return path != null && Files.exists(path);
 	}
 
@@ -1952,10 +1759,6 @@ public class FileOperate {
 		return isSymbolicLink(getPath(fileName));
 	}
 	public static boolean isSymbolicLink(Path path) {
-		if (path instanceof ObjPath) {
-			// 对象存储只支持软链接.
-			return false;
-		}
 		return Files.isSymbolicLink(path);
 	}
 	
@@ -2103,11 +1906,6 @@ public class FileOperate {
 		if (isSymbolicLink(file)) {
 			delPath(file);
 			return;
-		}
-		
-		if (file instanceof ObjPath) {
-			// 云平台环境删除对象存储中的文件夹时.在jsr203里有实现对以这个为前缀的所有的key的删除.所以这里就不用遍历了.
-			delPath(file);
 		}
 		
 		try {

@@ -23,7 +23,7 @@ public class TestCmdOperateRedirect {
 	
 	@Test
 	public void testCmdRealCopyToTmp() {
-		CmdPathCluster cmdPathCluster = new CmdPathCluster(false);
+		CmdPathCluster cmdPathCluster = new CmdPathCluster();
 		cmdPathCluster.putTmpOut2Out("/home/novelbio/mytest/result/test.bam", "/hdfs:/nbcloud/result/test.bam");
 		cmdPathCluster.putTmpOut2Out("/home/novelbio/mytest/result2/test.bam", "/hdfs:/nbcloud22/test.bam");
  
@@ -97,7 +97,7 @@ public class TestCmdOperateRedirect {
 		FileOperate.copyFile(script, FileOperate.getParentPathNameWithSep(tmpRealPath1) + "file2", true);
 		FileOperate.copyFile(script, tmpRealPath2 + "file3", true);
 
-		CmdPathCluster cmdPathCluster = new CmdPathCluster(false);
+		CmdPathCluster cmdPathCluster = new CmdPathCluster();
 		FileOperate.createFolders(FileOperate.getParentPathNameWithSep(out1));
 		FileOperate.createFolders(FileOperate.getParentPathNameWithSep(out2));
 		List<String> lsCmd = new ArrayList<>();

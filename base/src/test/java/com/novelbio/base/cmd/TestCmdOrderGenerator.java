@@ -16,7 +16,6 @@ import com.novelbio.base.PathDetail;
 import com.novelbio.base.dataOperate.DateUtil;
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.dataStructure.ArrayOperate;
-import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 
 @RunWith(PowerMockRunner.class)
@@ -42,7 +41,7 @@ public class TestCmdOrderGenerator {
 	
 	private void cmd1() {
 		CmdOrderGenerator cmdPath = new CmdOrderGenerator();
-		CmdMoveFile cmdMoveFile = CmdMoveFile.getInstance(true);
+		CmdMoveFile cmdMoveFile = new CmdMoveFile();
 		List<String> lsCmd = new ArrayList<>();
 		String inFile = "src/test/resources/testTrinity.fa";
 		lsCmd.add("bwa-index"); lsCmd.add(inFile);
@@ -75,7 +74,7 @@ public class TestCmdOrderGenerator {
 	
 	private void cmd2() {
 		CmdOrderGenerator cmdPath = new CmdOrderGenerator();
-		CmdMoveFile cmdMoveFile = CmdMoveFile.getInstance(true);
+		CmdMoveFile cmdMoveFile = new CmdMoveFile();
 		List<String> lsCmd = new ArrayList<>();
 		String inFile = "src/test/resources/testTrinity.fa";
 		String outFile = "src/test/CmdOperateOut/testTrinity.fa";
@@ -107,7 +106,7 @@ public class TestCmdOrderGenerator {
 	/** 假设test3文件夹 不 存在 */
 	private void cmd3() {
 		CmdOrderGenerator cmdPath = new CmdOrderGenerator();
-		CmdMoveFile cmdMoveFile = CmdMoveFile.getInstance(true);
+		CmdMoveFile cmdMoveFile = new CmdMoveFile();
 		List<String> lsCmd = new ArrayList<>();
 		String inFile = "src/test/resources/testTrinity.fa";
 		String outFile = "src/test/CmdOperateOut/testcc";
@@ -140,7 +139,7 @@ public class TestCmdOrderGenerator {
 	/** 假设test4文件夹存在 */
 	private void cmd4() {
 		CmdOrderGenerator cmdPath = new CmdOrderGenerator();
-		CmdMoveFile cmdMoveFile = CmdMoveFile.getInstance(true);
+		CmdMoveFile cmdMoveFile = new CmdMoveFile();
 		List<String> lsCmd = new ArrayList<>();
 		String inFile = "src/test/resources/testTrinity.fa";
 		String outFile = "src/test/CmdOperateOut/testTrinity3.fa";
@@ -173,7 +172,7 @@ public class TestCmdOrderGenerator {
 	/** 假设test5文件夹存在 */
 	private void cmd5() {
 		CmdOrderGenerator cmdPath = new CmdOrderGenerator();
-		CmdMoveFile cmdMoveFile = CmdMoveFile.getInstance(true);
+		CmdMoveFile cmdMoveFile = new CmdMoveFile();
 		List<String> lsCmd = new ArrayList<>();
 		String inFile = "src/test/resources/testTrinity.fa";
 		String outFile = "src/test/CmdOperateOut/testTrinity4.fa";
@@ -204,7 +203,7 @@ public class TestCmdOrderGenerator {
 	
 	private void cmd6() {
 		CmdOrderGenerator cmdPath = new CmdOrderGenerator();
-		CmdMoveFile cmdMoveFile = CmdMoveFile.getInstance(true);
+		CmdMoveFile cmdMoveFile = new CmdMoveFile();
 		List<String> lsCmd = new ArrayList<>();
 		String inFile = "src/test/resources/testTrinity.fa";
 		String outFile = "src/test/CmdOperateOut2/test";
@@ -233,7 +232,7 @@ public class TestCmdOrderGenerator {
 	
 	private void cmd7() {
 		CmdOrderGenerator cmdPath = new CmdOrderGenerator();
-		CmdMoveFile cmdMoveFile = CmdMoveFile.getInstance(true);
+		CmdMoveFile cmdMoveFile = new CmdMoveFile();
 		List<String> lsCmd = new ArrayList<>();
 		String inFile1 = "src/test/resources/testTrinity.fa";
 		String inFile2 = "src/test/resources/testTrinity2.fa";
@@ -271,7 +270,7 @@ public class TestCmdOrderGenerator {
 	
 	private void cmd8() {
 		CmdOrderGenerator cmdPath = new CmdOrderGenerator();
-		CmdMoveFile cmdMoveFile = CmdMoveFile.getInstance(true);
+		CmdMoveFile cmdMoveFile = new CmdMoveFile();
 		List<String> lsCmd = new ArrayList<>();
 		String inFile1 = "src/test/resources/testTrinity.fa";
 		String inFile2 = "src/test/resources/testTrinity2.fa";

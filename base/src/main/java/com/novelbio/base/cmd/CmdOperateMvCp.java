@@ -82,7 +82,6 @@ public class CmdOperateMvCp extends CmdOperate {
 		String outFile = lsCmdStr.get(lsCmdStr.size() - 1);
 		
 		/** 仅需考虑hdfs，如果是cos则不需要考虑这个问题 */
-		outFile = FileOperate.convertToHdfs(outFile);
 		if (StringOperate.isRealNull(outFile)) {
 			throw new ExceptionCmd("cannot move or copy file to null: " + cmd);
 		}
@@ -97,7 +96,6 @@ public class CmdOperateMvCp extends CmdOperate {
 		
 		if (lsCmdStr.get(0).equals("mv")) {
 			for (String file : lsFileNeedMvOrCp) {
-				file = FileOperate.convertToHdfs(file);
 				if (!FileOperate.isFileExistAndBigThan0(file)) {
 					continue;
 				}
@@ -111,7 +109,6 @@ public class CmdOperateMvCp extends CmdOperate {
 		
 		if (lsCmdStr.get(0).equals("cp")) {
 			for (String file : lsFileNeedMvOrCp) {
-				file = FileOperate.convertToHdfs(file);
 				if (!FileOperate.isFileExistAndBigThan0(file)) {
 					continue;
 				}
@@ -155,7 +152,6 @@ public class CmdOperateMvCp extends CmdOperate {
 			lsFolderNeedCreate.add(folderName);
 		}
 		for (String folder : lsFolderNeedCreate) {
-			folder = FileOperate.convertToHdfs(folder);
 			FileOperate.createFolders(folder);
 		}
 		return true;

@@ -21,7 +21,6 @@ import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.dataStructure.PatternOperate;
 import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.base.multithread.RunProcess;
-import com.novelbio.base.util.ServiceEnvUtil;
 
 /**
  * 输入cmd，执行完毕后可以将结果输出到界面，目前cmd只支持英文，否则会出错 只要继承后重写process方法即可
@@ -81,7 +80,7 @@ public class CmdOperate extends RunProcess {
 	
 	/** 用来传递参数，拷贝输入输出文件夹的类 */
 	protected CmdOrderGenerator cmdOrderGenerator = new CmdOrderGenerator();
-	protected CmdMoveFile cmdMoveFile = CmdMoveFile.getInstance(!ServiceEnvUtil.isCloudEnv());
+	protected CmdMoveFile cmdMoveFile = new CmdMoveFile();
 
 	/** 输出本程序正在运行时的参数等信息，本功能也用docker替换了 */
 	@Deprecated
@@ -389,15 +388,6 @@ public class CmdOperate extends RunProcess {
 			cmdMoveFile.addCmdParamOutput(path);
 		}
 	}
-	
-	/** 是否将hdfs的路径，改为本地路径，<b>默认为true</b><br>
-	 * 如将 /hdfs:/fseresr 改为 /media/hdfs/fseresr<br>
-	 * 只有类似varscan这种我们修改了代码，让其兼容hdfs的程序才不需要修改
-	 */
-	public void setIsConvertHdfsToLocal(boolean isConvertHdfs2Loc) {
-		cmdOrderGenerator.setConvertHdfs2Loc(isConvertHdfs2Loc);
-	}
-	
 	/** 是否将输入文件拷贝到临时文件夹，默认为false */
 	public void setRedirectInToTmp(boolean isRedirectInToTmp) {
 		cmdMoveFile.setRedirectInToTmp(isRedirectInToTmp);
@@ -1215,7 +1205,6 @@ class CmdMvCp extends CmdOperate {
 		String outFile = lsCmdStr.get(lsCmdStr.size() - 1);
 		
 		/** 仅需考虑hdfs，如果是cos则不需要考虑这个问题 */
-		outFile = FileOperate.convertToHdfs(outFile);
 		if (StringOperate.isRealNull(outFile)) {
 			throw new ExceptionCmd("cannot move or copy file to null: " + cmd);
 		}
@@ -1230,7 +1219,6 @@ class CmdMvCp extends CmdOperate {
 		
 		if (lsCmdStr.get(0).equals("mv")) {
 			for (String file : lsFileNeedMvOrCp) {
-				file = FileOperate.convertToHdfs(file);
 				if (!FileOperate.isFileExistAndBigThan0(file)) {
 					continue;
 				}
@@ -1244,7 +1232,6 @@ class CmdMvCp extends CmdOperate {
 		
 		if (lsCmdStr.get(0).equals("cp")) {
 			for (String file : lsFileNeedMvOrCp) {
-				file = FileOperate.convertToHdfs(file);
 				if (!FileOperate.isFileExistAndBigThan0(file)) {
 					continue;
 				}
@@ -1288,7 +1275,6 @@ class CmdMvCp extends CmdOperate {
 			lsFolderNeedCreate.add(folderName);
 		}
 		for (String folder : lsFolderNeedCreate) {
-			folder = FileOperate.convertToHdfs(folder);
 			FileOperate.createFolders(folder);
 		}
 		return true;

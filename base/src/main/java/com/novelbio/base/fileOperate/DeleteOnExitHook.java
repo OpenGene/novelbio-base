@@ -72,24 +72,14 @@ class DeleteOnExitHookHadoop {
             theFiles = files;
             files = null;
         }
-        boolean isNeedInitial = true;
         ArrayList<String> toBeDeleted = new ArrayList<>(theFiles);
 
         // reverse the list to maintain previous jdk deletion order.
         // Last in first deleted.
         Collections.reverse(toBeDeleted);
         for (String filename : toBeDeleted) {
-        	if (isNeedInitial) {
-        		HdfsInitial.initial();
-        		isNeedInitial = false;
-        }
         	File file = FileOperate.getFile(filename);
         	file.delete();
        }
-        try {
-			HdfsInitial.getFileSystem().close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
     }
 }
