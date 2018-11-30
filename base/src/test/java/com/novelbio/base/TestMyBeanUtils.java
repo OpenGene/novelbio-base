@@ -53,12 +53,12 @@ public class TestMyBeanUtils {
 		TestMyBeanUtilModel testModel = new TestMyBeanUtilModel();
 		MyBeanUtils.copyMap2Object(mapField2Val, testModel);
 
-		assertTrue(testModel.getA().equals(a)); // string
-		assertTrue(testModel.getB().equals(b)); // date
-		assertTrue(testModel.getSetDate().size() == 1); // set<>
+		assertEquals(a, testModel.getA()); // string
+		assertEquals(b, testModel.getB()); // date
+		assertEquals(1, testModel.getSetDate().size()); // set<>
 
-		assertTrue(testModel.getLsStr().size() == 3); // list
-		assertTrue(testModel.getMapKey2Obj().entrySet().size() == 3); // map
+		assertEquals(3, testModel.getLsStr().size()); // list
+		assertEquals(3, testModel.getMapKey2Obj().entrySet().size()); // map
 
 		mapField2Val.put("a", null);
 		mapTest.put("1", "");
@@ -66,7 +66,7 @@ public class TestMyBeanUtils {
 		MyBeanUtils.copyMap2Object(mapField2Val, testModel); // map中仅修改key值=""
 
 		assertNull(testModel.getA()); // null
-		assertTrue(testModel.getMapKey2Obj().get("1").equals("")); // map中仅修改key值=""
+		assertEquals("", testModel.getMapKey2Obj().get("1")); // map中仅修改key值=""
 
 		String jj = "jjjj";
 		mapField2Val.put("mapKey2Obj.1", jj);
@@ -108,9 +108,9 @@ public class TestMyBeanUtils {
 		model2 = MyBeanUtils.copyAllProperties(model1, model2, true);
 		assertNull(model2.getB());
 		assertNull(model2.getSetDate());
-		
+
 	}
-	
+
 	@Test
 	public void testCopyWithSameType() {
 		// 目标类
@@ -124,11 +124,11 @@ public class TestMyBeanUtils {
 		TestMyBeanUtilModel2 otherModel = new TestMyBeanUtilModel2();
 		otherModel.setA("model2");
 		otherModel.setB(BigDecimal.ZERO);
-		
+
 		model1 = MyBeanUtils.copyWithSameType(otherModel, model1, true);
 		assertEquals(otherModel.getA(), model1.getA());
 		assertNull(model1.getB());
-		
+
 		// 相同对象的拷贝
 		TestMyBeanUtilModel model2 = new TestMyBeanUtilModel();
 		model2.setA("2a");
