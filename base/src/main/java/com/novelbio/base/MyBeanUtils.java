@@ -5,10 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.Validate;
 
 import com.google.common.collect.Lists;
@@ -17,7 +15,8 @@ import net.sf.cglib.beans.BeanMap;
 
 /**
  * 本类进行source到target的拷贝时，相同的字段名对应的类型要一致。<br>
- * 当出现相同字段对应不应的类型时，请使用 TODO--实现方法 方法。
+ * 当出现相同字段对应不应的类型时，请使用
+ * {@link MyBeanUtils#copyWithSameType(Object, Object, boolean)} 方法。
  * 
  * @author novelbio liqi
  * @date 2018年11月30日 下午2:30:21
@@ -140,7 +139,7 @@ public class MyBeanUtils extends BeanUtils {
 		for (String key : source.keySet()) {
 			try {
 				if (key.indexOf(".") == -1) { // 不存在map
-					org.apache.commons.beanutils.BeanUtils.copyProperty(target, key, source.get(key));
+					BeanUtils.copyProperty(target, key, source.get(key));
 				} else {
 					// field最少有2个数据
 					String[] fields = key.split("\\."); // 拆分field和map的key
@@ -157,7 +156,7 @@ public class MyBeanUtils extends BeanUtils {
 					if (temObj instanceof Map) {
 						((Map) temObj).put(fields[lastIndex], source.get(key));
 					} else {
-						org.apache.commons.beanutils.BeanUtils.copyProperty(temObj, fields[lastIndex], source.get(key));
+						BeanUtils.copyProperty(temObj, fields[lastIndex], source.get(key));
 					}
 
 					// 反向循环，逐层往外赋值
