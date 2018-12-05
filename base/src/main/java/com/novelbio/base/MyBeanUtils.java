@@ -3,7 +3,6 @@ package com.novelbio.base;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -263,6 +262,12 @@ public class MyBeanUtils extends BeanUtils {
 		return target;
 	}
 
+	/**
+	 * 逐个获取父类，然后取得声明的属性。父类为object，或者null终止
+	 * 
+	 * @param clazz
+	 * @return
+	 */
 	private static Set<String> getAllDeclaredFieldNames(Class clazz) {
 		Set<String> setFieldName = new HashSet<>();
 		Class currClazz = clazz;
