@@ -22,6 +22,10 @@ public class TestMyBeanUtilModel {
 	private Map<String, Object> mapKey2Obj;
 	private TestMyBeanUtilModel innerModel;
 	
+	public String getVirtualName() {
+		return "virtual name";
+	}
+	
 	public String getA() {
 		return a;
 	}

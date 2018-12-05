@@ -25,11 +25,6 @@
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
-		<dependency>
-			<groupId>cglib</groupId>
-			<artifactId>cglib-nodep</artifactId>
-			<version>3.2.8</version>
-		</dependency>
 		<!-- 画图包，考虑去除 -->
 		<dependency>
 			<groupId>com.novelbio</groupId>

@@ -1,17 +1,20 @@
 package com.novelbio.base;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.apache.commons.beanutils.BeanMap;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.Validate;
 
 import com.google.common.collect.Lists;
-
-import net.sf.cglib.beans.BeanMap;
 
 /**
  * 本类进行source到target的拷贝时，相同的字段名对应的类型要一致。<br>
@@ -35,11 +38,42 @@ public class MyBeanUtils extends BeanUtils {
 	public static <T> Map<String, String> copyNotNullProperties(T source) throws ExceptionNbcBean {
 		Map<String, String> mapResult = new HashMap<>();
 		Validate.notNull(source, "Source must not be null");
-		BeanMap beanMap = BeanMap.create(source);
-		for (Object field : beanMap.keySet()) {
-			Object value = beanMap.get(field);
+		Map<String, Object> notNullMap = copyObject2Map(source, false);
+		for (String fieldName : notNullMap.keySet()) {
+			Object value = notNullMap.get(fieldName);
 			if (value != null) {
-				mapResult.put(field.toString(), value.toString());
+				mapResult.put(fieldName, value.toString());
+			}
+		}
+		return mapResult;
+	}
+
+	/**
+	 * 本类不保证返回的map和Bean同步修改的效果(请使用CGlib中的BeanMap进行同步操作)。<br>
+	 * 本方法拷贝的字段需要有对应的属性声明，且需要有对应的get方法
+	 * 
+	 * @param source
+	 * @param isCopyNull
+	 *            是否拷贝null属性
+	 * @return
+	 * @throws ExceptionNbcBean
+	 */
+	public static <T> Map<String, Object> copyObject2Map(T source, boolean isCopyNull) throws ExceptionNbcBean {
+		Validate.notNull(source, "Source must not be null");
+		// 获取类中的属性,并保存到map中
+		Set<String> setFieldName = getAllDeclaredFieldNames(source.getClass());
+
+		Map<String, Object> mapResult = new HashMap<>();
+		BeanMap beanMap = new BeanMap(source);
+		for (Object field : beanMap.keySet()) {
+			String fieldName = field.toString();
+			// 没有对应的属性，跳过
+			if (!setFieldName.contains(fieldName)) {
+				continue;
+			}
+			Object value = beanMap.get(field);
+			if (isCopyNull || value != null) {
+				mapResult.put(fieldName, value);
 			}
 		}
 		return mapResult;
@@ -82,20 +116,13 @@ public class MyBeanUtils extends BeanUtils {
 	 * @return
 	 * @throws ExceptionNbcBean
 	 */
+	@SuppressWarnings("unchecked")
 	public static <T, K> K copyAllProperties(T source, K target, boolean isCoypNull) throws ExceptionNbcBean {
 		Validate.notNull(target, "Target must not be null");
 		Validate.notNull(source, "Source must not be null");
 		// 获取soure中不为null的属性
-		Map<String, Object> notNullMap = new HashMap<>();
-		BeanMap sourceMap = BeanMap.create(source);
-		for (Object field : sourceMap.keySet()) {
-			Object value = sourceMap.get(field);
-			// isCoypNull复制空属性时， 或者 value不为null
-			if (isCoypNull || value != null) {
-				notNullMap.put(field.toString(), value);
-			}
-		}
-		BeanMap targetMap = BeanMap.create(target);
+		Map<String, Object> notNullMap = copyObject2Map(source, isCoypNull);
+		BeanMap targetMap = new BeanMap(target);
 		targetMap.putAll(notNullMap);
 		return target;
 	}
@@ -113,13 +140,10 @@ public class MyBeanUtils extends BeanUtils {
 	public static <T, K> K copyAllPropertiesWithoutId(T source, K target, boolean isCoypNull) throws ExceptionNbcBean {
 		Validate.notNull(target, "Target must not be null");
 		Validate.notNull(source, "Source must not be null");
-		Map<String, Object> allPropertiesMap = new HashMap<>();
-		// 添加所有属性后，移除id
-		BeanMap sourceMap = BeanMap.create(source);
-		allPropertiesMap.putAll(sourceMap);
+		Map<String, Object> allPropertiesMap = copyObject2Map(source, isCoypNull);
 		allPropertiesMap.remove("id");
 		// 合并到target中
-		BeanMap targetMap = BeanMap.create(target);
+		BeanMap targetMap = new BeanMap(target);
 		targetMap.putAll(allPropertiesMap);
 		return target;
 	}
@@ -147,7 +171,7 @@ public class MyBeanUtils extends BeanUtils {
 					Object temObj = target;
 					int lastIndex = fields.length - 1;
 					for (int i = 0; i < lastIndex; i++) { // fields数组 0 --> (length-2)
-						BeanMap beanMap = BeanMap.create(temObj);
+						BeanMap beanMap = new BeanMap(temObj);
 						lsObj.add(beanMap);
 						temObj = beanMap.get(fields[i]);
 					}
@@ -217,7 +241,7 @@ public class MyBeanUtils extends BeanUtils {
 			}
 		}
 
-		BeanMap sourceMap = BeanMap.create(source);
+		BeanMap sourceMap = new BeanMap(source);
 		// 可以被拷贝的属性
 		Map<String, Object> mapCopyProperties = new HashMap<>();
 		// 填充可以被拷贝的属性
@@ -234,8 +258,29 @@ public class MyBeanUtils extends BeanUtils {
 		}
 
 		// copy到目标对象中
-		BeanMap targetMap = BeanMap.create(target);
+		BeanMap targetMap = new BeanMap(target);
 		targetMap.putAll(mapCopyProperties);
 		return target;
+	}
+
+	private static Set<String> getAllDeclaredFieldNames(Class clazz) {
+		Set<String> setFieldName = new HashSet<>();
+		Class currClazz = clazz;
+		while (currClazz != null) {
+			Field[] arrField = clazz.getDeclaredFields();
+			for (Field field : arrField) {
+				String fieldName = field.getName();
+				if (setFieldName.contains(fieldName)) {
+					continue;
+				}
+				setFieldName.add(fieldName);
+			}
+			Type superType = currClazz.getGenericSuperclass();
+			currClazz = null;
+			if (superType != null && superType.getClass().equals(Object.class)) {
+				currClazz = superType.getClass();
+			}
+		}
+		return setFieldName;
 	}
 }
