@@ -1,29 +1,18 @@
 package com.novelbio.base;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Type;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.beanutils.BeanMap;
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.Validate;
+import org.springframework.beans.BeansException;
 
-import com.google.common.collect.Lists;
-
-/**
- * 本类进行source到target的拷贝时，相同的字段名对应的类型要一致。<br>
- * 当出现相同字段对应不应的类型时，请使用
- * {@link MyBeanUtils#copyWithSameType(Object, Object, boolean)} 方法。
- * 
- * @author novelbio liqi
- * @date 2018年11月30日 下午2:30:21
- */
-public class MyBeanUtils extends BeanUtils {
+public class MyBeanUtils extends org.springframework.beans.BeanUtils {
 
 	/**
 	 * 把新对象中不为null的属性拷贝到旧对象中
@@ -37,42 +26,24 @@ public class MyBeanUtils extends BeanUtils {
 	public static <T> Map<String, String> copyNotNullProperties(T source) throws ExceptionNbcBean {
 		Map<String, String> mapResult = new HashMap<>();
 		Validate.notNull(source, "Source must not be null");
-		Map<String, Object> notNullMap = copyObject2Map(source, false);
-		for (String fieldName : notNullMap.keySet()) {
-			Object value = notNullMap.get(fieldName);
-			if (value != null) {
-				mapResult.put(fieldName, value.toString());
-			}
-		}
-		return mapResult;
-	}
-
-	/**
-	 * 本类不保证返回的map和Bean同步修改的效果(请使用CGlib中的BeanMap进行同步操作)。<br>
-	 * 本方法拷贝的字段需要有对应的属性声明，且需要有对应的get方法
-	 * 
-	 * @param source
-	 * @param isCopyNull
-	 *            是否拷贝null属性
-	 * @return
-	 * @throws ExceptionNbcBean
-	 */
-	public static <T> Map<String, Object> copyObject2Map(T source, boolean isCopyNull) throws ExceptionNbcBean {
-		Validate.notNull(source, "Source must not be null");
-		// 获取类中的属性,并保存到map中
-		Set<String> setFieldName = getAllDeclaredFieldNames(source.getClass());
-
-		Map<String, Object> mapResult = new HashMap<>();
-		BeanMap beanMap = new BeanMap(source);
-		for (Object field : beanMap.keySet()) {
-			String fieldName = field.toString();
-			// 没有对应的属性，跳过
-			if (!setFieldName.contains(fieldName)) {
-				continue;
-			}
-			Object value = beanMap.get(field);
-			if (isCopyNull || value != null) {
-				mapResult.put(fieldName, value);
+		Class<?> actualEditable = source.getClass();
+		PropertyDescriptor[] sourcePds = getPropertyDescriptors(actualEditable);
+		for (PropertyDescriptor sourcePd : sourcePds) {
+			try {
+				Method readMethod = sourcePd.getReadMethod();
+				if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
+					readMethod.setAccessible(true);// 不是public的方法，就需要设置为可获取
+				}
+				if (sourcePd.getName().equals("class")) {
+					continue;
+				}
+				Object value = readMethod.invoke(source);
+				// 这里判断以下value是否为空 当然这里也能进行一些特殊要求的处理 例如绑定时格式转换等等
+				if (value != null) {
+					mapResult.put(sourcePd.getName(), value.toString());
+				}
+			} catch (Throwable ex) {
+				throw new ExceptionNbcBean("Could not copy properties from source to target", ex);
 			}
 		}
 		return mapResult;
@@ -89,7 +60,35 @@ public class MyBeanUtils extends BeanUtils {
 	 * @throws BeansException
 	 */
 	public static <T, K> K copyNotNullProperties(T source, K target) throws ExceptionNbcBean {
-		return copyAllProperties(source, target, false);
+		Validate.notNull(target, "Target must not be null");
+		Validate.notNull(source, "Source must not be null");
+		Class<?> actualEditable = target.getClass();
+		PropertyDescriptor[] targetPds = getPropertyDescriptors(actualEditable);
+		for (PropertyDescriptor targetPd : targetPds) {
+			if (targetPd.getWriteMethod() != null) {
+				PropertyDescriptor sourcePd = getPropertyDescriptor(source.getClass(), targetPd.getName());
+				if (sourcePd != null && sourcePd.getReadMethod() != null) {
+					try {
+						Method readMethod = sourcePd.getReadMethod();
+						if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
+							readMethod.setAccessible(true);// 不是public的方法，就需要设置为可获取
+						}
+						Object value = readMethod.invoke(source);
+						// 这里判断以下value是否为空 当然这里也能进行一些特殊要求的处理 例如绑定时格式转换等等
+						if (value != null) {
+							Method writeMethod = targetPd.getWriteMethod();
+							if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
+								writeMethod.setAccessible(true);
+							}
+							writeMethod.invoke(target, value);
+						}
+					} catch (Throwable ex) {
+						throw new ExceptionNbcBean("Could not copy properties from source to target", ex);
+					}
+				}
+			}
+		}
+		return target;
 	}
 
 	/**
@@ -115,14 +114,36 @@ public class MyBeanUtils extends BeanUtils {
 	 * @return
 	 * @throws ExceptionNbcBean
 	 */
-	@SuppressWarnings("unchecked")
 	public static <T, K> K copyAllProperties(T source, K target, boolean isCoypNull) throws ExceptionNbcBean {
 		Validate.notNull(target, "Target must not be null");
 		Validate.notNull(source, "Source must not be null");
-		// 获取soure中不为null的属性
-		Map<String, Object> notNullMap = copyObject2Map(source, isCoypNull);
-		BeanMap targetMap = new BeanMap(target);
-		targetMap.putAll(notNullMap);
+		Class<?> actualEditable = target.getClass();
+		PropertyDescriptor[] targetPds = getPropertyDescriptors(actualEditable);
+		for (PropertyDescriptor targetPd : targetPds) {
+			if (targetPd.getWriteMethod() != null) {
+				PropertyDescriptor sourcePd = getPropertyDescriptor(source.getClass(), targetPd.getName());
+				if (sourcePd != null && sourcePd.getReadMethod() != null) {
+					try {
+						Method readMethod = sourcePd.getReadMethod();
+						if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
+							readMethod.setAccessible(true);
+						}
+						Object value = readMethod.invoke(source);
+						if (!isCoypNull && value == null) {
+							continue;
+						}
+						// 这里判断以下value是否为空 当然这里也能进行一些特殊要求的处理 例如绑定时格式转换等等
+						Method writeMethod = targetPd.getWriteMethod();
+						if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
+							writeMethod.setAccessible(true);
+						}
+						writeMethod.invoke(target, value);
+					} catch (Throwable ex) {
+						throw new ExceptionNbcBean("Could not copy properties from source to target", ex);
+					}
+				}
+			}
+		}
 		return target;
 	}
 
@@ -139,11 +160,35 @@ public class MyBeanUtils extends BeanUtils {
 	public static <T, K> K copyAllPropertiesWithoutId(T source, K target, boolean isCoypNull) throws ExceptionNbcBean {
 		Validate.notNull(target, "Target must not be null");
 		Validate.notNull(source, "Source must not be null");
-		Map<String, Object> allPropertiesMap = copyObject2Map(source, isCoypNull);
-		allPropertiesMap.remove("id");
-		// 合并到target中
-		BeanMap targetMap = new BeanMap(target);
-		targetMap.putAll(allPropertiesMap);
+		Class<?> actualEditable = target.getClass();
+		Class<?> sourceClass = source.getClass();
+		PropertyDescriptor sourcePd = null;
+		PropertyDescriptor[] targetPds = getPropertyDescriptors(actualEditable);
+		for (PropertyDescriptor targetPd : targetPds) {
+			if (!targetPd.getName().equals("id") && targetPd.getWriteMethod() != null) {
+				sourcePd = getPropertyDescriptor(sourceClass, targetPd.getName());
+				if (sourcePd != null && sourcePd.getReadMethod() != null) {
+					try {
+						Method readMethod = sourcePd.getReadMethod();
+						if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
+							readMethod.setAccessible(true);
+						}
+						Object value = readMethod.invoke(source);
+						if (!isCoypNull && value == null) {
+							continue;
+						}
+						// 这里判断以下value是否为空 当然这里也能进行一些特殊要求的处理 例如绑定时格式转换等等
+						Method writeMethod = targetPd.getWriteMethod();
+						if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
+							writeMethod.setAccessible(true);
+						}
+						writeMethod.invoke(target, value);
+					} catch (Throwable ex) {
+						throw new ExceptionNbcBean("Could not copy properties from source to target", ex);
+					}
+				}
+			}
+		}
 		return target;
 	}
 
@@ -154,7 +199,6 @@ public class MyBeanUtils extends BeanUtils {
 	 * 
 	 * <p>
 	 * 当前仅能处理最后一级为map的情况，map和对象混用会抛出runtimeException。需要改进
-	 * 
 	 * @param source
 	 * @param target
 	 */
@@ -162,7 +206,7 @@ public class MyBeanUtils extends BeanUtils {
 		for (String key : source.keySet()) {
 			try {
 				if (key.indexOf(".") == -1) { // 不存在map
-					BeanUtils.copyProperty(target, key, source.get(key));
+					org.apache.commons.beanutils.BeanUtils.copyProperty(target, key, source.get(key));
 				} else {
 					// field最少有2个数据
 					String[] fields = key.split("\\."); // 拆分field和map的key
@@ -179,7 +223,7 @@ public class MyBeanUtils extends BeanUtils {
 					if (temObj instanceof Map) {
 						((Map) temObj).put(fields[lastIndex], source.get(key));
 					} else {
-						BeanUtils.copyProperty(temObj, fields[lastIndex], source.get(key));
+						org.apache.commons.beanutils.BeanUtils.copyProperty(temObj, fields[lastIndex], source.get(key));
 					}
 
 					// 反向循环，逐层往外赋值
@@ -196,96 +240,5 @@ public class MyBeanUtils extends BeanUtils {
 						"copyMap2Object error! map-key=" + key + "---objectClass=" + target.getClass(), e);
 			}
 		}
-	}
-
-	/**
-	 * <strong>优先使用其他方法</strong><br>
-	 * 仅拷贝相同字段相同类型的方法, (容器类，暂未实现)针对容器类，会进行范型的判断。<br>
-	 * 比如:<blockquote> {@code List<Object>} 可以接受 {@code List<String>} </blockquote>
-	 * 
-	 * @param source
-	 *            拷贝来源对象
-	 * @param target
-	 *            拷贝目标对象
-	 * @param isCoypNull
-	 *            是否拷贝null
-	 * @return 合并后的target
-	 */
-	public static <S, T> T copyWithSameType(S source, T target, boolean isCoypNull) {
-		Validate.notNull(target, "Target must not be null");
-		Validate.notNull(source, "Source must not be null");
-		// 可以被复制的属性
-		List<String> lsCopyFieldName = new ArrayList<>();
-		// 来源对象获取field
-		Map<String, Field> mapSourceRef = new HashMap<>();
-		List<Field> lsSourceField = Lists.newArrayList(source.getClass().getDeclaredFields());
-		lsSourceField.forEach(sField -> {
-			mapSourceRef.put(sField.getName(), sField);
-		});
-		// 目标字段获取field
-		Map<String, Field> mapTargetRef = new HashMap<>();
-		List<Field> lsTargetField = Lists.newArrayList(target.getClass().getDeclaredFields());
-		lsTargetField.forEach(tField -> {
-			mapTargetRef.put(tField.getName(), tField);
-		});
-		for (String fieldName : mapSourceRef.keySet()) {
-			if (mapTargetRef.containsKey(fieldName)) {
-				// source中的field
-				Field sfield = mapSourceRef.get(fieldName);
-				// target中的field
-				Field tfield = mapTargetRef.get(fieldName);
-				if (sfield.getType().equals(tfield.getType())) {
-					lsCopyFieldName.add(fieldName);
-				}
-			}
-		}
-
-		BeanMap sourceMap = new BeanMap(source);
-		// 可以被拷贝的属性
-		Map<String, Object> mapCopyProperties = new HashMap<>();
-		// 填充可以被拷贝的属性
-		for (String key : lsCopyFieldName) {
-			if (!sourceMap.containsKey(key)) {
-				continue;
-			}
-			Object sourceProperty = sourceMap.get(key);
-			// 不拷贝null值且source属性为null时，跳过
-			if (!isCoypNull && sourceProperty == null) {
-				continue;
-			}
-			mapCopyProperties.put(key, sourceProperty);
-		}
-
-		// copy到目标对象中
-		BeanMap targetMap = new BeanMap(target);
-		targetMap.putAll(mapCopyProperties);
-		return target;
-	}
-
-	/**
-	 * 逐个获取父类，然后取得声明的属性。父类为object，或者null终止
-	 * 
-	 * @param clazz
-	 * @return
-	 */
-	private static Set<String> getAllDeclaredFieldNames(Class clazz) {
-		Set<String> setFieldName = new HashSet<>();
-		Class currClazz = clazz;
-		while (currClazz != null) {
-			Field[] arrField = clazz.getDeclaredFields();
-			for (Field field : arrField) {
-				String fieldName = field.getName();
-				if (setFieldName.contains(fieldName)) {
-					continue;
-				}
-				setFieldName.add(fieldName);
-			}
-			Type superType = currClazz.getGenericSuperclass();
-			currClazz = null;
-			if (superType != null && superType.getClass().equals(Object.class)) {
-				currClazz = superType.getClass();
-			}
-		}
-		return setFieldName;
 	}
 }

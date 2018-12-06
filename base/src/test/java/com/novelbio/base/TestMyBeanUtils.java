@@ -49,12 +49,14 @@ public class TestMyBeanUtils {
 		mapTest.put("2", new Date());
 		mapTest.put("3", new JsonObject());
 		mapField2Val.put("mapKey2Obj", mapTest);
+		mapField2Val.put("virtualA", "virtualA");
 
 		TestMyBeanUtilModel testModel = new TestMyBeanUtilModel();
 		MyBeanUtils.copyMap2Object(mapField2Val, testModel);
 
 		assertEquals(a, testModel.getA()); // string
 		assertEquals(b, testModel.getB()); // date
+		assertEquals("virtualA", testModel.getVirtualA()); // date
 		assertEquals(1, testModel.getSetDate().size()); // set<>
 
 		assertEquals(3, testModel.getLsStr().size()); // list
@@ -93,6 +95,9 @@ public class TestMyBeanUtils {
 		List<String> lsStr = new ArrayList<>();
 		lsStr.add("ls1");
 		model1.setLsStr(lsStr);
+		model1.setVirtualA("virtualA");
+		model1.setIsFirst(true);
+		model1.setsName("Super name");
 
 		TestMyBeanUtilModel model2 = new TestMyBeanUtilModel();
 		model2.setA("2a");
@@ -125,7 +130,7 @@ public class TestMyBeanUtils {
 		otherModel.setA("model2");
 		otherModel.setB(BigDecimal.ZERO);
 
-		model1 = MyBeanUtils.copyWithSameType(otherModel, model1, true);
+//		model1 = MyBeanUtils.copyWithSameType(otherModel, model1, true);
 		assertEquals(otherModel.getA(), model1.getA());
 		assertNull(model1.getB());
 
@@ -137,7 +142,7 @@ public class TestMyBeanUtils {
 		setDate.add(new Date());
 		model2.setSetDate(setDate);
 
-		model2 = MyBeanUtils.copyWithSameType(model2, model1, false);
+//		model2 = MyBeanUtils.copyWithSameType(model2, model1, false);
 		assertEquals(model1.getA(), model2.getA());
 		assertNotNull(model2.getB());
 	}
