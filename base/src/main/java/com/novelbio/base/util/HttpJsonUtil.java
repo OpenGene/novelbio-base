@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -21,6 +24,7 @@ import com.novelbio.base.security.Crypter;
  *
  */
 public class HttpJsonUtil {
+	private static final Logger logger = LoggerFactory.getLogger(HttpJsonUtil.class);
 
 	/** 开放模式，不加密 **/
 	public static final int ENCRYTION_TYPE_NONE = 0;
@@ -117,6 +121,7 @@ public class HttpJsonUtil {
 		Map<String, Object> paramsEn = Crypter.encryptHttpParams(requestUrl.substring(requestUrl.lastIndexOf("/") + 1),
 				JSON.toJSONString(params));
 		try {
+			logger.debug("requestUrl={}", requestUrl);
 			// paramsEn已经加密，HttpJsonUtil不需要二次处理
 			paramsEn.put("authCode", authCode); // 添加authCode
 			return HttpJsonUtil.post4JsonOne(requestUrl, paramsEn, HttpJsonUtil.ENCRYTION_TYPE_NONE, ResultJson.class);
@@ -154,6 +159,7 @@ public class HttpJsonUtil {
 	 * @return
 	 */
 	private static String post4String(String url, Map<String, Object> params, int encryptionType) {
+		logger.debug("requestUrl={}", url);
 		Map<String, Object> paramsEn = null;
 		switch (encryptionType) {
 		case ENCRYTION_TYPE_RSA:

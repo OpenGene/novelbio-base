@@ -265,6 +265,7 @@ public class Crypter {
 	 * @return
 	 */
 	public static Map<String, Object> encryptHttpParams(String url, String paramJson) {
+		logger.debug("url={}  param={}", url, paramJson);
 		long st = Long.parseLong(("" + System.currentTimeMillis()).substring(7));
 		String key = DateUtil.getDateMSAndRandom().substring(0, 16);
 		String paramEn = encryptAESonCBC(paramJson, key);
