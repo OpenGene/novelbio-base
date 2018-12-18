@@ -190,7 +190,7 @@ public class FileOperate {
 	}
 	
 	private static String[] getURIParams(String scheme, String fileName) {
-		fileName = fileName.replace(scheme, "");
+		fileName = fileName.replaceFirst(scheme, "");
 		if (fileName.startsWith(":")) {
 			fileName = fileName.replaceFirst(":", "");
 		}
