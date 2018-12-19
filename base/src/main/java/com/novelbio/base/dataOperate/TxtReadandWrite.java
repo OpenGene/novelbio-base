@@ -540,7 +540,7 @@ public class TxtReadandWrite implements Closeable {
 	}
 	
 	/**
-	 * 写入一行list，用sep隔开
+	 * 写入一行list，用\t隔开
 	 * @param content
 	 */
 	public void writefileln(List<String> content) {
