@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.cglib.beans.BeanMap;
+import org.apache.commons.beanutils.BeanMap;
 
 /**
  * 处理latex的保留字符转义。<br>
@@ -95,7 +95,7 @@ public class LatexUtil {
 		} else if (t instanceof Map) {
 			obj = insteadMap(t);
 		} else {
-			BeanMap map = BeanMap.create(t);
+			BeanMap map = new BeanMap(t);
 			map = insteadMap(map);
 			obj = t;
 		}

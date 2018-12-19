@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<properties>
 		<jdk.version>1.8</jdk.version>
@@ -12,19 +13,6 @@
 	<version>0.0.3-SNAPSHOT</version>
 
 	<dependencies>
-
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-core</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-beans</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
@@ -37,14 +25,17 @@
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
-
 		<!-- 画图包，考虑去除 -->
 		<dependency>
 			<groupId>com.novelbio</groupId>
 			<artifactId>gral-core</artifactId>
 			<version>0.9</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-math3</artifactId>
@@ -158,11 +149,11 @@
 			<artifactId>ftp4j</artifactId>
 			<version>1.7.2</version>
 		</dependency>
-		
+
 		<dependency>
-		  <groupId>org.apache.commons</groupId>
-		  <artifactId>commons-compress</artifactId>
-		  <version>1.13</version>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+			<version>1.13</version>
 		</dependency>
 
 		<!-- svg转png <dependency> <groupId>batik</groupId> <artifactId>batik-rasterizer</artifactId> 
@@ -227,20 +218,15 @@
 			<artifactId>jsr203hadoop</artifactId>
 			<version>1.0.1-SNAPSHOT</version>
 		</dependency>
-		<!-- 
-		<dependency>
-			<groupId>com.novelbio</groupId>
-			<artifactId>jsr203-oss</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		  -->
-		
+		<!-- <dependency> <groupId>com.novelbio</groupId> <artifactId>jsr203-oss</artifactId> 
+			<version>0.0.1-SNAPSHOT</version> </dependency> -->
+
 		<dependency>
 			<groupId>com.novelbio</groupId>
 			<artifactId>jsr203-cos</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-common</artifactId>
@@ -417,9 +403,9 @@
 		</dependency>
 		<!-- redis 客户端操作 -->
 		<dependency>
-		  <groupId>redis.clients</groupId>
-		  <artifactId>jedis</artifactId>
-		  <version>2.9.0</version>
+			<groupId>redis.clients</groupId>
+			<artifactId>jedis</artifactId>
+			<version>2.9.0</version>
 		</dependency>
 
 		<dependency>
@@ -432,6 +418,13 @@
 			<artifactId>cdp4j</artifactId>
 			<version>3.0.1</version>
 		</dependency>
+		<!-- java reflect tools -->
+		<dependency>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>0.9.11</version>
+		</dependency>
+
 	</dependencies>
 	<build>
 		<defaultGoal>compile</defaultGoal>
@@ -445,20 +438,10 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-			<!-- 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.19.1</version>
-				<dependencies>
-					<dependency>
-						<groupId>org.apache.maven.surefire</groupId>
-						<artifactId>surefire-junit47</artifactId>
-						<version>2.19.1</version>
-					</dependency>
-				</dependencies>
-			</plugin>
-			 -->
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-surefire-plugin</artifactId> 
+				<version>2.19.1</version> <dependencies> <dependency> <groupId>org.apache.maven.surefire</groupId> 
+				<artifactId>surefire-junit47</artifactId> <version>2.19.1</version> </dependency> 
+				</dependencies> </plugin> -->
 			<plugin>
 				<!-- explicitly define maven-deploy-plugin after other to force execorder -->
 				<artifactId>maven-deploy-plugin</artifactId>

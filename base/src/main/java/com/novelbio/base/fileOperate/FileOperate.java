@@ -190,7 +190,7 @@ public class FileOperate {
 	}
 	
 	private static String[] getURIParams(String scheme, String fileName) {
-		fileName = fileName.replace(scheme, "");
+		fileName = fileName.replaceFirst(scheme, "");
 		if (fileName.startsWith(":")) {
 			fileName = fileName.replaceFirst(":", "");
 		}
@@ -1133,7 +1133,7 @@ public class FileOperate {
 				return;
 			}
 			// 这里再判定一次，因为有可能别的程序在这时候新建了一个文件夹
-			if (isFileExistAndNotDir(path))
+			if (isFileExist(path))
 				throw new ExceptionFileError("folderPath is an exist file " + path);
 
 			Files.createDirectories(path);
@@ -1298,7 +1298,7 @@ public class FileOperate {
 			for (Path pathOld : getLsFoldPath(oldFilePath)) {
 				if (isFileDirectory(pathOld)) {
 					copyFolder(pathOld, newPathSep + pathOld.getFileName(), cover);
-				} else if (isFileExistAndNotDir(pathOld)) {
+				} else if (isFileExist(pathOld)) {
 					copyFile(pathOld, getPath(newPathSep + pathOld.getFileName()), cover);
 				} else {
 					String isSymbolLink = isSymbolicLink(pathOld) ? " is symbol link" : " is not symbol link";
@@ -1338,7 +1338,7 @@ public class FileOperate {
 	 * @return
 	 */
 	public static void copyFile(Path oldfile, String newfile, boolean cover) {
-		if (!isFileExistAndNotDir(oldfile)) {
+		if (!isFileExist(oldfile)) {
 			throw new ExceptionNbcFile("no file exist: " + oldfile);
 		}
 		copyFile(oldfile, getPath(newfile), cover);
@@ -1636,11 +1636,11 @@ public class FileOperate {
 	 * @return
 	 */
 	private static void moveFile(boolean isCover, Path oldFile, String newPathName, boolean isDeleteFolder) {
-		if (isFileExistAndNotDir(oldFile)) {
-			moveSingleFile(oldFile, newPathName, isCover);
-		} else if (isFileDirectory(oldFile)) {
+		if (isFileDirectory(oldFile)) {
 			moveFoldFile(oldFile, newPathName, isCover, isDeleteFolder);
-		}
+		} else if (isFileExist(oldFile)) {
+			moveSingleFile(oldFile, newPathName, isCover);
+		} 
 	}
 
 	/**
@@ -2041,7 +2041,7 @@ public class FileOperate {
 		if (isFileExist(file)) {
 			return false;
 		}
-		if (isFileExistAndNotDir(file)) {
+		if (!isFileDirectory(file)) {
 			return getFileSizeLong(file) == realSize;
 		}
 		return false;
