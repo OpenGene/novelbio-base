@@ -97,7 +97,7 @@ public class CmdOrderGenerator {
 	 * 正常情况输出到标准输出流 > out.gz  会自动压缩成gz格式
 	 * 但是部分情况cat 1.gz 2.gz > out.gz 这时候不能压缩成gz格式
 	 * 
-	 * 默认为true, 仅当 > 写成 (>) 时, 本值为false
+	 * 默认为false, 仅当 > 写成 (>) 时, 本值为true
 	 */
 	public boolean isOutStdWithSuffix() {
 		return isOutStdWithSuffix;

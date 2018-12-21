@@ -11,6 +11,7 @@ import java.util.List;
 import org.junit.Test;
 
 import com.alibaba.fastjson.JSON;
+import com.novelbio.base.dataOperate.TxtReadandWrite;
 
 /**
  *
@@ -30,34 +31,42 @@ public class LayoutForceTest {
 		// LayoutForce layoutForce = new LayoutForce();
 		// layoutForce.setLsNodesAndEdges(lsNodes, lsEdges);
 		// lsNodes = layoutForce.springLayout(1000);
-
+		
+		TxtReadandWrite txtWrite = new TxtReadandWrite("/home/novelbio/git/NBC-OmicsDB/src/test/resources/cyto/data2.json", true);
+		
 		List<Node> lsNodes = getMockNodes();
 		List<Edge> lsEdges = getMockEdges();
-		// LayoutForce.initialNodePos(lsNodes);
-
-		LayoutForce layoutForce = new LayoutForce();
+		LayoutForce layoutForce = new LayoutForce(1000, 1000);
 		layoutForce.setLsNodesAndEdges(lsNodes, lsEdges);
-		lsNodes = layoutForce.springLayout(10000);
-
-		System.out.println(JSON.toJSON(lsNodes));
-		System.out.println(JSON.toJSON(lsEdges));
+		lsNodes = layoutForce.springLayout(700);
+//		for (Node node : lsNodes) {
+//			node.setX(node.getX()*10);
+//			node.setY(node.getY()*10);
+//		}
+		txtWrite.writefileln("{\"lsNodes\":");
+		txtWrite.writefileln();
+		txtWrite.writefileln(JSON.toJSON(lsNodes).toString());
+		txtWrite.writefileln(",\"lsEdges\":");
+		txtWrite.writefileln(JSON.toJSON(lsEdges).toString());
+		txtWrite.writefileln("}");
+		txtWrite.close();
 	}
 
 	private List<Node> getMockNodes() {
 		List<Node> lsNodes = new ArrayList<>();
-		int[][] nodeArray = new int[][] { { 1, 1, 1, 1 }, { 3, 3, 3, 1 }, { 9, 9, 9, 1 } };
+		int[][] nodeArray = new int[][] { { 1, 1, 1, 1 }, { 2, 1, 1, 1 }, { 3, 1, 1, 1 } , { 4, 1, 1, 1 } , { 5, 1, 1, 1 } };
 		for (int i = 0; i < nodeArray.length; i++) {
 			Node node = new Node(String.valueOf(nodeArray[i][0]), nodeArray[i][1], nodeArray[i][2]);
 			node.setR(nodeArray[i][3]);
 			lsNodes.add(node);
 		}
-
 		return lsNodes;
 	}
 
 	private List<Edge> getMockEdges() {
 		List<Edge> lsEdges = new ArrayList<>();
-		int[][] edgeArray = new int[][] { { 1, 3, 1 }, { 3, 9, 7 } };
+		int[][] edgeArray = new int[][] { { 1, 3, 50 }, { 4, 5, 220 }, { 1, 4, 150 } , { 2, 4, 300 }, { 2, 5, 500 } };
+//		int[][] edgeArray = new int[][] { { 4, 5, 220 }, { 1, 4, 150 } , { 2, 4, 300 }, { 2, 5, 500 } };
 		for (int i = 0; i < edgeArray.length; i++) {
 			Edge edge = new Edge();
 			edge.setId1(String.valueOf(edgeArray[i][0]));
