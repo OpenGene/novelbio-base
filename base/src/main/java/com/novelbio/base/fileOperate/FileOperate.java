@@ -2100,6 +2100,7 @@ public class FileOperate {
 	 */
 	public static void deleteFileFolder(Path file) {
 		if (file == null || !isFileExist(file)) return;
+		logger.debug("delFolder ={}", file.toString());
 		if (isSymbolicLink(file)) {
 			delPath(file);
 			return;
