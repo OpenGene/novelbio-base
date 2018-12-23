@@ -64,7 +64,7 @@ public class Edge {
 	 * @param node2
 	 * @return node1 减去这两个坐标，node2加上这两个坐标
 	 */
-	public double[] getAxisAttractMove(Node node1, Node node2) {
+	public double[] getAxisAttractMove(Node node1, Node node2, double step) {
 		double deltaX = node1.getX() - node2.getX();
 		double deltaY = node1.getY() - node2.getY();
 		double deltaLength = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
@@ -79,7 +79,7 @@ public class Edge {
 		double force = Math.abs(Math.pow(deltaLengthReal - length, 1) * condensefactor/2);
 		double deltaXResult =Math.abs(deltaX/deltaLength*force);
 		double deltaYResult = Math.abs(deltaY/deltaLength*force);
-		if (deltaLength > length) {
+		if (deltaLengthReal > length) {
 			deltaXResult = -deltaXResult;
 			deltaYResult = -deltaYResult;
 		}
@@ -89,7 +89,7 @@ public class Edge {
 		if (node1.getY() > node2.getY()) {
 			deltaYResult = -deltaYResult;
 		}
-		return new double[] {deltaXResult, deltaYResult};
+ 		return new double[] {deltaXResult, deltaYResult};
 	}
 	
 	private static int randomSign(Random random) {

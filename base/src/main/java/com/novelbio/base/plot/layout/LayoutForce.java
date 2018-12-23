@@ -164,7 +164,7 @@ public class LayoutForce {
 				String eEndID = edge.getId2();
 				Node start = mapId2Nodes.get(eStartID);
 				Node end = mapId2Nodes.get(eEndID);
-				double[] move = edge.getAxisAttractMove(start, end);
+				double[] move = edge.getAxisAttractMove(start, end, tempEdge);
 				int[] startEnd = getNodeStartEnd(start, end, (int)edge.getLength());
 				int startBefore = startEnd[0];
 				int endAfter = startEnd[1];
@@ -186,14 +186,14 @@ public class LayoutForce {
 			}
 		}
 
-//		txtWrite = new TxtReadandWrite("/home/novelbio/git/NBC-OmicsDB/src/test/resources/cyto/data2.json", true);
-//		txtWrite.writefileln("{\"lsNodes\":");
-//		txtWrite.writefileln();
-//		txtWrite.writefileln(JSON.toJSON(lsNodes).toString());
-//		txtWrite.writefileln(",\"lsEdges\":");
-//		txtWrite.writefileln(JSON.toJSON(lsEdges).toString());
-//		txtWrite.writefileln("}");
-//		txtWrite.close();
+//		TxtReadandWrite txtWrite2 = new TxtReadandWrite("/home/novelbio/git/NBC-OmicsDB/src/test/resources/cyto/data2.json", true);
+//		txtWrite2.writefileln("{\"lsNodes\":");
+//		txtWrite2.writefileln();
+//		txtWrite2.writefileln(JSON.toJSON(lsNodes).toString());
+//		txtWrite2.writefileln(",\"lsEdges\":");
+//		txtWrite2.writefileln(JSON.toJSON(lsEdges).toString());
+//		txtWrite2.writefileln("}");
+//		txtWrite2.close();
 //		System.out.println();
 //		for (Node node : lsNodes) {
 //			//不能出画图版的区域
@@ -357,8 +357,24 @@ public class LayoutForce {
 		double area = 0;
 		area = nodeNum*100*100/Math.pow(nodeNum, 0.2);
 		int W = (int) Math.sqrt(area);
-		int L = (int) Math.sqrt(area);
-		return new int[]{W, L};
+		if (W < 500) {
+			W = 500;
+		}
+		return new int[]{W, W};
+	}
+	
+	public static void writeJson(List<Node> lsNodes, List<? extends Edge> lsEdges, String outFile) {
+		for (Node node : lsNodes) {
+			node.setR(node.getR()*2);
+		}
+		TxtReadandWrite txtWrite = new TxtReadandWrite(outFile, true);
+		txtWrite.writefileln("{\"lsNodes\":");
+		txtWrite.writefileln();
+		txtWrite.writefileln(JSON.toJSON(lsNodes).toString());
+		txtWrite.writefileln(",\"lsEdges\":");
+		txtWrite.writefileln(JSON.toJSON(lsEdges).toString());
+		txtWrite.writefileln("}");
+		txtWrite.close();
 	}
 	
 }

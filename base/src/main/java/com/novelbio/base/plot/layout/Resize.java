@@ -47,7 +47,13 @@ public class Resize {
 		maxPic = mediaPic*5;
 		minPic = Math.max(5,(int) (mediaPic/8.0));
 	}
-//	/**
+	public void setPicLen(int minPic, int mediaPic, int maxPic) {
+		this.minPic = minPic;
+		this.mediaPic = mediaPic;
+		this.maxPic = maxPic;
+	}
+
+	//	/**
 //	 * 在图片上面的像素最大最小值
 //	 * 譬如在图片上，node最长180,最短5,中位数40
 //	 * @param media
