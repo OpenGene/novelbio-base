@@ -134,11 +134,9 @@ public class FileOperate {
 	}
 	
 	public static void main(String[] args) {
-//		String pathStr = "hdfs:/publicFile/Special_Information_for_test/Nelumbo_nucifera_genome/unplaced.scaf_sep/gi|478766296|gb|AQOG01057743.fa";
-		String pathStr = "cos://novelbiosha-1255651097/publicFile/Special_Information_for_test/Nelumbo_nucifera_genome/unplaced.scaf_sep/gi|478766296|gb|AQOG01057743.fa";
-		Path path = getPath(pathStr);
-		System.out.println(path);
-		System.out.println(ObjStorageUtil.getInnerPath(path));
+		for (String path : FileOperate.getLsFoldFileName("/home/novelbio/tmp")) {
+			System.out.println(path);
+		}
 	}
 	
 	public static Path getPath(String first, String... rest) {
@@ -705,7 +703,7 @@ public class FileOperate {
 	 * 如果不是文件夹，则返回该文件名<br>
 	 * 
 	 * @param filePath
-	 * @return
+	 * @return 返回是的全路径加文件名
 	 */
 	public static ArrayList<String> getLsFoldFileName(String filePath) {
 		return getLsFoldFileName(filePath, "*", "*");
@@ -717,9 +715,9 @@ public class FileOperate {
 	 * 如果不是文件夹，则返回该文件名<br>
 	 * 
 	 * @param filePath
-	 * @param deepth
-	 *            指定深度
-	 * @return
+	 * @param filename
+	 *            文件名,支持正则
+	 * @return 全路径加文件名
 	 */
 	public static ArrayList<String> getLsFoldFileName(String filePath, String filename, String suffix) {
 		return getLsFoldFileName(getPath(filePath), filename, suffix);
@@ -731,9 +729,9 @@ public class FileOperate {
 	 * 如果不是文件夹，则返回该文件名<br>
 	 * 
 	 * @param filePath
-	 * @param deepth
-	 *            指定深度
-	 * @return
+	 * @param filename
+	 *            文件名,支持正则
+	 * @return 全路径加文件名
 	 */
 	public static ArrayList<String> getLsFoldFileName(String filePath, String filename) {
 		return getLsFoldFileName(getPath(filePath), filename);
@@ -745,9 +743,7 @@ public class FileOperate {
 	 * 如果不是文件夹，则返回该文件名<br>
 	 * 
 	 * @param filePath
-	 * @param deepth
-	 *            指定深度
-	 * @return
+	 * @return 全路径加文件名
 	 */
 	public static ArrayList<String> getLsFoldFileName(Path filePath) {
 		return getLsFoldFileName(filePath, "*", "*");
@@ -759,9 +755,9 @@ public class FileOperate {
 	 * 如果不是文件夹，则返回该文件名<br>
 	 * 
 	 * @param filePath
-	 * @param deepth
-	 *            指定深度
-	 * @return
+	 * @param filename
+	 *            文件名,支持正则
+	 * @return 全路径加文件名
 	 */
 	public static ArrayList<String> getLsFoldFileName(Path filePath, String filename, String suffix) {
 		List<Path> lsPaths = getLsFoldPath(filePath, filename, suffix);
@@ -777,9 +773,9 @@ public class FileOperate {
 	 * 如果不是文件夹，则返回该文件名<br>
 	 * 
 	 * @param filePath
-	 * @param deepth
-	 *            指定深度
-	 * @return
+	 * @param filename
+	 *            文件名,支持正则
+	 * @return 全路径加文件名
 	 */
 	public static ArrayList<String> getLsFoldFileName(Path filePath, String filename) {
 		List<Path> lsPaths = getLsFoldPath(filePath, filename);
@@ -806,7 +802,7 @@ public class FileOperate {
 	 *            文件 wfese.fse.认作 "wfese.fse."和""<br>
 	 *            文件 wfese 认作 "wfese"和""<br>
 	 *            null 表示不指定
-	 * @return 返回包含目标文件全名的ArrayList
+	 * @return 返回包含目标文件全名的ArrayList 全路径加文件名
 	 * @throws IOException
 	 */
 	public static List<Path> getLsFoldPath(String filePath, String filename, String suffix) {
@@ -820,7 +816,7 @@ public class FileOperate {
 	 * 
 	 * @param fileName
 	 *            目录路径
-	 * @return 返回包含目标文件全名的ArrayList
+	 * @return 返回包含目标文件全名的ArrayList 全路径加文件名
 	 * @throws IOException
 	 */
 	public static List<Path> getLsFoldPath(String fileName) {
@@ -834,7 +830,7 @@ public class FileOperate {
 	 * 
 	 * @param file
 	 *            目录路径
-	 * @return 返回包含目标文件全名的ArrayList
+	 * @return 返回包含目标文件全名的ArrayList 全路径加文件名
 	 * @throws IOException
 	 */
 	public static List<Path> getLsFoldPath(Path file) {
@@ -857,7 +853,7 @@ public class FileOperate {
 	 *            文件 wfese.fse.认作 "wfese.fse."和""<br>
 	 *            文件 wfese 认作 "wfese"和""<br>
 	 *            null 表示不指定
-	 * @return 返回包含目标文件全名的ArrayList
+	 * @return 返回包含目标文件全名的ArrayList 全路径加文件名
 	 * @throws IOException
 	 */
 	public static List<Path> getLsFoldPath(Path file, String filename) {
@@ -880,7 +876,7 @@ public class FileOperate {
 	 *            文件 wfese.fse.认作 "wfese.fse."和""<br>
 	 *            文件 wfese 认作 "wfese"和""<br>
 	 *            null 表示不指定
-	 * @return 返回包含目标文件全名的ArrayList
+	 * @return 返回包含目标文件全名的ArrayList 全路径加文件名
 	 * @throws IOException
 	 */
 	public static List<Path> getLsFoldPath(Path path, String filename, String suffix) {
@@ -937,7 +933,7 @@ public class FileOperate {
 	 *            目录路径
 	 * @param isNeedFolder
 	 *            是否需要把文件夹也记录下来
-	 * @return 返回包含目标文件全名的ArrayList
+	 * @return 返回包含目标文件全名的ArrayList 全路径加文件名
 	 * @throws IOException
 	 */
 	public static List<Path> getLsFoldPathRecur(String file, boolean isNeedFolder) {
@@ -953,7 +949,7 @@ public class FileOperate {
 	 *            目录路径
 	 * @param isNeedFolder
 	 *            是否需要把文件夹也记录下来
-	 * @return 返回包含目标文件全名的ArrayList
+	 * @return 返回包含目标文件全名的ArrayList 全路径加文件名
 	 * @throws IOException
 	 */
 	public static List<Path> getLsFoldPathRecur(Path file, boolean isNeedFolder) {
@@ -978,7 +974,7 @@ public class FileOperate {
 	 *            null 表示不指定
 	 * @param isNeedFolder
 	 *            是否需要把文件夹也记录下来
-	 * @return 返回包含目标Path 的ArrayList
+	 * @return 返回包含目标Path 的ArrayList 全路径加文件名
 	 * @throws IOException
 	 */
 	protected static List<Path> getLsFoldPathRecur(Path path, String filename, String suffix, boolean isNeedFolder) {
