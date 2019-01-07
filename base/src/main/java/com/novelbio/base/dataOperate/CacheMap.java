@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+
 /**
  * 用来存储短暂对象的缓存类，实现Map接口，内部有一个定时器用来清除过期（DEFAULT_TIMEOUT）的对象。
  * 为避免创建过多线程，没有特殊要求请使用getDefault()方法来获取本类的实例。<br/>
@@ -13,10 +14,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * 参数代表过期的毫秒数.从数据存入开始计算.
  * 
  * @author www.zuidaima.com
+ * @deprecated 可以用guava里的cache代替。CacheBuilder.newBuilder().build();
  * @param <K>
  * @param <V>
  */
-
 public class CacheMap<K, V> extends AbstractMap<K, V> {
 
 	/** 过期时间8小时 */
@@ -37,7 +38,10 @@ public class CacheMap<K, V> extends AbstractMap<K, V> {
 	 */
 	public CacheMap(long timeout) {
 		this.cacheTimeout = timeout;
-		new ClearThread().start();
+		ClearThread thread = new ClearThread();
+		thread.setName("ClearThread");
+		thread.setDaemon(true);
+		thread.start();
 	}
 	
 	/** 默认8小时过期 */
