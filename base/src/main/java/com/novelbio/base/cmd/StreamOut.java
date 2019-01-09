@@ -179,7 +179,9 @@ public class StreamOut extends RunProcess {
 				}
 			}
 		} catch (IOException ioe) {
-			ioe.printStackTrace();
+			System.err.println("=== IO PRINT ERROR ===");
+			System.err.println(DateUtil.getDate(DateUtil.PATTERN_DATETIME) + " "+ioe.getMessage());
+			System.err.println("=== CANNOT PRINT LOG ===");
 		}
 	}
 	
