@@ -5,37 +5,24 @@ import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
 import java.nio.charset.Charset;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.StringTokenizer;
-import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
 import com.novelbio.base.dataStructure.ArrayOperate;
 import com.novelbio.base.fileOperate.ExceptionNbcFile;
-import com.novelbio.base.fileOperate.FileHadoop;
 import com.novelbio.base.fileOperate.FileOperate;
 import com.novelbio.base.fileOperate.RandomFileInt;
 import com.novelbio.base.fileOperate.RandomFileInt.RandomFileFactory;
-import com.novelbio.base.util.IOUtil;
 
 /**
  * 新建read没关系
@@ -832,6 +819,22 @@ public class TxtReadandWrite implements Closeable {
 
 	public static String readFirstLine(String txtFile) {
 		return readFirstLine(FileOperate.getPath(txtFile));
+	}
+	
+	/** 内部会关闭流 */
+	public static String readInputStream(InputStream is) {
+		TxtReadandWrite txtRead = new TxtReadandWrite(is);
+		StringBuffer sBuffer = new StringBuffer();
+		int i = 0;
+		for (String content : txtRead.readlines()) {
+			if (i++ == 0) {
+				sBuffer.append(content);
+			} else {
+				sBuffer.append("\n").append(content);
+			}
+		}
+		txtRead.close();
+		return sBuffer.toString();
 	}
 	
 	public static String readFirstLine(File txtFile) {
