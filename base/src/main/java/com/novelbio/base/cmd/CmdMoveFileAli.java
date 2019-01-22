@@ -47,10 +47,17 @@ public class CmdMoveFileAli extends CmdMoveFile {
 				continue;
 			}
 			try {
-				logger.info("link file from {} to {}", inFile, inTmpName);
-				FileOperate.linkFile(inFile, inTmpName, false);
+				//如果是输入文件，文件在只读挂载中，则把文件拷贝过来，因为输入文件的性能不行
+				//如果是输出文件，文件在结果文件夹，还没写入对象存储，这个就可以链接过来了
+				if (isInmapFile(inFile)) {
+					logger.info("copy file from {} to {}", inFile, inTmpName);
+					FileOperate.copyFileFolder(inFile, inTmpName, false);
+				} else {
+					logger.info("link file from {} to {}", inFile, inTmpName);
+					FileOperate.linkFile(inFile, inTmpName, false);
+				}
 			} catch (Exception e) {
-				logger.error("link file from " + inFile + " to " + inTmpName + "error", e);
+				logger.error("copy file from " + inFile + " to " + inTmpName + "error", e);
 			}
 		}
 	}
@@ -121,6 +128,19 @@ public class CmdMoveFileAli extends CmdMoveFile {
 		pathLocal = PathDetailObjStorage.getOsMountPathWithSep() + head + "/" + pathLocal;
 		
 		return pathLocal;
+	}
+	
+	private boolean isInmapFile(String path) {
+		if (!ServiceEnvUtil.isCloudEnv()) {
+			return false;
+		}
+		String pathLocal = PathDetailObjStorage.changeOsToLocal(path);
+		if (pathLocal.startsWith(PathDetailObjStorage.getOsMountPathWithSep())) {		//	/home/novelbio/oss
+			pathLocal = pathLocal.replaceFirst(PathDetailObjStorage.getOsMountPathWithSep(), "");
+		} else {
+			return false;
+		}
+		return pathLocal.startsWith(IN_MAP);
 	}
 	
 	/**
