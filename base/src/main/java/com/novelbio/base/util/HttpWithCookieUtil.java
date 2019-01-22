@@ -5,8 +5,8 @@ import java.util.Map;
 
 import org.apache.http.client.CookieStore;
 import org.apache.http.impl.client.BasicCookieStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import lombok.extern.slf4j.Slf4j;
 
 
 /**
@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
  * @author novelbio liqi
  * @date 2018年5月11日 下午4:11:44
  */
+@Slf4j
 public class HttpWithCookieUtil {
-	private static final Logger logger = LoggerFactory.getLogger(HttpWithCookieUtil.class);
 
 	CookieStore cookieStore = null;
 
@@ -41,6 +41,7 @@ public class HttpWithCookieUtil {
 	 * @return
 	 */
 	public String doPost(String url, Map<String, Object> params, Map<String, String> headers) {
+		log.debug("url = {}", url);
 		return HttpUtil.doPost(url, params, headers, cookieStore);
 	}
 
