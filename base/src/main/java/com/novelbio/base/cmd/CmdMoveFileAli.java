@@ -1,5 +1,9 @@
 package com.novelbio.base.cmd;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +50,17 @@ public class CmdMoveFileAli extends CmdMoveFile {
 				//如果是输出文件，文件在结果文件夹，还没写入对象存储，这个就可以链接过来了
 				if (isInmapFile(inFile)) {
 					logger.info("copy file from {} to {}", inFile, inTmpName);
-					FileOperate.copyFileFolder(inFile, inTmpName, false);
+					
+					if (FileOperate.isFileExistAndBigThan0(inFile) && !FileOperate.isFileExistAndBigThan0(inTmpName)) {
+						String tmpFile = inTmpName + ".tmp";
+						InputStream input = FileOperate.getInputStream(inFile);
+						OutputStream output = FileOperate.getOutputStream(tmpFile);
+						IOUtils.copy(input, output);
+						IOUtils.closeQuietly(input);
+						IOUtils.closeQuietly(output);
+						FileOperate.moveFile(true, tmpFile, inTmpName);
+					}
+//					FileOperate.copyFileFolder(inFile, inTmpName, false);
 				} else {
 					logger.info("link file from {} to {}", inFile, inTmpName);
 					FileOperate.linkFile(inFile, inTmpName, false);
