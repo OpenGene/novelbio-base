@@ -11,8 +11,8 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.novelbio.base.ExceptionNbcApiStateError;
 import com.novelbio.base.ResultJson;
+import com.novelbio.base.exceptioin.ExceptionErp;
 import com.novelbio.base.security.Crypter;
 
 /**
@@ -58,7 +58,7 @@ public class HttpJsonUtil {
 				lsResult.add(tObj);
 			}
 		} else {
-			throw new ExceptionNbcApiStateError("ResultJson中state不等于true!");
+			throw new ExceptionErp(jsonObject.getString("message"));
 		}
 		return lsResult;
 	}
@@ -85,7 +85,7 @@ public class HttpJsonUtil {
 			JSONObject obj = jsonObject.getJSONObject("result");
 			result = parseToJava(obj, clazz);
 		} else {
-			throw new ExceptionNbcApiStateError("ResultJson中state不等于true!");
+			throw new ExceptionErp(jsonObject.getString("message"));
 		}
 		return result;
 	}
@@ -111,23 +111,19 @@ public class HttpJsonUtil {
 
 		for (int i = 0; i < array.size(); i++) {
 			JSONObject obj = array.getJSONObject(i);
-			T tObj =  parseToJava(obj, clazz);
+			T tObj = parseToJava(obj, clazz);
 			lsResult.add(tObj);
 		}
 		return lsResult;
 	}
-	
+
 	public static ResultJson postEncryp(String requestUrl, Map<String, Object> params, String authCode) {
 		Map<String, Object> paramsEn = Crypter.encryptHttpParams(requestUrl.substring(requestUrl.lastIndexOf("/") + 1),
 				JSON.toJSONString(params));
-		try {
-			logger.debug("requestUrl={}", requestUrl);
-			// paramsEn已经加密，HttpJsonUtil不需要二次处理
-			paramsEn.put("authCode", authCode); // 添加authCode
-			return HttpJsonUtil.post4JsonOne(requestUrl, paramsEn, HttpJsonUtil.ENCRYTION_TYPE_NONE, ResultJson.class);
-		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage());
-		}
+		logger.debug("requestUrl={}", requestUrl);
+		// paramsEn已经加密，HttpJsonUtil不需要二次处理
+		paramsEn.put("authCode", authCode); // 添加authCode
+		return HttpJsonUtil.post4JsonOne(requestUrl, paramsEn, HttpJsonUtil.ENCRYTION_TYPE_NONE, ResultJson.class);
 	}
 
 	/**
@@ -146,8 +142,7 @@ public class HttpJsonUtil {
 	 */
 	public static <T> T post4JsonOne(String url, Map<String, Object> params, int encryptionType, Class<T> clazz) {
 		JSONObject jsonObject = JSON.parseObject(post4String(url, params, encryptionType));
-		T result =  parseToJava(jsonObject, clazz);
-		return result;
+		return parseToJava(jsonObject, clazz);
 	}
 
 	/**
@@ -178,18 +173,19 @@ public class HttpJsonUtil {
 		}
 		return HttpUtil.doPost(url, paramsEn, null);
 	}
-	
+
 	/**
 	 * 将json对象转换成java对象，如果clazz等于JSONObject.class强转类型
+	 * 
 	 * @param jsonObj
 	 * @param clazz
 	 * @return
 	 */
-	private static <T> T parseToJava(JSONObject jsonObj, Class<T> clazz){
+	private static <T> T parseToJava(JSONObject jsonObj, Class<T> clazz) {
 		T obj = null;
-		if(JSONObject.class.equals(clazz)) {
+		if (JSONObject.class.equals(clazz)) {
 			obj = (T) jsonObj;
-		}else {
+		} else {
 			obj = jsonObj.toJavaObject(clazz);
 		}
 		return obj;

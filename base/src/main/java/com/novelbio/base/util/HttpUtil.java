@@ -9,8 +9,10 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -42,15 +44,19 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.novelbio.base.dataOperate.TxtReadandWrite;
-import com.novelbio.base.fileOperate.FileOperate;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 /**
  * HTTP 请求工具类
  *
  */
 public class HttpUtil {
+	private static final Logger logger = LoggerFactory.getLogger(HttpUtil.class);
+	
 	private static PoolingHttpClientConnectionManager connMgr;
 	private static RequestConfig requestConfig;
 	private static final int MAX_TIMEOUT = 120_000;
@@ -95,14 +101,19 @@ public class HttpUtil {
 	 * @return
 	 */
 	public static String doGet(String url, Map<String, Object> params) {
+		return doGetWithCookie(url, params, null);
+	}
+	
+	public static String doGetWithCookie(String url, Map<String, Object> params, CookieStore cookieStore) {
 		String apiUrl = url;
 		StringBuffer param = new StringBuffer();
 		int i = 0;
 		for (String key : params.keySet()) {
-			if (i == 0)
+			if (i == 0) {
 				param.append("?");
-			else
+			} else {
 				param.append("&");
+			}
 			param.append(key).append("=").append(params.get(key));
 			i++;
 		}
@@ -111,18 +122,20 @@ public class HttpUtil {
 		CloseableHttpClient httpClient = null;
 		HttpResponse response = null;
 		try {
-			httpClient = SeeSSLCloseableHttpClient.getCloseableHttpClient();
+			httpClient = getHttpClient(apiUrl.startsWith("https"), cookieStore);
 			HttpGet httpPost = new HttpGet(apiUrl);
 			response = httpClient.execute(httpPost);
 			HttpEntity entity = response.getEntity();
 			if (entity != null) {
 				InputStream instream = entity.getContent();
 				result = IOUtils.toString(instream, "UTF-8");
+				IOUtil.close(instream);
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("", e);
+			throw new RuntimeException(e);
 		} finally {
-			FileOperate.close(httpClient);
+			IOUtil.close(httpClient);
 			closeResponse(response);
 		}
 		return result;
@@ -140,11 +153,43 @@ public class HttpUtil {
 	 * @return
 	 */
 	public static String doPost(String apiUrl, Map<String, Object> params, Map<String, String> headers) {
-
 		String httpStr = null;
-		CloseableHttpClient httpClient = null;
 		CloseableHttpResponse response = null;
-
+		try {
+			response = doPost2Response(apiUrl, params, headers);
+			HttpEntity entity = response.getEntity();
+			httpStr = EntityUtils.toString(entity, "UTF-8");
+		} catch (IOException e) {
+			logger.error("", e);
+			throw new RuntimeException(e);
+		} finally {
+			closeResponse(response);
+		}
+		return httpStr;
+	}
+	
+	public static String doPost(String apiUrl, Map<String, Object> params, Map<String, String> headers, CookieStore cookieStore) {
+		String httpStr = null;
+		CloseableHttpResponse response = null;
+		try {
+			response = doPost2Response(apiUrl, params, headers);
+			HttpEntity entity = response.getEntity();
+			httpStr = EntityUtils.toString(entity, "UTF-8");
+		} catch (IOException e) {
+			logger.error("", e);
+			throw new RuntimeException(e);
+		} finally {
+			closeResponse(response);
+		}
+		return httpStr;
+	}
+	
+	public static CloseableHttpResponse doPost2Response(String apiUrl, Map<String, Object> params, Map<String, String> headers) {
+		return doPostWithCookie(apiUrl, params, headers, null);
+	}
+	
+	public static CloseableHttpResponse doPostWithCookie(String apiUrl, Map<String, Object> params, Map<String, String> headers, CookieStore cookieStore) {
+		CloseableHttpClient httpClient = null;
 		try {
 			HttpPost httpPost = new HttpPost(apiUrl);
 			// 设置 header
@@ -161,21 +206,24 @@ public class HttpUtil {
 				}
 				httpPost.setEntity(new UrlEncodedFormEntity(pairList, Charset.forName("UTF-8")));
 			}
-			if (apiUrl.startsWith("https")) {
-				httpClient = SeeSSLCloseableHttpClient.getCloseableHttpClient();
-			} else {
-				httpClient = HttpClients.createDefault();
-			}
-			response = httpClient.execute(httpPost);
-			HttpEntity entity = response.getEntity();
-			httpStr = EntityUtils.toString(entity, "UTF-8");
+			
+			httpClient = getHttpClient(apiUrl.startsWith("https"), cookieStore);
+			return httpClient.execute(httpPost);
 		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			FileOperate.close(httpClient);
-			closeResponse(response);
+			logger.error("", e);
+			throw new RuntimeException(e);
+		} 
+	}
+	
+	private static CloseableHttpClient getHttpClient(boolean isHttps, CookieStore cookieStore) {
+		CloseableHttpClient httpClient = null;
+		if (isHttps) {
+			httpClient = cookieStore == null ? SeeSSLCloseableHttpClient.getCloseableHttpClient() : SeeSSLCloseableHttpClient.getCloseableHttpClient(cookieStore);
+		} else {
+			httpClient = cookieStore == null ? HttpClients.createDefault() : HttpClients.custom().setDefaultCookieStore(cookieStore).build();
 		}
-		return httpStr;
+		
+		return httpClient;
 	}
 
 	/**
@@ -184,9 +232,10 @@ public class HttpUtil {
 	 * @param params
 	 * @return
 	 */
-	public static Header[] buildHeader(Map<String, String> params) {
-		if (params == null || params.size() <= 0)
+	protected static Header[] buildHeader(Map<String, String> params) {
+		if (params == null || params.size() <= 0) {
 			return null;
+		}
 
 		Header[] headers = new BasicHeader[params.size()];
 		int i = 0;
@@ -198,36 +247,57 @@ public class HttpUtil {
 	}
 
 	public static void closeResponse(HttpResponse response) {
-		if (response == null)
-			return;
+		if (response == null) return;
 		try {
 			EntityUtils.consume(response.getEntity());
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("", e);
 		}
 	}
 
-	public static void main(String[] args) {
-		Map<String, Object> params = new HashMap<>();
-		params.put("csrfmiddlewaretoken", "B5qnoqYpWjqV0gCSno0ihs7OpPzM35o1f8klNLfUXf7GQjTkKHy08JdLIdcQcvgH");
-		params.put("chr", "chr01");
-		params.put("pos_start", 1);
-		params.put("pos_end", 10000);
-		params.put("type", "All");
-		params.put("pop1", "All");
-		params.put("b1", "AND");
-		params.put("pop2", "All");
-		params.put("b2", "AND");
-		params.put("pop3", "All");
-		params.put("dispop", "All");
-		Map<String, String> headers = new HashMap<>();
-		headers.put("Cookie", "csrftoken=bUR4X5pjlrPEp9MElrEJ0MByN0aKCbYMPXL2mqGOmnwpfc36IKcrR3Hv6oNOLBQs; _ga=GA1.2.919839038.1530868797; _gid=GA1.2.1209465166.1530868797; _gat=1");
-		String requestUrl = "http://ricevarmap.ncpgr.cn/v2/vars_in_region/";
-		String resultStr = HttpUtil.doPost(requestUrl, params, headers);
-		TxtReadandWrite txtWrite = new TxtReadandWrite("/home/novelbio/tmp/test.html", true);
-		txtWrite.writefile(resultStr, true);
-		txtWrite.close();
+	/** 注意:这里的cookie只适用单个客户端连接 */
+	public static Cache<String, String> Cookie = CacheBuilder.newBuilder().expireAfterAccess(8, TimeUnit.HOURS).build();
+	
+	public static void saveCookies(HttpResponse response) {
+		Header[] headers = response.getHeaders("Set-Cookie");
+		if (headers == null) {
+			return;
+		}
+
+		for (int i = 0; i < headers.length; i++) {
+			String cookie = headers[i].getValue();
+			String[] cookievalues = cookie.split(";");
+			for (int j = 0; j < cookievalues.length; j++) {
+				String[] keyPair = cookievalues[j].split("=");
+				String key = keyPair[0].trim();
+				String value = keyPair.length > 1 ? keyPair[1].trim() : "";
+				HttpUtil.Cookie.put(key, value);
+			}
+		}
+		closeResponse(response);
 	}
+	
+	 /**
+     * 增加Cookie
+     * 
+     * @param request
+     */
+    @SuppressWarnings("rawtypes")
+	public static String getCookies() {
+		StringBuilder sb = new StringBuilder();
+		Iterator iter = Cookie.asMap().entrySet().iterator();
+		while (iter.hasNext()) {
+			Map.Entry entry = (Map.Entry) iter.next();
+			String key = entry.getKey().toString();
+			String val = entry.getValue().toString();
+			sb.append(key);
+			sb.append("=");
+			sb.append(val);
+			sb.append(";");
+		}
+		return sb.toString();
+	}
+    
 }
 
 /**
@@ -294,4 +364,5 @@ class SeeSSLCloseableHttpClient {
 		}
 		return builder.build();
 	}
+	
 }
