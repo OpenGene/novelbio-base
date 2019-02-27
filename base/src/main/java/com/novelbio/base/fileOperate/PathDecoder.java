@@ -55,6 +55,7 @@ public class PathDecoder {
 		boolean isStart = true;
 		boolean isSep = false;
 		boolean isDomain = false;
+		boolean previousIsSep = false; //前一个字节是否是/
 		int sepNum = 0;
 		
 		for (int i = 0; i < cpath.length; i++) {
@@ -86,7 +87,7 @@ public class PathDecoder {
 			
 			if (unit == '/') {
 				isFirstPathUnit = false;
-				if (!isSep) {
+				if (!isSep || previousIsSep) {
 					isSep = true;
 					if (isDomain) {
 						domain = stringBuilder.toString();
@@ -96,10 +97,12 @@ public class PathDecoder {
 					}
 					stringBuilder = new StringBuilder();
 				}
-				continue;
+				previousIsSep = true;
+			} else {
+				isSep = false;
+				stringBuilder.append(unit);
+				previousIsSep = false;
 			}
-			isSep = false;
-			stringBuilder.append(unit);
 		}
 		if (isSep && !lsPaths.isEmpty()) {
 			isEndWithSep = true;
