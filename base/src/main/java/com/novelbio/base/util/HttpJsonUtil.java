@@ -58,6 +58,7 @@ public class HttpJsonUtil {
 				lsResult.add(tObj);
 			}
 		} else {
+			logger.error("List<class>={} , json string = {}", clazz.getName(), jsonObject.toString());
 			throw new ExceptionErp(jsonObject.getString("message"));
 		}
 		return lsResult;
@@ -85,6 +86,7 @@ public class HttpJsonUtil {
 			JSONObject obj = jsonObject.getJSONObject("result");
 			result = parseToJava(obj, clazz);
 		} else {
+			logger.error("class={} , json string = {}", clazz.getName(), jsonObject.toString());
 			throw new ExceptionErp(jsonObject.getString("message"));
 		}
 		return result;
