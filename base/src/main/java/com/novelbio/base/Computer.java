@@ -75,7 +75,7 @@ public class Computer implements Serializable {
 		} catch (Exception e) {
 			name = "nbcNoName";
 		}
-		
+		ip = "0.0.0.0";
 		if (FileOperate.isWindows()) {
 			ip = getIpWindows();
 		} else {
@@ -84,7 +84,10 @@ public class Computer implements Serializable {
 			} catch (Exception e) {
 			}
 			if (StringOperate.isRealNull(ip) || ip.equals("0.0.0.0")) {
-				ip = getIpCentOs();
+				try {
+					ip = getIpCentOs();
+				} catch (Exception e) {
+				}
 			}
 		}
 	}

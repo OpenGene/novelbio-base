@@ -266,11 +266,12 @@ class TxtWrite implements Closeable {
 	 * @param content
 	 */
 	public void writefileln(List<String> content) {
-		String[] strings = new String[content.size()]; 
-		for (int i = 0; i < content.size(); i++) {
-			strings[i] =  content.get(i);
+		String content2 = ArrayOperate.cmbString(content, TxtReadandWrite.sep);
+		try {
+			outputStream.write((content2 + TxtReadandWrite.ENTER_LINUX).getBytes());
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
-		writefileln(strings);
 	}
 	
 	/**

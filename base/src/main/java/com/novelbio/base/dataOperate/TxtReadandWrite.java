@@ -527,7 +527,7 @@ public class TxtReadandWrite implements Closeable {
 	}
 	
 	/**
-	 * 写入一行list，用sep隔开
+	 * 写入一行list，用\t隔开
 	 * @param content
 	 */
 	public void writefileln(List<String> content) {
@@ -819,6 +819,22 @@ public class TxtReadandWrite implements Closeable {
 
 	public static String readFirstLine(String txtFile) {
 		return readFirstLine(FileOperate.getPath(txtFile));
+	}
+	
+	/** 内部会关闭流 */
+	public static String readInputStream(InputStream is) {
+		TxtReadandWrite txtRead = new TxtReadandWrite(is);
+		StringBuffer sBuffer = new StringBuffer();
+		int i = 0;
+		for (String content : txtRead.readlines()) {
+			if (i++ == 0) {
+				sBuffer.append(content);
+			} else {
+				sBuffer.append("\n").append(content);
+			}
+		}
+		txtRead.close();
+		return sBuffer.toString();
 	}
 	
 	public static String readFirstLine(File txtFile) {

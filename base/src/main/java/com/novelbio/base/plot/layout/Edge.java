@@ -47,7 +47,7 @@ public class Edge {
 		return getId1_Id2_key(id1, id2);
 	}
 	/** 没有方向的可以当key的Id */
-	private static String getId1_Id2_key(String id1, String id2) {
+	public static String getId1_Id2_key(String id1, String id2) {
 		if (id1.compareTo(id2) > 0) {
 			String idTmp = id1;
 			id1 = id2;
@@ -55,22 +55,45 @@ public class Edge {
 		}
 		return id1+nodeSep+id2;
 	}
-	public double[] getAxisAttractMove(Node node1, Node node2) {
+	public String getLabel() {
+		return length+"";
+	}
+	/**
+	 * 假设第一个点在前面，第二个点在后面
+	 * @param node1
+	 * @param node2
+	 * @return node1 减去这两个坐标，node2加上这两个坐标
+	 */
+	public double[] getAxisAttractMove(Node node1, Node node2, double step) {
 		double deltaX = node1.getX() - node2.getX();
 		double deltaY = node1.getY() - node2.getY();
 		double deltaLength = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 		if (deltaLength == 0) {
 			Random random = new Random();
-			deltaX = (double)random.nextInt(10)/10;
-			deltaY = (double)random.nextInt(10)/10;
+			deltaX = (double)random.nextInt(10)/10 * randomSign(random);
+			deltaY = (double)random.nextInt(10)/10 * randomSign(random);
 			deltaLength = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
 		}
 		
 		double deltaLengthReal = deltaLength - node1.getR() - node2.getR();
-		double force = Math.pow(deltaLengthReal - length, 2) * condensefactor/2;
-		if (deltaLength < length) {
-			force = -force;
+		double force = Math.abs(Math.pow(deltaLengthReal - length, 1) * condensefactor/2);
+		double deltaXResult =Math.abs(deltaX/deltaLength*force);
+		double deltaYResult = Math.abs(deltaY/deltaLength*force);
+		if (deltaLengthReal > length) {
+			deltaXResult = -deltaXResult;
+			deltaYResult = -deltaYResult;
 		}
-		return new double[] {deltaX/deltaLength*force, deltaY/deltaLength*force};
+		if (node1.getX() > node2.getX()) {
+			deltaXResult = - deltaXResult;
+		}
+		if (node1.getY() > node2.getY()) {
+			deltaYResult = -deltaYResult;
+		}
+ 		return new double[] {deltaXResult, deltaYResult};
+	}
+	
+	private static int randomSign(Random random) {
+		int num = random.nextInt(9);
+		return num <= 4 ? -1:1;
 	}
 }

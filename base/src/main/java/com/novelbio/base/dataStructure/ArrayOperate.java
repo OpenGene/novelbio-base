@@ -899,6 +899,26 @@ public class ArrayOperate {
 		}
 		return result;
 	}
+	
+	public static <K,V> Map<K, V> cloneMap(Map<K, V> map) {
+		if (map == null) {
+			return null;
+		}
+		return new HashMap<>(map);
+	}
+	public static <T> List<T> cloneList(List<T> list) {
+		if (list == null) {
+			return null;
+		}
+		return new ArrayList<>(list);
+	}
+	public static <T> Set<T> cloneSet(Set<T> set) {
+		if (set == null) {
+			return null;
+		}
+		return new HashSet<>(set);
+	}
+	
 	/**
 	 * 复制数组
 	 * @param <T>

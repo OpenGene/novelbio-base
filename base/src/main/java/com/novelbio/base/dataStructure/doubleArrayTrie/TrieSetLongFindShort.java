@@ -2,10 +2,12 @@ package com.novelbio.base.dataStructure.doubleArrayTrie;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.novelbio.base.StringOperate;
 import com.novelbio.base.dataStructure.ArrayOperate;
 
 /**
@@ -25,8 +27,14 @@ public class TrieSetLongFindShort {
 		if (ArrayOperate.isEmpty(setKkey)) {
 			return;
 		}
-		this.setKkey = setKkey;
-		lsKeys = new ArrayList<>(setKkey);
+		this.setKkey = new HashSet<>();
+		for (String key : setKkey) {
+			if (StringOperate.isRealNull(key)) {
+				continue;
+			}
+			this.setKkey.add(key);
+		}
+		lsKeys = new ArrayList<>(this.setKkey);
 		Collections.sort(lsKeys, (info1, info2) -> {
 			Integer l1 = info1.length();
 			Integer l2 = info2.length();

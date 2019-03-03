@@ -25,11 +25,6 @@ import java.util.Hashtable;
 import java.util.List;
 
 import javax.imageio.ImageIO;
-import javax.media.jai.JAI;
-import javax.media.jai.RenderedOp;
-
-import com.sun.media.jai.codec.FileSeekableStream;
-import com.sun.media.jai.codec.SeekableStream;
 //import org.apache.batik.transcoder.TranscoderInput;
 //import org.apache.batik.transcoder.TranscoderOutput;
 //import org.apache.batik.transcoder.image.ImageTranscoder;
@@ -57,16 +52,7 @@ public class ImageUtils {
 		
 		InputStream input = null;
 		BufferedImage bufferedImage = null;
-		
-		if (fileName.endsWith(".tiff") || fileName.endsWith(".tif")) {
-			try {
-				bufferedImage = readTiffBufferedImage(fileName);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return bufferedImage;
-		}
+
 		//============================================
 		try {
 			input = FileOperate.getInputStream(fileName);
@@ -86,24 +72,6 @@ public class ImageUtils {
 		}
 		return bufferedImage;
 	}
-	
-	/** 获取tiff格式图片的BufferedImage，需传入图片的全路经 */
-	private final static BufferedImage readTiffBufferedImage(String tiffImagePath) throws IOException {
-		File file =  FileOperate.getFile(tiffImagePath);
-		SeekableStream seekableStream = new FileSeekableStream(file);
-		ParameterBlock parameterBlock = new ParameterBlock();
-		parameterBlock.add(seekableStream);
-		RenderedOp renderedOp = JAI.create("tiff", parameterBlock);
-		String[] lsPropertyName = renderedOp.getPropertyNames();
-		Hashtable<String, Object> properties = new Hashtable<String, Object>();
-		for(int i = 0; i < lsPropertyName.length; i++) {
-			properties.put(lsPropertyName[i], renderedOp.getProperty(lsPropertyName[i]));
-		}
-		BufferedImage cache_buffer = new BufferedImage(renderedOp.getColorModel(), (WritableRaster)renderedOp.getData(), false, properties);
-		return cache_buffer;
-	}
-
-
 
 	/**
 	 * 保存bufferImage为图片文件
