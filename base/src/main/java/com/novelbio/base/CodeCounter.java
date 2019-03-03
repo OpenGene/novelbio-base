@@ -3,36 +3,45 @@ package com.novelbio.base;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.nio.file.Path;
+import java.util.List;
 
 import com.novelbio.base.dataOperate.TxtReadandWrite;
 import com.novelbio.base.fileOperate.FileOperate;
 
 public class CodeCounter {
 	public static void main(String[] args) {
-		CodeCounter codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio", "/media/winD/fedora/codestatistics/allCodeLines.txt");
+		CodeCounter codeCounter = new CodeCounter("/home/novelbio/git/NBCService/service/src/main/java", "/home/novelbio/tmp/allCodeLines.txt");
 		
-		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio/analysis/annotation/functiontest", "/media/winD/fedora/codestatistics/functiontestCodeLines.txt");
-
-		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio/project", "/media/winD/fedora/codestatistics/projectMinusCodeLines.txt");
-		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/test/java", "/media/winD/fedora/codestatistics/testCodeLines.txt");
+//		List<Path> lsPaths = FileOperate.getLsFoldPathRecur("/home/novelbio/tmp", false);
+//		for (Path path : lsPaths) {
+//			FileOperate.copyFile(path, "/home/novelbio/tmp/all/" + FileOperate.getFileName(path), true);
+//		}
 		
-		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio/analysis/seq", "/media/winD/fedora/codestatistics/seqCodeLines.txt");
-		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio/base", "/media/winD/fedora/codestatistics/baseCodeLines.txt");
-		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio/database", "/media/winD/fedora/codestatistics/databaseCodeLines.txt");
-		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio/nbcgui", "/media/winD/fedora/codestatistics/nbcguiCodeLines.txt");
-		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio/nbcgui/GUI", "/media/winD/fedora/codestatistics/nbcguiGUICodeLines.txt");
-		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio/analysis/annotation", "/media/winD/fedora/codestatistics/annotationCodeLines.txt");
-		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio/analysis/diffexpress", "/media/winD/fedora/codestatistics/diffexpressCodeLines.txt");
-		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio/analysis/tools", "/media/winD/fedora/codestatistics/toolsCodeLines.txt");
-		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio/analysis/seq/resequencing", "/media/winD/fedora/codestatistics/resequencingCodeLines.txt");
-		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio/analysis/seq/resequencing/statistics", "/media/winD/fedora/codestatistics/resequencingstatisticsCodeLines.txt");
-
 		
-		codeCounter = new CodeCounter("/home/zong0jie/git/NBCWebApp1.0/NBCWebApp1.0/src/main/java/com", "/media/winD/fedora/codestatistics/Webapp1.0statisticsCodeLines.txt");
-		codeCounter = new CodeCounter("/home/zong0jie/git/NBCGUI/NBCGUI", "/media/winD/fedora/codestatistics/GUIstatisticsCodeLines.txt");
-		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/other/uk/ac/babraham/FastQC", "/media/winD/fedora/codestatistics/FastQCCodeLines.txt");
+		
+//		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio/analysis/annotation/functiontest", "/media/winD/fedora/codestatistics/functiontestCodeLines.txt");
 
-		codeCounter = new CodeCounter("/home/zong0jie/git/base/base/src/main/java/com", "/media/winD/fedora/codestatistics/BaseCodeLines.txt");
+//		codeCounter = new CodeCounter(/*"/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio/project", "/media/winD/fedora/codestatistics/projectMinusCodeLines.txt");
+//		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/test/java", "/media/winD/fedora/codestatistics/testCodeLines.txt");
+//		
+//		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio/analysis/seq", "/media/winD/fedora/codestatistics/seqCodeLines.txt");
+//		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio/base", "/media/winD/fedora/codestatistics/baseCodeLines.txt");
+//		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio/database", "/media/winD/fedora/codestatistics/databaseCodeLines.txt");
+//		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio/nbcgui", "/media/winD/fedora/codestatistics/nbcguiCodeLines.txt");
+//		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio/nbcgui/GUI", "/media/winD/fedora/codestatistics/nbcguiGUICodeLines.txt");
+//		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio/analysis/annotation", "/media/winD/fedora/codestatistics/annotationCodeLines.txt");
+//		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio/analysis/diffexpress", "/media/winD/fedora/codestatistics/diffexpressCodeLines.txt");
+//		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio/analysis/tools", "/media/winD/fedora/codestatistics/toolsCodeLines.txt");
+//		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio/analysis/seq/resequencing", "/media/winD/fedora/codestatistics/resequencingCodeLines.txt");
+//		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio/analysis/seq/resequencing/statistics", "/media/winD/fedora/codestatistics/resequencingstatisticsCodeLines.txt");
+//
+//		
+//		codeCounter = new CodeCounter("/home/zong0jie/git/NBCWebApp1.0/NBCWebApp1.0/src/main/java/com", "/media/winD/fedora/codestatistics/Webapp1.0statisticsCodeLines.txt");
+//		codeCounter = new CodeCounter("/home/zong0jie/git/NBCGUI/NBCGUI", "/media/winD/fedora/codestatistics/GUIstatisticsCodeLines.txt");
+//		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/other/uk/ac/babraham/FastQC", "/media/winD/fedora/codestatistics/FastQCCodeLines.txt");
+//
+//		codeCounter = new CodeCounter("/home/zong0jie/git/base/base/src/main/java/com", "/media/winD/fedora/codestatistics/BaseCodeLines.txt");*/
 
 //		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio/analysis/seq/blast", "/media/winD/fedora/codestatistics/blastCodeLines.txt");
 //		codeCounter = new CodeCounter("/home/zong0jie/git/NBCplatform/src/main/java/com/novelbio/analysis/seq/blastZJ", "/media/winD/fedora/codestatistics/blastZJCodeLines.txt");
