@@ -185,6 +185,14 @@ public class TxtReadandWrite implements Closeable {
 		return -1;
 	}
 	
+	public int read() throws IOException {
+		return txtRead.read();
+	}
+	
+	public int read(char[] cbuf) throws IOException {
+		return txtRead.read(cbuf);
+	}
+	
 	public Iterable<String> readlines() {
 		return txtRead.readlines();
 	}

@@ -118,29 +118,14 @@ class TxtRead implements Closeable {
 			last = num;
 		}
 		return type;
-//		while (bufread.read()) {
-//			
-//		}
-//		for (int chr : bufread.read()) {
-//			
-//		}
-//		int firstLineNum = readFirstLine().getBytes().length;
-//		//获得第一行的btye长度
-//		byte[] mybyte = new byte[firstLineNum + 2];
-//		initialReading();
-//		inputStream.read(mybyte);
-//		Charset cs = Charset.forName("UTF-8");
-//		ByteBuffer bb = ByteBuffer.allocate (mybyte.length);
-//		bb.put(mybyte);
-//		bb.flip();
-//		CharBuffer cb = cs.decode (bb);
-//		close();
-//		char[] mychar = cb.array();
-//		if (mychar[mychar.length - 2] == 13 && mychar[mychar.length - 1] == 10) {
-//			return TxtReadandWrite.ENTER_WINDOWS;
-//		} else {
-//			return TxtReadandWrite.ENTER_LINUX;
-//		}
+	}
+	
+	public int read() throws IOException {
+		return bufread.read();
+	}
+	
+	public int read(char[] cbuf) throws IOException {
+		return bufread.read(cbuf);
 	}
 	
 	public Iterable<String> readlines() {
